@@ -1,0 +1,11 @@
+Ion Mode	Exact DM	Topological fragment	Elemental Composition	H-Difference	Furthest Distance	Atom to start Hydrogen Connected to Start Atom	Substance Class Identifier
++ -	18.01056	OH	H2O	-1	3	O	1	Non-specific (OH)
++ -	27.01090	CN	HCN	-1	3	N	0	Alkaloids
++ -	17.02655	NH2	NH3	-1	3	N	2	not sure
+#+ -	27.99491	COH	CO	1	3	O	0	Flavonoids, Coumarins, Chromones ….
++ -	30.01056	COH	CH2O	-1	3	O	0	Methoxylated aromatic compounds
+#+ -	43.98983	COOH	CO2	1	3	O	0	Aromatic acids, Lactones 
++	46.00548	COOH	HCOOH	-1	3	O	0	Aliphatic Acids, Amino Acid Conjugates …
+#-	79.95681	SO3H	SO3	1	3	S	0	0	-sulfated compounds
+#+ -	162.05282	C6H11O5	C6H10O5	1	6	O	0	Glucosides
+//

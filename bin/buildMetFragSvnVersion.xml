@@ -1,0 +1,41 @@
+<project>
+	<echo>Generate build info class...</echo>
+	<exec outputproperty="build.current.revision" executable="svnversion">
+	         <arg line="-n -c" />
+	         <redirector>
+	           <outputfilterchain>
+	             <tokenfilter>
+	                 <replaceregex pattern="^[0-9]*:?" replace="" flags="g"/>
+	             </tokenfilter>
+	          </outputfilterchain>
+	        </redirector>
+	</exec>
+	<echo>Generate svn log...</echo>
+	<exec dir="${basedir}/de/ipbhalle/metfrag/" executable="svn" outputproperty="build.current.revision.log">
+	         <arg line="log" />
+	         <arg line="-r HEAD:440" />
+	         <redirector>
+	           <outputfilterchain>
+	             <tokenfilter>
+	             	 <stringtokenizer includeDelims="true"/>
+	                 <replaceregex pattern="[\n\r]+" replace="#BR#"/>
+	             </tokenfilter>
+	          </outputfilterchain>
+	        </redirector>
+	</exec>
+	<tstamp>
+		    <format property="TODAY" pattern="EEE, d-MMMM-yyyy HH:mm:ss z" locale="ENGLISH, GERMANY"/>
+	</tstamp>
+	<echo>Virtual PVT Cell Revision: ${build.current.revision}</echo>
+	<echo>Time stamp ${TODAY}</echo>
+	<echo>Write build info to file ${basedir}/buildinfo/BuildInfo.java</echo>
+	<!-- the source code of the java class -->
+	<echo file="${basedir}/de/ipbhalle/metfrag/buildinfo/BuildInfo.java">
+		package de.ipbhalle.metfrag.buildinfo;
+		public class BuildInfo {
+			public static final String revisionNumber="${build.current.revision}";
+			public static final String timeStamp="${TODAY}";
+			public static final String svnLog="${build.current.revision.log}";
+		}
+	</echo>
+</project>

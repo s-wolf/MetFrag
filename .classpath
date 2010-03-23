@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="test"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="lib/axis-ant.jar"/>
+	<classpathentry kind="lib" path="lib/axis.jar"/>
+	<classpathentry kind="lib" path="lib/commons-discovery-0.2.jar"/>
+	<classpathentry kind="lib" path="lib/commons-logging-1.0.4.jar"/>
+	<classpathentry kind="lib" path="lib/freehep-export-2.1.1.jar"/>
+	<classpathentry kind="lib" path="lib/freehep-graphics2d-2.1.1.jar"/>
+	<classpathentry kind="lib" path="lib/freehep-graphicsio-2.1.1.jar"/>
+	<classpathentry kind="lib" path="lib/freehep-graphicsio-emf-2.1.1.jar"/>
+	<classpathentry kind="lib" path="lib/freehep-graphicsio-java-2.1.1.jar"/>
+	<classpathentry kind="lib" path="lib/freehep-graphicsio-pdf-2.1.1.jar"/>
+	<classpathentry kind="lib" path="lib/freehep-graphicsio-ps-2.1.1.jar"/>
+	<classpathentry kind="lib" path="lib/freehep-graphicsio-svg-2.1.1.jar"/>
+	<classpathentry kind="lib" path="lib/freehep-graphicsio-swf-2.1.1.jar"/>
+	<classpathentry kind="lib" path="lib/freehep-graphicsio-tests-2.1.1.jar"/>
+	<classpathentry kind="lib" path="lib/freehep-io-2.0.2.jar"/>
+	<classpathentry kind="lib" path="lib/freehep-swing-2.0.3.jar"/>
+	<classpathentry kind="lib" path="lib/freehep-util-2.0.2.jar"/>
+	<classpathentry kind="lib" path="lib/freehep-xml-2.1.1.jar"/>
+	<classpathentry kind="lib" path="lib/iText-2.1.2u.jar"/>
+	<classpathentry kind="lib" path="lib/jai_codec.jar"/>
+	<classpathentry kind="lib" path="lib/jai_core.jar"/>
+	<classpathentry kind="lib" path="lib/jas-plotter-2.2.jar"/>
+	<classpathentry kind="lib" path="lib/jaxrpc.jar"/>
+	<classpathentry kind="lib" path="lib/jdom-1.0.jar"/>
+	<classpathentry kind="lib" path="lib/keggapi.jar"/>
+	<classpathentry kind="lib" path="lib/mlibwrapper_jai.jar"/>
+	<classpathentry kind="lib" path="lib/mysql-connector-java-3.0.17-ga-bin.jar"/>
+	<classpathentry kind="lib" path="lib/saaj.jar"/>
+	<classpathentry kind="lib" path="lib/wsdl4j-1.5.1.jar"/>
+	<classpathentry kind="lib" path="lib/log4j-1.2.15.jar"/>
+	<classpathentry kind="lib" path="lib/cdk-1.2.1.jar" sourcepath="/home/swolf/cdk/cdk-src+libs-1.2.0/src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
