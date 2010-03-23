@@ -2,7 +2,6 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="test"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/axis-ant.jar"/>
 	<classpathentry kind="lib" path="lib/axis.jar"/>
 	<classpathentry kind="lib" path="lib/commons-discovery-0.2.jar"/>
@@ -35,5 +34,11 @@
 	<classpathentry kind="lib" path="lib/log4j-1.2.15.jar"/>
 	<classpathentry kind="lib" path="lib/cdk-1.2.1.jar" sourcepath="/home/swolf/cdk/cdk-src+libs-1.2.0/src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
+	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.module.container"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/java-6-sun-1.6.0.17">
+		<attributes>
+			<attribute name="owner.project.facets" value="jst.java"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
