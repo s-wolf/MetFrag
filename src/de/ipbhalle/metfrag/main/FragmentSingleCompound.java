@@ -168,8 +168,8 @@ public class FragmentSingleCompound {
 	
 	public static void main(String[] args) {
 		//example values
-		String smiles = "CN1CCC2=CC=CC3=C2C1CC4=C3C(=C(C=C4)O)O";
-		Double minMass = 152.0;
+		String smiles = "C1=CC(=C(C=C1C2=C(C(=O)C3=C(C=C(C=C3O2)O)O)OC4C(C(C(C(O4)CO)O)O)O)O)O";
+		Double minMass = 303.0499;
 		Boolean render = false;
 		//get command line arguments
 		if(args != null && args.length == 3)

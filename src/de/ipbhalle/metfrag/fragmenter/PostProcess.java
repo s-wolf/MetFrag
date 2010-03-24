@@ -381,8 +381,8 @@ public class PostProcess {
     		if(hydrogenStartAtom <= 0)
     		{
     			ret.add(fragCopy);
-		    	Render.Draw(frag, "BEFORE");
-		    	Render.Draw(fragCopy, "AFTER");
+//		    	Render.Draw(frag, "BEFORE");
+//		    	Render.Draw(fragCopy, "AFTER");
 //		    	IMoleculeSet set = ConnectivityChecker.partitionIntoMolecules(fragCopy);
 //		    	for (IAtomContainer mol : set.molecules()) {
 //					Render.Draw(mol, "partitions");

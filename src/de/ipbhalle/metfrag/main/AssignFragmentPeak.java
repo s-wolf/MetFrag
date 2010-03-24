@@ -156,7 +156,7 @@ public class AssignFragmentPeak {
         if(hydrogenTest && !found)
         {
         	int treeDepth = Integer.parseInt((String)ac.getProperty("TreeDepth"));
-        	for(int i= 0; i < treeDepth; i++)
+        	for(int i= 0; i <= treeDepth; i++)
         	{
         		if(i==0)
         		{
@@ -179,6 +179,14 @@ public class AssignFragmentPeak {
         		else
         		{
         			double hMass = i * protonMass;
+        			
+        			//always add one proton more in pos mode
+        			if(mode == 1)
+        				hMass = hMass + protonMass;
+        			//one less in neg. mode
+        			else
+        				hMass = hMass - protonMass;
+        			
         			//found
         			if(((mass-hMass) >= peakLow && (mass-hMass) <= peakHigh))
         			{
@@ -189,6 +197,20 @@ public class AssignFragmentPeak {
         	        		this.molecularFormula = MolecularFormulaManipulator.getHTML(molecularFormula) + "-" + i + "H" + neutralLoss;
         	        	else
         	        		this.molecularFormula = MolecularFormulaManipulator.getString(molecularFormula) + "-" + i + "H" + neutralLoss;
+        				//now add a bond energy equivalent to a H-C bond
+        				this.hydrogenPenalty = (i * 1000) + 1000;
+        				
+        				break;
+        			}
+        			else if(((mass+hMass) >= peakLow && (mass+hMass) <= peakHigh))
+        			{
+        				found = true;
+        				matchedMass = Math.round((mass-hMass)*10000.0)/10000.0;
+        				
+        				if(this.html)
+        	        		this.molecularFormula = MolecularFormulaManipulator.getHTML(molecularFormula) + "+" + i + "H" + neutralLoss;
+        	        	else
+        	        		this.molecularFormula = MolecularFormulaManipulator.getString(molecularFormula) + "+" + i + "H" + neutralLoss;
         				//now add a bond energy equivalent to a H-C bond
         				this.hydrogenPenalty = (i * 1000) + 1000;
         				

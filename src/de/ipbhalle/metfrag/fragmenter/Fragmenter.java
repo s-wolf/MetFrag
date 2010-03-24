@@ -479,6 +479,9 @@ public class Fragmenter {
     	List<File> fragmentsReturn = new ArrayList<File>();
     	int tempLevelCount = 0;
     	
+    	//now set a new min weight
+    	this.minWeight = this.minWeight - (double)treeDepthMax;
+    	
 
     	//counting vars for the tree build
     	int parent = 0;
@@ -623,6 +626,8 @@ public class Fragmenter {
     	List<IAtomContainer> fragmentsReturn = new ArrayList<IAtomContainer>();
     	int tempLevelCount = 0;
     	
+    	//now set a new min weight
+    	this.minWeight = this.minWeight - (double)treeDepthMax;
 
     	//counting vars for the tree build
     	int parent = 0;
