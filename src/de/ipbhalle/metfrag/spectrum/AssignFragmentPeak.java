@@ -173,9 +173,9 @@ public class AssignFragmentPeak {
         				matchedMass = Math.round((mass)*10000.0)/10000.0;
         				
         				if(this.html)
-        	        		this.molecularFormula = MolecularFormulaManipulator.getHTML(molecularFormula) + neutralLoss+ "BDE:" + ac.getProperty("BondEnergy") + " H-Penalty:" + this.hydrogenPenalty;
+        	        		this.molecularFormula = MolecularFormulaManipulator.getHTML(molecularFormula) + neutralLoss;
         	        	else
-        	        		this.molecularFormula = MolecularFormulaManipulator.getString(molecularFormula) + neutralLoss+ "BDE:" + ac.getProperty("BondEnergy") + " H-Penalty:" + this.hydrogenPenalty;
+        	        		this.molecularFormula = MolecularFormulaManipulator.getString(molecularFormula) + neutralLoss;
         				
         				break;
         			}
@@ -194,9 +194,9 @@ public class AssignFragmentPeak {
         				this.hydrogenPenalty = (i * 1000) + 1000;
         				
         				if(this.html)
-        	        		this.molecularFormula = MolecularFormulaManipulator.getHTML(molecularFormula) + "-" + (i + 1) + "H" + neutralLoss+ "BDE:" + ac.getProperty("BondEnergy") + " H-Penalty:" + this.hydrogenPenalty;
+        	        		this.molecularFormula = MolecularFormulaManipulator.getHTML(molecularFormula) + "-" + (i + 1) + "H";
         	        	else
-        	        		this.molecularFormula = MolecularFormulaManipulator.getString(molecularFormula) + "-" + (i + 1) + "H" + neutralLoss+ "BDE:" + ac.getProperty("BondEnergy") + " H-Penalty:" + this.hydrogenPenalty;
+        	        		this.molecularFormula = MolecularFormulaManipulator.getString(molecularFormula) + "-" + (i + 1) + "H";
         				
         				
         				break;
@@ -210,9 +210,9 @@ public class AssignFragmentPeak {
         				
         				
         				if(this.html)
-        	        		this.molecularFormula = MolecularFormulaManipulator.getHTML(molecularFormula) + "+" + (i + 1) + "H" + neutralLoss+ "BDE:" + ac.getProperty("BondEnergy") + " H-Penalty:" + this.hydrogenPenalty;
+        	        		this.molecularFormula = MolecularFormulaManipulator.getHTML(molecularFormula) + "+" + (i + 1) + "H" + neutralLoss;
         	        	else
-        	        		this.molecularFormula = MolecularFormulaManipulator.getString(molecularFormula) + "+" + (i + 1) + "H" + neutralLoss+ "BDE:" + ac.getProperty("BondEnergy") + " H-Penalty:" + this.hydrogenPenalty;
+        	        		this.molecularFormula = MolecularFormulaManipulator.getString(molecularFormula) + "+" + (i + 1) + "H" + neutralLoss;
         				
         				break;
         			}
