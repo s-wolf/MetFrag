@@ -55,8 +55,8 @@ import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 
 import de.ipbhalle.metfrag.bondPrediction.Charges;
 import de.ipbhalle.metfrag.graphviz.GraphViz;
-import de.ipbhalle.metfrag.main.AssignFragmentPeak;
 import de.ipbhalle.metfrag.massbankParser.Peak;
+import de.ipbhalle.metfrag.spectrum.AssignFragmentPeak;
 import de.ipbhalle.metfrag.tools.MolecularFormulaTools;
 import de.ipbhalle.metfrag.tools.MoleculeTools;
 import de.ipbhalle.metfrag.tools.Number;

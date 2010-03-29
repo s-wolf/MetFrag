@@ -1,4 +1,4 @@
-package de.ipbhalle.metfrag.main;
+package de.ipbhalle.metfrag.spectrum;
 
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.formula.MolecularFormula;
@@ -8,6 +8,7 @@ import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 
 import de.ipbhalle.metfrag.classifier.BayesTraining;
 import de.ipbhalle.metfrag.fragmenter.NeutralLoss;
+import de.ipbhalle.metfrag.main.PeakMolPair;
 import de.ipbhalle.metfrag.massbankParser.Peak;
 import de.ipbhalle.metfrag.tools.MolecularFormulaTools;
 import de.ipbhalle.metfrag.tools.PPMTool;
@@ -64,7 +65,7 @@ public class AssignFragmentPeak {
 	 * @throws CDKException the CDK exception
 	 * @throws IOException 
 	 */
-	public void AssignFragmentPeak(List<IAtomContainer> acs, Vector<Peak> peakList, double mzabs, double mzppm, int mode, boolean html) throws CDKException, IOException
+	public void assignFragmentPeak(List<IAtomContainer> acs, Vector<Peak> peakList, double mzabs, double mzppm, int mode, boolean html) throws CDKException, IOException
 	{
 		this.acs = acs;
 		this.peakList = peakList;
@@ -84,7 +85,7 @@ public class AssignFragmentPeak {
 			boolean test = true;
 			for (int j = 0; j < this.acs.size(); j++) {
 				//matched peak
-				if(MatchByMass(this.acs.get(j), this.peakList.get(i).getMass(), mode))
+				if(matchByMass(this.acs.get(j), this.peakList.get(i).getMass(), mode))
 				{
 					//add hits to list...only 1...check if this found hydrogen penalty is less than the previous found one
 					if(test || hits.lastElement().getHydrogenPenalty() > this.hydrogenPenalty)
@@ -114,7 +115,7 @@ public class AssignFragmentPeak {
 	 * @throws CDKException the CDK exception
 	 * @throws IOException 
 	 */
-	private boolean MatchByMass(IAtomContainer ac, double peak, int mode) throws CDKException, IOException
+	private boolean matchByMass(IAtomContainer ac, double peak, int mode) throws CDKException, IOException
 	{
 		boolean found = false;
 		
@@ -130,6 +131,7 @@ public class AssignFragmentPeak {
         double peakLow = peak - this.mzabs - PPMTool.getPPMDeviation(peak, this.mzppm);
         double peakHigh = peak + this.mzabs + PPMTool.getPPMDeviation(peak, this.mzppm);
         double protonMass = hydrogenMass * (double)mode;
+        double massToCompare = mass+protonMass;
         
         String neutralLoss = "";
     	if(ac.getProperty("NlElementalComposition") != null && ac.getProperty("NlElementalComposition") != "")
@@ -138,18 +140,17 @@ public class AssignFragmentPeak {
         
         String modeString = (mode > 0) ? " +" : " -";
         
-        if(((mass+protonMass) >= peakLow && (mass+protonMass) <= peakHigh))
+        if((massToCompare >= peakLow && massToCompare <= peakHigh))
         {
         	found = true;
-        	matchedMass = Math.round((mass+protonMass)*10000.0)/10000.0;
-        	
+        	matchedMass = Math.round(massToCompare*10000.0)/10000.0;
+        	this.hydrogenPenalty = 0;
         	
         	if(this.html)
-        		this.molecularFormula = MolecularFormulaManipulator.getHTML(molecularFormula) + modeString + "H" + neutralLoss;
+        		this.molecularFormula = MolecularFormulaManipulator.getHTML(molecularFormula) + modeString + "H" + neutralLoss + "BDE:" + ac.getProperty("BondEnergy");
         	else
-        		this.molecularFormula = MolecularFormulaManipulator.getString(molecularFormula) + modeString + "H" + neutralLoss;
+        		this.molecularFormula = MolecularFormulaManipulator.getString(molecularFormula) + modeString + "H" + neutralLoss+ "BDE:" + ac.getProperty("BondEnergy");
         	
-        	this.hydrogenPenalty = 0;
         	//System.out.println("HIT!" + (double)Math.round(((mass+protonMass)-peak) * 10000)/10000 + " Mass: " + (double)Math.round((mass + protonMass)* 10000)/10000 + " " + MolecularFormulaManipulator.getString(molecularFormula) + " " + mode + "H Error: " + (double)Math.round((Math.abs((mass+protonMass)-peak)*10000))/10000);
         }
         //now try to decrease the hydrogens...at most the treedepth
@@ -163,15 +164,18 @@ public class AssignFragmentPeak {
         			//found
         			if(((mass) >= peakLow && (mass) <= peakHigh))
         			{
+        				
+        				//now add a bond energy equivalent to a H-C bond
+        				this.hydrogenPenalty = 1000;
+        				
+        				
         				found = true;
         				matchedMass = Math.round((mass)*10000.0)/10000.0;
         				
         				if(this.html)
-        	        		this.molecularFormula = MolecularFormulaManipulator.getHTML(molecularFormula) + neutralLoss;
+        	        		this.molecularFormula = MolecularFormulaManipulator.getHTML(molecularFormula) + neutralLoss+ "BDE:" + ac.getProperty("BondEnergy") + " H-Penalty:" + this.hydrogenPenalty;
         	        	else
-        	        		this.molecularFormula = MolecularFormulaManipulator.getString(molecularFormula) + neutralLoss;
-        				//now add a bond energy equivalent to a H-C bond
-        				this.hydrogenPenalty = 1000;
+        	        		this.molecularFormula = MolecularFormulaManipulator.getString(molecularFormula) + neutralLoss+ "BDE:" + ac.getProperty("BondEnergy") + " H-Penalty:" + this.hydrogenPenalty;
         				
         				break;
         			}
@@ -180,39 +184,35 @@ public class AssignFragmentPeak {
         		{
         			double hMass = i * protonMass;
         			
-        			//always add one proton more in pos mode
-        			if(mode == 1)
-        				hMass = hMass + protonMass;
-        			//one less in neg. mode
-        			else
-        				hMass = hMass - protonMass;
-        			
         			//found
-        			if(((mass-hMass) >= peakLow && (mass-hMass) <= peakHigh))
+        			if(((massToCompare - hMass) >= peakLow && (massToCompare - hMass) <= peakHigh))
         			{
         				found = true;
-        				matchedMass = Math.round((mass-hMass)*10000.0)/10000.0;
+        				matchedMass = Math.round((massToCompare-hMass)*10000.0)/10000.0;
         				
-        				if(this.html)
-        	        		this.molecularFormula = MolecularFormulaManipulator.getHTML(molecularFormula) + "-" + i + "H" + neutralLoss;
-        	        	else
-        	        		this.molecularFormula = MolecularFormulaManipulator.getString(molecularFormula) + "-" + i + "H" + neutralLoss;
         				//now add a bond energy equivalent to a H-C bond
         				this.hydrogenPenalty = (i * 1000) + 1000;
+        				
+        				if(this.html)
+        	        		this.molecularFormula = MolecularFormulaManipulator.getHTML(molecularFormula) + "-" + (i + 1) + "H" + neutralLoss+ "BDE:" + ac.getProperty("BondEnergy") + " H-Penalty:" + this.hydrogenPenalty;
+        	        	else
+        	        		this.molecularFormula = MolecularFormulaManipulator.getString(molecularFormula) + "-" + (i + 1) + "H" + neutralLoss+ "BDE:" + ac.getProperty("BondEnergy") + " H-Penalty:" + this.hydrogenPenalty;
+        				
         				
         				break;
         			}
-        			else if(((mass+hMass) >= peakLow && (mass+hMass) <= peakHigh))
+        			else if(((massToCompare + hMass) >= peakLow && (massToCompare + hMass) <= peakHigh))
         			{
         				found = true;
-        				matchedMass = Math.round((mass-hMass)*10000.0)/10000.0;
-        				
-        				if(this.html)
-        	        		this.molecularFormula = MolecularFormulaManipulator.getHTML(molecularFormula) + "+" + i + "H" + neutralLoss;
-        	        	else
-        	        		this.molecularFormula = MolecularFormulaManipulator.getString(molecularFormula) + "+" + i + "H" + neutralLoss;
+        				matchedMass = Math.round((massToCompare+hMass)*10000.0)/10000.0;
         				//now add a bond energy equivalent to a H-C bond
         				this.hydrogenPenalty = (i * 1000) + 1000;
+        				
+        				
+        				if(this.html)
+        	        		this.molecularFormula = MolecularFormulaManipulator.getHTML(molecularFormula) + "+" + (i + 1) + "H" + neutralLoss+ "BDE:" + ac.getProperty("BondEnergy") + " H-Penalty:" + this.hydrogenPenalty;
+        	        	else
+        	        		this.molecularFormula = MolecularFormulaManipulator.getString(molecularFormula) + "+" + (i + 1) + "H" + neutralLoss+ "BDE:" + ac.getProperty("BondEnergy") + " H-Penalty:" + this.hydrogenPenalty;
         				
         				break;
         			}

@@ -35,6 +35,7 @@ import de.ipbhalle.metfrag.read.Molfile;
 import de.ipbhalle.metfrag.scoring.Scoring;
 import de.ipbhalle.metfrag.similarity.Similarity;
 import de.ipbhalle.metfrag.similarity.SimilarityGroup;
+import de.ipbhalle.metfrag.spectrum.AssignFragmentPeak;
 import de.ipbhalle.metfrag.spectrum.CleanUpPeakList;
 import de.ipbhalle.metfrag.spectrum.WrapperSpectrum;
 import de.ipbhalle.metfrag.tools.DisplayStructure;
@@ -436,7 +437,7 @@ public class KEGGSearch {
 				//now find corresponding fragments to the mass
 				AssignFragmentPeak afp = new AssignFragmentPeak();
 				afp.setHydrogenTest(hydrogenTest);
-				afp.AssignFragmentPeak(fragments, cleanedPeakList, mzabs, mzppm, spectrum.getMode(), false);
+				afp.assignFragmentPeak(fragments, cleanedPeakList, mzabs, mzppm, spectrum.getMode(), false);
 				Vector<PeakMolPair> hits = afp.getHits();
 				
 				Scoring score = new Scoring(spectrum.getPeakList());

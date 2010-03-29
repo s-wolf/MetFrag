@@ -41,6 +41,7 @@ import de.ipbhalle.metfrag.massbankParser.Peak;
 import de.ipbhalle.metfrag.pubchem.PubChemWebService;
 import de.ipbhalle.metfrag.read.Molfile;
 import de.ipbhalle.metfrag.scoring.Scoring;
+import de.ipbhalle.metfrag.spectrum.AssignFragmentPeak;
 import de.ipbhalle.metfrag.spectrum.CleanUpPeakList;
 import de.ipbhalle.metfrag.spectrum.WrapperSpectrum;
 import de.ipbhalle.metfrag.tools.DisplayStructure;
@@ -427,7 +428,7 @@ public class PubChemSearch {
 					//now find corresponding fragments to the mass
 					AssignFragmentPeak afp = new AssignFragmentPeak();
 					afp.setHydrogenTest(hydrogenTest);
-					afp.AssignFragmentPeak(fragments, cleanedPeakList, mzabs, mzppm, spectrum.getMode(), false);
+					afp.assignFragmentPeak(fragments, cleanedPeakList, mzabs, mzppm, spectrum.getMode(), false);
 					Vector<PeakMolPair> hits = afp.getHits();
 					
 					
