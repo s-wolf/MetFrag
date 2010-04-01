@@ -37,7 +37,7 @@ import org.openscience.cdk.isomorphism.UniversalIsomorphismTester;
 import org.openscience.cdk.isomorphism.mcss.RMap;
 import org.openscience.cdk.aromaticity.CDKHueckelAromaticityDetector;
 
-import de.ipbhalle.metfrag.main.PeakMolPair;
+import de.ipbhalle.metfrag.spectrum.PeakMolPair;
 
 
 

@@ -1,4 +1,4 @@
-package de.ipbhalle.metfrag.main;
+package de.ipbhalle.metfrag.spectrum;
 
 
 import org.openscience.cdk.interfaces.IAtomContainer;
@@ -16,6 +16,7 @@ public class PeakMolPair {
 	private double matchedMass;
 	private String molecularFormula;
 	private double hydrogenPenalty = 0.0;
+	private double partialChargeDiff = 0.0;
 	
 	
 	/**
@@ -24,13 +25,14 @@ public class PeakMolPair {
 	 * @param ac the ac
 	 * @param peak the peak
 	 */
-	public PeakMolPair(IAtomContainer ac, Peak peak, double matchedMass, String molecularFormula, double score)
+	public PeakMolPair(IAtomContainer ac, Peak peak, double matchedMass, String molecularFormula, double score, double partialChargeDiff)
 	{
 		this.ac = ac;
 		this.peak = peak;
 		this.matchedMass = matchedMass;
 		this.setMolecularFormula(molecularFormula);
 		this.hydrogenPenalty = score;
+		this.setPartialChargeDiff(partialChargeDiff);
 	}
 	
 	/**
@@ -105,6 +107,24 @@ public class PeakMolPair {
 	 */
 	public double getHydrogenPenalty() {
 		return hydrogenPenalty;
+	}
+
+	/**
+	 * Sets the partial charge diff.
+	 * 
+	 * @param partialChargeDiff the new partial charge diff
+	 */
+	public void setPartialChargeDiff(double partialChargeDiff) {
+		this.partialChargeDiff = partialChargeDiff;
+	}
+
+	/**
+	 * Gets the partial charge diff.
+	 * 
+	 * @return the partial charge diff
+	 */
+	public double getPartialChargeDiff() {
+		return partialChargeDiff;
 	}
 
 }

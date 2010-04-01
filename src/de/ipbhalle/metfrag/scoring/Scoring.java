@@ -16,8 +16,8 @@ import org.openscience.cdk.interfaces.IMolecularFormula;
 import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 
 import de.ipbhalle.metfrag.fragmenter.NeutralLoss;
-import de.ipbhalle.metfrag.main.PeakMolPair;
 import de.ipbhalle.metfrag.massbankParser.Peak;
+import de.ipbhalle.metfrag.spectrum.PeakMolPair;
 
 
 
@@ -31,21 +31,12 @@ import de.ipbhalle.metfrag.massbankParser.Peak;
  */
 public class Scoring {
 	
-	/** The mz to intensity. */
 	private Map<Double, Double> mzToIntensity = null;
-	
-	/** The neutral loss. */
 	private Map<Double, NeutralLoss> neutralLoss= null;
-	
-	/** The sum intensities. */
 	private double sumIntensities = 0;
-	
-	/** The summed up bond energies. */
 	double scoreBondEnergy = 0.0;
-	
-	/** The place. */
 	private double penalty = 0.0;
-	
+	private double partialChargeDiff = 0.0;
 	private HashMap<Double, Integer> peakToRank;
 	
 	/**
@@ -67,51 +58,6 @@ public class Scoring {
 		}
 	}	
 	
-	
-	
-	/**
-	 * Compute scoring.
-	 * * f(X) = sum i = 1 to n ( (I_n/ I_g) * p_N)
-	 * p_N = 0 peak not found --> else: 1
-	 * I_n ... nth intensity
-	 * I_g ... sum of all intensities --> precomputed
-	 * 
-	 * @param hits the hits
-	 */
-	public double computeScoring(Vector<Double> hits)
-	{
-		double score = 0.0;
-		
-		
-		for (int i = 0; i < hits.size(); i++) {
-			//Scoring with intensities.....not very good
-			//normal scoring
-			//score += (this.mzToIntensity.get(hits.get(i))/this.sumIntensities);
-			
-			//Squared
-			//score += (this.mzToIntensity.get(hits.get(i))*this.mzToIntensity.get(hits.get(i)))/this.sumIntensities;
-			
-			//ranked peaks
-			//double temp = peakToRank.get(hits.get(i));
-			//temp = hits.get(i) / temp;
-			//score += temp;
-			
-			//double temp = peakToRank.get(hits.get(i));
-			//temp = hits.get(i) / temp;
-			//score += hits.get(i);
-			
-			
-			//Scoring like in Massbank paper m=0.6, n=3
-			//W = [Peak intensity]^m * [Mass]^n
-			score += Math.pow(this.mzToIntensity.get(hits.get(i)), 0.6) * Math.pow(hits.get(i),3);
-			//m=0.5, n=2 --> not very good
-			//score += Math.pow(this.mzToIntensity.get(hits.get(i)), 0.5) * Math.pow(hits.get(i),2);
-
-		}
-		
-		return score;
-	}
-	
 	/**
 	 * Compute scoring.
 	 * * f(X) = sum i = 1 to n ( (I_n/ I_g) * p_N)
@@ -124,32 +70,11 @@ public class Scoring {
 	public double computeScoringPeakMolPair(Vector<PeakMolPair> hits)
 	{
 		double score = 0.0;
-		
-		
-		for (int i = 0; i < hits.size(); i++) {
-			//Scoring with intensities.....not very good
-			//normal scoring
-			//score += (this.mzToIntensity.get(hits.get(i))/this.sumIntensities);
-			
-			//Squared
-			//score += (this.mzToIntensity.get(hits.get(i))*this.mzToIntensity.get(hits.get(i)))/this.sumIntensities;
-			
-			//ranked peaks
-			//double temp = peakToRank.get(hits.get(i));
-			//temp = hits.get(i) / temp;
-			//score += temp;
-			
-			//double temp = peakToRank.get(hits.get(i));
-			//temp = hits.get(i) / temp;
-			//score += hits.get(i);
-			
-			
+
+		for (int i = 0; i < hits.size(); i++) {			
 			//Scoring like in Massbank paper m=0.6, n=3
 			//W = [Peak intensity]^m * [Mass]^n
 			score += Math.pow(this.mzToIntensity.get(hits.get(i).getPeak().getMass()), 0.6) * Math.pow(hits.get(i).getPeak().getMass(),3);
-			//m=0.5, n=2 --> not very good
-			//score += Math.pow(this.mzToIntensity.get(hits.get(i)), 0.5) * Math.pow(hits.get(i),2);
-
 		}
 		
 		return score;
@@ -174,11 +99,9 @@ public class Scoring {
 			score += Math.pow(this.mzToIntensity.get(hits.get(i).getPeak().getMass()), 0.6) * Math.pow(hits.get(i).getPeak().getMass(),3);
 			scoreBondEnergy += Double.parseDouble((String)hits.get(i).getFragment().getProperty("BondEnergy"));
 			penalty += hits.get(i).getHydrogenPenalty(); 
-			//Scoring like in MassBank paper
-			//m=0.5, n=2 --> try it!
-			//score += Math.pow(this.mzToIntensity.get(hits.get(i)), 0.5) * Math.pow(hits.get(i),2);
-
+			partialChargeDiff += hits.get(i).getPartialChargeDiff();
 		}
+		//todo optimize parameter
 		penalty = penalty / 10;
 		return score;
 	}
@@ -191,6 +114,16 @@ public class Scoring {
 	public double getFragmentBondEnergy()
 	{
 		return this.scoreBondEnergy;
+	}
+	
+	/**
+	 * Gets the partial charge Diff.
+	 * 
+	 * @return the partial charge diff
+	 */
+	public double getPartialChargeDiff()
+	{
+		return this.partialChargeDiff;
 	}
 	
 	
@@ -260,7 +193,7 @@ public class Scoring {
 				
 				
 				
-				double finalScore = normalizedScore - (normalizedBondEnergy / 2);
+				double finalScore = normalizedScore - (normalizedBondEnergy / 4);
 				
 				if(finalScore < 0)
 					finalScore = 0.0;

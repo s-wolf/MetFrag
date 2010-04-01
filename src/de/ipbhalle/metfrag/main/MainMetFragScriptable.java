@@ -30,7 +30,7 @@ public class MainMetFragScriptable {
 public static void main(String[] args) {
 		
 		Config c = null;
-		String completeLog = "";
+		StringBuilder completeLog = new StringBuilder();
 		String date = "";
 		String currentFile = "";
 		
@@ -41,6 +41,7 @@ public static void main(String[] args) {
 		String histogramPeaksCorresponding = "";
 		String histogramPeaksAll = "";
 		String similarityValues = "";
+		String parameterOptimization = "";
 		
 		try
 		{
@@ -87,7 +88,7 @@ public static void main(String[] args) {
 
 
 		//add comment to log file
-		completeLog += c.getComment() + "\n\n\n"; 
+		completeLog.append(c.getComment() + "\n\n\n"); 
 
 		//timer
 		long start = 0;
@@ -180,8 +181,8 @@ public static void main(String[] args) {
 			
 			if(c.isKEGG())
 			{
-				completeLog = ks.getCompleteLog();
-				completeLog += "\t Time: " + end + "\n";
+				completeLog.append(ks.getCompleteLog());
+				completeLog.append("\t Time: " + end + "\n");
 				histogramCompare += ks.getHistogramCompare() + "\t" + end;
 				histogram += ks.getHistogram() + "\t" + end;
 				histogramReal += ks.getHistogramReal() + "\t" + end;
@@ -189,8 +190,8 @@ public static void main(String[] args) {
 			}
 			else if(c.isPubChem())
 			{
-				completeLog = psParallel.getCompleteLog();
-				completeLog += "\t Time: " + end + "\n ";
+				completeLog.append(psParallel.getCompleteLog());
+				completeLog.append("\t Time: " + end + "\n ");
 				histogramCompare += psParallel.getHistogramCompare() + "\t" + end;
 				histogram += psParallel.getHistogram() + "\t" + end;
 				histogramReal += psParallel.getHistogramReal() + "\t" + end;
@@ -198,6 +199,7 @@ public static void main(String[] args) {
 				histogramPeaksCorresponding += psParallel.getHistogramPeaksReal().toString();
 				histogramPeaksAll += psParallel.getHistogramPeaksAll().toString();
 				similarityValues += psParallel.getSimilarityValues().toString();
+				parameterOptimization = psParallel.getParameterOptimizationMatrix();
 			}
 			
             sum += end;
@@ -234,10 +236,10 @@ public static void main(String[] args) {
 			
 			
 
-			completeLog += "\n\n\n============================================================================";
+			completeLog.append("\n\n\n============================================================================");
 //			completeLog += "\n#Peaks: " + allPeaks;
 //			completeLog += " Found Peaks: " + foundPeaks + " (" + ((double)(foundPeaks*100)/(double)allPeaks) + "%) ";
-			completeLog += " Complete Time: " + (sum) + "ms";
+			completeLog.append(" Complete Time: " + (sum) + "ms");
 //			completeLog += " \n\n Histogram COMPARISON: \n" + histogramCompare;
 //			completeLog += " \n\n Histogram (easy scoring): \n" + histogram;
 //			completeLog += " \n\n Histogram (real scoring): \n" + histogramReal;
@@ -248,7 +250,7 @@ public static void main(String[] args) {
 				new File(c.getFolder() + "logs/").mkdir();
 				File outFile = new File(c.getFolder() + "logs/" + date + "_log.txt");
 	            FileWriter out = new FileWriter(outFile, true);
-	            out.write(completeLog);
+	            out.write(completeLog.toString());
 	            out.close();
 	            
 	            //write peak data of the correct compounds to file
@@ -277,6 +279,11 @@ public static void main(String[] args) {
 				FileWriter allFoundPeaks = new FileWriter(c.getFolder() + "logs/" + date + "_FoundPeaks.txt", true);
 				allFoundPeaks.write(histogramPeaksCorresponding);
 	            allFoundPeaks.close();
+	            
+	            new File(c.getFolder() + "logs/" + date + "/").mkdirs();
+	            FileWriter out4 = new FileWriter(c.getFolder() + "logs/" + date + "/" + currentFile + ".txt", true);
+	            out4.write(parameterOptimization);
+	            out4.close();
 	            
 //	            FileWriter similarities = new FileWriter(c.getFolder() + "logs/" + date + "_Similarities.txt", true);
 //	            similarities.write(similarityValues);

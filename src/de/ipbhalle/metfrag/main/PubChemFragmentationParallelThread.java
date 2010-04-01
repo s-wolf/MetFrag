@@ -33,6 +33,7 @@ import de.ipbhalle.metfrag.read.Molfile;
 import de.ipbhalle.metfrag.scoring.Scoring;
 import de.ipbhalle.metfrag.spectrum.AssignFragmentPeak;
 import de.ipbhalle.metfrag.spectrum.CleanUpPeakList;
+import de.ipbhalle.metfrag.spectrum.PeakMolPair;
 import de.ipbhalle.metfrag.spectrum.WrapperSpectrum;
 import de.ipbhalle.metfrag.tools.DisplayStructure;
 import de.ipbhalle.metfrag.tools.Render;
@@ -198,6 +199,9 @@ public class PubChemFragmentationParallelThread implements Runnable{
 					Map<String, Double> mapCandidateToHydrogenPenalty = PubChemSearchParallel.getCandidateToHydrogenPenalty();
 					mapCandidateToHydrogenPenalty.put(candidate, score.getPenalty());
 					PubChemSearchParallel.setCandidateToHydrogenPenalty(mapCandidateToHydrogenPenalty);
+					Map<String, Double> mapCandidateToPartialChargesDiff = PubChemSearchParallel.getCandidateToPartialChargesDiff();
+					mapCandidateToHydrogenPenalty.put(candidate, score.getPartialChargeDiff());
+					PubChemSearchParallel.setCandidateToHydrogenPenalty(mapCandidateToPartialChargesDiff);
 					
 					
 					

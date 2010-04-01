@@ -32,6 +32,7 @@ import de.ipbhalle.metfrag.pubchem.PubChemWebService;
 import de.ipbhalle.metfrag.scoring.Scoring;
 import de.ipbhalle.metfrag.spectrum.AssignFragmentPeak;
 import de.ipbhalle.metfrag.spectrum.CleanUpPeakList;
+import de.ipbhalle.metfrag.spectrum.PeakMolPair;
 import de.ipbhalle.metfrag.spectrum.WrapperSpectrum;
 import de.ipbhalle.metfrag.tools.MolecularFormulaTools;
 import de.ipbhalle.metfrag.tools.PPMTool;
@@ -292,7 +293,7 @@ public class MetFlowConvenience {
 			
 			//now "real" scoring --> depends on intensities
 			Scoring score = new Scoring(spectrum.getPeakList());
-			double currentScore = score.computeScoring(afp.getHitsMZ());
+			double currentScore = score.computeScoringPeakMolPair(afp.getHits());
 			
 			//save score in hashmap...if there are several hits with the same score --> vector of strings
 			if(realScoreMap.containsKey(currentScore))

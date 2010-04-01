@@ -30,6 +30,7 @@ import de.ipbhalle.metfrag.massbankParser.Peak;
 import de.ipbhalle.metfrag.scoring.Scoring;
 import de.ipbhalle.metfrag.spectrum.AssignFragmentPeak;
 import de.ipbhalle.metfrag.spectrum.CleanUpPeakList;
+import de.ipbhalle.metfrag.spectrum.PeakMolPair;
 import de.ipbhalle.metfrag.spectrum.WrapperSpectrum;
 import de.ipbhalle.metfrag.tools.DisplayStructure;
 import de.ipbhalle.metfrag.tools.GetKEGGIdentifier;
@@ -428,7 +429,7 @@ public class HierarchicalSearch {
 					
 					//now "real" scoring
 					Scoring score = new Scoring(cleanedPeakList);
-					double currentScore = score.computeScoring(afp.getHitsMZ());
+					double currentScore = score.computeScoringPeakMolPair(afp.getHits());
 					combinedScore += currentScore; 
 					
 					//check for last run and create the data for the log file

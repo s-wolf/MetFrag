@@ -105,6 +105,7 @@ public class Fragmenter {
     private PostProcess pp = null;
     private List<String> bondsToBreak = null;
     private boolean isOnlyBreakSelectedBonds = false;
+    private Charges bondPrediction = null;
     
     //Timer
     long startTraverse = 0;
@@ -431,17 +432,16 @@ public class Fragmenter {
 			}
         }
     	
-    	if(isOnlyBreakSelectedBonds)
-    	{
-    		//now find all bonds which are worth splitting
-        	try {
-        		Charges bondPrediction = new Charges();
-    			this.bondsToBreak = bondPrediction.calculateBondsToBreak(this.originalMolecule);
-    		} catch (CloneNotSupportedException e) {
-    			// TODO Auto-generated catch block
-    			e.printStackTrace();
-    		}
-    	}
+
+		//now find all bonds which are worth splitting
+    	try {
+    		bondPrediction = new Charges();
+			this.bondsToBreak = bondPrediction.calculateBondsToBreak(this.originalMolecule);
+		} catch (CloneNotSupportedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	
     	
     	
     	
@@ -934,6 +934,8 @@ public class Fragmenter {
                         
                         //now set property
                         temp = setBondEnergy(temp, (currentBondEnergyRing + currentBondEnergy));
+                        temp = setCharge(temp, bondPrediction.getBondLength(bondInRing.getID()));
+                        
                         
                         if(lonePairGeneration)
                         {
@@ -1029,6 +1031,7 @@ public class Fragmenter {
                 
         		//now set property: BondEnergy!
                 temp = setBondEnergy(temp, currentBondEnergy);
+                temp = setCharge(temp, bondPrediction.getBondLength(bond.getID()));
                 
                 if(lonePairGeneration)
                 {
@@ -1111,6 +1114,32 @@ public class Fragmenter {
     	else
     	{
     		props.put("BondEnergy", bondEnergy.toString());
+    	}
+    	
+    	mol.setProperties(props);
+    	return mol;
+    }
+    
+    /**
+     * Sets the partial charge difference previously calculated using Gasteiger-Marsili.
+     * 
+     * @param mol the mol
+     * @param bondEnergy the bond energy
+     * 
+     * @return the i atom container
+     */
+    private IAtomContainer setCharge(IAtomContainer mol, Double partialChargeDiff)
+    {
+    	
+    	Map<Object, Object> props = mol.getProperties();
+    	if(props.get("PartialChargeDiff") != null)
+    	{
+    		Double sumPartialChargeDiff = Double.parseDouble((String)props.get("PartialChargeDiff")) + partialChargeDiff;
+    		props.put("PartialChargeDiff", sumPartialChargeDiff.toString());	
+    	}
+    	else
+    	{
+    		props.put("PartialChargeDiff", partialChargeDiff.toString());
     	}
     	
     	mol.setProperties(props);
@@ -1869,8 +1898,8 @@ public class Fragmenter {
 //	    					fragmentNL.setProperty("FragmentMass", MolecularFormulaTools.getMonoisotopicMass(formulaFragment));
 	    					//set bond energy
 	    					fragmentNL = setBondEnergy(fragment, fragmentNL, 500.0);
-	    					
-	    					
+	    					//set partial charge diff to 0
+	    					fragmentNL = setCharge(fragmentNL, 0.0);
 	    					
 	    					
 	    					Map<Object, Object> props = fragmentNL.getProperties();

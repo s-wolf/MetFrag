@@ -8,7 +8,6 @@ import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 
 import de.ipbhalle.metfrag.classifier.BayesTraining;
 import de.ipbhalle.metfrag.fragmenter.NeutralLoss;
-import de.ipbhalle.metfrag.main.PeakMolPair;
 import de.ipbhalle.metfrag.massbankParser.Peak;
 import de.ipbhalle.metfrag.tools.MolecularFormulaTools;
 import de.ipbhalle.metfrag.tools.PPMTool;
@@ -44,6 +43,7 @@ public class AssignFragmentPeak {
 	private String molecularFormula = "";
 	private boolean html = false;
 	private double hydrogenPenalty = 0.0;
+	private double partialChargeDiff = 0.0;
 	
 	
 	public AssignFragmentPeak()
@@ -93,11 +93,11 @@ public class AssignFragmentPeak {
 						//exchange the last element...this is the one with the current peak
 						if(!test && hits.size() > 0 && hits.lastElement().getHydrogenPenalty() > this.hydrogenPenalty)
 							hits.remove(hits.size() - 1);
-						hits.add(new PeakMolPair(acs.get(j),this.peakList.get(i), this.matchedMass, this.molecularFormula, this.hydrogenPenalty));
+						hits.add(new PeakMolPair(acs.get(j),this.peakList.get(i), this.matchedMass, this.molecularFormula, this.hydrogenPenalty, this.partialChargeDiff));
 						hitsPeaks.add(this.peakList.get(i).getMass());
 						test = false;
 					}
-					hitsAll.add(new PeakMolPair(acs.get(j),this.peakList.get(i), this.matchedMass, this.molecularFormula, this.hydrogenPenalty));
+					hitsAll.add(new PeakMolPair(acs.get(j),this.peakList.get(i), this.matchedMass, this.molecularFormula, this.hydrogenPenalty, this.partialChargeDiff));
 				}
 			}
 		}
@@ -127,6 +127,10 @@ public class AssignFragmentPeak {
         	mass = Double.parseDouble(ac.getProperty("FragmentMass").toString());
         else
         	mass = MolecularFormulaTools.getMonoisotopicMass(molecularFormula);
+        
+        
+        this.partialChargeDiff = Double.parseDouble((String)ac.getProperty("PartialChargeDiff"));
+        
         
         double peakLow = peak - this.mzabs - PPMTool.getPPMDeviation(peak, this.mzppm);
         double peakHigh = peak + this.mzabs + PPMTool.getPPMDeviation(peak, this.mzppm);

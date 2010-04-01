@@ -23,6 +23,7 @@ import de.ipbhalle.metfrag.tools.Render;
 public class Charges {
 	
 	private IAtomContainer mol;
+	private Map<String, Double> bondToBondLength;
 	
 	/**
 	 * Instantiates a new charges class.
@@ -31,7 +32,7 @@ public class Charges {
 	 */
 	public Charges()
 	{
-		
+		this.bondToBondLength = new HashMap<String, Double>();
 	}
 	
 	
@@ -47,7 +48,6 @@ public class Charges {
 	{		
 		this.mol = MoleculeTools.moleculeNumbering(mol);
 		List<String> bondsToBreak = new ArrayList<String>();
-		Map<String, Double> bondToBondLength = new HashMap<String, Double>();
 		
 		try {
         	GasteigerMarsiliPartialCharges peoe = new GasteigerMarsiliPartialCharges();
@@ -239,6 +239,18 @@ public class Charges {
 		return check;
 	}
 	
+	/**
+	 * Gets the bond length for a specified bond ID.
+	 * Molecule bonds are numbered using MoleculeTools.moleculeNumbering
+	 * 
+	 * @param bondID the bond id
+	 * 
+	 * @return the bond length
+	 */
+	public Double getBondLength(String bondID)
+	{
+		return this.bondToBondLength.get(bondID);
+	}
 	
 	
 
