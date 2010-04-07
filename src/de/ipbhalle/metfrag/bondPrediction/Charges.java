@@ -18,7 +18,6 @@ import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 
 import de.ipbhalle.metfrag.moldynamics.Distance;
 import de.ipbhalle.metfrag.tools.MoleculeTools;
-import de.ipbhalle.metfrag.tools.Render;
 
 public class Charges {
 	

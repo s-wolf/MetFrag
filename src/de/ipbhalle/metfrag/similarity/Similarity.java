@@ -20,7 +20,6 @@ import org.openscience.cdk.similarity.Tanimoto;
 import org.openscience.cdk.smiles.SmilesParser;
 
 import de.ipbhalle.metfrag.molDatabase.PubChemLocal;
-import de.ipbhalle.metfrag.tools.Render;
 
 public class Similarity {
 	

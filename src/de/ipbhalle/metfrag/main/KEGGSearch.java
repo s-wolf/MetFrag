@@ -39,11 +39,10 @@ import de.ipbhalle.metfrag.spectrum.AssignFragmentPeak;
 import de.ipbhalle.metfrag.spectrum.CleanUpPeakList;
 import de.ipbhalle.metfrag.spectrum.PeakMolPair;
 import de.ipbhalle.metfrag.spectrum.WrapperSpectrum;
-import de.ipbhalle.metfrag.tools.DisplayStructure;
 import de.ipbhalle.metfrag.tools.GetKEGGIdentifier;
 import de.ipbhalle.metfrag.tools.PPMTool;
-import de.ipbhalle.metfrag.tools.Render;
-import de.ipbhalle.metfrag.tools.WritePDFTable;
+import de.ipbhalle.metfrag.tools.renderer.StructureRenderer;
+import de.ipbhalle.metfrag.tools.renderer.StructureRendererTable;
 
 
 
@@ -403,24 +402,24 @@ public class KEGGSearch {
 		        
 			        //Draw molecule and its fragments
 			        if (showDiagrams)
-			        	Render.Draw(molecule,l, "Original Molecule"); 
+			        	StructureRendererTable.Draw(molecule,l, "Original Molecule"); 
 			        
-			        if(pdf)
-			        {
-				        //Create PDF Output
-				        l.add(molecule);
-			        	DisplayStructure ds1 = null;
-			        	//create pdf subfolder
-			        	new File(folder + file + "/" + candidates.get(c) + "pdf/").mkdir();
-			        	ds1 = new WritePDFTable(true, 300, 300, 0.9, 2, false, false, folder + file + "/" + candidates.get(c) + "pdf/");
-			        	for (int i = 0; i < l.size(); i++) {
-			                //ds = new displayStructure(false, 300, 300, 0.9, false, "PDF", "/home/basti/WorkspaceJava/TandemMSLookup/fragmenter/Test");
-			                assert ds1 != null;
-			                ds1.drawStructure(l.get(i), i);
-			    		}
-				        
-				        if (ds1 != null) ds1.close();
-			        }
+//			        if(pdf)
+//			        {
+//				        //Create PDF Output
+//				        l.add(molecule);
+//			        	DisplayStructure ds1 = null;
+//			        	//create pdf subfolder
+//			        	new File(folder + file + "/" + candidates.get(c) + "pdf/").mkdir();
+//			        	ds1 = new WritePDFTable(true, 300, 300, 0.9, 2, false, false, folder + file + "/" + candidates.get(c) + "pdf/");
+//			        	for (int i = 0; i < l.size(); i++) {
+//			                //ds = new displayStructure(false, 300, 300, 0.9, false, "PDF", "/home/basti/WorkspaceJava/TandemMSLookup/fragmenter/Test");
+//			                assert ds1 != null;
+//			                ds1.drawStructure(l.get(i), i);
+//			    		}
+//				        
+//				        if (ds1 != null) ds1.close();
+//			        }
 		        }
 		        else
 		        	System.out.println("Could not create folder...frags already computed!!!!");
@@ -517,7 +516,7 @@ public class KEGGSearch {
 					//Render.Highlight(AtomContainerManipulator.removeHydrogens(molecule), hitsList , Double.toString(hits.get(i).getPeak()));
 				}
 				if (showDiagrams)
-					Render.Draw(molecule, hitsListTest , "Fragmente von: " + candidates.get(c));
+					StructureRendererTable.Draw(molecule, hitsListTest , "Fragmente von: " + candidates.get(c));
 				
 				
 				//map storing all candidate structures...analyze further on the similarity of the hits

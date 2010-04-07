@@ -52,12 +52,9 @@ import de.ipbhalle.metfrag.scoring.Scoring;
 import de.ipbhalle.metfrag.similarity.Similarity;
 import de.ipbhalle.metfrag.similarity.SimilarityGroup;
 import de.ipbhalle.metfrag.spectrum.WrapperSpectrum;
-import de.ipbhalle.metfrag.tools.DisplayStructure;
 import de.ipbhalle.metfrag.tools.GetKEGGIdentifier;
 import de.ipbhalle.metfrag.tools.MolecularFormulaTools;
 import de.ipbhalle.metfrag.tools.PPMTool;
-import de.ipbhalle.metfrag.tools.Render;
-import de.ipbhalle.metfrag.tools.WritePDFTable;
 
 public class PubChemSearchParallel{
 		

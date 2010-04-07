@@ -1,43 +1,25 @@
 package de.ipbhalle.metfrag.moldynamics;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.vecmath.Point3d;
 
 import org.openscience.cdk.ChemFile;
 import org.openscience.cdk.ChemObject;
-import org.openscience.cdk.DefaultChemObjectBuilder;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IBond;
-import org.openscience.cdk.interfaces.IChemFile;
-import org.openscience.cdk.io.IChemObjectReader;
 import org.openscience.cdk.io.ISimpleChemObjectReader;
-import org.openscience.cdk.io.MDLV2000Reader;
-import org.openscience.cdk.io.Mol2Reader;
 import org.openscience.cdk.io.ReaderFactory;
-import org.openscience.cdk.io.formats.CMLFormat;
-import org.openscience.cdk.io.formats.IChemFormatMatcher;
-import org.openscience.cdk.io.formats.MDLFormat;
-import org.openscience.cdk.io.formats.MDLV2000Format;
-import org.openscience.cdk.io.formats.MDLV3000Format;
-import org.openscience.cdk.io.formats.Mol2Format;
-import org.openscience.cdk.io.formats.SDFFormat;
 import org.openscience.cdk.tools.manipulator.ChemFileManipulator;
 
-import com.lowagie.text.pdf.hyphenation.TernaryTree.Iterator;
-
-import de.ipbhalle.metfrag.tools.Render;
 
 public class BondDistance {
 

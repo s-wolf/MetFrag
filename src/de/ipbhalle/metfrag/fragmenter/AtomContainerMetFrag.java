@@ -46,6 +46,7 @@ import org.openscience.cdk.interfaces.IElectronContainer;
 import org.openscience.cdk.interfaces.ILonePair;
 import org.openscience.cdk.interfaces.ISingleElectron;
 import org.openscience.cdk.interfaces.IBond.Order;
+import org.openscience.cdk.interfaces.IBond.Stereo;
 
 /**
  *  Base class for all chemical objects that maintain a list of Atoms and
@@ -1407,9 +1408,9 @@ public class AtomContainerMetFrag extends ChemObject
 	 *@param  order   Bondorder
 	 *@param  stereo  Stereochemical orientation
 	 */
-	public void addBond(int atom1, int atom2, IBond.Order order, int stereo)
+	public void addBond(int atom1, int atom2, IBond.Order order, Stereo stereo)
 	{
-		IBond bond = getBuilder().newBond(getAtom(atom1), getAtom(atom2), order, stereo);
+		IBond bond = getBuilder().newBond(getAtom(atom1), getAtom(atom2), order);
 
 		if (contains(bond))
 		{
@@ -1751,7 +1752,7 @@ public class AtomContainerMetFrag extends ChemObject
 
 	public double getBondEnergy() {
 		return bondEnergy;
-	}   
+	}
 
 }
 

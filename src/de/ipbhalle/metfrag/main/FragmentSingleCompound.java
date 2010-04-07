@@ -23,7 +23,8 @@ import de.ipbhalle.metfrag.massbankParser.Peak;
 import de.ipbhalle.metfrag.read.Molfile;
 import de.ipbhalle.metfrag.spectrum.WrapperSpectrum;
 import de.ipbhalle.metfrag.tools.MolecularFormulaTools;
-import de.ipbhalle.metfrag.tools.Render;
+import de.ipbhalle.metfrag.tools.renderer.StructureRenderer;
+import de.ipbhalle.metfrag.tools.renderer.StructureRendererTable;
 
 public class FragmentSingleCompound {
 	
@@ -104,7 +105,7 @@ public class FragmentSingleCompound {
 		}
 		
 		if(render)
-			Render.Draw(molecule, listOfFrags, "Fragments");
+			StructureRendererTable.Draw(molecule, listOfFrags, "Fragments");
 		
 		return results;
 	}

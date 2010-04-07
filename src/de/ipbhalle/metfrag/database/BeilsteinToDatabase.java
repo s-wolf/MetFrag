@@ -193,8 +193,7 @@ public class BeilsteinToDatabase {
 						int chonsp = Tools.checkCHONSP(formulaStringOrig);
 						
 						
-						InChIGeneratorFactory factory = new InChIGeneratorFactory();
-				        InChIGenerator gen = factory.getInChIGenerator(molRead);
+				        InChIGenerator gen = InChIGeneratorFactory.getInstance().getInChIGenerator(molRead);
 				        String iupac = gen.getInchi();
 						
 						

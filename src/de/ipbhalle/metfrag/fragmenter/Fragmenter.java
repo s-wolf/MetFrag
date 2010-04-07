@@ -61,7 +61,6 @@ import de.ipbhalle.metfrag.tools.MolecularFormulaTools;
 import de.ipbhalle.metfrag.tools.MoleculeTools;
 import de.ipbhalle.metfrag.tools.Number;
 import de.ipbhalle.metfrag.tools.PPMTool;
-import de.ipbhalle.metfrag.tools.Render;
 
 
 public class Fragmenter {

@@ -47,10 +47,9 @@ import de.ipbhalle.metfrag.spectrum.AssignFragmentPeak;
 import de.ipbhalle.metfrag.spectrum.CleanUpPeakList;
 import de.ipbhalle.metfrag.spectrum.PeakMolPair;
 import de.ipbhalle.metfrag.spectrum.WrapperSpectrum;
-import de.ipbhalle.metfrag.tools.DisplayStructure;
 import de.ipbhalle.metfrag.tools.PreprocessSpectraLive;
-import de.ipbhalle.metfrag.tools.Render;
-import de.ipbhalle.metfrag.tools.WritePDFTable;
+import de.ipbhalle.metfrag.tools.renderer.StructureRendererTable;
+import de.ipbhalle.metfrag.tools.renderer.StructureToFile;
 
 
 
@@ -184,10 +183,10 @@ public class MainMetFrag {
 	        
 	        if(createTree)
 			{
-				DisplayStructure ds = new DisplayStructure(true, 200, 200, 0.9, true, "png", folder + spectrum.getFilename() + "/pdf_" + dateFormat.format(date));
-				ds.drawStructure(molecule,0);
+				StructureToFile ds = new StructureToFile(200, 200, folder + spectrum.getFilename() + "/pdf_" + dateFormat.format(date), true, true);
+				ds.writeMOL2PNGFile(molecule, 0 + "");
 		        for (int i = 0; i < l.size(); i++) {
-		        	ds.drawStructure(l.get(i), i+1);
+		        	ds.writeMOL2PNGFile(l.get(i), (i+1) + "");
 				}
 		        //create graph from fragments
 		        File out = new File(folder + spectrum.getFilename() + "/pdf_" + dateFormat.format(date) + "/" + file + ".ps");
@@ -222,24 +221,24 @@ public class MainMetFrag {
 	        //Draw molecule and its fragments
 	        if (showDiagrams)
 	        	//Render.Draw(AtomContainerManipulator.removeHydrogens(molecule), ListManipulator.removeHydrogensInList(l) , "Original Molecule"); 
-	        	Render.Draw(molecule, l , "Original Molecule"); 
+	        	StructureRendererTable.Draw(molecule, l , "Original Molecule"); 
 	        
-	        if(pdf)
-	        {
-		        //Create PDF Output
-		        l.add(0,molecule);
-	        	DisplayStructure ds1 = null;
-	        	//create pdf subfolder
-	        	new File(folder + spectrum.getFilename() + "/pdf_" + dateFormat.format(date)).mkdir();
-	        	ds1 = new WritePDFTable(true, 200, 200, 0.9, 4, false, true, folder + spectrum.getFilename() + "/pdf_" + dateFormat.format(date));
-	        	for (int i = 0; i < l.size(); i++) {
-	                //DisplayStructure(false, 200, 200, 0.9, false, "PDF", "/home/swolf/workspaceFsNEW/FragSearch/");
-	                assert ds1 != null;
-	                ds1.drawStructure(l.get(i), i);
-	    		}
-		        
-		        if (ds1 != null) ds1.close();
-	        }
+//	        if(pdf)
+//	        {
+//		        //Create PDF Output
+//		        l.add(0,molecule);
+//	        	DisplayStructure ds1 = null;
+//	        	//create pdf subfolder
+//	        	new File(folder + spectrum.getFilename() + "/pdf_" + dateFormat.format(date)).mkdir();
+//	        	ds1 = new WritePDFTable(true, 200, 200, 0.9, 4, false, true, folder + spectrum.getFilename() + "/pdf_" + dateFormat.format(date));
+//	        	for (int i = 0; i < l.size(); i++) {
+//	                //DisplayStructure(false, 200, 200, 0.9, false, "PDF", "/home/swolf/workspaceFsNEW/FragSearch/");
+//	                assert ds1 != null;
+//	                ds1.drawStructure(l.get(i), i);
+//	    		}
+//		        
+//		        if (ds1 != null) ds1.close();
+//	        }
 			
 	        //now try to assign the peaks to the fragments
 	        peakToStructure(folder, spectrum, spectrum.getFilename(), spectrum.getExactMass(), mzabs, mzppm, molecule, molFile);
@@ -326,7 +325,7 @@ public class MainMetFrag {
 			}
 			System.out.println(hitsAll.size());
 			if (showDiagrams)
-				Render.DrawHits(molecule, hitsAll , "Fragmente von:");
+				StructureRendererTable.DrawHits(molecule, hitsAll , "Fragmente von:");
 			
 			
 			//add to done mols

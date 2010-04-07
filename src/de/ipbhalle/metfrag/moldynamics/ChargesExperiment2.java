@@ -23,7 +23,6 @@ import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 import org.openscience.cdk.tools.manipulator.ChemFileManipulator;
 
 import de.ipbhalle.metfrag.bondPrediction.Charges;
-import de.ipbhalle.metfrag.tools.Render;
 
 public class ChargesExperiment2 {
 	

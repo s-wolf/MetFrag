@@ -120,8 +120,7 @@ public class ModifyHillMassBankFiles {
 			        AtomContainerManipulator.convertImplicitToExplicitHydrogens(molecule);
 			        
 			      	//generate inchi
-				  	InChIGeneratorFactory factory = new InChIGeneratorFactory();
-			        InChIGenerator gen = factory.getInChIGenerator(molecule);
+			        InChIGenerator gen = InChIGeneratorFactory.getInstance().getInChIGenerator(molecule);
 			        String inchi = gen.getInchi();
 			        
 				  	out.write("CH$IUPAC: " + inchi);

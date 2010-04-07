@@ -53,7 +53,6 @@ import de.ipbhalle.metfrag.main.Config;
 import de.ipbhalle.metfrag.massbankParser.Peak;
 import de.ipbhalle.metfrag.tools.MolecularFormulaTools;
 import de.ipbhalle.metfrag.tools.Number;
-import de.ipbhalle.metfrag.tools.Render;
 
 public class KEGGToDatabase {
 	
@@ -106,8 +105,7 @@ public class KEGGToDatabase {
 			int chonsp = Tools.checkCHONSP(formulaStringOrig);
 			
 			
-			InChIGeneratorFactory factory = new InChIGeneratorFactory();
-	        InChIGenerator gen = factory.getInChIGenerator(molRead);
+	        InChIGenerator gen = InChIGeneratorFactory.getInstance().getInChIGenerator(molRead);
 	        String iupac = gen.getInchi();
 			
 			

@@ -60,7 +60,7 @@ import de.ipbhalle.metfrag.main.Config;
 import de.ipbhalle.metfrag.massbankParser.Peak;
 import de.ipbhalle.metfrag.tools.MolecularFormulaTools;
 import de.ipbhalle.metfrag.tools.Number;
-import de.ipbhalle.metfrag.tools.Render;
+import de.ipbhalle.metfrag.tools.renderer.StructureRenderer;
 
 public class KeggPreprocess {
 	
@@ -128,12 +128,12 @@ public class KeggPreprocess {
 				SmilesParser sp = new SmilesParser(DefaultChemObjectBuilder.getInstance());
 				try {
 					IAtomContainer molecule = sp.parseSmiles(smilesFrag);
-					Render.Draw(molecule, "read in smiles");
+					new StructureRenderer(molecule, "read in smiles");
 				}
 				catch (Exception e) {
 					e.printStackTrace();
 				}
-		        Render.Draw(fragment, "test");
+		        new StructureRenderer(fragment, "test");
 		        peaksMap.put(mass, " 10000.000 999\n");
 		        
 			}
@@ -161,8 +161,7 @@ public class KeggPreprocess {
 			String formulaStringOrig = MolecularFormulaManipulator.getString(formulaOrig);
 			Double mass = MolecularFormulaTools.getMonoisotopicMass(formulaOrig);
 			
-			InChIGeneratorFactory factory = new InChIGeneratorFactory();
-	        InChIGenerator gen = factory.getInChIGenerator(molRead);
+	        InChIGenerator gen = InChIGeneratorFactory.getInstance().getInChIGenerator(molRead);
 	        String iupac = gen.getInchi();
 			
 			

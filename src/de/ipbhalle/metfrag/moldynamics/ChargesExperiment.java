@@ -40,7 +40,7 @@ import org.openscience.cdk.tools.manipulator.ChemFileManipulator;
 
 import com.lowagie.text.pdf.hyphenation.TernaryTree.Iterator;
 
-import de.ipbhalle.metfrag.tools.Render;
+import de.ipbhalle.metfrag.tools.renderer.StructureRenderer;
 
 public class ChargesExperiment {
 
@@ -119,7 +119,7 @@ public class ChargesExperiment {
 					e.printStackTrace();
 				}
 		        	    
-				Render.Draw(cpd, "Compound");
+				new StructureRenderer(cpd, "Compound");
 		        
 		        for (IBond bond : cpd.bonds()) {
 		        	IAtom atom1 = null;
