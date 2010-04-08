@@ -7,7 +7,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
@@ -35,16 +37,18 @@ public class Scoring {
 	private Map<Double, NeutralLoss> neutralLoss= null;
 	private double sumIntensities = 0;
 	double scoreBondEnergy = 0.0;
+	double scoreChargesDiff = 0.0;
 	private double penalty = 0.0;
-	private double partialChargeDiff = 0.0;
 	private HashMap<Double, Integer> peakToRank;
+	private List<OptimizationMatrixEntry> optimizationMatrixEntries;
+	private String candidateID;
 	
 	/**
 	 * Instantiates a new scoring.
 	 * 
 	 * @param peakList the intensities
 	 */
-	public Scoring(Vector<Peak> peakList)
+	public Scoring(Vector<Peak> peakList, String candidateID)
 	{
 		this.mzToIntensity = new HashMap<Double, Double>();
 		this.peakToRank = new HashMap<Double, Integer>();
@@ -56,6 +60,9 @@ public class Scoring {
 			this.peakToRank.put(peakList.get(i).getMass(), i+1);
 			this.sumIntensities += peakList.get(i).getRelIntensity();
 		}
+		
+		this.optimizationMatrixEntries = new ArrayList<OptimizationMatrixEntry>();
+		this.candidateID = candidateID;
 	}	
 	
 	/**
@@ -97,12 +104,26 @@ public class Scoring {
 			//Scoring like in Massbank paper m=0.6, n=3
 			//W = [Peak intensity]^m * [Mass]^n
 			score += Math.pow(this.mzToIntensity.get(hits.get(i).getPeak().getMass()), 0.6) * Math.pow(hits.get(i).getPeak().getMass(),3);
-			scoreBondEnergy += Double.parseDouble((String)hits.get(i).getFragment().getProperty("BondEnergy"));
+			
+			String bondEnergies = (String)hits.get(i).getFragment().getProperty("BondEnergy");
+			String[] bondEnergyArray = bondEnergies.split(";");
+			for (int j = 0; j < bondEnergyArray.length; j++) {
+				scoreBondEnergy += Double.parseDouble(bondEnergyArray[i]);
+			}
+			
+			String partialCharges = hits.get(i).getPartialChargeDiff();
+			String[] partialChargeArray = partialCharges.split(";");
+			for (int j = 0; j < partialChargeArray.length; j++) {
+				scoreChargesDiff += Double.parseDouble(partialChargeArray[j]);
+			}
+			
 			penalty += hits.get(i).getHydrogenPenalty(); 
-			partialChargeDiff += hits.get(i).getPartialChargeDiff();
+			
+			//add new entry to optimization matrix
+			this.optimizationMatrixEntries.add(new OptimizationMatrixEntry(candidateID, hits.get(i).getPeak().getMass(), hits.get(i).getPeak().getIntensity(), (String)hits.get(i).getFragment().getProperty("BondEnergy"), hits.get(i).getHydrogenPenalty(), hits.get(i).getPartialChargeDiff()));
+			
 		}
-		//todo optimize parameter
-		penalty = penalty / 10;
+
 		return score;
 	}
 	
@@ -114,16 +135,6 @@ public class Scoring {
 	public double getFragmentBondEnergy()
 	{
 		return this.scoreBondEnergy;
-	}
-	
-	/**
-	 * Gets the partial charge Diff.
-	 * 
-	 * @return the partial charge diff
-	 */
-	public double getPartialChargeDiff()
-	{
-		return this.partialChargeDiff;
 	}
 	
 	
@@ -217,7 +228,22 @@ public class Scoring {
 		
 		return ret;
 	}
+	
+	/**
+	 * Gets the optimization matrix entries.
+	 * 
+	 * @return the optimization matrix entries
+	 */
+	public List<OptimizationMatrixEntry> getOptimizationMatrixEntries()
+	{
+		return this.optimizationMatrixEntries;
+	}
 
+	
+	public double getPartialChargesDiff()
+	{
+		return this.scoreChargesDiff;
+	}
 
 
 	public void setPenalty(double penalty) {

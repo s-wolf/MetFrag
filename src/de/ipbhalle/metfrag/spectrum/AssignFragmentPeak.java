@@ -31,8 +31,8 @@ public class AssignFragmentPeak {
 	private Double matchedMass = 0.0;
 	private String molecularFormula = "";
 	private boolean html = false;
-	private double hydrogenPenalty = 0.0;
-	private double partialChargeDiff = 0.0;
+	private int hydrogenPenalty = 0;
+	private String partialChargeDiff;
 	
 	
 	public AssignFragmentPeak()
@@ -118,7 +118,7 @@ public class AssignFragmentPeak {
         	mass = MolecularFormulaTools.getMonoisotopicMass(molecularFormula);
         
         
-        this.partialChargeDiff = Double.parseDouble((String)ac.getProperty("PartialChargeDiff"));
+        this.partialChargeDiff = (String)ac.getProperty("PartialChargeDiff");
         
         
         double peakLow = peak - this.mzabs - PPMTool.getPPMDeviation(peak, this.mzppm);
@@ -159,7 +159,7 @@ public class AssignFragmentPeak {
         			{
         				
         				//now add a bond energy equivalent to a H-C bond
-        				this.hydrogenPenalty = 1000;
+        				this.hydrogenPenalty = 1;
         				
         				
         				found = true;
@@ -184,7 +184,7 @@ public class AssignFragmentPeak {
         				matchedMass = Math.round((massToCompare-hMass)*10000.0)/10000.0;
         				
         				//now add a bond energy equivalent to a H-C bond
-        				this.hydrogenPenalty = (i * 1000) + 1000;
+        				this.hydrogenPenalty = (i +1);
         				
         				if(this.html)
         	        		this.molecularFormula = MolecularFormulaManipulator.getHTML(molecularFormula) + "-" + (i + 1) + "H" + neutralLoss;
@@ -199,7 +199,7 @@ public class AssignFragmentPeak {
         				found = true;
         				matchedMass = Math.round((massToCompare+hMass)*10000.0)/10000.0;
         				//now add a bond energy equivalent to a H-C bond
-        				this.hydrogenPenalty = (i * 1000) + 1000;
+        				this.hydrogenPenalty = (i +1);
         				
         				
         				if(this.html)

@@ -172,10 +172,6 @@ public static void main(String[] args) {
 					System.err.println("Not implemented with hierarchical option");
 					System.exit(0);
 				}
-				else
-				{
-					test.MassbankProofOfConcept(c.getFolder(), spectrum, spectrum.getFilename(), c.getMzabs(), c.getMzppm(), c.isPdf(), c.isShowDiagrams(), c.isBreakAromaticRings(), c.isCreateTree(), c.isSumFormulaRedundancyCheck());
-				}
 			}
 			end = System.currentTimeMillis() - start;
 			

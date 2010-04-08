@@ -178,7 +178,7 @@ public class PubChemFragmentationParallelThread implements Runnable{
 					
 					
 					//now "real" scoring --> depends on intensities
-					Scoring score = new Scoring(spectrum.getPeakList());
+					Scoring score = new Scoring(spectrum.getPeakList(), candidate);
 					double currentScore = 0.0;
 					if(this.bondEnergyScoring)
 						currentScore = score.computeScoringWithBondEnergies(hits);
@@ -189,16 +189,19 @@ public class PubChemFragmentationParallelThread implements Runnable{
 		
 					if(currentBondEnergy > 0)
 						currentBondEnergy = currentBondEnergy / afp.getHits().size();
+					
 					//set the added up energy of every fragment
 					Map<String, Double> mapCandidateToEnergy = PubChemSearchParallel.getCandidateToEnergy();
 					mapCandidateToEnergy.put(candidate, currentBondEnergy);
 					PubChemSearchParallel.setCandidateToEnergy(mapCandidateToEnergy);
+					
 					Map<String, Double> mapCandidateToHydrogenPenalty = PubChemSearchParallel.getCandidateToHydrogenPenalty();
 					mapCandidateToHydrogenPenalty.put(candidate, score.getPenalty());
 					PubChemSearchParallel.setCandidateToHydrogenPenalty(mapCandidateToHydrogenPenalty);
+					
 					Map<String, Double> mapCandidateToPartialChargesDiff = PubChemSearchParallel.getCandidateToPartialChargesDiff();
-					mapCandidateToHydrogenPenalty.put(candidate, score.getPartialChargeDiff());
-					PubChemSearchParallel.setCandidateToHydrogenPenalty(mapCandidateToPartialChargesDiff);
+					mapCandidateToPartialChargesDiff.put(candidate, score.getPartialChargesDiff());
+					PubChemSearchParallel.setCandidateToPartialChargesDiff(mapCandidateToPartialChargesDiff);
 					
 					
 					

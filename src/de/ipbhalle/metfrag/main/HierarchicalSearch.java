@@ -427,7 +427,7 @@ public class HierarchicalSearch {
 			        //Render.Draw(molecule, foundHits, "Found Hits"); 
 					
 					//now "real" scoring
-					Scoring score = new Scoring(cleanedPeakList);
+					Scoring score = new Scoring(cleanedPeakList, candidate);
 					double currentScore = score.computeScoringPeakMolPair(afp.getHits());
 					combinedScore += currentScore; 
 					

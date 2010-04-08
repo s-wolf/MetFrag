@@ -292,7 +292,7 @@ public class MetFlowConvenience {
 			
 			
 			//now "real" scoring --> depends on intensities
-			Scoring score = new Scoring(spectrum.getPeakList());
+			Scoring score = new Scoring(spectrum.getPeakList(), candidateID);
 			double currentScore = score.computeScoringPeakMolPair(afp.getHits());
 			
 			//save score in hashmap...if there are several hits with the same score --> vector of strings

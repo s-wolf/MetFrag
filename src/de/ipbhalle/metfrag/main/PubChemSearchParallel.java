@@ -48,6 +48,7 @@ import de.ipbhalle.metfrag.molDatabase.PubChemLocal;
 import de.ipbhalle.metfrag.pubchem.ESearchDownload;
 import de.ipbhalle.metfrag.pubchem.PubChemWebService;
 import de.ipbhalle.metfrag.read.Molfile;
+import de.ipbhalle.metfrag.scoring.OptimizationMatrixEntry;
 import de.ipbhalle.metfrag.scoring.Scoring;
 import de.ipbhalle.metfrag.similarity.Similarity;
 import de.ipbhalle.metfrag.similarity.SimilarityGroup;
@@ -82,6 +83,8 @@ public class PubChemSearchParallel{
 		private static Map<String, Double> candidateToEnergy = new HashMap<String, Double>(); 
 		private static Map<String, Double> candidateToHydrogenPenalty = new HashMap<String, Double>();
 		private static Map<String, Double> candidateToPartialChargesDiff = new HashMap<String, Double>();
+		
+		private static Map<String, List<OptimizationMatrixEntry>> candidateToOptimizationMatrixEntries = new HashMap<String, List<OptimizationMatrixEntry>>();
 		
 		private boolean neutralLossAdd = false;
 		private static String similarityValues = "";
@@ -796,6 +799,17 @@ public class PubChemSearchParallel{
 		 */
 		public static void setCandidateToEnergy(Map<String, Double> map) {
 			candidateToEnergy = map;
+		}
+		
+		/**
+		 * Adds the optimization matrix entries.
+		 * 
+		 * @param candidateID the candidate id
+		 * @param optimizationMatrixEntries the optimization matrix entries
+		 */
+		public static void addOptimizationMatrixEntry(String candidateID, List<OptimizationMatrixEntry> optimizationMatrixEntries)
+		{
+			candidateToOptimizationMatrixEntries.put(candidateID, optimizationMatrixEntries);
 		}
 
 

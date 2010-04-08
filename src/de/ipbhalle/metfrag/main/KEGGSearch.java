@@ -440,7 +440,7 @@ public class KEGGSearch {
 				afp.assignFragmentPeak(fragments, cleanedPeakList, mzabs, mzppm, spectrum.getMode(), false);
 				Vector<PeakMolPair> hits = afp.getHits();
 				
-				Scoring score = new Scoring(spectrum.getPeakList());
+				Scoring score = new Scoring(spectrum.getPeakList(), keggIdentifier);
 				
 				double currentScore = 0.0;
 				if(bondEnergyScoring)

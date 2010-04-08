@@ -15,8 +15,8 @@ public class PeakMolPair {
 	private Peak peak;
 	private double matchedMass;
 	private String molecularFormula;
-	private double hydrogenPenalty = 0.0;
-	private double partialChargeDiff = 0.0;
+	private int hydrogenPenalty = 0;
+	private String partialChargeDiff;
 	
 	
 	/**
@@ -25,7 +25,7 @@ public class PeakMolPair {
 	 * @param ac the ac
 	 * @param peak the peak
 	 */
-	public PeakMolPair(IAtomContainer ac, Peak peak, double matchedMass, String molecularFormula, double score, double partialChargeDiff)
+	public PeakMolPair(IAtomContainer ac, Peak peak, double matchedMass, String molecularFormula, int score, String partialChargeDiff)
 	{
 		this.ac = ac;
 		this.peak = peak;
@@ -96,7 +96,7 @@ public class PeakMolPair {
 	 * 
 	 * @param score the new score
 	 */
-	public void setHydrogenPenalty(double penalty) {
+	public void setHydrogenPenalty(int penalty) {
 		this.hydrogenPenalty = penalty;
 	}
 
@@ -105,7 +105,7 @@ public class PeakMolPair {
 	 * 
 	 * @return the score
 	 */
-	public double getHydrogenPenalty() {
+	public int getHydrogenPenalty() {
 		return hydrogenPenalty;
 	}
 
@@ -114,7 +114,7 @@ public class PeakMolPair {
 	 * 
 	 * @param partialChargeDiff the new partial charge diff
 	 */
-	public void setPartialChargeDiff(double partialChargeDiff) {
+	public void setPartialChargeDiff(String partialChargeDiff) {
 		this.partialChargeDiff = partialChargeDiff;
 	}
 
@@ -123,7 +123,7 @@ public class PeakMolPair {
 	 * 
 	 * @return the partial charge diff
 	 */
-	public double getPartialChargeDiff() {
+	public String getPartialChargeDiff() {
 		return partialChargeDiff;
 	}
 
