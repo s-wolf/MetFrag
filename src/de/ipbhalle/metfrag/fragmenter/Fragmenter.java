@@ -55,8 +55,8 @@ import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 
 import de.ipbhalle.metfrag.bondPrediction.Charges;
 import de.ipbhalle.metfrag.graphviz.GraphViz;
-import de.ipbhalle.metfrag.main.AssignFragmentPeak;
 import de.ipbhalle.metfrag.massbankParser.Peak;
+import de.ipbhalle.metfrag.spectrum.AssignFragmentPeak;
 import de.ipbhalle.metfrag.tools.MolecularFormulaTools;
 import de.ipbhalle.metfrag.tools.MoleculeTools;
 import de.ipbhalle.metfrag.tools.Number;
@@ -479,6 +479,9 @@ public class Fragmenter {
     	List<File> fragmentsReturn = new ArrayList<File>();
     	int tempLevelCount = 0;
     	
+    	//now set a new min weight
+    	this.minWeight = this.minWeight - (double)treeDepthMax;
+    	
 
     	//counting vars for the tree build
     	int parent = 0;
@@ -623,6 +626,8 @@ public class Fragmenter {
     	List<IAtomContainer> fragmentsReturn = new ArrayList<IAtomContainer>();
     	int tempLevelCount = 0;
     	
+    	//now set a new min weight
+    	this.minWeight = this.minWeight - (double)treeDepthMax;
 
     	//counting vars for the tree build
     	int parent = 0;

@@ -28,6 +28,7 @@ import de.ipbhalle.metfrag.fragmenter.Fragmenter;
 import de.ipbhalle.metfrag.keggWebservice.KeggWebservice;
 import de.ipbhalle.metfrag.massbankParser.Peak;
 import de.ipbhalle.metfrag.scoring.Scoring;
+import de.ipbhalle.metfrag.spectrum.AssignFragmentPeak;
 import de.ipbhalle.metfrag.spectrum.CleanUpPeakList;
 import de.ipbhalle.metfrag.spectrum.WrapperSpectrum;
 import de.ipbhalle.metfrag.tools.DisplayStructure;
@@ -413,7 +414,7 @@ public class HierarchicalSearch {
 					//now find corresponding fragments to the mass
 					AssignFragmentPeak afp = new AssignFragmentPeak();
 					afp.setHydrogenTest(hydrogenTest);
-					afp.AssignFragmentPeak(fragments, cleanedPeakList, mzabs, mzppm, spectrum.getMode(), false);					Vector<PeakMolPair> hits = afp.getHits();
+					afp.assignFragmentPeak(fragments, cleanedPeakList, mzabs, mzppm, spectrum.getMode(), false);					Vector<PeakMolPair> hits = afp.getHits();
 					Vector<PeakMolPair> hitsAll = afp.getAllHits();
 					
 					//add them to the list of already found fragments....they were found in the previous run 

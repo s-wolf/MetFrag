@@ -26,10 +26,10 @@ import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 
 import de.ipbhalle.metfrag.fragmenter.Fragmenter;
 import de.ipbhalle.metfrag.keggWebservice.KeggWebservice;
-import de.ipbhalle.metfrag.main.AssignFragmentPeak;
 import de.ipbhalle.metfrag.main.PeakMolPair;
 import de.ipbhalle.metfrag.massbankParser.Peak;
 import de.ipbhalle.metfrag.read.Molfile;
+import de.ipbhalle.metfrag.spectrum.AssignFragmentPeak;
 import de.ipbhalle.metfrag.spectrum.CleanUpPeakList;
 import de.ipbhalle.metfrag.spectrum.WrapperSpectrum;
 import de.ipbhalle.metfrag.tools.MolecularFormulaTools;
@@ -132,7 +132,7 @@ public class FragmenterEfficientTest {
 		AssignFragmentPeak afp = new AssignFragmentPeak();
 		afp.setHydrogenTest(false);
 		try {
-			afp.AssignFragmentPeak(l, cleanedPeakList, mzabs, mzppm, spectrum.getMode(), false);
+			afp.assignFragmentPeak(l, cleanedPeakList, mzabs, mzppm, spectrum.getMode(), false);
 		} catch (CDKException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -175,7 +175,7 @@ public class FragmenterEfficientTest {
 		AssignFragmentPeak afp = new AssignFragmentPeak();
 		afp.setHydrogenTest(true);
 		try {
-			afp.AssignFragmentPeak(l, cleanedPeakList, mzabs, mzppm, spectrum.getMode(), false);
+			afp.assignFragmentPeak(l, cleanedPeakList, mzabs, mzppm, spectrum.getMode(), false);
 		} catch (CDKException e) {
 			e.printStackTrace();
 		} catch (IOException e) {

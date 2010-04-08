@@ -27,6 +27,7 @@ import de.ipbhalle.metfrag.fragmenter.Fragmenter;
 import de.ipbhalle.metfrag.fragmenter.NeutralLoss;
 import de.ipbhalle.metfrag.massbankParser.Peak;
 import de.ipbhalle.metfrag.pubchem.PubChemWebService;
+import de.ipbhalle.metfrag.spectrum.AssignFragmentPeak;
 import de.ipbhalle.metfrag.spectrum.CleanUpPeakList;
 import de.ipbhalle.metfrag.spectrum.WrapperSpectrum;
 
@@ -192,7 +193,7 @@ public class MM48ReverseLookup {
     	    		  //now find corresponding fragments to the mass
     	    		  AssignFragmentPeak afp = new AssignFragmentPeak();
     	    		  afp.setHydrogenTest(true);
-    	    		  afp.AssignFragmentPeak(fragments, cleanedPeakList, mzabs, mzppm, spectrum.getMode(), true);
+    	    		  afp.assignFragmentPeak(fragments, cleanedPeakList, mzabs, mzppm, spectrum.getMode(), true);
     	    		  Vector<PeakMolPair> hits = afp.getHits();
     	    		  
     	    		  //add to result map

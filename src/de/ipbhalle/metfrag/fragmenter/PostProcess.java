@@ -41,7 +41,7 @@ import org.openscience.cdk.interfaces.IRingSet;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 
-import de.ipbhalle.metfrag.main.AssignFragmentPeak;
+import de.ipbhalle.metfrag.spectrum.AssignFragmentPeak;
 import de.ipbhalle.metfrag.tools.Render;
 
 public class PostProcess {
@@ -374,15 +374,17 @@ public class PostProcess {
     		//TODO add hydrogen somewhere
     		if(addHydrogen)
     		{
-    			
+    			Map<Object, Object> props = fragCopy.getProperties();
+    			props.put("hydrogenAddFromNL", "1");
+    			fragCopy.setProperties(props);
     		}
     			
     		//add fragment to return if enough H were connected and fragment is still connected
     		if(hydrogenStartAtom <= 0)
     		{
     			ret.add(fragCopy);
-		    	Render.Draw(frag, "BEFORE");
-		    	Render.Draw(fragCopy, "AFTER");
+//		    	Render.Draw(frag, "BEFORE");
+//		    	Render.Draw(fragCopy, "AFTER");
 //		    	IMoleculeSet set = ConnectivityChecker.partitionIntoMolecules(fragCopy);
 //		    	for (IAtomContainer mol : set.molecules()) {
 //					Render.Draw(mol, "partitions");

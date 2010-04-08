@@ -43,6 +43,7 @@ import org.openscience.cdk.smiles.SmilesGenerator;
 import org.openscience.cdk.smiles.SmilesParser;
 import org.openscience.cdk.tools.manipulator.ChemFileManipulator;
 import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
+import org.xml.sax.SAXParseException;
 
 import gov.nih.nlm.ncbi.pubchem.CompressType;
 import gov.nih.nlm.ncbi.pubchem.EntrezKey;
@@ -183,8 +184,19 @@ public class PubChemWebService {
 			System.out.println("Waiting for query to finish...");
 			Thread.sleep(10000);
 		}
+		
+		int[] cids = null;
 		//get cids
-		int[] cids = pug_soap.getIDList(listKey);
+		try
+		{
+			cids = pug_soap.getIDList(listKey);
+		}
+		catch(RemoteException e)
+		{
+			System.err.println("Error: No hit!?" + e.getMessage());
+			return candidatesString;
+		}
+		
 		String listkey = pug_soap.inputList(cids, PCIDType.eID_CID);
 		String downloadKey = pug_soap.download(listkey, FormatType.eFormat_SDF,
 				CompressType.eCompress_None, false);

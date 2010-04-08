@@ -84,8 +84,8 @@ public class PUGTest {
 		
 		MFSearchOptions mf_options = new MFSearchOptions();
 		mf_options.setAllowOtherElements(false);
-		String listKey = pug_soap.MFSearch("C15H12O5", mf_options, null);
-		System.out.println("MFSearch C15H12O5 " + listKey);
+		String listKey = pug_soap.MFSearch("C19H26O14", mf_options, null);
+		System.out.println("MFSearch C19H26O14 " + listKey);
 		
 		
 		StatusType status;
@@ -116,7 +116,7 @@ public class PUGTest {
 		while ((status = pug_soap.getOperationStatus(downloadKey)) == StatusType.eStatus_Running
 				|| status == StatusType.eStatus_Queued) {
 			System.out.println("Waiting for download to finish...");
-			Thread.sleep(1000);
+			Thread.sleep(10000);
 		}
 		
 		// On success, get the download URL, save to local file
@@ -277,13 +277,13 @@ public class PUGTest {
 
 	}
 
-	public static void main(String[] args) {
-		try {
-			testDownload();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//	public static void main(String[] args) {
+//		try {
+//			testDownload();
+//		} catch (Exception e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 		
 //		try {
 //			PUGLocator locator = new PUGLocator();
@@ -332,6 +332,50 @@ public class PUGTest {
 //		} catch (ServiceException e) {
 //			e.printStackTrace();
 //		}
-	}
+//	}
+	
+	public static void main (String[] argv) throws Exception {
+        
+		PUGLocator locator = new PUGLocator();
+		PUGSoap soap = locator.getPUGSoap();
+
+	        // Initialize MF search
+		String listKey = soap.MFSearch(
+	                "C19H26O14",                         // formula
+	                new MFSearchOptions(false, null), // don't allow other elements
+	                null);                            // no limits
+		System.out.println("ListKey = " + listKey);
+	        
+	        // Wait for the search to finish
+		StatusType status;
+		while ((status = soap.getOperationStatus(listKey)) 
+	                    == StatusType.eStatus_Running || 
+	               status == StatusType.eStatus_Queued) 
+	        {
+	            System.out.println("Waiting for search to finish...");
+		    Thread.sleep(10000);
+		}
+	        
+	        // On success, get the results as an Entrez URL
+	        if (status == StatusType.eStatus_Success ||
+	            status == StatusType.eStatus_TimeLimit ||
+	            status == StatusType.eStatus_HitLimit) 
+	        {
+	            if (status == StatusType.eStatus_TimeLimit) {
+	                System.out.println(
+	                    "Warning: time limit reached before entire db searched");
+	            } else if (status == StatusType.eStatus_HitLimit) {
+	                System.out.println(
+	                    "Warning: hit limit reached before entire db searched");
+	            }
+	            EntrezKey entrezKey = soap.getEntrezKey(listKey);
+	            String URL = soap.getEntrezUrl(entrezKey);
+	            System.out.println("Success! Entrez URL = " + URL);
+	        } else {
+	            System.out.println("Error: " 
+	                + soap.getStatusMessage(listKey));            
+	        }
+	    }
+
 
 }

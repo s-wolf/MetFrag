@@ -126,14 +126,44 @@ public class WrapperSpectrum {
 				}
 			}
 			
-			//no absolute intensity is given
+			//no rel intensity is given
 			if(count == 2)
-				parsedPeaks.add(new Peak(Double.parseDouble(arrayClean[0]), 0.0, Double.parseDouble(arrayClean[1]), collisionEnergy));
+			{
+				parsedPeaks.add(new Peak(Double.parseDouble(arrayClean[0]), Double.parseDouble(arrayClean[1]), 0.0, collisionEnergy));
+			}
 			//rel intensity is given
 			else if(count == 3)
+			{
 				parsedPeaks.add(new Peak(Double.parseDouble(arrayClean[0]), Double.parseDouble(arrayClean[1]), Double.parseDouble(arrayClean[2]), collisionEnergy));
+			}
 		}
+		
+		parsedPeaks = calcRelIntensity(parsedPeaks);
+		
 		return parsedPeaks;
+	}
+	
+	
+	
+	/**
+	 * Calc rel intensity.
+	 * 
+	 * @param peakList the peak list
+	 */
+	private Vector<Peak> calcRelIntensity(Vector<Peak> peakList)
+	{
+		double maxAbsInt = 0.0;
+		for (Peak peak : peakList) {
+			if(peak.getIntensity() > maxAbsInt)
+				maxAbsInt = peak.getIntensity();
+		}
+		
+		//calculate the rel. intensity
+		for (Peak peak : peakList) {
+			peak.setRelIntensity(Math.round(((peak.getIntensity() / maxAbsInt) * 999)));
+		}
+		
+		return peakList;
 	}
 	
 	
