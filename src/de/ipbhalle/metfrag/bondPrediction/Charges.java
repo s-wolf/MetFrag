@@ -184,7 +184,7 @@ public class Charges {
 		}
 		
 		for (IBond bond : molArray[0].bonds()) {
-			System.out.println(bond.getID() + " " + bond.getAtom(0).getSymbol() + "-" + bond.getAtom(1).getSymbol() + " " + bondToBondLength.get(bond.getID()));
+//			System.out.println(bond.getID() + " " + bond.getAtom(0).getSymbol() + "-" + bond.getAtom(1).getSymbol() + " " + bondToBondLength.get(bond.getID()));
 			
 			//if it is C-C check for double or triple bond order
 			if(!isCandidateBond(bond))
@@ -194,9 +194,9 @@ public class Charges {
 				bondsToBreak.add(bond.getID());				
 		}
 		
-		for (String bondID : bondsToBreak) {
-			System.out.println(bondID);
-		}
+//		for (String bondID : bondsToBreak) {
+//			System.out.println(bondID);
+//		}
 
 		return bondsToBreak;
             
