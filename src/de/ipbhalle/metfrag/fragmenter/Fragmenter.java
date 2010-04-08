@@ -1384,7 +1384,7 @@ public class Fragmenter {
      * 
      * @return the combined bond energy
      */
-    private Double getCombinedBondEnergy(String bondEnergyString)
+    public static Double getCombinedBondEnergy(String bondEnergyString)
     {
     	double bondEnergy = 0.0;
     	

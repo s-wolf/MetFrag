@@ -17,6 +17,7 @@ import org.openscience.cdk.formula.MolecularFormula;
 import org.openscience.cdk.interfaces.IMolecularFormula;
 import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 
+import de.ipbhalle.metfrag.fragmenter.Fragmenter;
 import de.ipbhalle.metfrag.fragmenter.NeutralLoss;
 import de.ipbhalle.metfrag.massbankParser.Peak;
 import de.ipbhalle.metfrag.spectrum.PeakMolPair;
@@ -106,10 +107,8 @@ public class Scoring {
 			score += Math.pow(this.mzToIntensity.get(hits.get(i).getPeak().getMass()), 0.6) * Math.pow(hits.get(i).getPeak().getMass(),3);
 			
 			String bondEnergies = (String)hits.get(i).getFragment().getProperty("BondEnergy");
-			String[] bondEnergyArray = bondEnergies.split(";");
-			for (int j = 0; j < bondEnergyArray.length; j++) {
-				scoreBondEnergy += Double.parseDouble(bondEnergyArray[i]);
-			}
+			scoreBondEnergy = Fragmenter.getCombinedBondEnergy(bondEnergies);
+			
 			
 			String partialCharges = hits.get(i).getPartialChargeDiff();
 			String[] partialChargeArray = partialCharges.split(";");
