@@ -1355,9 +1355,9 @@ public class Fragmenter {
 	    		if(molecularFormulaRedundancyCheck || smilesRedundancyCheck)
 	    		{
 	    			//now replace fragment if its "bond energy is less"
-		    		double bondEnergy = getCombinedBondEnergy((String)fragment.getProperty("BondEnergy"));
+		    		double bondEnergy = getCombinedEnergy((String)fragment.getProperty("BondEnergy"));
 		    		for (IAtomContainer atomContainer : fragsToCompare) {
-						if(getCombinedBondEnergy((String)atomContainer.getProperty("BondEnergy")) > bondEnergy )
+						if(getCombinedEnergy((String)atomContainer.getProperty("BondEnergy")) > bondEnergy )
 						{
 							addFragmentToListMapReplace(fragment, currentSumFormula);
 						}
@@ -1380,15 +1380,15 @@ public class Fragmenter {
     /**
      * Gets the combined bond energy because the property stores every single energy in a list.
      * 
-     * @param bondEnergyString the bond energy string
+     * @param energyString the bond energy string
      * 
      * @return the combined bond energy
      */
-    public static Double getCombinedBondEnergy(String bondEnergyString)
+    public static Double getCombinedEnergy(String energyString)
     {
     	double bondEnergy = 0.0;
     	
-    	String[] arr1 = bondEnergyString.split(";");
+    	String[] arr1 = energyString.split(";");
     	for (int i = 0; i < arr1.length; i++) {
 			String[] arr2 = arr1[i].split(",");
 			for (int j = 0; j < arr2.length; j++) {

@@ -107,14 +107,11 @@ public class Scoring {
 			score += Math.pow(this.mzToIntensity.get(hits.get(i).getPeak().getMass()), 0.6) * Math.pow(hits.get(i).getPeak().getMass(),3);
 			
 			String bondEnergies = (String)hits.get(i).getFragment().getProperty("BondEnergy");
-			scoreBondEnergy = Fragmenter.getCombinedBondEnergy(bondEnergies);
+			scoreBondEnergy = Fragmenter.getCombinedEnergy(bondEnergies);
 			
 			
 			String partialCharges = hits.get(i).getPartialChargeDiff();
-			String[] partialChargeArray = partialCharges.split(";");
-			for (int j = 0; j < partialChargeArray.length; j++) {
-				scoreChargesDiff += Double.parseDouble(partialChargeArray[j]);
-			}
+			scoreChargesDiff = Fragmenter.getCombinedEnergy(partialCharges);
 			
 			penalty += (hits.get(i).getHydrogenPenalty() * 500);
 						
