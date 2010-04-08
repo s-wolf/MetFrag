@@ -247,7 +247,7 @@ public class PubChemFragmentationParallelThread implements Runnable{
 					
 					for (int i = 0; i < hits.size(); i++) {
 						
-						bondEnergy += Double.parseDouble((String)hits.get(i).getFragment().getProperty("BondEnergy"));
+						bondEnergy += Fragmenter.getCombinedEnergy((String)hits.get(i).getFragment().getProperty("BondEnergy"));
 						peaks += hits.get(i).getPeak().getMass() + "[" + hits.get(i).getFragment().getProperty("BondEnergy") + "]" +  " ";
 						//add to vector
 						Vector<Peak> temp = PubChemSearchParallel.getVectorOfPeaks();
