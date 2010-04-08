@@ -203,6 +203,8 @@ public class PubChemFragmentationParallelThread implements Runnable{
 					mapCandidateToPartialChargesDiff.put(candidate, score.getPartialChargesDiff());
 					PubChemSearchParallel.setCandidateToPartialChargesDiff(mapCandidateToPartialChargesDiff);
 					
+					//now add all the parameters to the map
+					PubChemSearchParallel.addOptimizationMatrixEntry(candidate, score.getOptimizationMatrixEntries());					
 					
 					
 					Map<Double, Vector<String>> realScoreMap = PubChemSearchParallel.getRealScoreMap();

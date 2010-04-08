@@ -117,8 +117,8 @@ public class Scoring {
 				scoreChargesDiff += Double.parseDouble(partialChargeArray[j]);
 			}
 			
-			penalty += hits.get(i).getHydrogenPenalty(); 
-			
+			penalty += (hits.get(i).getHydrogenPenalty() * 500);
+						
 			//add new entry to optimization matrix
 			this.optimizationMatrixEntries.add(new OptimizationMatrixEntry(candidateID, hits.get(i).getPeak().getMass(), hits.get(i).getPeak().getIntensity(), (String)hits.get(i).getFragment().getProperty("BondEnergy"), hits.get(i).getHydrogenPenalty(), hits.get(i).getPartialChargeDiff()));
 			

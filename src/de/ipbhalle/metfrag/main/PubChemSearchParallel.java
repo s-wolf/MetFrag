@@ -539,16 +539,15 @@ public class PubChemSearchParallel{
 			completeLog += scoreList;
 			completeLog += "\n*****************************************************\n\n";
 			//easy scoring end
-			
-			
-			//generate the parameter optimization matrix
-			parameterOptimizationMatrix = prepareParameterOptimizationMatrix(pubChemIdentifier, realScoreMap);
-			generateOptimizationMatrix(realScoreMap, candidateToEnergy, candidateToHydrogenPenalty);
-			
+						
 			
 			//real scoring
 			if(bondEnergyScoring)
 				realScoreMap = Scoring.getCombinedScore(realScoreMap, candidateToEnergy, candidateToHydrogenPenalty);
+			
+			//generate the parameter optimization matrix
+			parameterOptimizationMatrix = prepareParameterOptimizationMatrix(pubChemIdentifier);
+			generateOptimizationMatrix(candidateToOptimizationMatrixEntries);
 						
 			
 			Double[] keysScore = new Double[realScoreMap.keySet().size()];
@@ -697,101 +696,31 @@ public class PubChemSearchParallel{
 		 * 
 		 * @return the string
 		 */
-		private String prepareParameterOptimizationMatrix(String pubChemIdentifier, Map<Double, Vector<String>> realScoreMap)
+		private String prepareParameterOptimizationMatrix(String pubChemIdentifier)
 		{
 			String ret = "";
 			
 			ret += pubChemIdentifier + "\n\n";
-			ret += "candidate\tweightedPeak\tbondEnergy\thydrogenPenalty\tcharges\n";
+			ret += "candidate\tpeakMass\tpeakInt\tbondEnergy\thydrogenPenalty\tpCharges\n";
 			
 			return ret;
 		}
+				
 		
 		/**
 		 * Generate optimization matrix.
 		 * 
-		 * @param realScoreMap the real score map
-		 * @param mapCandidateToEnergy the map candidate to energy
-		 * @param mapCandidateToHydrogenPenalty the map candidate to hydrogen penalty
+		 * @param candidateToOptimizationMatrixEntries the candidate to optimization matrix entries
 		 */
-		private void generateOptimizationMatrix(Map<Double, Vector<String>> realScoreMap, Map<String, Double> mapCandidateToEnergy, Map<String, Double> mapCandidateToHydrogenPenalty)
+		private void generateOptimizationMatrix(Map<String, List<OptimizationMatrixEntry>> candidateToOptimizationMatrixEntries)
 		{
-			double maxScore = 0.0;
-			double maxBondEnergy = 0.0;
-			double maxHydrogenPenalty = 0.0;
-			
-			
-			for (Double score : realScoreMap.keySet()) {
-				if(score > maxScore)
-					maxScore = score;
-				
-				Vector<String> cands = realScoreMap.get(score);
-				for (String candidate : cands) {
-					double bondEnergy = mapCandidateToEnergy.get(candidate);
-					double hydrogenPenalty = 0;
-					try
-					{
-						hydrogenPenalty = mapCandidateToHydrogenPenalty.get(candidate);
-						
-					}
-					catch(NullPointerException e)
-					{
-						System.err.println("ERROR: Null Pointer exception in scoring! \n" + e.getMessage());
-					}
-					if(bondEnergy > maxBondEnergy)
-						maxBondEnergy = bondEnergy;
-					
-					if(hydrogenPenalty > maxHydrogenPenalty)
-						maxHydrogenPenalty = hydrogenPenalty; 
+			for (String candidate : candidateToOptimizationMatrixEntries.keySet()) {
+				for (OptimizationMatrixEntry entry : candidateToOptimizationMatrixEntries.get(candidate)) {
+					parameterOptimizationMatrix += candidate + "\t" + entry.getPeakMass() + "\t" + entry.getPeakInt() + "\t" + entry.getBondEnergyString() + "\t" + entry.getHydrogenPenalty() + "\t" + entry.getChargesDiffString() + "\n";
 				}
 			}
-			
-			
-			//now compute the final score....normalize the weighted peaks to 1 and the bond energy to 0.5 and finally add them up
-			//and add them together
-			for (Double score : realScoreMap.keySet()) {
-				double normalizedScore = Math.round((score / maxScore) * 1000) / 1000.0;
-				Vector<String> cands = realScoreMap.get(score);
-				for (String candidate : cands) {
-					
-					double normalizedBondEnergy = 0.0;
-					double normalizedHydrogenPenalty = 0.0;
-					double normalizedWeightedPeak = 0.0;
-					double partialChargeDiff = 0.0;
-					
-					double bondEnergy = mapCandidateToEnergy.get(candidate);
-					double hydrogenPenalty = 0;
-					try
-					{
-						hydrogenPenalty = mapCandidateToHydrogenPenalty.get(candidate);
-						partialChargeDiff = candidateToPartialChargesDiff.get(candidate);
-					}
-					catch(NullPointerException e)
-					{
-						System.err.println("ERROR: Null Pointer exception in scoring! Candidate: " + candidate + "\n\n\n" + e.getMessage());
-					}
-					
-					
-					//more than 1 peak explained
-					if(bondEnergy > 0)
-					{
-						//now normalize the bond energy and subtract it from 1
-						normalizedBondEnergy = Math.round((bondEnergy / maxBondEnergy) * 1000) / 1000.0;
-					}
-					
-					normalizedBondEnergy = Math.round((bondEnergy / maxBondEnergy) * 1000) / 1000.0;
-					normalizedHydrogenPenalty = Math.round((hydrogenPenalty / maxHydrogenPenalty) * 1000) / 1000.0;
-					normalizedWeightedPeak = normalizedScore;
-					
-					
-					parameterOptimizationMatrix += candidate + "\t" + normalizedWeightedPeak + "\t" + normalizedBondEnergy + "\t" + normalizedHydrogenPenalty + "\t" + partialChargeDiff +"\n";
-					
-				}
-				
-			}	
 		}
-
-
+		
 		/**
 		 * Sets the candidate to energy.
 		 * 

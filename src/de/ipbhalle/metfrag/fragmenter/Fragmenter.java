@@ -931,9 +931,9 @@ public class Fragmenter {
                         
                         //*********************************************************
                         
-                        //now set property
-                        temp = setBondEnergy(temp, (currentBondEnergyRing + currentBondEnergy));
-                        temp = setCharge(temp, bondPrediction.getBondLength(bondInRing.getID()));
+                        //now set property from both bonds
+                        temp = setBondEnergy(temp, currentBondEnergyRing, currentBondEnergy);
+                        temp = setCharge(temp, bondPrediction.getBondLength(bondInRing.getID()), bondPrediction.getBondLength(bond.getID()));
                         
                         
                         if(lonePairGeneration)
@@ -1093,6 +1093,21 @@ public class Fragmenter {
     }
     
     
+    
+    /**
+     * Sets the bond energy for bonds from a ring
+     * 
+     * @param mol the mol
+     * @param bondEnergy1 the bond energy1
+     * @param bondEnergy2 the bond energy2
+     * 
+     * @return the i atom container
+     */
+    private IAtomContainer setBondEnergy(IAtomContainer mol, Double bondEnergy1, Double bondEnergy2)
+    {
+    	return setBondEnergy(mol, bondEnergy1 + "," + bondEnergy2);
+    }
+    
     /**
      * Sets the bond energy.
      * 
@@ -1103,46 +1118,7 @@ public class Fragmenter {
      */
     private IAtomContainer setBondEnergy(IAtomContainer mol, Double bondEnergy)
     {
-    	
-    	Map<Object, Object> props = mol.getProperties();
-    	if(props.get("BondEnergy") != null)
-    	{
-    		Double sumEnergy = Double.parseDouble((String)props.get("BondEnergy")) + bondEnergy;
-    		props.put("BondEnergy", sumEnergy.toString());	
-    	}
-    	else
-    	{
-    		props.put("BondEnergy", bondEnergy.toString());
-    	}
-    	
-    	mol.setProperties(props);
-    	return mol;
-    }
-    
-    /**
-     * Sets the partial charge difference previously calculated using Gasteiger-Marsili.
-     * 
-     * @param mol the mol
-     * @param bondEnergy the bond energy
-     * 
-     * @return the i atom container
-     */
-    private IAtomContainer setCharge(IAtomContainer mol, Double partialChargeDiff)
-    {
-    	
-    	Map<Object, Object> props = mol.getProperties();
-    	if(props.get("PartialChargeDiff") != null)
-    	{
-    		Double sumPartialChargeDiff = Double.parseDouble((String)props.get("PartialChargeDiff")) + partialChargeDiff;
-    		props.put("PartialChargeDiff", sumPartialChargeDiff.toString());	
-    	}
-    	else
-    	{
-    		props.put("PartialChargeDiff", partialChargeDiff.toString());
-    	}
-    	
-    	mol.setProperties(props);
-    	return mol;
+    	return setBondEnergy(mol, bondEnergy.toString());
     }
     
     
@@ -1161,7 +1137,7 @@ public class Fragmenter {
     	String bondEnergyOrig = (String)origMol.getProperty("BondEnergy");
     	if(bondEnergyOrig != null)
     	{
-    		Double sumEnergy = Double.parseDouble(bondEnergyOrig) + bondEnergy;
+    		String sumEnergy = bondEnergyOrig + ";" + bondEnergy;
     		props.put("BondEnergy", sumEnergy.toString());	
     	}
     	else
@@ -1173,6 +1149,87 @@ public class Fragmenter {
     	return mol;
     }
     
+    
+    /**
+     * Sets the bond energy.
+     * 
+     * @param mol the mol
+     * @param bondEnergy the bond energy
+     * 
+     * @return the i atom container
+     */
+    private IAtomContainer setBondEnergy(IAtomContainer mol, String bondEnergy)
+    {
+    	
+    	Map<Object, Object> props = mol.getProperties();
+    	if(props.get("BondEnergy") != null)
+    	{
+    		String sumEnergy = (String)props.get("BondEnergy") + ";" + bondEnergy;
+    		props.put("BondEnergy", sumEnergy);	
+    	}
+    	else
+    	{
+    		props.put("BondEnergy", bondEnergy.toString());
+    	}
+    	
+    	mol.setProperties(props);
+    	return mol;
+    }
+    
+    
+    /**
+     * Sets the charge for bonds in a ring.
+     * 
+     * @param mol the mol
+     * @param partialChargeDiff1 the partial charge diff1
+     * @param partialChargeDiff2 the partial charge diff2
+     * 
+     * @return the i atom container
+     */
+    private IAtomContainer setCharge(IAtomContainer mol, Double partialChargeDiff1, Double partialChargeDiff2)
+    {
+    	return setCharge(mol, partialChargeDiff1.toString() + "," + partialChargeDiff2.toString());
+    }
+    
+    /**
+     * Sets the charge.
+     * 
+     * @param mol the mol
+     * @param partialChargeDiff the partial charge diff
+     * 
+     * @return the i atom container
+     */
+    private IAtomContainer setCharge(IAtomContainer mol, Double partialChargeDiff)
+    {
+    	return setCharge(mol, partialChargeDiff.toString());
+    }
+    
+    /**
+     * Sets the partial charge difference previously calculated using Gasteiger-Marsili.
+     * 
+     * @param mol the mol
+     * @param bondEnergy the bond energy
+     * 
+     * @return the i atom container
+     */
+    private IAtomContainer setCharge(IAtomContainer mol, String partialChargeDiff)
+    {
+    	
+    	Map<Object, Object> props = mol.getProperties();
+    	if(props.get("PartialChargeDiff") != null)
+    	{
+    		String sumPartialChargeDiff = (String)props.get("PartialChargeDiff") + ";" + partialChargeDiff;
+    		props.put("PartialChargeDiff", sumPartialChargeDiff);	
+    	}
+    	else
+    	{
+    		props.put("PartialChargeDiff", partialChargeDiff.toString());
+    	}
+    	
+    	mol.setProperties(props);
+    	return mol;
+    }
+        
     
     /**
      * Gets the fragment mass subtracting the neutral loss from it.
@@ -1926,50 +1983,7 @@ public class Fragmenter {
     	return ret;
     }
     
-    /**
-     * Adds the to property String another one divided by komma.
-     * 
-     * @param property the property
-     * @param propertyAdd the property add
-     * 
-     * @return the string
-     */
-    private String AddToProperty(String property, String propertyAdd)
-    {
-    	String ret = "";
-    	if(property == null)
-    		ret = propertyAdd;
-    	else
-    		ret = property + "," + propertyAdd;
-    	return ret;
-    }
-    
-    
-    /**
-     * Replaces the current fragment mass. Depends on previous set fragment mass
-     * if it was set previously.
-     * 
-     * @param property the property
-     * @param propertyAdd the property add
-     * 
-     * @return the string
-     */
-    private String ReplaceMassProperty(String property, IMolecularFormula fragmentFormula, IMolecularFormula nlFormula)
-    {
-    	String ret = "";
-    	if(property == null)
-    	{
-    		Double newMass = MolecularFormulaTools.getMonoisotopicMass(fragmentFormula) - MolecularFormulaTools.getMonoisotopicMass(nlFormula);
-    		ret =  newMass.toString();
-    	}
-    	else
-    	{
-    		Double newMass = Double.parseDouble(property) - MolecularFormulaTools.getMonoisotopicMass(nlFormula);
-    		ret =  newMass.toString();
-    	}
-    	return ret;
-    }
-    
+     
     
     /**
 	 * Gets the neutral losses which are stored in a file.
