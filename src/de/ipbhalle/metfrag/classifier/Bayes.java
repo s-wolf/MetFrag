@@ -11,8 +11,8 @@ import de.ipbhalle.metfrag.main.Config;
 import de.ipbhalle.metfrag.main.KEGGSearch;
 import de.ipbhalle.metfrag.main.MainMetFrag;
 import de.ipbhalle.metfrag.massbankParser.Peak;
+import de.ipbhalle.metfrag.spectrum.PreprocessSpectraLive;
 import de.ipbhalle.metfrag.spectrum.WrapperSpectrum;
-import de.ipbhalle.metfrag.tools.PreprocessSpectraLive;
 
 
 

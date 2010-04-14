@@ -46,8 +46,8 @@ import de.ipbhalle.metfrag.read.Molfile;
 import de.ipbhalle.metfrag.spectrum.AssignFragmentPeak;
 import de.ipbhalle.metfrag.spectrum.CleanUpPeakList;
 import de.ipbhalle.metfrag.spectrum.PeakMolPair;
+import de.ipbhalle.metfrag.spectrum.PreprocessSpectraLive;
 import de.ipbhalle.metfrag.spectrum.WrapperSpectrum;
-import de.ipbhalle.metfrag.tools.PreprocessSpectraLive;
 import de.ipbhalle.metfrag.tools.renderer.StructureRendererTable;
 import de.ipbhalle.metfrag.tools.renderer.StructureToFile;
 

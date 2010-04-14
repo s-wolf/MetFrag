@@ -1,4 +1,4 @@
-package de.ipbhalle.metfrag.tools;
+package de.ipbhalle.metfrag.spectrum;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -12,8 +12,7 @@ import java.util.Vector;
 
 
 import de.ipbhalle.metfrag.massbankParser.Peak;
-import de.ipbhalle.metfrag.spectrum.CleanUpPeakList;
-import de.ipbhalle.metfrag.spectrum.WrapperSpectrum;
+import de.ipbhalle.metfrag.tools.PPMTool;
 
 
 public class PreprocessSpectraLive {
