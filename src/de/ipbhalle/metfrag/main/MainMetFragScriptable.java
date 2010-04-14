@@ -277,7 +277,7 @@ public static void main(String[] args) {
 	            allFoundPeaks.close();
 	            
 	            new File(c.getFolder() + "logs/" + date + "/").mkdirs();
-	            FileWriter out4 = new FileWriter(c.getFolder() + "logs/" + date + "/" + currentFile + ".txt", true);
+	            FileWriter out4 = new FileWriter(c.getFolder() + "logs/" + date + "/" + currentFile, true);
 	            out4.write(parameterOptimization);
 	            out4.close();
 	            

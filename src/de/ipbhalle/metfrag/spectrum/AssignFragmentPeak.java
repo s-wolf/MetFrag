@@ -184,7 +184,10 @@ public class AssignFragmentPeak {
         				matchedMass = Math.round((massToCompare-hMass)*10000.0)/10000.0;
         				
         				//now add a bond energy equivalent to a H-C bond
-        				this.hydrogenPenalty = (i +1);
+        				if(mode == -1)
+        					this.hydrogenPenalty = (i);
+        				else
+        					this.hydrogenPenalty = (i + 1);
         				
         				if(this.html)
         	        		this.molecularFormula = MolecularFormulaManipulator.getHTML(molecularFormula) + "-" + (i + 1) + "H" + neutralLoss;
@@ -199,7 +202,10 @@ public class AssignFragmentPeak {
         				found = true;
         				matchedMass = Math.round((massToCompare+hMass)*10000.0)/10000.0;
         				//now add a bond energy equivalent to a H-C bond
-        				this.hydrogenPenalty = (i +1);
+        				if(mode == 1)
+        					this.hydrogenPenalty = (i);
+        				else
+        					this.hydrogenPenalty = (i + 1);
         				
         				
         				if(this.html)
