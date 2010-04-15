@@ -199,8 +199,8 @@ public class Scoring {
 				}
 				
 				
-				
-				double finalScore = normalizedScore - (normalizedBondEnergy / 2);
+				//TODO: 4 delivers better results than 2
+				double finalScore = normalizedScore - (normalizedBondEnergy / 4);
 				
 				if(finalScore < 0)
 					finalScore = 0.0;

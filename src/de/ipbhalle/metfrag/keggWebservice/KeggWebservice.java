@@ -331,6 +331,8 @@ public class KeggWebservice {
 	        System.err.println(e.toString());
 	    }
 		
+		if(ret == null || ret.equals(""))
+			return null;
 		
 		MDLReader reader;
 		List<IAtomContainer> containersList;

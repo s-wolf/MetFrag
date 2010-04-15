@@ -143,7 +143,7 @@ public class PubChemLocal {
         Class.forName(driver);
         con = DriverManager.getConnection(url, username, password);
         Statement stmt = con.createStatement();
-	    ResultSet rs = stmt.executeQuery("SELECT SMILES, CHONSP FROM RECORD WHERE ID = '" + pubChemID + "' limit 1;");
+	    ResultSet rs = stmt.executeQuery("SELECT SMILES, CHONSP FROM RECORD WHERE SUBSTRING(ID,1,1) != 'C' and SUBSTRING(ID,1,1) != 'B' and ID = '" + pubChemID + "' limit 1;");
 	    SmilesParser sp1 = new SmilesParser(DefaultChemObjectBuilder.getInstance());
 	    IAtomContainer molecule = null;
 	    Boolean chonsp = false;

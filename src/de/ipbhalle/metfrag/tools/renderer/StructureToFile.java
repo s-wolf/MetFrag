@@ -64,6 +64,8 @@ public class StructureToFile {
      */
     private RenderedImage getImage4MOL(IAtomContainer molAC) throws Exception {
 
+    	molAC = AtomContainerManipulator.removeHydrogens(molAC);
+    	    	
         // creates CDK Molecule object and get the renderer
     	IMolecule molSource = new Molecule(molAC);
     	

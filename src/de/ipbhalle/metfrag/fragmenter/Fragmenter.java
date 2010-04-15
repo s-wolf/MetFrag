@@ -25,7 +25,9 @@ import java.util.Vector;
 import org.openscience.cdk.Atom;
 import org.openscience.cdk.AtomContainerSet;
 import org.openscience.cdk.DefaultChemObjectBuilder;
+import org.openscience.cdk.LonePair;
 import org.openscience.cdk.Molecule;
+import org.openscience.cdk.SingleElectron;
 import org.openscience.cdk.aromaticity.AromaticityCalculator;
 import org.openscience.cdk.aromaticity.CDKHueckelAromaticityDetector;
 import org.openscience.cdk.config.IsotopeFactory;
@@ -33,6 +35,7 @@ import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.exception.NoSuchAtomException;
 import org.openscience.cdk.formula.MolecularFormula;
 import org.openscience.cdk.interfaces.IElement;
+import org.openscience.cdk.interfaces.ILonePair;
 import org.openscience.cdk.interfaces.IMolecularFormula;
 import org.openscience.cdk.interfaces.IMolecularFormulaSet;
 import org.openscience.cdk.interfaces.IAtom;
@@ -42,6 +45,8 @@ import org.openscience.cdk.interfaces.IBond;
 import org.openscience.cdk.interfaces.IMolecule;
 import org.openscience.cdk.interfaces.IRing;
 import org.openscience.cdk.interfaces.IRingSet;
+import org.openscience.cdk.interfaces.ISingleElectron;
+import org.openscience.cdk.interfaces.IBond.Stereo;
 import org.openscience.cdk.io.MDLWriter;
 import org.openscience.cdk.io.SDFWriter;
 import org.openscience.cdk.isomorphism.IsomorphismTester;
@@ -940,10 +945,18 @@ public class Fragmenter {
                         {
                         	//create the single electron (radical site)
                         	for (IAtom bondAtom : bond.atoms()) {
-                        		temp.addSingleElectron(temp.getAtomNumber(bondAtom));
+                        		ILonePair lonePair = new LonePair(bondAtom);
+                        		temp.addLonePair(lonePair);
+                        		
+                        		ISingleElectron singleElectron = new SingleElectron(bondAtom);
+                        		temp.addSingleElectron(singleElectron);
                         	}
                         	for (IAtom bondAtom : bondInRing.atoms()) {
-                        		temp.addSingleElectron(temp.getAtomNumber(bondAtom));
+                        		ILonePair lonePair = new LonePair(bondAtom);
+                        		temp.addLonePair(lonePair);
+                        		
+                        		ISingleElectron singleElectron = new SingleElectron(bondAtom);
+                        		temp.addSingleElectron(singleElectron);
                         	}
                         	//temp.addSingleElectron(temp.getAtomNumber(currentAtom));
                         	//AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(temp);
@@ -1036,9 +1049,12 @@ public class Fragmenter {
                 {
                 	//create the single electron (radical site)
                 	for (IAtom bondAtom : bond.atoms()) {
-                		temp.addSingleElectron(temp.getAtomNumber(bondAtom));
+                		ILonePair lonePair = new LonePair(bondAtom);
+                		temp.addLonePair(lonePair);
+                		
+                		ISingleElectron singleElectron = new SingleElectron(bondAtom);
+                		temp.addSingleElectron(singleElectron);
                 	}
-                	//AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(temp);
                 }
                 set.add(temp);
                 
@@ -1894,6 +1910,9 @@ public class Fragmenter {
     	File temp = File.createTempFile(identifier + "_" + globalCount, ".sdf");
         // Delete temp file when program exits.
         temp.deleteOnExit();
+        
+        mol = noStereochemistry(mol);
+        
         FileWriter out = new FileWriter(temp);
         SDFWriter mw = new SDFWriter(out);
         IAtomContainer tmp = mol;
@@ -1906,6 +1925,23 @@ public class Fragmenter {
         mw.close();
         
         return temp;
+    }
+    
+    
+    /**
+     * No stereochemistry. Fix for BUG in SDF writer with CDK 1.3.4
+     * 
+     * @param mol the mol
+     * 
+     * @return the i atom container
+     */
+    private IAtomContainer noStereochemistry(IAtomContainer mol)
+    {
+    	for (IBond bond : mol.bonds()) {
+			Stereo stereo = bond.getStereo();
+			bond.setStereo(stereo.NONE);
+		}    	
+    	return mol;
     }
 
     
