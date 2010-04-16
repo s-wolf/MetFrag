@@ -85,6 +85,8 @@ public class StructureToFile {
 		List<IAtomContainerGenerator> generators = new ArrayList<IAtomContainerGenerator>();
 		generators.add(new BasicBondGenerator());
 		generators.add(new BasicAtomGenerator());
+//		generators.add(new LonePairGenerator());
+				
 		   
 		// the renderer needs to have a toolkit-specific font manager 
 		Renderer renderer = new Renderer(generators, new AWTFontManager());
