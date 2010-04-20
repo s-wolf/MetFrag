@@ -1,6 +1,8 @@
 package de.ipbhalle.metfrag.main;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
@@ -30,7 +32,7 @@ public class FragmentSingleCompound {
 	
 	private int treeDepth;
 	private boolean sumFormulaRedundancyCheck;
-	private List<Double> dissociationEnergyToReturn;
+	private List<String> dissociationEnergyToReturn;
 	private List<String> fromNeutralLoss;
 	
 	/**
@@ -45,7 +47,7 @@ public class FragmentSingleCompound {
 	{
 		setTreeDepth(2);
 		setSumFormulaRedundancyCheck(true);
-		dissociationEnergyToReturn = new ArrayList<Double>();
+		dissociationEnergyToReturn = new ArrayList<String>();
 		fromNeutralLoss = new ArrayList<String>();
 	}
 	
@@ -92,9 +94,9 @@ public class FragmentSingleCompound {
 			IMolecule mol = new Molecule(fragment);
 			results.add(sg.createSMILES(mol));
 			if(fragment.getProperty("BondEnergy") == null)
-				dissociationEnergyToReturn.add(0.0);
+				dissociationEnergyToReturn.add("0.0");
 			else
-				dissociationEnergyToReturn.add(Double.parseDouble((String)fragment.getProperty("BondEnergy")));
+				dissociationEnergyToReturn.add((String)fragment.getProperty("BondEnergy"));
 			
 			if(fragment.getProperty("NeutralLossRule") == null)
 				fromNeutralLoss.add("");
@@ -115,7 +117,7 @@ public class FragmentSingleCompound {
 	 * 
 	 * @return the energies
 	 */
-	public List<Double> getEnergies()
+	public List<String> getEnergies()
 	{
 		return dissociationEnergyToReturn;
 	}
@@ -172,31 +174,47 @@ public class FragmentSingleCompound {
 		String smiles = "C1=CC(=C(C=C1C2=C(C(=O)C3=C(C=C(C=C3O2)O)O)OC4C(C(C(C(O4)CO)O)O)O)O)O";
 		Double minMass = 303.0499;
 		Boolean render = false;
+		Boolean writeToFile = false;
+		int treeDEpth = 2;
+		
 		//get command line arguments
-		if(args != null && args.length == 3)
+		if(args != null && args.length == 5)
 		{
-//			smiles = args[0];
-//			minMass = Double.parseDouble(args[1]);
+			smiles = args[0];
+			minMass = Double.parseDouble(args[1]);
+			if(args[2].equals("1"))
+				render = true;
+			writeToFile = true;
+		}
+		else if(args != null && args.length == 4)
+		{
+			smiles = args[0];
+			minMass = Double.parseDouble(args[1]);
 			if(args[2].equals("1"))
 				render = true;
 		}
 		else
 		{
-			System.err.println("Please enter CL values!\n1. value: Smiles to fragment\n2. value: Minimum mass\n3. value: Render fragments? (1 --> true, 0 --> false)\nExample: C1C(OC2=CC(=CC(=C2C1=O)O)O)C3=CC=C(C=C3)O 42.1 1\n");
+			System.err.println("Please enter CL values!\n1. value: Smiles to fragment\n2. value: Minimum mass\n3. value: Render fragments? (1 --> true, 0 --> false)\n4. value: Tree depth\nExample: C1C(OC2=CC(=CC(=C2C1=O)O)O)C3=CC=C(C=C3)O 42.1 1 2\n");
 			System.exit(1);
 		}
 		
 		FragmentSingleCompound test = new FragmentSingleCompound();
 		//those are the default values...no need to set them like this
 		test.setSumFormulaRedundancyCheck(true);
-		test.setTreeDepth(2);
+		test.setTreeDepth(Integer.parseInt(args[3]));
 		
 		try {
 			List<String> resultingFragments = test.getFragments(smiles, minMass, render);
-			List<Double> resultingEnergies = test.getEnergies();
+			List<String> resultingEnergies = test.getEnergies();
 			List<String> resultingNeutralLosses = test.getNeutralLosses();
 			
 			System.out.println("Fragment count: " + resultingFragments.size());
+			
+			BufferedWriter out = null;
+			if(writeToFile)
+				out = new BufferedWriter(new FileWriter(args[4]));
+			
 			for (int i = 0; i < resultingFragments.size(); i++) {
 				
 				SmilesParser sp = new SmilesParser(DefaultChemObjectBuilder.getInstance());
@@ -210,11 +228,19 @@ public class FragmentSingleCompound {
 //		        AtomContainerManipulator.convertImplicitToExplicitHydrogens(molecule); 
 		        
 		        IMolecularFormula formula = MolecularFormulaManipulator.getMolecularFormula(molecule);
-		  			
-				
-				System.out.print(resultingFragments.get(i));
-				System.out.print(" " + resultingEnergies.get(i) + " " + MolecularFormulaManipulator.getString(formula) + " " + MolecularFormulaTools.getMonoisotopicMass(formula) + " " + resultingNeutralLosses.get(i) +"\n");
+		  		
+		        if(writeToFile)
+			        out.write(resultingFragments.get(i) + "\t" + resultingEnergies.get(i) + "\t" + MolecularFormulaManipulator.getString(formula) + "\t" + MolecularFormulaTools.getMonoisotopicMass(formula) + "\t" + resultingNeutralLosses.get(i) +"\n"); 
+		        else
+		        {
+		        	System.out.print(resultingFragments.get(i));
+					System.out.print(" " + resultingEnergies.get(i) + " " + MolecularFormulaManipulator.getString(formula) + " " + MolecularFormulaTools.getMonoisotopicMass(formula) + " " + resultingNeutralLosses.get(i) +"\n");
+		        }				
 			}
+			
+			if(writeToFile)
+				out.close();
+			
 		} catch (Exception e) {
 			System.out.println("Error! TODO...");
 			e.printStackTrace();

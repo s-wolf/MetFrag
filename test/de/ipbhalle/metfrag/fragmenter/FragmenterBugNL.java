@@ -35,7 +35,7 @@ public class FragmenterBugNL {
 		List<String> resultingFragments = null;
 		try {
 			resultingFragments = test.getFragments(smiles, minMass, render);
-			List<Double> resultingEnergies = test.getEnergies();
+			List<String> resultingEnergies = test.getEnergies();
 			System.out.println("Fragment count: " + resultingFragments.size());
 			for (int i = 0; i < resultingFragments.size(); i++) {
 				System.out.print(resultingFragments.get(i));
