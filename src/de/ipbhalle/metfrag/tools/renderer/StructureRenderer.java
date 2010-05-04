@@ -1,3 +1,23 @@
+/*
+*
+* Copyright (C) 2009-2010 IPB Halle, Sebastian Wolf
+*
+* Contact: swolf@ipb-halle.de
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*
+*/
 package de.ipbhalle.metfrag.tools.renderer;
 
 import java.awt.Color;
@@ -15,7 +35,9 @@ import javax.swing.JScrollPane;
 import javax.vecmath.Vector2d;
 
 import org.openscience.cdk.CDKConstants;
+import org.openscience.cdk.DefaultChemObjectBuilder;
 import org.openscience.cdk.Molecule;
+import org.openscience.cdk.exception.InvalidSmilesException;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IMolecule;
 import org.openscience.cdk.layout.StructureDiagramGenerator;
@@ -33,6 +55,7 @@ import org.openscience.cdk.renderer.generators.IGeneratorParameter;
 import org.openscience.cdk.renderer.generators.LonePairGenerator;
 import org.openscience.cdk.renderer.generators.RingGenerator;
 import org.openscience.cdk.renderer.visitor.AWTDrawVisitor;
+import org.openscience.cdk.smiles.SmilesParser;
 import org.openscience.cdk.templates.MoleculeFactory;
 
 /**
@@ -160,9 +183,19 @@ public class StructureRenderer extends JFrame {
     
     
     public static void main(String[] args) {
-    	IMolecule chain = MoleculeFactory.makeAdenine();
-    	chain.setProperty(CDKConstants.TITLE, "Test");
-		new StructureRenderer(chain, "test");
+    	SmilesParser sp = new SmilesParser(DefaultChemObjectBuilder.getInstance());
+    	try {
+			IAtomContainer ac = sp.parseSmiles("O=c1c2ccccc2[se]n1c1ccccc1");
+			new StructureRenderer(ac, "test");
+			
+		} catch (InvalidSmilesException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+//    	IMolecule chain = MoleculeFactory.makeAdenine();
+//    	chain.setProperty(CDKConstants.TITLE, "Test");
+//		new StructureRenderer(chain, "test");
 	}
 
 
