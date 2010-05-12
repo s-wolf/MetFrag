@@ -58,7 +58,7 @@ public class StartMetFrag {
 		String output = "";
 		//start MetFrag
 		try {
-			boolean useIPBProxy = true;
+			boolean useIPBProxy = false;
 			//possible databases: kegg, pubchem, chemspider
 			output = MetFrag.start("pubchem", "", "", exactMass, spectrum, useIPBProxy);
 		} catch (Exception e) {
