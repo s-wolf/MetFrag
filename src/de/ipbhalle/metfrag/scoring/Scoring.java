@@ -155,7 +155,8 @@ public class Scoring {
 	
 	
 	/**
-	 * Gets the combined score.
+	 * Gets the combined score. This is used for normalizing the score values and weight the terms differently.
+	 * This method is not used in the webinterface.
 	 * 
 	 * @param realScoreMap the real score map
 	 * @param mapCandidateToEnergy the map candidate to energy

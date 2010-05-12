@@ -138,7 +138,7 @@ public class MM48ReverseLookup {
 		      
 		      
 		      PubChemWebService pubchemService = new PubChemWebService();
-			  IAtomContainer molecule = pubchemService.getSingleMol(pubchemID);
+			  IAtomContainer molecule = pubchemService.getSingleMol(pubchemID, true);
 		      
 		      System.out.println("\nNow match spectra\n");
 		      File f = new File(folderPeakList);

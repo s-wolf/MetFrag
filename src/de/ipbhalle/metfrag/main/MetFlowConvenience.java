@@ -157,9 +157,9 @@ public class MetFlowConvenience {
 		else if(this.database.equals("pubchem") && databaseID.equals(""))
 		{
 			if(this.sumFormula != "")
-				candidates = pubchem.getHitsbySumFormula(this.sumFormula);
+				candidates = pubchem.getHitsbySumFormula(this.sumFormula, true);
 			else
-				candidates = pubchem.getHitsByMass(exactMass, (PPMTool.getPPMDeviation(exactMass, this.searchPPM)), this.limit);
+				candidates = pubchem.getHitsByMass(exactMass, (PPMTool.getPPMDeviation(exactMass, this.searchPPM)), this.limit, true);
 		}
 		else if (!databaseID.equals(""))
 		{

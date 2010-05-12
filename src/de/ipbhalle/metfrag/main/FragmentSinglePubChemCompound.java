@@ -138,7 +138,7 @@ public class FragmentSinglePubChemCompound {
 	    }
 	      
 	    PubChemWebService pubchemService = new PubChemWebService();
-    	IAtomContainer molecule = pubchemService.getSingleMol(pubchemID);
+    	IAtomContainer molecule = pubchemService.getSingleMol(pubchemID, true);
 	    //now fragment the molecule
     	try
 	    {

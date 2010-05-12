@@ -65,6 +65,8 @@ import org.openscience.cdk.tools.manipulator.ChemFileManipulator;
 import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 import org.xml.sax.SAXParseException;
 
+import de.ipbhalle.metfrag.main.Config;
+
 import gov.nih.nlm.ncbi.pubchem.CompressType;
 import gov.nih.nlm.ncbi.pubchem.EntrezKey;
 import gov.nih.nlm.ncbi.pubchem.FormatType;
@@ -104,7 +106,7 @@ public class PubChemWebService {
 	
 	
 	
-	public IAtomContainer getSingleMol(String cid) throws CDKException, InterruptedException, IOException
+	public IAtomContainer getSingleMol(String cid, boolean useProxy) throws CDKException, InterruptedException, IOException
 	{
 		IAtomContainer ac = null;
 		int[] cids = new int[1];
@@ -132,10 +134,13 @@ public class PubChemWebService {
         if (status == StatusType.eStatus_Success) {
         	
         	// PROXY
-		    System.getProperties().put( "ftp.proxySet", "true" );
-		    System.getProperties().put( "ftp.proxyHost", "www.ipb-halle.de" );
-		    System.getProperties().put( "ftp.proxyPort", "3128" );
-        	
+        	if(useProxy)
+        	{
+        		System.getProperties().put( "ftp.proxySet", "true" );
+    		    System.getProperties().put( "ftp.proxyHost", "www.ipb-halle.de" );
+    		    System.getProperties().put( "ftp.proxyPort", "3128" );
+        	}
+		    
             URL url = new URL(pug_soap.getDownloadUrl(downloadKey));
 //            System.out.println("Success! Download URL = " + url.toString());
             
@@ -184,7 +189,7 @@ public class PubChemWebService {
 	 * 
 	 * @throws Exception the exception
 	 */
-	public Vector<String> getHitsbySumFormula(String sumFormula) throws Exception
+	public Vector<String> getHitsbySumFormula(String sumFormula, boolean useProxy) throws Exception
 	{
 		Vector<String> candidatesString = new Vector<String>();        
 		
@@ -232,11 +237,13 @@ public class PubChemWebService {
 		if (status == StatusType.eStatus_Success) {
 			
 			// PROXY
-		    System.getProperties().put( "ftp.proxySet", "true" );
-		    System.getProperties().put( "ftp.proxyHost", "www.ipb-halle.de" );
-		    System.getProperties().put( "ftp.proxyPort", "3128" );
-
-			
+			if(useProxy)
+			{
+				System.getProperties().put( "ftp.proxySet", "true" );
+			    System.getProperties().put( "ftp.proxyHost", "www.ipb-halle.de" );
+			    System.getProperties().put( "ftp.proxyPort", "3128" );
+			}
+		    
 			URL url = new URL(pug_soap.getDownloadUrl(downloadKey));
 			System.out.println("Success! Download URL = " + url.toString());
 
@@ -309,7 +316,7 @@ public class PubChemWebService {
 	 * 
 	 * @throws Exception the exception
 	 */
-	public Vector<String> getHitsByMass(double mass, double error, Integer limit) throws Exception
+	public Vector<String> getHitsByMass(double mass, double error, Integer limit, boolean useProxy) throws Exception
 	{
 		Vector<String> pubchemCIDs = new Vector<String>();
 		
@@ -371,11 +378,13 @@ public class PubChemWebService {
 		if (status == StatusType.eStatus_Success) {
 			
 			// PROXY
-		    System.getProperties().put( "ftp.proxySet", "true" );
-		    System.getProperties().put( "ftp.proxyHost", "www.ipb-halle.de" );
-		    System.getProperties().put( "ftp.proxyPort", "3128" );
-
-			
+			if(useProxy)
+			{
+				System.getProperties().put( "ftp.proxySet", "true" );
+			    System.getProperties().put( "ftp.proxyHost", "www.ipb-halle.de" );
+			    System.getProperties().put( "ftp.proxyPort", "3128" );
+			}
+		    
 			URL url = new URL(pug_soap.getDownloadUrl(downloadKey));
 			System.out.println("Success! Download URL = " + url.toString());
 

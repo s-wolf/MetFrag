@@ -54,7 +54,7 @@ public class Config {
     private boolean pubChem = false;
     private int searchPPM = 10;
     private boolean hydrogenTest = false;
-    private boolean threads = true;
+    private int threads = 1;
     private boolean neutralLossAdd = false;
     private boolean bondEnergyScoring = false;
     private boolean isOnlyBreakSelectedBonds = false;
@@ -148,67 +148,62 @@ public class Config {
 		
 		//Output fragments in pdf file
 		setPdf(false); //create pdf output....uses a lot memory
-		if(properties.getProperty("pdf").equals("true"))
+		if(properties.getProperty("pdf") != null && properties.getProperty("pdf").equals("true"))
 			setPdf(true);
 		
 		//Output fragments in pdf file
 		setHierarchical(false); //create pdf output....uses a lot memory
-		if(properties.getProperty("Hierarchical").equals("true"))
+		if(properties.getProperty("Hierarchical") != null && properties.getProperty("Hierarchical").equals("true"))
 			setHierarchical(true);
 		
 		setShowDiagrams(false); //show graphical output?
-		if(properties.getProperty("showDiagrams").equals("true"))
+		if(properties.getProperty("showDiagrams") != null && properties.getProperty("showDiagrams").equals("true"))
 			setShowDiagrams(true);
 		
 		setFolderRead(false); //read complete folder
-		if(properties.getProperty("folderRead").equals("true"))
+		if(properties.getProperty("folderRead") != null && properties.getProperty("folderRead").equals("true"))
 			setFolderRead(true);
 		
 		setKEGG(false); //if true run a full test with kegg, else run massbank proof of concept
-		if(properties.getProperty("KEGG").equals("true"))
+		if(properties.getProperty("KEGG") != null && properties.getProperty("KEGG").equals("true"))
 			setKEGG(true);
 		
 		setRecreateFrags(false);
-		if(properties.getProperty("recreateFrags").equals("true"))
+		if(properties.getProperty("recreateFrags") != null && properties.getProperty("recreateFrags").equals("true"))
 			setRecreateFrags(true);
 		
 		setCreateTree(false);
-		if(properties.getProperty("createTree").equals("true"))
+		if(properties.getProperty("createTree") != null && properties.getProperty("createTree").equals("true"))
 			setCreateTree(true);
 		
 		setBreakAromaticRings(false);
-		if(properties.getProperty("breakAromaticRings").equals("true"))
+		if(properties.getProperty("breakAromaticRings") != null && properties.getProperty("breakAromaticRings").equals("true"))
 			setBreakAromaticRings(true);
 		
 		setSumFormulaRedundancyCheck(false);
-		if(properties.getProperty("sumFormulaRedundancyCheck").equals("true"))
+		if(properties.getProperty("sumFormulaRedundancyCheck") != null && properties.getProperty("sumFormulaRedundancyCheck").equals("true"))
 			setSumFormulaRedundancyCheck(true);
 		
 		setPubChem(false);
-		if(properties.getProperty("PubChem").equals("true"))
+		if(properties.getProperty("PubChem") != null && properties.getProperty("PubChem").equals("true"))
 			setPubChem(true);
 		
 		setHydrogenTest(false);
-		if(properties.getProperty("hydrogenTest").equals("true"))
+		if(properties.getProperty("hydrogenTest") != null && properties.getProperty("hydrogenTest").equals("true"))
 			setHydrogenTest(true);
 		
 		setTreeDepth(Integer.parseInt(properties.getProperty("treeDepth")));
-		
 		setKeggPath(properties.getProperty("keggPath"));
-		
 		setComment(properties.getProperty("comment"));
+		setThreads(Integer.parseInt(properties.getProperty("threads")));
 		
-		setThreads(false);
-		if(properties.getProperty("threads").equals("true"))
-			setThreads(true);
-		
-		if(properties.getProperty("neutralLossAdd").equals("true"))
+		if(properties.getProperty("neutralLossAdd") != null && properties.getProperty("neutralLossAdd").equals("true"))
 			setNeutralLossAdd(true);
 		
-		if(properties.getProperty("bondEnergyScoring").equals("true"))
+		if(properties.getProperty("bondEnergyScoring") != null && properties.getProperty("bondEnergyScoring").equals("true"))
 			setBondEnergyScoring(true);
 		
-		if(properties.getProperty("breakOnlySelectedBonds").equals("true"))
+		if(properties.getProperty("breakOnlySelectedBonds") != null && properties.getProperty("breakOnlySelectedBonds").equals("true"))
 			setOnlyBreakSelectedBonds(isOnlyBreakSelectedBonds);
 	}
 
@@ -568,11 +563,11 @@ public class Config {
 		return hydrogenTest;
 	}
 
-	public void setThreads(boolean threads) {
+	public void setThreads(int threads) {
 		this.threads = threads;
 	}
 
-	public boolean isThreads() {
+	public int isThreads() {
 		return threads;
 	}
 

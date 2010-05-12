@@ -120,7 +120,7 @@ public class ModifyHillMassBankFiles {
 		  	  if( line != null && line.contains("CH$LINK: PUBCHEM CID:"))
 		  	  {
 		  		Integer linkPubChem = Integer.parseInt(line.substring(line.indexOf("CH$LINK: PUBCHEM CID:")+21).split("\\ ")[0]);
-			  	IAtomContainer ac = pcw.getSingleMol(linkPubChem.toString());
+			  	IAtomContainer ac = pcw.getSingleMol(linkPubChem.toString(), true);
 			  	String smiles = (String)ac.getProperty("PUBCHEM_OPENEYE_CAN_SMILES");
 			  	out.write("CH$SMILES: " + smiles);
 			  	out.newLine();

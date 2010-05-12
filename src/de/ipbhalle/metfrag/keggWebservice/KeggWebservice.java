@@ -280,7 +280,7 @@ public class KeggWebservice {
             }
             
             //if this file is not found use webservice...otherwise use local molfile
-		  	if(webservice)
+		  	if(webservice || keggPath.equals(""))
 		  		ret = serv.bget(str);
 		  	else
 		  		ret = mol;

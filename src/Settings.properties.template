@@ -52,7 +52,7 @@ breakOnlySelectedBonds = false
 #local kegg mol files
 keggPath = /vol/data/pathways/kegg/mol/
 #use parallel threads?
-threads = true
+threads = 1
 
 #pubchem databse connection
 #JDBC URL

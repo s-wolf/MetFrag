@@ -1,0 +1,25 @@
+# Configuration for MetFrag
+################################################################################
+
+#mzabs and mzppm		
+mzabs = 0.01
+mzppm = 10
+searchppm = 10
+
+
+#Break aromatic rings?
+breakAromaticRings = true
+#molecular formula based redundancy check
+sumFormulaRedundancyCheck = true
+#compute all fragments until a treedepth is reached....for now treedepth =  2 --> 1
+treeDepth = 2
+#experimental hydrogen shift rule...allow the mass to be - proton TODO
+hydrogenTest = true
+#neutral loss add in every layer?
+neutralLossAdd = false
+#bond energy scoring?
+bondEnergyScoring = true
+#break only bonds which will most likely break
+breakOnlySelectedBonds = false
+#use parallel threads?
+threads = 4

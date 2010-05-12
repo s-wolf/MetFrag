@@ -312,7 +312,7 @@ public class PubChemSearch {
 			//get candidates from pubchem webservice...with with a given mzppm and mzabs
 			PubChemWebService pubchem = new PubChemWebService();
 			Vector<String> candidates = null;
-			candidates = pubchem.getHitsByMass(exactMass, PPMTool.getPPMDeviation(exactMass, searchPPM), 3000);
+			candidates = pubchem.getHitsByMass(exactMass, PPMTool.getPPMDeviation(exactMass, searchPPM), 3000, true);
 			
 			
 			

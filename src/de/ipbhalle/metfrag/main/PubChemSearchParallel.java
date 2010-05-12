@@ -566,7 +566,7 @@ public class PubChemSearchParallel{
 				realScoreMap = Scoring.getCombinedScore(realScoreMap, candidateToEnergy, candidateToHydrogenPenalty);
 			
 			//generate the parameter optimization matrix
-			parameterOptimizationMatrix = prepareParameterOptimizationMatrix(pubChemIdentifier);
+			parameterOptimizationMatrix = prepareParameterOptimizationMatrix(pubChemIdentifier, exactMass);
 			generateOptimizationMatrix(candidateToOptimizationMatrixEntries);
 						
 			
@@ -716,11 +716,12 @@ public class PubChemSearchParallel{
 		 * 
 		 * @return the string
 		 */
-		private String prepareParameterOptimizationMatrix(String pubChemIdentifier)
+		private String prepareParameterOptimizationMatrix(String pubChemIdentifier, Double exactMass)
 		{
 			String ret = "";
 			
-			ret += pubChemIdentifier + "\n\n";
+			ret += pubChemIdentifier + "\n";
+			ret += exactMass.toString() + "\n\n";
 			ret += "candidate\tpeakMass\tpeakInt\tbondEnergy\thydrogenPenalty\tpCharges\n";
 			
 			return ret;
