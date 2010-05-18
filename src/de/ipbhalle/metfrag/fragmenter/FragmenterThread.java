@@ -237,6 +237,11 @@ public class FragmenterThread implements Runnable{
 				MetFrag.results.getMapCandidateToHydrogenPenalty().put(candidate, score.getPenalty());
 				MetFrag.results.getMapCandidateToPartialChargesDiff().put(candidate, score.getPartialChargesDiff());
 				
+				//also add the structure to results file
+				MetFrag.results.getMapCandidateToStructure().put(candidate, molecule);
+				MetFrag.results.getMapCandidateToFragments().put(candidate, hits);
+				
+				
 				Map<Double, Vector<String>> realScoreMap = MetFrag.results.getRealScoreMap();
 				//save score in hashmap...if there are several hits with the same score --> vector of strings
 				if(realScoreMap.containsKey(currentScore))

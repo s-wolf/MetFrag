@@ -1,5 +1,8 @@
 package de.ipbhalle.metfrag.main;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -10,16 +13,28 @@ import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.openscience.cdk.AtomContainerSet;
 import org.openscience.cdk.ChemFile;
 import org.openscience.cdk.ChemObject;
+import org.openscience.cdk.Molecule;
+import org.openscience.cdk.MoleculeSet;
 import org.openscience.cdk.atomtype.CDKAtomTypeMatcher;
+import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.graph.ConnectivityChecker;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
+import org.openscience.cdk.interfaces.IAtomContainerSet;
 import org.openscience.cdk.interfaces.IAtomType;
+import org.openscience.cdk.interfaces.IBond;
+import org.openscience.cdk.interfaces.IMolecule;
+import org.openscience.cdk.interfaces.IMoleculeSet;
+import org.openscience.cdk.interfaces.IBond.Stereo;
 import org.openscience.cdk.io.MDLReader;
+import org.openscience.cdk.io.SDFWriter;
+import org.openscience.cdk.isomorphism.matchers.smarts.StereoBond;
 import org.openscience.cdk.tools.CDKHydrogenAdder;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
+import org.openscience.cdk.tools.manipulator.AtomContainerSetManipulator;
 import org.openscience.cdk.tools.manipulator.AtomTypeManipulator;
 import org.openscience.cdk.tools.manipulator.ChemFileManipulator;
 import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
@@ -58,7 +73,7 @@ public class MetFrag {
 	 * 
 	 * @throws Exception the exception
 	 */
-	public static String start(String database, String databaseID, String molecularFormula, Double exactMass, WrapperSpectrum spectrum, boolean useProxy) throws Exception
+	public static String start(String database, String databaseID, String molecularFormula, Double exactMass, WrapperSpectrum spectrum, boolean useProxy, String outputFile) throws Exception
 	{
 		//get configuration
 		Config config = new Config();
@@ -134,13 +149,45 @@ public class MetFrag {
 		scores = scoresNormalized.keySet().toArray(scores);
 		Arrays.sort(scores);
 		
+		
+		
 		//now collect the result
+		Map<String, IAtomContainer> candidateToStructure = results.getMapCandidateToStructure();
+		Map<String, Vector<PeakMolPair>> candidateToFragments = results.getMapCandidateToFragments();
+		MoleculeSet setOfMolecules = new MoleculeSet();
 		for (int i = scores.length -1; i >=0 ; i--) {
 			Vector<String> list = scoresNormalized.get(scores[i]);
 			for (String string : list) {
 				ret += string + "\t" + scores[i] + "\n";
+				//get corresponding structure
+				IAtomContainer tmp = candidateToStructure.get(string);
+				tmp.setProperty("Score", scores[i]);
+				tmp.setProperty("PeaksExplained", candidateToFragments.get(string).size());
+				
+				
+				//fix for bug in mdl reader setting where it happens that bond.stereo is null when the bond was read in as UP/DOWN (4)
+				for (IBond bond : tmp.bonds()) {
+					if(bond.getStereo() == null)
+						bond.setStereo(Stereo.UP_OR_DOWN);		
+				} 
+				setOfMolecules.addAtomContainer(tmp);
 			}
 		}
+	
+		
+		//write results file
+		try {
+			SDFWriter writer = new SDFWriter(new FileWriter(new File(outputFile)));
+			writer.write(setOfMolecules);
+			writer.close();
+		} catch (CDKException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		
 		return ret;
 	}

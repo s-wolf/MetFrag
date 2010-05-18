@@ -102,11 +102,15 @@ public class MassbankParser{
 				IUPAC = line.substring(line.indexOf("CH$IUPAC")+10);
 				 
 			    //CH$LINK - ID of other database with link
-			  	while (line != null && !line.contains("CH$LINK: PUBCHEM CID:")){
+			  	while (line != null && !line.contains("CH$LINK: PUBCHEM CID:") && !line.startsWith("AC")){
 				  	  line = reader.readLine();
 				}
-				//pubchem id
-				linkPubChem = Integer.parseInt(line.substring(line.indexOf("CH$LINK: PUBCHEM CID:")+21).split("\\ ")[0]);
+			  	
+			  	//pubchem id
+			  	if(!line.startsWith("AC"))
+			  		linkPubChem = Integer.parseInt(line.substring(line.indexOf("CH$LINK: PUBCHEM CID:")+21).split("\\ ")[0]);
+			  	else
+			  		linkPubChem = 0;
 			  	
 				
 				//CH$LINK - KEGG ID --> optional
@@ -125,12 +129,18 @@ public class MassbankParser{
 			  	//Experimental condition
 			  	//Equipment
 				instrument = line.substring(line.indexOf("AC$INSTRUMENT")+15);
-			  	while (line != null && !line.contains("AC$ANALYTICAL_CONDITION: PRECURSOR_TYPE")){
-			  	  line = reader.readLine();
+			  	while (line != null){
+			  		if(line.contains("AC$ANALYTICAL_CONDITION: PRECURSOR_TYPE") || line.contains("AC$ANALYTICAL_CONDITION: MODE"))
+			  			break;
+			  		
+			  		line = reader.readLine();
 			  	}	
-			  		// PRECURSOR_TYPE: POSITIVE (1) or NEGATIVE (-1)
-					if (line.substring(line.indexOf("AC$ANALYTICAL_CONDITION: PRECURSOR_TYPE")+40).contains("[M+H]+")) mode = 1;
-					else mode = -1;
+		  		// PRECURSOR_TYPE: POSITIVE (1) or NEGATIVE (-1)
+				if (line.contains("AC$ANALYTICAL_CONDITION: PRECURSOR_TYPE") && line.substring(line.indexOf("AC$ANALYTICAL_CONDITION: PRECURSOR_TYPE")+40).contains("[M+H]+")) mode = 1;
+				else mode = -1;
+				//RIKEN Spektren
+				if (line.contains("AC$ANALYTICAL_CONDITION: MODE") && line.substring(line.indexOf("AC$ANALYTICAL_CONDITION: MODE")+30).contains("POSITIVE")) mode = 1;
+				else mode = -1;
 				}
 		  	
 		  		//skipped PRECURSER SELECTION, FRAGMENTATION_EQUIPMENT, SPECTRUM_TYPE.....

@@ -66,6 +66,11 @@ public class PreprocessSpectra {
 			if(files[i].isFile())
 			{
 				WrapperSpectrum spectrum = new WrapperSpectrum(files[i].toString());
+				
+				//no pubchem id given ... skip this spectrum!
+				if(spectrum.getCID() == 0)
+					continue;
+				
 				temp = i;
 				
 				Vector<WrapperSpectrum> spectra = new Vector<WrapperSpectrum>();
@@ -293,7 +298,7 @@ public class PreprocessSpectra {
 	
 	
 	public static void main(String[] args) {
-		String folder = "/home/swolf/MassBankData/HillPaper/Paper_0.01/";
+		String folder = "/home/swolf/MassBankData/MetFragSunGrid/RikenMassBank/";
 		PreprocessSpectra pps = new PreprocessSpectra();
 		pps.Preprocess(folder, 0.01);
 		System.out.println("Done!");

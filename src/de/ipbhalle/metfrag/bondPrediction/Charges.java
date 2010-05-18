@@ -28,16 +28,24 @@ import java.util.Map;
 
 import org.openscience.cdk.Atom;
 import org.openscience.cdk.Bond;
+import org.openscience.cdk.DefaultChemObjectBuilder;
 import org.openscience.cdk.charges.GasteigerMarsiliPartialCharges;
 import org.openscience.cdk.charges.GasteigerPEPEPartialCharges;
 import org.openscience.cdk.exception.CDKException;
+import org.openscience.cdk.exception.InvalidSmilesException;
+import org.openscience.cdk.graph.invariant.CanonicalLabeler;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IBond;
+import org.openscience.cdk.interfaces.IChemObjectBuilder;
+import org.openscience.cdk.interfaces.IMolecule;
+import org.openscience.cdk.smiles.InvPair;
+import org.openscience.cdk.smiles.SmilesParser;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 
 import de.ipbhalle.metfrag.moldynamics.Distance;
 import de.ipbhalle.metfrag.tools.MoleculeTools;
+import de.ipbhalle.metfrag.tools.renderer.StructureRenderer;
 
 public class Charges {
 	
@@ -269,6 +277,60 @@ public class Charges {
 	public Double getBondLength(String bondID)
 	{
 		return this.bondToBondLength.get(bondID);
+	}
+	
+	public static void main(String[] args) {
+		
+		try {
+			String naringenin = "C1C(OC2=CC(=CC(=C2C1=O)O)O)C3=CC=C(C=C3)O";
+			SmilesParser sp = new SmilesParser(DefaultChemObjectBuilder.getInstance());
+			IMolecule m = sp.parseSmiles(naringenin);
+			
+			AtomContainerManipulator.convertImplicitToExplicitHydrogens(m);
+            AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(m);
+            
+            MoleculeTools.moleculeNumbering(m);
+            
+//            IAtom s = new Atom("O");
+            IAtom test = m.getAtom(1); // getAtomById(m, "0");
+            test.setSymbol("S");
+//            m.setAtom(1, s);
+            
+            AtomContainerManipulator.convertImplicitToExplicitHydrogens(m);
+            AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(m);
+            
+			new StructureRenderer(m, "Naringenin"); 
+			IAtom[] atomList = AtomContainerManipulator.getAtomArray(m);			
+			for (int i = 0; i < atomList.length; i++) {
+				System.out.println(i + " id:" + (Integer.parseInt(atomList[i].getID()) + 1) +  " symbol:" + atomList[i].getSymbol() + " atomicNumber:" + atomList[i].getAtomicNumber());
+			}
+//			for (IBond bond : m.bonds()) {
+//				for (IAtom atom : bond.atoms()) {
+//					if(!alreadyDone.contains(atom))
+//					{
+//						System.out.println(atom.getAtomicNumber());
+//					}
+//				}
+//			}
+			
+			
+			Charges charges = new Charges();
+			charges.calculateBondsToBreak(m);
+			
+			
+			
+		} catch (InvalidSmilesException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (CloneNotSupportedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (CDKException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		
 	}
 	
 	

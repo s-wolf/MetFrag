@@ -26,6 +26,7 @@ import java.util.List;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IBond;
+import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 
 import de.ipbhalle.metfrag.bondPrediction.AtomProperty;
 
@@ -40,26 +41,11 @@ public class MoleculeTools {
 	 * @return the i atom container
 	 */
 	public static IAtomContainer moleculeNumbering(IAtomContainer mol)
-	{
-		Integer count = 0;
-		Integer countBond = 0;
-		List<IAtom> alreadyDone = new ArrayList<IAtom>();
-
-		for (IBond bond : mol.bonds()) {
-			
-			bond.setID(countBond.toString());
-			countBond++;
-			
-        	for (IAtom atom : bond.atoms()) {
-        		if(!alreadyDone.contains(atom))
-        		{
-        			atom.setID(count.toString());
-            		count++;
-            		alreadyDone.add(atom);        			
-        		}
-			}	        	
-		}
-		
+	{		
+		IAtom[] atomList = AtomContainerManipulator.getAtomArray(mol);
+		for (int i = 0; i < atomList.length; i++) {
+			atomList[i].setID((i) + "");
+		}		
 		return mol;
 	}
 
