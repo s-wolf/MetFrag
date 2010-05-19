@@ -20,6 +20,7 @@ import org.openscience.cdk.Molecule;
 import org.openscience.cdk.MoleculeSet;
 import org.openscience.cdk.atomtype.CDKAtomTypeMatcher;
 import org.openscience.cdk.exception.CDKException;
+import org.openscience.cdk.geometry.GeometryTools;
 import org.openscience.cdk.graph.ConnectivityChecker;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
@@ -161,9 +162,9 @@ public class MetFrag {
 				ret += string + "\t" + scores[i] + "\n";
 				//get corresponding structure
 				IAtomContainer tmp = candidateToStructure.get(string);
+				tmp = AtomContainerManipulator.removeHydrogens(tmp);
 				tmp.setProperty("Score", scores[i]);
 				tmp.setProperty("PeaksExplained", candidateToFragments.get(string).size());
-				
 				
 				//fix for bug in mdl reader setting where it happens that bond.stereo is null when the bond was read in as UP/DOWN (4)
 				for (IBond bond : tmp.bonds()) {

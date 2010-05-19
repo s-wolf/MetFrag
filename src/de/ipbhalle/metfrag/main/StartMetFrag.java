@@ -1,5 +1,10 @@
 package de.ipbhalle.metfrag.main;
 
+import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -50,7 +55,27 @@ public class StartMetFrag {
 		   "179.036 141.192\n" +
 		   "189.058 176.358\n" +
 		   "273.076 10000.000\n" +
-		   "274.083 318.003\n";	
+		   "274.083 318.003\n";
+		
+		//alternatively read peaklist from file
+//		String peaks = "";
+//		try
+//		{
+//			FileInputStream fstream = new FileInputStream("/path/to/file");
+//		    DataInputStream in = new DataInputStream(fstream);
+//		    BufferedReader br = new BufferedReader(new InputStreamReader(in));
+//		    String strLine;
+//		    //Read File Line By Line
+//		    while ((strLine = br.readLine()) != null)   {
+//		      peaks += strLine;
+//		    }
+//		    in.close();
+//		}
+//		catch(IOException e)
+//		{
+//			System.err.println("File not found! " + e.getMessage());
+//		}
+		
 		//create spectrum
 		WrapperSpectrum spectrum = new WrapperSpectrum(peaks, 1, exactMass);
 		

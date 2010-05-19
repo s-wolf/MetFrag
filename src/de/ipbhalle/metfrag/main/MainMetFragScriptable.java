@@ -43,6 +43,7 @@ import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.exception.InvalidSmilesException;
 
 import de.ipbhalle.metfrag.spectrum.WrapperSpectrum;
+import de.ipbhalle.metfrag.tools.Writer;
 
 
 public class MainMetFragScriptable {
@@ -264,54 +265,29 @@ public static void main(String[] args) {
 			try
 			{
 				new File(c.getFolder() + "logs/").mkdir();
-				File outFile = new File(c.getFolder() + "logs/" + date + "_log.txt");
-	            FileWriter out = new FileWriter(outFile, true);
-	            out.write(completeLog.toString());
-	            out.close();
-	            
-	            //write peak data of the correct compounds to file
-	            FileWriter out1 = new FileWriter(c.getFolder() + "logs/" + date + "_histCompare.txt", true);
-	            out1.write(histogramCompare);
-	            out1.close();
-	            
-	            //write peak data of all explained peaks to file
-	            FileWriter out2 = new FileWriter(c.getFolder() + "logs/" + date + "_histEasy.txt", true);
-	            out2.write(histogram);
-	            out2.close();
-	            
-	            //write peak data of all explained peaks to file
-	            FileWriter out3 = new FileWriter(c.getFolder() + "logs/" + date + "_histRealScoring.txt", true);
-	            out3.write(histogramReal);
-	            out3.close();
-	            
-	            
-	            //write peak data
-	            FileWriter allPeaksOut = new FileWriter(c.getFolder() + "logs/" + date + "_AllPeaksInclusive.txt", true);
-				allPeaksOut.write(histogramPeaksAll);
-				allPeaksOut.close();
-	            FileWriter allPeaksExclusiveOut = new FileWriter(c.getFolder() + "logs/" + date + "_AllPeaksExclusive.txt", true);
-	            allPeaksExclusiveOut.write(histogramPeaks);
-	            allPeaksExclusiveOut.close();
-				FileWriter allFoundPeaks = new FileWriter(c.getFolder() + "logs/" + date + "_FoundPeaks.txt", true);
-				allFoundPeaks.write(histogramPeaksCorresponding);
-	            allFoundPeaks.close();
-	            
-	            new File(c.getFolder() + "logs/" + date + "/").mkdirs();
-	            FileWriter out4 = new FileWriter(c.getFolder() + "logs/" + date + "/" + currentFile, true);
-	            out4.write(parameterOptimization);
-	            out4.close();
-	            
+
+				//complete log
+				Writer.writeToFile(c.getFolder() + "logs/" + date + "_log.txt", completeLog.toString());
+				//write peak data of the correct compounds to file
+				Writer.writeToFile(c.getFolder() + "logs/" + date + "_histCompare.txt", histogramCompare);
+				//write peak data of all explained peaks to file
+				Writer.writeToFile(c.getFolder() + "logs/" + date + "_histEasy.txt", histogram);
+				//write peak data of all explained peaks to file
+				Writer.writeToFile(c.getFolder() + "logs/" + date + "_histRealScoring.txt", histogramReal);
+				Writer.writeToFile(c.getFolder() + "logs/" + date + "_AllPeaksInclusive.txt", histogramPeaksAll);
+				Writer.writeToFile(c.getFolder() + "logs/" + date + "_AllPeaksExclusive.txt", histogramPeaks);
+				Writer.writeToFile(c.getFolder() + "logs/" + date + "_FoundPeaks.txt", histogramPeaksCorresponding);
+				new File(c.getFolder() + "logs/" + date + "/").mkdirs();
+				Writer.writeToFile(c.getFolder() + "logs/" + date + "/" + currentFile, parameterOptimization);
+				
+
 //	            FileWriter similarities = new FileWriter(c.getFolder() + "logs/" + date + "_Similarities.txt", true);
 //	            similarities.write(similarityValues);
 //	            similarities.close();
 			}
-			catch (FileNotFoundException ex)
-			{
-				System.out.print("File not found: " + ex.getMessage());
-			}
-			catch (IOException ex)
-			{
-				System.out.print("IO Error: " + ex.getMessage());
+			catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 		}
 
