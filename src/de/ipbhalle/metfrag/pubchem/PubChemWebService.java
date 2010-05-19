@@ -24,6 +24,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -149,10 +150,11 @@ public class PubChemWebService {
             InputStream input = fetch.getInputStream();
             
             // open local file based on the URL file name
-			String filename = "/tmp"
-					+ url.getFile().substring(url.getFile().lastIndexOf('/'));
-			FileOutputStream output = new FileOutputStream(filename);
-//			System.out.println("Writing data to " + filename);
+            File tempFile = File.createTempFile(url.getFile().substring(url.getFile().lastIndexOf('/')), ".sdf");
+
+            // Delete temp file when program exits.
+            tempFile.deleteOnExit();
+            FileOutputStream output = new FileOutputStream(tempFile);
 
 			// buffered read/write
 			byte[] buffer = new byte[10000];
@@ -162,7 +164,7 @@ public class PubChemWebService {
 			
 			//now read in the file
 			FileInputStream in = null;
-	        in = new FileInputStream(filename);
+	        in = new FileInputStream(tempFile);
 	        GZIPInputStream gin = new GZIPInputStream(in);
 	        
 	        //IChemObjectReader cor = null;
@@ -252,10 +254,13 @@ public class PubChemWebService {
 			InputStream input = fetch.getInputStream();
 
 			// open local file based on the URL file name
-			String filename = "/tmp"
-					+ url.getFile().substring(url.getFile().lastIndexOf('/'));
-			FileOutputStream output = new FileOutputStream(filename);
-			System.out.println("Writing data to " + filename);
+            File tempFile = File.createTempFile(url.getFile().substring(url.getFile().lastIndexOf('/')), ".sdf");
+
+            // Delete temp file when program exits.
+            tempFile.deleteOnExit();
+            FileOutputStream output = new FileOutputStream(tempFile);
+
+			System.out.println("Writing data to " + tempFile.getName());
 
 			// buffered read/write
 			byte[] buffer = new byte[10000];
@@ -265,7 +270,7 @@ public class PubChemWebService {
 			
 			//read the file
 			FileInputStream in = null;
-	        in = new FileInputStream(filename);
+	        in = new FileInputStream(tempFile);
 	        
 	        //IChemObjectReader cor = null;
 	        //cor = new ReaderFactory().createReader(in);
@@ -293,9 +298,6 @@ public class PubChemWebService {
 				System.out.println(cids[i]);
 				this.retrievedHits.put(cids[i], generatorSmiles.createSMILES(fileContents.getChemSequence(0).getChemModel(i).getMoleculeSet().getMolecule(0)));
 			}
-	        
-	        new File("/tmp"	+ url.getFile().substring(url.getFile().lastIndexOf('/'))).delete();
-	        System.out.println("Temp file deleted!");
 	        
 		}
 		 else {
@@ -393,10 +395,11 @@ public class PubChemWebService {
 			InputStream input = fetch.getInputStream();
 
 			// open local file based on the URL file name
-			String filename = "/tmp"
-					+ url.getFile().substring(url.getFile().lastIndexOf('/'));
-			FileOutputStream output = new FileOutputStream(filename);
-			System.out.println("Writing data to " + filename);
+            File tempFile = File.createTempFile(url.getFile().substring(url.getFile().lastIndexOf('/')), ".sdf");
+            // Delete temp file when program exits.
+            tempFile.deleteOnExit();
+            FileOutputStream output = new FileOutputStream(tempFile);
+			System.out.println("Writing data to " + tempFile.getAbsolutePath() + tempFile.getName());
 
 			// buffered read/write
 			byte[] buffer = new byte[10000];
@@ -406,7 +409,7 @@ public class PubChemWebService {
 			
 			//now read in the file
 			FileInputStream in = null;
-	        in = new FileInputStream(filename);
+	        in = new FileInputStream(tempFile);
 	        
 	        //IChemObjectReader cor = null;
 	        //cor = new ReaderFactory().createReader(in);
@@ -425,10 +428,6 @@ public class PubChemWebService {
 			}
 
 	        System.out.println("Read the file");
-	        
-	        new File("/tmp"	+ url.getFile().substring(url.getFile().lastIndexOf('/'))).delete();
-	        
-	        System.out.println("Temp file deleted!");
 			
 		} else {
 			System.out.println("Error: "
@@ -528,10 +527,11 @@ public class PubChemWebService {
 			InputStream input = fetch.getInputStream();
 
 			// open local file based on the URL file name
-			String filename = "/tmp"
-					+ url.getFile().substring(url.getFile().lastIndexOf('/'));
-			FileOutputStream output = new FileOutputStream(filename);
-			System.out.println("Writing data to " + filename);
+            File tempFile = File.createTempFile(url.getFile().substring(url.getFile().lastIndexOf('/')), ".sdf");
+            // Delete temp file when program exits.
+            tempFile.deleteOnExit();
+            FileOutputStream output = new FileOutputStream(tempFile);
+			System.out.println("Writing data to " + tempFile.getAbsolutePath() + tempFile.getName());
 
 			// buffered read/write
 			byte[] buffer = new byte[10000];
@@ -541,7 +541,7 @@ public class PubChemWebService {
 			
 			//now read in the file
 			FileInputStream in = null;
-	        in = new FileInputStream(filename);
+	        in = new FileInputStream(tempFile);
 	        
 	        //IChemObjectReader cor = null;
 	        //cor = new ReaderFactory().createReader(in);
@@ -560,10 +560,6 @@ public class PubChemWebService {
 			}
 
 	        System.out.println("Read the file");
-	        
-	        new File("/tmp"	+ url.getFile().substring(url.getFile().lastIndexOf('/'))).delete();
-	        
-	        System.out.println("Temp file deleted!");
 			
 		} else {
 			System.out.println("Error: "
