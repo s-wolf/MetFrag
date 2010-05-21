@@ -138,7 +138,7 @@ public class Charges {
 				protonatedMol = (IAtomContainer) mol.clone();
 				IAtom hydrogenAtom = new Atom("H");
 				if(verbose)
-					System.out.println("Protonation of atom: " + chargesArray[i].getAtom().getSymbol()  + chargesArray[i].getAtom().getID());
+					System.out.println("Protonation of atom: " + chargesArray[i].getAtom().getSymbol()  + (Integer.parseInt(chargesArray[i].getAtom().getID()) + 1));
 				IBond hydrogenBond = new Bond(AtomContainerManipulator.getAtomById(protonatedMol, chargesArray[i].getAtom().getID()), hydrogenAtom);
 				protonatedMol.addAtom(hydrogenAtom);
 				protonatedMol.addBond(hydrogenBond);
@@ -181,7 +181,7 @@ public class Charges {
 		        	
 		        	Double diffCharge = Math.abs(atom1Charge - atom2Charge);
 		        	
-		        	Distance dist = new Distance(atom1.getSymbol() + "-" + atom2.getSymbol(), diffCharge, bond.getID());
+		        	Distance dist = new Distance(atom1.getSymbol() + (Integer.parseInt(atom1.getID()) + 1) + "-" + atom2.getSymbol() + (Integer.parseInt(atom2.getID()) + 1), diffCharge, bond.getID());
 		        	//original molecule
 		        	if(j == 0 && !cpd1BondToDistance.contains(dist))
 		        		cpd1BondToDistance.add(dist);
