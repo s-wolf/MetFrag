@@ -137,7 +137,8 @@ public class Charges {
 				//now add hydrogen atom
 				protonatedMol = (IAtomContainer) mol.clone();
 				IAtom hydrogenAtom = new Atom("H");
-				System.out.println("Protonation of atom: " + chargesArray[i].getAtom().getSymbol()  + chargesArray[i].getAtom().getID());
+				if(verbose)
+					System.out.println("Protonation of atom: " + chargesArray[i].getAtom().getSymbol()  + chargesArray[i].getAtom().getID());
 				IBond hydrogenBond = new Bond(AtomContainerManipulator.getAtomById(protonatedMol, chargesArray[i].getAtom().getID()), hydrogenAtom);
 				protonatedMol.addAtom(hydrogenAtom);
 				protonatedMol.addBond(hydrogenBond);

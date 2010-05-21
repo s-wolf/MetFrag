@@ -225,6 +225,16 @@ public class MetFrag {
 	 * @param molecularFormula the molecular formula
 	 * @param exactMass the exact mass
 	 * @param spectrum the spectrum
+	 * @param useProxy the use proxy
+	 * @param mzabs the mzabs
+	 * @param mzppm the mzppm
+	 * @param molecularFormulaRedundancyCheck the molecular formula redundancy check
+	 * @param breakAromaticRings the break aromatic rings
+	 * @param treeDepth the tree depth
+	 * @param hydrogenTest the hydrogen test
+	 * @param neutralLossInEveryLayer the neutral loss in every layer
+	 * @param bondEnergyScoring the bond energy scoring
+	 * @param breakOnlySelectedBonds the break only selected bonds
 	 * 
 	 * @return the string
 	 * 
