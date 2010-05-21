@@ -98,10 +98,10 @@ public class StructureRenderer extends JFrame {
             
             for (IGenerator generator : renderer.getGenerators()) {
             	for (IGeneratorParameter parameter : generator.getParameters()) {
-            		System.out.println("parameter: " +
-            	      parameter.getClass().getName().substring(40) +
-            	      " -> " +
-            	      parameter.getValue());
+//            		System.out.println("parameter: " +
+//            	      parameter.getClass().getName().substring(40) +
+//            	      " -> " +
+//            	      parameter.getValue());
             		if(parameter.getClass().getName().substring(40).equals("BasicAtomGenerator$KekuleStructure"))
             			parameter.setValue(true);
             		
@@ -109,7 +109,7 @@ public class StructureRenderer extends JFrame {
             }
             
             renderer.getRenderer2DModel().setDrawNumbers(true);
-            System.out.println("Numbers: " + renderer.getRenderer2DModel().drawNumbers());
+//            System.out.println("Numbers: " + renderer.getRenderer2DModel().drawNumbers());
                         
             this.isNew = true;
         }

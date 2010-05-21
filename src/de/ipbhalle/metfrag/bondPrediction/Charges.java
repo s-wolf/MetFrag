@@ -51,6 +51,7 @@ public class Charges {
 	
 	private IAtomContainer mol;
 	private Map<String, Double> bondToBondLength;
+	private boolean verbose = false;
 	
 	/**
 	 * Instantiates a new charges class.
@@ -60,6 +61,12 @@ public class Charges {
 	public Charges()
 	{
 		this.bondToBondLength = new HashMap<String, Double>();
+	}
+	
+	
+	public void debug()
+	{
+		verbose = true;
 	}
 	
 	
@@ -130,6 +137,7 @@ public class Charges {
 				//now add hydrogen atom
 				protonatedMol = (IAtomContainer) mol.clone();
 				IAtom hydrogenAtom = new Atom("H");
+				System.out.println("Protonation of atom: " + chargesArray[i].getAtom().getSymbol()  + chargesArray[i].getAtom().getID());
 				IBond hydrogenBond = new Bond(AtomContainerManipulator.getAtomById(protonatedMol, chargesArray[i].getAtom().getID()), hydrogenAtom);
 				protonatedMol.addAtom(hydrogenAtom);
 				protonatedMol.addBond(hydrogenBond);
@@ -137,7 +145,8 @@ public class Charges {
 				AtomContainerManipulator.convertImplicitToExplicitHydrogens(protonatedMol);
 	            AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(protonatedMol);
 //	            Render.Draw(this.mol, "original");
-//	            Render.Draw(protonatedMol, "protonated");
+	            if(verbose)
+	            	new StructureRenderer(protonatedMol, "protonated");
 	            GasteigerMarsiliPartialCharges peoe = new GasteigerMarsiliPartialCharges();
 	            peoe.calculateCharges(protonatedMol);
 	            protonatedMol = MoleculeTools.moleculeNumbering(protonatedMol);
@@ -163,8 +172,8 @@ public class Charges {
 		        			atom2 = atom;
 		        		
 					}
-		        	//System.out.println("Distance between " + atom1.getSymbol() + "-"  +	atom2.getSymbol() + "\t" +
-		        	//		atom1.getPoint3d().distance(atom2.getPoint3d()));
+//		        	System.out.println("Distance between " + atom1.getSymbol() + "-"  +	atom2.getSymbol() + "\t" +
+//		        			atom1.getPoint3d().distance(atom2.getPoint3d()));
 		        	
 		        	Double atom1Charge = (Math.round(atom1.getCharge() * 1000.0)/1000.0);
 		        	Double atom2Charge = (Math.round(atom2.getCharge() * 1000.0)/1000.0);
@@ -202,7 +211,8 @@ public class Charges {
 				//now save only the maximum bond length change...
 				bondToBondLength = saveMaximum(bondToBondLength, cpd1BondToDistance.get(i1).getBondID(), distRound);
 				
-//				System.out.println(cpd1BondToDistance.get(i1).getBond() + " " + cpd1BondToDistance.get(i1).getBondLength() + " " + cpd2BondToDistance.get(i1 + offset).getBondLength() + ": " + distRound);
+				if(verbose)
+					System.out.println(cpd1BondToDistance.get(i1).getBond() + " " + cpd1BondToDistance.get(i1).getBondLength() + " " + cpd2BondToDistance.get(i1 + offset).getBondLength() + ": " + distRound);
 			}
 			
 //			for (String string : notMatched) {
@@ -292,8 +302,8 @@ public class Charges {
             MoleculeTools.moleculeNumbering(m);
             
 //            IAtom s = new Atom("O");
-            IAtom test = m.getAtom(1); // getAtomById(m, "0");
-            test.setSymbol("S");
+//            IAtom test = m.getAtom(1); // getAtomById(m, "0");
+//            test.setSymbol("S");
 //            m.setAtom(1, s);
             
             AtomContainerManipulator.convertImplicitToExplicitHydrogens(m);
@@ -315,6 +325,7 @@ public class Charges {
 			
 			
 			Charges charges = new Charges();
+			charges.debug();
 			charges.calculateBondsToBreak(m);
 			
 			

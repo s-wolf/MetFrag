@@ -1,3 +1,24 @@
+/*
+*
+* Copyright (C) 2009-2010 IPB Halle, Sebastian Wolf
+*
+* Contact: swolf@ipb-halle.de
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*
+*/
+
 package de.ipbhalle.metfrag.main;
 
 import java.io.File;
@@ -191,6 +212,119 @@ public class MetFrag {
 		
 		
 		return ret;
+	}
+	
+	
+	
+	/**
+	 * MetFrag. Start the fragmenter thread. Afterwards score the results.
+	 * 
+	 * @param database the database
+	 * @param searchPPM the search ppm
+	 * @param databaseID the database id
+	 * @param molecularFormula the molecular formula
+	 * @param exactMass the exact mass
+	 * @param spectrum the spectrum
+	 * 
+	 * @return the string
+	 * 
+	 * @throws Exception the exception
+	 */
+	public static List<MetFragResult> startConvenience(String database, String databaseID, String molecularFormula, Double exactMass, WrapperSpectrum spectrum, boolean useProxy, String outputFile, 
+			double mzabs, double mzppm, double searchPPM, boolean molecularFormulaRedundancyCheck, boolean breakAromaticRings, int treeDepth,
+			boolean hydrogenTest, boolean neutralLossInEveryLayer, boolean bondEnergyScoring, boolean breakOnlySelectedBonds) throws Exception
+	{
+		
+		PubChemWebService pubchem = new PubChemWebService();
+		Vector<String> candidates = null;
+		
+		System.out.println("Search PPM: " + searchPPM);
+		
+		if(database.equals("kegg") && databaseID.equals(""))
+		{
+			if(molecularFormula != "")
+				candidates = KeggWebservice.KEGGbySumFormula(molecularFormula);
+			else
+				candidates = KeggWebservice.KEGGbyMass(exactMass, (PPMTool.getPPMDeviation(exactMass, searchPPM)));
+		}
+		else if(database.equals("chemspider") && databaseID.equals(""))
+		{
+			if(molecularFormula != "")
+				candidates = ChemSpider.getChemspiderBySumFormula(molecularFormula);
+			else
+				candidates = ChemSpider.getChemspiderByMass(exactMass, (PPMTool.getPPMDeviation(exactMass, searchPPM)));
+		}
+		else if(database.equals("pubchem") && databaseID.equals(""))
+		{
+			if(molecularFormula != "")
+				candidates = pubchem.getHitsbySumFormula(molecularFormula, useProxy);
+			else
+				candidates = pubchem.getHitsByMass(exactMass, (PPMTool.getPPMDeviation(exactMass, searchPPM)), Integer.MAX_VALUE, useProxy);
+		}
+		else if (!databaseID.equals(""))
+		{
+			candidates = new Vector<String>();
+			candidates.add(databaseID);
+		}
+		
+		
+		
+
+		//now fill executor!!!
+		//number of threads depending on the available processors
+	    int threads = Runtime.getRuntime().availableProcessors();
+	    //thread executor
+	    ExecutorService threadExecutor = null;
+	    System.out.println("Used Threads: " + threads);
+	    threadExecutor = Executors.newFixedThreadPool(threads);
+	    //threadExecutor = Executors.newCachedThreadPool();
+		Vector<String> realCandidates = new Vector<String>();
+		
+			
+		for (int c = 0; c < candidates.size(); c++) {				
+			threadExecutor.execute(new FragmenterThread(candidates.get(c), database, pubchem, spectrum, mzabs, mzppm, 
+					molecularFormulaRedundancyCheck, breakAromaticRings, treeDepth, false, hydrogenTest, neutralLossInEveryLayer, 
+					bondEnergyScoring, breakOnlySelectedBonds));		
+		}
+		
+		threadExecutor.shutdown();
+		
+		//wait until all threads are finished
+		while(!threadExecutor.isTerminated())
+		{
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}//sleep for 1000 ms
+		}
+		
+		String ret = "";
+
+		Map<Double, Vector<String>> scoresNormalized = Scoring.getCombinedScore(results.getRealScoreMap(), results.getMapCandidateToEnergy(), results.getMapCandidateToHydrogenPenalty());
+		Double[] scores = new Double[scoresNormalized.size()];
+		scores = scoresNormalized.keySet().toArray(scores);
+		Arrays.sort(scores);
+		
+		
+		
+		//now collect the result
+		Map<String, IAtomContainer> candidateToStructure = results.getMapCandidateToStructure();
+		Map<String, Vector<PeakMolPair>> candidateToFragments = results.getMapCandidateToFragments();
+
+		List<MetFragResult> results = new ArrayList<MetFragResult>();
+		for (int i = scores.length -1; i >=0 ; i--) {
+			Vector<String> list = scoresNormalized.get(scores[i]);
+			for (String string : list) {
+				//get corresponding structure
+				IAtomContainer tmp = candidateToStructure.get(string);
+				tmp = AtomContainerManipulator.removeHydrogens(tmp);
+				
+				results.add(new MetFragResult(string, tmp, scores[i], candidateToFragments.get(string).size()));
+			}
+		}		
+		
+		return results;
 	}
 
 }
