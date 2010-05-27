@@ -442,8 +442,6 @@ public class PubChemSearchParallel{
 			    //threadExecutor = Executors.newCachedThreadPool();
 				Vector<String> realCandidates = new Vector<String>();
 				
-				
-				
 				int count = 0;
 			    //add them into queue
 				for (String candidate : candidates) {
@@ -503,11 +501,12 @@ public class PubChemSearchParallel{
 				while(!threadExecutor.isTerminated())
 				{
 					try {
-						Thread.currentThread().sleep(1000);
+						Thread.sleep(10000);
 					} catch (InterruptedException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}//sleep for 1000 ms
+					System.err.println("Ich rechne mich kaputt");
 				}
 				
 			}

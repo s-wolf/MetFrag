@@ -52,21 +52,33 @@ public class Charges {
 	private IAtomContainer mol;
 	private Map<String, Double> bondToBondLength;
 	private boolean verbose = false;
+	private List<ChargeResult> results= null;
 	
 	/**
 	 * Instantiates a new charges class.
 	 * 
-	 * @param mol the mol
 	 */
 	public Charges()
 	{
 		this.bondToBondLength = new HashMap<String, Double>();
+		this.setResults(new ArrayList<ChargeResult>());
 	}
 	
 	
 	public void debug()
 	{
 		verbose = true;
+	}
+	
+	
+	/**
+	 * Gets the original molecule after it was processed.
+	 * 
+	 * @return the original molecule
+	 */
+	public IAtomContainer getOriginalMolecule()
+	{
+		return this.mol;
 	}
 	
 	
@@ -80,15 +92,15 @@ public class Charges {
 	 */
 	public List<String> calculateBondsToBreak(IAtomContainer mol) throws CloneNotSupportedException, CDKException
 	{		
-		this.mol = MoleculeTools.moleculeNumbering(mol);
 		List<String> bondsToBreak = new ArrayList<String>();
+		this.mol = mol;
 		
 		try {
         	GasteigerMarsiliPartialCharges peoe = new GasteigerMarsiliPartialCharges();
 //        	GasteigerPEPEPartialCharges pepe = new GasteigerPEPEPartialCharges();
             AtomContainerManipulator.convertImplicitToExplicitHydrogens(this.mol);
             AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(this.mol);
-    		
+            this.mol = MoleculeTools.moleculeNumbering(this.mol);
     		peoe.calculateCharges(this.mol);
 //	    	pepe.calculateCharges(cpd);
 		} catch (Exception e) {
@@ -135,7 +147,7 @@ public class Charges {
 			else
 			{
 				//now add hydrogen atom
-				protonatedMol = (IAtomContainer) mol.clone();
+				protonatedMol = (IAtomContainer) this.mol.clone();
 				IAtom hydrogenAtom = new Atom("H");
 				if(verbose)
 					System.out.println("Protonation of atom: " + chargesArray[i].getAtom().getSymbol()  + (Integer.parseInt(chargesArray[i].getAtom().getID()) + 1));
@@ -197,25 +209,29 @@ public class Charges {
 			
 			//now compare the results
 			int offset = 0;
+			String tempResult = "";
 			for (int i1 = 0; i1 < cpd1BondToDistance.size(); i1++) {
 				Double dist = -999.9;
 				if(cpd1BondToDistance.get(i1).getBond().equals(cpd2BondToDistance.get(i1 + offset).getBond()))
+				{
 					dist = (cpd2BondToDistance.get(i1 + offset).getBondLength() - cpd1BondToDistance.get(i1).getBondLength());
+					double distRound = Math.round(dist*1000.0)/1000.0;
+					//now save only the maximum bond length change...
+					bondToBondLength = saveMaximum(bondToBondLength, cpd1BondToDistance.get(i1).getBondID(), distRound);
+					tempResult += cpd1BondToDistance.get(i1).getBond() + " " + cpd1BondToDistance.get(i1).getBondLength() + " " + cpd2BondToDistance.get(i1 + offset).getBondLength() + ": " + distRound + "\n";
+				}
 				else
 				{
 					notMatched.add(cpd2BondToDistance.get(i1 + offset).getBond());
 					offset++;
-					dist = (cpd2BondToDistance.get(i1 + offset).getBondLength() - cpd1BondToDistance.get(i1).getBondLength());
-				}
-				double distRound = Math.round(dist*1000.0)/1000.0;
-				
-				//now save only the maximum bond length change...
-				bondToBondLength = saveMaximum(bondToBondLength, cpd1BondToDistance.get(i1).getBondID(), distRound);
-				
-				if(verbose)
-					System.out.println(cpd1BondToDistance.get(i1).getBond() + " " + cpd1BondToDistance.get(i1).getBondLength() + " " + cpd2BondToDistance.get(i1 + offset).getBondLength() + ": " + distRound);
+//					dist = (cpd2BondToDistance.get(i1 + offset).getBondLength() - cpd1BondToDistance.get(i1).getBondLength());
+				}				
 			}
 			
+			if(verbose)
+				System.out.println(tempResult);
+			this.results.add(new ChargeResult(protonatedMol, tempResult));
+
 //			for (String string : notMatched) {
 //				System.out.println(string);
 //			}
@@ -237,6 +253,15 @@ public class Charges {
 //			System.out.println(bondID);
 //		}
 
+		
+		//now add the complete combined result in front of the list
+		String combinedResults = "";
+		for (String bond : bondToBondLength.keySet()) {
+			combinedResults += bond + " " + bondToBondLength.get(bond);
+		}
+		this.results.add(0, new ChargeResult(this.mol, combinedResults));
+		
+		
 		return bondsToBreak;
             
 	}
@@ -290,6 +315,15 @@ public class Charges {
 		return this.bondToBondLength.get(bondID);
 	}
 	
+	public void setResults(List<ChargeResult> results) {
+		this.results = results;
+	}
+
+
+	public List<ChargeResult> getResults() {
+		return results;
+	}
+	
 	public static void main(String[] args) {
 		
 		try {
@@ -341,10 +375,5 @@ public class Charges {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
-		
 	}
-	
-	
-
 }

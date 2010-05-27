@@ -62,13 +62,17 @@ import org.openscience.cdk.tools.manipulator.ChemFileManipulator;
 import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 
 import de.ipbhalle.metfrag.chemspiderClient.ChemSpider;
+import de.ipbhalle.metfrag.fragmenter.Candidates;
 import de.ipbhalle.metfrag.fragmenter.Fragmenter;
 import de.ipbhalle.metfrag.fragmenter.FragmenterResult;
 import de.ipbhalle.metfrag.fragmenter.FragmenterThread;
 import de.ipbhalle.metfrag.keggWebservice.KeggWebservice;
 import de.ipbhalle.metfrag.massbankParser.Peak;
+import de.ipbhalle.metfrag.molDatabase.KEGGLocal;
 import de.ipbhalle.metfrag.pubchem.PubChemWebService;
 import de.ipbhalle.metfrag.scoring.Scoring;
+import de.ipbhalle.metfrag.similarity.Similarity;
+import de.ipbhalle.metfrag.similarity.SimilarityGroup;
 import de.ipbhalle.metfrag.spectrum.AssignFragmentPeak;
 import de.ipbhalle.metfrag.spectrum.CleanUpPeakList;
 import de.ipbhalle.metfrag.spectrum.PeakMolPair;
@@ -99,41 +103,8 @@ public class MetFrag {
 	{
 		//get configuration
 		Config config = new Config();
-		
 		PubChemWebService pubchem = new PubChemWebService();
-		Vector<String> candidates = null;
-		
-		System.out.println("Search PPM: " + config.getSearchPPM());
-		
-		if(database.equals("kegg") && databaseID.equals(""))
-		{
-			if(molecularFormula != "")
-				candidates = KeggWebservice.KEGGbySumFormula(molecularFormula);
-			else
-				candidates = KeggWebservice.KEGGbyMass(exactMass, (PPMTool.getPPMDeviation(exactMass, config.getSearchPPM())));
-		}
-		else if(database.equals("chemspider") && databaseID.equals(""))
-		{
-			if(molecularFormula != "")
-				candidates = ChemSpider.getChemspiderBySumFormula(molecularFormula);
-			else
-				candidates = ChemSpider.getChemspiderByMass(exactMass, (PPMTool.getPPMDeviation(exactMass, config.getSearchPPM())));
-		}
-		else if(database.equals("pubchem") && databaseID.equals(""))
-		{
-			if(molecularFormula != "")
-				candidates = pubchem.getHitsbySumFormula(molecularFormula, useProxy);
-			else
-				candidates = pubchem.getHitsByMass(exactMass, (PPMTool.getPPMDeviation(exactMass, config.getSearchPPM())), Integer.MAX_VALUE, useProxy);
-		}
-		else if (!databaseID.equals(""))
-		{
-			candidates = new Vector<String>();
-			candidates.add(databaseID);
-		}
-		
-		
-		
+		Vector<String> candidates = Candidates.getOnline(database, databaseID, molecularFormula, exactMass, config.getSearchPPM(), useProxy, pubchem);
 
 		//now fill executor!!!
 		//number of threads depending on the available processors
@@ -142,9 +113,6 @@ public class MetFrag {
 	    ExecutorService threadExecutor = null;
 	    System.out.println("Used Threads: " + threads);
 	    threadExecutor = Executors.newFixedThreadPool(threads);
-	    //threadExecutor = Executors.newCachedThreadPool();
-		Vector<String> realCandidates = new Vector<String>();
-		
 			
 		for (int c = 0; c < candidates.size(); c++) {				
 			threadExecutor.execute(new FragmenterThread(candidates.get(c), database, pubchem, spectrum, config.getMzabs(), config.getMzppm(), 
@@ -246,39 +214,8 @@ public class MetFrag {
 	{
 		
 		PubChemWebService pubchem = new PubChemWebService();
-		Vector<String> candidates = null;
-		
-		System.out.println("Search PPM: " + searchPPM);
-		
-		if(database.equals("kegg") && databaseID.equals(""))
-		{
-			if(molecularFormula != "")
-				candidates = KeggWebservice.KEGGbySumFormula(molecularFormula);
-			else
-				candidates = KeggWebservice.KEGGbyMass(exactMass, (PPMTool.getPPMDeviation(exactMass, searchPPM)));
-		}
-		else if(database.equals("chemspider") && databaseID.equals(""))
-		{
-			if(molecularFormula != "")
-				candidates = ChemSpider.getChemspiderBySumFormula(molecularFormula);
-			else
-				candidates = ChemSpider.getChemspiderByMass(exactMass, (PPMTool.getPPMDeviation(exactMass, searchPPM)));
-		}
-		else if(database.equals("pubchem") && databaseID.equals(""))
-		{
-			if(molecularFormula != "")
-				candidates = pubchem.getHitsbySumFormula(molecularFormula, useProxy);
-			else
-				candidates = pubchem.getHitsByMass(exactMass, (PPMTool.getPPMDeviation(exactMass, searchPPM)), Integer.MAX_VALUE, useProxy);
-		}
-		else if (!databaseID.equals(""))
-		{
-			candidates = new Vector<String>();
-			candidates.add(databaseID);
-		}
-		
-		
-		
+		Vector<String> candidates = Candidates.getOnline(database, databaseID, molecularFormula, exactMass, searchPPM, useProxy, pubchem);
+
 
 		//now fill executor!!!
 		//number of threads depending on the available processors
@@ -287,14 +224,86 @@ public class MetFrag {
 	    ExecutorService threadExecutor = null;
 	    System.out.println("Used Threads: " + threads);
 	    threadExecutor = Executors.newFixedThreadPool(threads);
-	    //threadExecutor = Executors.newCachedThreadPool();
-		Vector<String> realCandidates = new Vector<String>();
-		
 			
 		for (int c = 0; c < candidates.size(); c++) {				
 			threadExecutor.execute(new FragmenterThread(candidates.get(c), database, pubchem, spectrum, mzabs, mzppm, 
 					molecularFormulaRedundancyCheck, breakAromaticRings, treeDepth, false, hydrogenTest, neutralLossInEveryLayer, 
 					bondEnergyScoring, breakOnlySelectedBonds));		
+		}
+		
+		threadExecutor.shutdown();
+		
+		//wait until all threads are finished
+		while(!threadExecutor.isTerminated())
+		{
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}//sleep for 1000 ms
+		}
+
+		Map<Double, Vector<String>> scoresNormalized = Scoring.getCombinedScore(results.getRealScoreMap(), results.getMapCandidateToEnergy(), results.getMapCandidateToHydrogenPenalty());
+		Double[] scores = new Double[scoresNormalized.size()];
+		scores = scoresNormalized.keySet().toArray(scores);
+		Arrays.sort(scores);
+
+		//now collect the result
+		Map<String, IAtomContainer> candidateToStructure = results.getMapCandidateToStructure();
+		Map<String, Vector<PeakMolPair>> candidateToFragments = results.getMapCandidateToFragments();
+
+		List<MetFragResult> results = new ArrayList<MetFragResult>();
+		for (int i = scores.length -1; i >=0 ; i--) {
+			Vector<String> list = scoresNormalized.get(scores[i]);
+			for (String string : list) {
+				//get corresponding structure
+				IAtomContainer tmp = candidateToStructure.get(string);
+				tmp = AtomContainerManipulator.removeHydrogens(tmp);
+				
+				results.add(new MetFragResult(string, tmp, scores[i], candidateToFragments.get(string).size()));
+			}
+		}		
+		
+		return results;
+	}
+	
+	
+	
+	/**
+	 * MetFrag. Start the fragmenter thread. Afterwards score the results.
+	 * This method is mainly used to evaluate MetFrag against the test data set.
+	 * 
+	 * @param database the database
+	 * @param searchPPM the search ppm
+	 * @param databaseID the database id
+	 * @param molecularFormula the molecular formula
+	 * @param exactMass the exact mass
+	 * @param spectrum the spectrum
+	 * 
+	 * @return the string
+	 * 
+	 * @throws Exception the exception
+	 */
+	public static String startScriptable(String database, String databaseID, String molecularFormula, Double exactMass, WrapperSpectrum spectrum, boolean useProxy, String outputFile, String correctCandidateID, boolean generateOptimizationMatrix) throws Exception
+	{
+		//get configuration
+		Config config = new Config();
+		
+		PubChemWebService pubchem = new PubChemWebService();
+		List<String> candidates = Candidates.getLocally(database, exactMass, config.getSearchPPM(), config.getJdbc(), config.getUsername(), config.getPassword());
+
+		//now fill executor!!!
+		//number of threads depending on the available processors
+	    int threads = Runtime.getRuntime().availableProcessors();
+	    //thread executor
+	    ExecutorService threadExecutor = null;
+	    System.out.println("Used Threads: " + threads);
+	    threadExecutor = Executors.newFixedThreadPool(threads);
+
+		for (int c = 0; c < candidates.size(); c++) {				
+			threadExecutor.execute(new FragmenterThread(candidates.get(c), database, pubchem, spectrum, config.getMzabs(), config.getMzppm(), 
+					config.isSumFormulaRedundancyCheck(), config.isBreakAromaticRings(), config.getTreeDepth(), false, config.isHydrogenTest(), config.isNeutralLossAdd(), 
+					config.isBondEnergyScoring(), config.isOnlyBreakSelectedBonds()));		
 		}
 		
 		threadExecutor.shutdown();
@@ -315,26 +324,227 @@ public class MetFrag {
 		Double[] scores = new Double[scoresNormalized.size()];
 		scores = scoresNormalized.keySet().toArray(scores);
 		Arrays.sort(scores);
-		
-		
-		
+
 		//now collect the result
 		Map<String, IAtomContainer> candidateToStructure = results.getMapCandidateToStructure();
 		Map<String, Vector<PeakMolPair>> candidateToFragments = results.getMapCandidateToFragments();
-
-		List<MetFragResult> results = new ArrayList<MetFragResult>();
-		for (int i = scores.length -1; i >=0 ; i--) {
-			Vector<String> list = scoresNormalized.get(scores[i]);
-			for (String string : list) {
-				//get corresponding structure
-				IAtomContainer tmp = candidateToStructure.get(string);
-				tmp = AtomContainerManipulator.removeHydrogens(tmp);
-				
-				results.add(new MetFragResult(string, tmp, scores[i], candidateToFragments.get(string).size()));
-			}
-		}		
+		Map<String, Double> candidateToEnergy = results.getMapCandidateToEnergy();
+		Map<Integer, List<String>> scoreMap = results.getScoreMap();
+		Map<Double, Vector<String>> realScoreMap = results.getRealScoreMap();
+		StringBuilder completeLog = results.getCompleteLog();
 		
-		return results;
+		
+		//TODO
+		
+		
+		//easy scoring
+		Integer[] keylist = new Integer[scoreMap.keySet().size()];
+		Object[] keys = scoreMap.keySet().toArray();
+		
+		for (int i = 0; i < keys.length; i++) {
+			keylist[i] = Integer.parseInt(keys[i].toString());
+		}
+		
+		Arrays.sort(keylist);
+		StringBuilder scoreList = new StringBuilder();
+		int rankWorstCase = 0;
+		
+		for (int i = keylist.length-1; i >= 0; i--) {
+			boolean check = false;
+			for (int j = 0; j < scoreMap.get(keylist[i]).size(); j++) {
+				scoreList.append("\n" + keylist[i] + " - " + scoreMap.get(keylist[i]).get(j) + " [" + Math.round(candidateToEnergy.get(scoreMap.get(keylist[i]).get(j))) + "]");
+				if(correctCandidateID.equals(scoreMap.get(keylist[i]).get(j)))
+				{
+					check = true;
+				}
+				//worst case: count all which are better or have a equal position
+				rankWorstCase++;
+			}
+			if(check)
+			{
+				histogram += "\n" + file + "\t" + correctCandidateID + "\t" + rankWorstCase + "\t" + exactMass;
+			}
+		}
+		
+		if(correctCandidateID.equals("none"))
+		{
+			histogram += "\n" + file + "\t" + correctCandidateID + "\t\t" + exactMass;
+		}
+		
+		completeLog.append("\n\n*****************Scoring*****************************");
+		completeLog.append("Supposed to be: " + correctCandidateID);
+		completeLog.append(scoreList);
+		completeLog.append("\n*****************************************************\n\n");
+		//easy scoring end
+					
+		
+		//real scoring
+		if(config.isBondEnergyScoring())
+			realScoreMap = Scoring.getCombinedScore(realScoreMap, candidateToEnergy, candidateToHydrogenPenalty);
+		
+		//generate the parameter optimization matrix
+		if(generateOptimizationMatrix)
+		{
+			parameterOptimizationMatrix = prepareParameterOptimizationMatrix(pubChemIdentifier, exactMass);
+			generateOptimizationMatrix(candidateToOptimizationMatrixEntries);
+		}
+		
+					
+		
+		Double[] keysScore = new Double[realScoreMap.keySet().size()];
+		keysScore = realScoreMap.keySet().toArray(keysScore);
+		
+		Arrays.sort(keysScore);
+		String scoreListReal = "";
+		rankWorstCase = 0;
+		int rankBestCase = 0;
+		int rankBestCaseGrouped = 0;
+		
+		
+		
+		//now create the tanimoto distance matrix
+		//to be able to group results with the same score
+		//search molecules with the same connectivity
+		String similarity = "";
+		int rankTanimotoGroup = 0;
+		int rankIsomorphism = 0;
+		boolean stop = false;
+		try {
+			Similarity sim = new Similarity(candidateToSmiles, (float)0.95);
+			for (int i = keysScore.length-1; i >= 0; i--) {
+				similarity += "\nScore: " + keysScore[i] + "\n";
+				List<String> candidateGroup = new ArrayList<String>();
+				for (int j = 0; j < realScoreMap.get(keysScore[i]).size(); j++) {
+					candidateGroup.add(realScoreMap.get(keysScore[i]).get(j));
+				}
+
+				List<SimilarityGroup> groupedCandidates = sim.getTanimotoDistanceList(candidateGroup);
+				for (SimilarityGroup similarityGroup : groupedCandidates) {				
+					List<String> tempSimilar = similarityGroup.getSimilarCompounds();
+					List<Float> tempSimilarTanimoto = similarityGroup.getSimilarCompoundsTanimoto();
+					similarity += similarityGroup.getCandidateTocompare() + ": ";
+					
+					if(pubChemIdentifier.equals(similarityGroup.getCandidateTocompare()))
+						stop = true;					
+					
+					for (int k = 0; k < tempSimilar.size(); k++) {
+
+						if(pubChemIdentifier.equals(tempSimilar.get(k)))
+							stop = true;
+						
+						similarity += tempSimilar.get(k) + "(" +  tempSimilarTanimoto.get(k);
+					
+						boolean isIsomorph = sim.isIsomorph(tempSimilar.get(k), similarityGroup.getCandidateTocompare());
+						if(!isIsomorph)
+							rankIsomorphism++;
+						
+						similarity += " -" + isIsomorph + ") ";
+					}
+					similarity += "\n";						
+					rankTanimotoGroup++;
+					rankIsomorphism++;
+				}
+				if(stop)
+					break;
+			}
+		} catch (CDKException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+		for (int i = keysScore.length-1; i >= 0; i--) {
+			boolean check = false;
+			int temp = 0;
+			for (int j = 0; j < realScoreMap.get(keysScore[i]).size(); j++) {
+				scoreListReal += "\n" + keysScore[i] + " - " + realScoreMap.get(keysScore[i]).get(j) + "[" + candidateToEnergy.get(realScoreMap.get(keysScore[i]).get(j)) + "]";
+				if(pubChemIdentifier.compareTo(realScoreMap.get(keysScore[i]).get(j)) == 0)
+				{
+					check = true;
+				}
+				//worst case: count all which are better or have a equal position
+				rankWorstCase++;
+				temp++;
+			}
+			rankBestCaseGrouped++;
+			if(!check)
+			{
+				rankBestCase += temp;
+			}
+			//add it to rank best case
+			else
+			{
+				histogramReal += "\n" + file + "\t" + pubChemIdentifier + "\t" + rankWorstCase + "\t" + rankTanimotoGroup + "\t" + rankIsomorphism + "\t" + exactMass;
+			}
+		}
+		
+		if(pubChemIdentifier.equals("none"))
+		{
+			histogramReal += "\n" + file + "\t" + pubChemIdentifier + "\t\t" + exactMass;
+		}
+		
+		//timing
+		long timeEnd = System.currentTimeMillis() - timeStart;
+        sumTime += timeEnd;
+		
+		completeLog += "\n\n*****************Scoring(Real)*****************************";
+		completeLog += "Supposed to be: " + pubChemIdentifier;
+		completeLog += "\nTime: " + timeEnd;
+		completeLog += scoreListReal;
+		
+		//write all tanimoto distances in one file
+		//similarityValues += sim.getAllSimilarityValues();
+		completeLog += similarity;			
+		
+		completeLog += "\n*****************************************************\n\n";	
+		
+		
+		histogramPeaksAll += "//\n" + file + "\n";
+		//write the data for peak histogram to log file
+		for (int i = 0; i < listOfPeaks.size(); i++) {
+			histogramPeaksAll += listOfPeaks.get(i).getMass() + "\n";
+		}	
+		
+		//filter the peaks which are contained in the all peaks list. (exclusive)
+		for (int i = 0; i < listOfPeaksCorresponding.size(); i++) {
+			for (int j = 0; j < listOfPeaks.size(); j++) {
+				Double valueA = listOfPeaks.get(j).getMass();
+				Double valueB = listOfPeaksCorresponding.get(i).getMass();
+				if(valueA.equals(valueB))
+				{
+					listOfPeaks.remove(j);
+				}
+			}
+		}
+		
+		histogramPeaks += "//\n" + file + "\n";
+		for (int i = 0; i < listOfPeaks.size(); i++) {
+			histogramPeaks += listOfPeaks.get(i).getMass() + "\n";
+		}
+		
+		histogramPeaksReal += "//\n" + file + "\n";
+		for (int i = 0; i < listOfPeaksCorresponding.size(); i++) {
+			histogramPeaksReal += listOfPeaksCorresponding.get(i).getMass() + "\n";
+		}
+		
+		
+		//TODO
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	}
+	
+	
+	
+	public static void main(String[] args) {
+		
 	}
 
 }

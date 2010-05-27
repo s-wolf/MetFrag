@@ -33,8 +33,13 @@ public class FragmenterResult {
 		mapCandidateToFragments = Collections.synchronizedMap(new HashMap<String, Vector<PeakMolPair>>());
 	}
 
-	public void setCompleteLog(StringBuilder completeLog) {
-		this.completeLog = completeLog;
+	/**
+	 * Add a String to complete log
+	 * 
+	 * @param add the new complete log
+	 */
+	public synchronized void addToCompleteLog(String add) {
+		this.completeLog.append(add);
 	}
 
 	public StringBuilder getCompleteLog() {

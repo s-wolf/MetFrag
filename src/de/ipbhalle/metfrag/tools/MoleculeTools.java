@@ -45,7 +45,13 @@ public class MoleculeTools {
 		IAtom[] atomList = AtomContainerManipulator.getAtomArray(mol);
 		for (int i = 0; i < atomList.length; i++) {
 			atomList[i].setID((i) + "");
-		}		
+		}	
+		
+		IBond[] bondList = AtomContainerManipulator.getBondArray(mol);
+		for (int i = 0; i < bondList.length; i++) {
+			bondList[i].setID((i) + "");
+		}
+		
 		return mol;
 	}
 

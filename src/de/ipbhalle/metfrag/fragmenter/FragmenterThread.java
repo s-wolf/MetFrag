@@ -108,7 +108,7 @@ public class FragmenterThread implements Runnable{
 		this.neutralLossAdd = neutralLossAdd;
 		this.bondEnergyScoring = bondEnergyScoring;
 		this.isOnlyBreakSelectedBonds = isOnlyBreakSelectedBonds;
-		
+		this.treeDepth = treeDepth;
 	}
 	
 	
@@ -176,7 +176,7 @@ public class FragmenterThread implements Runnable{
 	        //there is a bug in cdk??
 	        catch(IllegalArgumentException e)
             {
-	        	MetFrag.results.getCompleteLog().append("Error: " + candidate + " Message: " + e.getMessage());
+	        	MetFrag.results.addToCompleteLog("Error: " + candidate + " Message: " + e.getMessage());
             	//skip it
             	return;
             }
@@ -195,7 +195,7 @@ public class FragmenterThread implements Runnable{
 	        catch(OutOfMemoryError e)
 	        {
 	        	System.out.println("OUT OF MEMORY ERROR! " + treeDepth);
-	        	MetFrag.results.getCompleteLog().append("Error: " + candidate + " Message: " + e.getMessage());
+	        	MetFrag.results.addToCompleteLog("Error: " + candidate + " Message: " + e.getMessage());
 	        	return;
 	        }
 	        long time = System.currentTimeMillis() - start;
@@ -282,8 +282,8 @@ public class FragmenterThread implements Runnable{
 				
 
 				//write things to log file
-				MetFrag.results.getCompleteLog().append("\nFile: " + candidate + "\t #Peaks: " + spectrum.getPeakList().size() + "\t #Found: " + hits.size());
-				MetFrag.results.getCompleteLog().append("\tPeaks: " + peaks);
+				MetFrag.results.addToCompleteLog("\nFile: " + candidate + "\t #Peaks: " + spectrum.getPeakList().size() + "\t #Found: " + hits.size());
+				MetFrag.results.addToCompleteLog("\tPeaks: " + peaks);
 				
 				List<IAtomContainer> hitsListTest = new ArrayList<IAtomContainer>();
 				for (int i = 0; i < hits.size(); i++) {
@@ -296,19 +296,19 @@ public class FragmenterThread implements Runnable{
 			catch(CDKException e)
 			{
 				System.out.println("CDK error!" + e.getMessage());
-				MetFrag.results.getCompleteLog().append("CDK Error! " + e.getMessage() + " File: " + candidate);
+				MetFrag.results.addToCompleteLog("CDK Error! " + e.getMessage() + " File: " + candidate);
 			}
 			catch(Exception e)
 			{
 				System.out.println("Error: " + e.getMessage());
 				e.printStackTrace();
-				MetFrag.results.getCompleteLog().append("Error! "+ e.getMessage() + " File: " + candidate);
+				MetFrag.results.addToCompleteLog("Error! "+ e.getMessage() + " File: " + candidate);
 			}
 			catch(OutOfMemoryError e)
 			{
 				System.out.println("Out of memory: " + e.getMessage() + "\n" + e.getStackTrace());
 				System.gc();
-				MetFrag.results.getCompleteLog().append("Out of memory! "+ e.getMessage() + " File: " + candidate);
+				MetFrag.results.addToCompleteLog("Out of memory! "+ e.getMessage() + " File: " + candidate);
 			}
 
 	        
@@ -316,29 +316,29 @@ public class FragmenterThread implements Runnable{
 		catch(CDKException e)
 		{
 			System.out.println("CDK error!" + e.getMessage());
-			MetFrag.results.getCompleteLog().append("CDK Error! " + e.getMessage() + "File: " + candidate);
+			MetFrag.results.addToCompleteLog("CDK Error! " + e.getMessage() + "File: " + candidate);
 		}
 		catch(FileNotFoundException e)
 		{
 			System.out.println("File not found" + e.getMessage());
-			MetFrag.results.getCompleteLog().append("File not found error! "+ e.getMessage() + "File: " + candidate);
+			MetFrag.results.addToCompleteLog("File not found error! "+ e.getMessage() + "File: " + candidate);
 		}
 		catch(IOException e)
 		{
 			System.out.println("IO error: " + e.getMessage());
-			MetFrag.results.getCompleteLog().append("IO Error! "+ e.getMessage() + "File: " + candidate);
+			MetFrag.results.addToCompleteLog("IO Error! "+ e.getMessage() + "File: " + candidate);
 		}
 		catch(Exception e)
 		{
 			System.out.println("Error: " + e.getMessage());
 			e.printStackTrace();
-			MetFrag.results.getCompleteLog().append("Error! "+ e.getMessage() + "File: " + candidate);
+			MetFrag.results.addToCompleteLog("Error! "+ e.getMessage() + "File: " + candidate);
 		}
 		catch(OutOfMemoryError e)
 		{
 			System.out.println("Out of memory: " + e.getMessage() + "\n" + e.getStackTrace());
 			System.gc();
-			MetFrag.results.getCompleteLog().append("Out of memory! "+ e.getMessage() + "File: " + candidate);
+			MetFrag.results.addToCompleteLog("Out of memory! "+ e.getMessage() + "File: " + candidate);
 		}
 	}
 

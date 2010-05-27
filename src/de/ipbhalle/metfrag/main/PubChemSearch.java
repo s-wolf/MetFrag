@@ -79,9 +79,6 @@ public class PubChemSearch {
 	    private boolean showDiagrams = false;
 	    private Vector<String> doneMols = new Vector<String>();
 	    private HashMap<Integer, ArrayList<String>> scoreMap = new HashMap<Integer, ArrayList<String>>();
-	    private String jdbc = "";
-	    private String username = "";
-	    private String password = "";
 	    private String histogram = "";
 	    private String histogramCompare = "";
 	    private String histogramReal = "";
@@ -118,11 +115,8 @@ public class PubChemSearch {
 		 * @param keggPath the kegg path
 		 * @throws Exception 
 		 */
-		public PubChemSearch(String folder, WrapperSpectrum spectrum, double mzabs, double mzppm, int searchPPM, boolean pdf, boolean showDiagrams, boolean recreateFrags, boolean breakAromaticRings, boolean sumFormulaRedundancyCheck, String username, String password, String jdbc, int treeDepth, boolean hydrogenTest) throws Exception
+		public PubChemSearch(String folder, WrapperSpectrum spectrum, double mzabs, double mzppm, int searchPPM, boolean pdf, boolean showDiagrams, boolean recreateFrags, boolean breakAromaticRings, boolean sumFormulaRedundancyCheck, int treeDepth, boolean hydrogenTest) throws Exception
 		{
-			this.username = username;
-			this.password = password;
-			this.jdbc = jdbc;
 			BlackList bl = new BlackList(sumFormulaRedundancyCheck);
 			this.blackList = bl.getBlackList();
 			this.hydrogenTest = hydrogenTest;

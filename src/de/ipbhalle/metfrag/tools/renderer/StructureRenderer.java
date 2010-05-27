@@ -47,8 +47,12 @@ import org.openscience.cdk.renderer.font.AWTFontManager;
 import org.openscience.cdk.renderer.font.IFontManager;
 import org.openscience.cdk.renderer.generators.AtomNumberGenerator;
 import org.openscience.cdk.renderer.generators.BasicAtomGenerator;
+import org.openscience.cdk.renderer.generators.BasicBondGenerator;
+import org.openscience.cdk.renderer.generators.BasicGenerator;
 import org.openscience.cdk.renderer.generators.BasicSceneGenerator;
 import org.openscience.cdk.renderer.generators.ExtendedAtomGenerator;
+import org.openscience.cdk.renderer.generators.HighlightAtomGenerator;
+import org.openscience.cdk.renderer.generators.HighlightBondGenerator;
 import org.openscience.cdk.renderer.generators.IAtomContainerGenerator;
 import org.openscience.cdk.renderer.generators.IGenerator;
 import org.openscience.cdk.renderer.generators.IGeneratorParameter;
@@ -113,6 +117,55 @@ public class StructureRenderer extends JFrame {
                         
             this.isNew = true;
         }
+        
+        
+        public MoleculePanel(IAtomContainer atomContainer, IAtomContainer highlight) {
+
+        	this.atomContainer = atomContainer;           
+            this.initialWidth = 300;
+            this.initialHeight = 300;
+            
+            this.setPreferredSize(
+                    new Dimension(this.initialWidth + 10, this.initialHeight + 10));
+            this.setBackground(Color.WHITE);
+            this.setBorder(BorderFactory.createRaisedBevelBorder());
+            
+            List<IAtomContainerGenerator> generators = new ArrayList<IAtomContainerGenerator>();
+            HighlightAtomGenerator ha = new HighlightAtomGenerator();
+            HighlightBondGenerator hb = new HighlightBondGenerator();
+            
+            
+            generators.add(new BasicAtomGenerator());
+            generators.add(new BasicBondGenerator());
+            generators.add(ha);
+            generators.add(hb);
+                                      
+         
+            IFontManager fm = new AWTFontManager();
+            this.renderer = new Renderer(generators, fm); 
+
+//            ha.generate(highlight, renderer.getRenderer2DModel());
+//            hb.generate(highlight, renderer.getRenderer2DModel());
+            
+            for (IGenerator generator : renderer.getGenerators()) {
+            	for (IGeneratorParameter parameter : generator.getParameters()) {
+//            		System.out.println("parameter: " +
+//            	      parameter.getClass().getName().substring(40) +
+//            	      " -> " +
+//            	      parameter.getValue());
+            		if(parameter.getClass().getName().substring(40).equals("BasicAtomGenerator$KekuleStructure"))
+            			parameter.setValue(true);
+            		
+            	}
+            } 
+            renderer.getRenderer2DModel().setDrawNumbers(true);
+//            System.out.println("Numbers: " + renderer.getRenderer2DModel().drawNumbers());
+                        
+            this.isNew = true;
+        }
+        
+        
+        
         
         public void paint(Graphics g) {
             super.paint(g);
@@ -181,12 +234,39 @@ public class StructureRenderer extends JFrame {
         this.setVisible(true);
     }
     
+    /**
+     * Instantiates a new structure renderer.
+     * Displays the structure in a window and highlights the given structure
+     * 
+     * @param original the original
+     * @param name the name
+     * @param highlight the highlight
+     */
+    public StructureRenderer(IAtomContainer original, IAtomContainer highlight, String name) {
+    	
+    	IMolecule mol = new Molecule(original);
+    	
+    	StructureDiagramGenerator sdg = new StructureDiagramGenerator();
+        sdg.setMolecule(mol);
+        
+        try {
+            sdg.generateCoordinates();
+            MoleculePanel molPanel = new MoleculePanel(sdg.getMolecule(), highlight);
+            this.add(new JScrollPane(molPanel));
+        } catch (Exception e) {}
+        
+        this.pack();
+        this.setVisible(true);
+    }
+    
     
     public static void main(String[] args) {
     	SmilesParser sp = new SmilesParser(DefaultChemObjectBuilder.getInstance());
     	try {
-			IAtomContainer ac = sp.parseSmiles("O=c1c2ccccc2[se]n1c1ccccc1");
+			IAtomContainer ac = sp.parseSmiles("O=c1c2ccccc2[Se]n1c1ccccc1");
+			IAtomContainer ac2 = sp.parseSmiles("O=c1c2ccccc2[Se]n1c1ccccc1");
 			new StructureRenderer(ac, "test");
+			new StructureRenderer(ac, ac2, "test");
 			
 		} catch (InvalidSmilesException e) {
 			// TODO Auto-generated catch block

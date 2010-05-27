@@ -61,6 +61,9 @@ public class MoleculeCell extends JPanel{
     
     private boolean isNew;
     
+    public MoleculeCell(){
+    }
+    
     public MoleculeCell(IAtomContainer atomContainer, int w, int h, String title, boolean first) {
         this.atomContainer = atomContainer;
         this.preferredWidth = w;
