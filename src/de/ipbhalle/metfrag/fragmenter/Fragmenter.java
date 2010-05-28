@@ -544,7 +544,7 @@ public class Fragmenter {
                 fragmentsReturn.add(writeMoleculeToTemp(fragNL, identifier, globalCount, (String)fragNL.getProperty("BondEnergy"), treeDepth));
                 globalCount++;
 			}
-            System.out.println("Original Candidate [" + this.originalMolecule.getAtomCount() + "]: Neutral Losses: " + fragsNL.size() + " --> " + atomCount);
+//            System.out.println("Original Candidate [" + this.originalMolecule.getAtomCount() + "]: Neutral Losses: " + fragsNL.size() + " --> " + atomCount);
         }
         
         
@@ -689,7 +689,7 @@ public class Fragmenter {
                 fragmentsReturn.add(fragNL);
                 globalCount++;
 			}
-            System.out.println("Original Candidate [" + this.originalMolecule.getAtomCount() + "]: Neutral Losses: " + fragsNL.size() + " --> " + atomCount);
+//            System.out.println("Original Candidate [" + this.originalMolecule.getAtomCount() + "]: Neutral Losses: " + fragsNL.size() + " --> " + atomCount);
         }
         
         

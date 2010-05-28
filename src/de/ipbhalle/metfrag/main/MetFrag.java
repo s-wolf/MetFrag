@@ -21,7 +21,10 @@
 
 package de.ipbhalle.metfrag.main;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringReader;
@@ -68,8 +71,10 @@ import de.ipbhalle.metfrag.fragmenter.FragmenterResult;
 import de.ipbhalle.metfrag.fragmenter.FragmenterThread;
 import de.ipbhalle.metfrag.keggWebservice.KeggWebservice;
 import de.ipbhalle.metfrag.massbankParser.Peak;
+import de.ipbhalle.metfrag.massbankParser.Spectrum;
 import de.ipbhalle.metfrag.molDatabase.KEGGLocal;
 import de.ipbhalle.metfrag.pubchem.PubChemWebService;
+import de.ipbhalle.metfrag.scoring.OptimizationMatrixEntry;
 import de.ipbhalle.metfrag.scoring.Scoring;
 import de.ipbhalle.metfrag.similarity.Similarity;
 import de.ipbhalle.metfrag.similarity.SimilarityGroup;
@@ -79,11 +84,30 @@ import de.ipbhalle.metfrag.spectrum.PeakMolPair;
 import de.ipbhalle.metfrag.spectrum.WrapperSpectrum;
 import de.ipbhalle.metfrag.tools.MolecularFormulaTools;
 import de.ipbhalle.metfrag.tools.PPMTool;
+import de.ipbhalle.metfrag.tools.Writer;
 
 public class MetFrag {
 	
 	public static FragmenterResult results = new FragmenterResult();
+	private String file = "";
+	private String date = "";
+	private long timeStart;
+	private int candidateCount = 0;
 		
+	/**
+	 * Instantiates a new metFrag object.
+	 * 
+	 * @param file the file
+	 * @param date the date
+	 * @param folder the folder
+	 */
+	public MetFrag(String file, String date)
+	{
+		this.file = file;
+		this.date = date;
+		this.timeStart = System.currentTimeMillis();
+	}
+	
 	
 	/**
 	 * MetFrag. Start the fragmenter thread. Afterwards score the results.
@@ -117,7 +141,7 @@ public class MetFrag {
 		for (int c = 0; c < candidates.size(); c++) {				
 			threadExecutor.execute(new FragmenterThread(candidates.get(c), database, pubchem, spectrum, config.getMzabs(), config.getMzppm(), 
 					config.isSumFormulaRedundancyCheck(), config.isBreakAromaticRings(), config.getTreeDepth(), false, config.isHydrogenTest(), config.isNeutralLossAdd(), 
-					config.isBondEnergyScoring(), config.isOnlyBreakSelectedBonds()));		
+					config.isBondEnergyScoring(), config.isOnlyBreakSelectedBonds(), config));		
 		}
 		
 		threadExecutor.shutdown();
@@ -228,7 +252,7 @@ public class MetFrag {
 		for (int c = 0; c < candidates.size(); c++) {				
 			threadExecutor.execute(new FragmenterThread(candidates.get(c), database, pubchem, spectrum, mzabs, mzppm, 
 					molecularFormulaRedundancyCheck, breakAromaticRings, treeDepth, false, hydrogenTest, neutralLossInEveryLayer, 
-					bondEnergyScoring, breakOnlySelectedBonds));		
+					bondEnergyScoring, breakOnlySelectedBonds, null));		
 		}
 		
 		threadExecutor.shutdown();
@@ -284,14 +308,26 @@ public class MetFrag {
 	 * 
 	 * @throws Exception the exception
 	 */
-	public static String startScriptable(String database, String databaseID, String molecularFormula, Double exactMass, WrapperSpectrum spectrum, boolean useProxy, String outputFile, String correctCandidateID, boolean generateOptimizationMatrix) throws Exception
+	public void startScriptable(boolean useProxy) throws Exception
 	{
 		//get configuration
-		Config config = new Config();
+		Config config = new Config("outside");
+		WrapperSpectrum spectrum = new WrapperSpectrum(config.getFolder() + file);
 		
-		PubChemWebService pubchem = new PubChemWebService();
-		List<String> candidates = Candidates.getLocally(database, exactMass, config.getSearchPPM(), config.getJdbc(), config.getUsername(), config.getPassword());
-
+		String database = "";
+		if(config.isKEGG())
+			database = "kegg";
+		else if(config.isPubChem())
+			database = "pubchem";
+		
+		PubChemWebService pubchem = null;
+		List<String> candidates = Candidates.getLocally(database, spectrum.getExactMass(), config.getSearchPPM(), config.getJdbc(), config.getUsername(), config.getPassword());
+		
+		this.candidateCount = candidates.size();
+		results.addToCompleteLog("\n*****************************************************\n\n");
+		results.addToCompleteLog("\nFile: " + file);
+		
+		
 		//now fill executor!!!
 		//number of threads depending on the available processors
 	    int threads = Runtime.getRuntime().availableProcessors();
@@ -303,90 +339,57 @@ public class MetFrag {
 		for (int c = 0; c < candidates.size(); c++) {				
 			threadExecutor.execute(new FragmenterThread(candidates.get(c), database, pubchem, spectrum, config.getMzabs(), config.getMzppm(), 
 					config.isSumFormulaRedundancyCheck(), config.isBreakAromaticRings(), config.getTreeDepth(), false, config.isHydrogenTest(), config.isNeutralLossAdd(), 
-					config.isBondEnergyScoring(), config.isOnlyBreakSelectedBonds()));		
+					config.isBondEnergyScoring(), config.isOnlyBreakSelectedBonds(), config));		
 		}
 		
 		threadExecutor.shutdown();
 		
 		//wait until all threads are finished
+		int count = 0;
 		while(!threadExecutor.isTerminated())
 		{
 			try {
-				Thread.sleep(1000);
+				Thread.sleep(5000);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}//sleep for 1000 ms
+			if(count == 1000)
+				System.err.println("ThreadExecutor is not terminated!");
+			else
+				Thread.sleep(5000);
+			
+			count++;
 		}
 		
-		String ret = "";
-
-		Map<Double, Vector<String>> scoresNormalized = Scoring.getCombinedScore(results.getRealScoreMap(), results.getMapCandidateToEnergy(), results.getMapCandidateToHydrogenPenalty());
-		Double[] scores = new Double[scoresNormalized.size()];
-		scores = scoresNormalized.keySet().toArray(scores);
-		Arrays.sort(scores);
-
+		//TODO fix database id
+		if(config.isPubChem())
+			evaluateResults(spectrum.getCID() + "", spectrum, true, config.getFolder());
+		else if(config.isKEGG())
+			evaluateResults(spectrum.getKEGG() + "", spectrum, true, config.getFolder());
+		
+		
+	}
+	
+	
+	/**
+	 * Evaluate results and write them to the log files
+	 * @throws InterruptedException 
+	 */
+	private void evaluateResults(String correctCandidateID, WrapperSpectrum spectrum, boolean generateOptimizationMatrix, String folder) throws InterruptedException
+	{
 		//now collect the result
 		Map<String, IAtomContainer> candidateToStructure = results.getMapCandidateToStructure();
-		Map<String, Vector<PeakMolPair>> candidateToFragments = results.getMapCandidateToFragments();
 		Map<String, Double> candidateToEnergy = results.getMapCandidateToEnergy();
-		Map<Integer, List<String>> scoreMap = results.getScoreMap();
 		Map<Double, Vector<String>> realScoreMap = results.getRealScoreMap();
 		StringBuilder completeLog = results.getCompleteLog();
-		
-		
-		//TODO
-		
-		
-		//easy scoring
-		Integer[] keylist = new Integer[scoreMap.keySet().size()];
-		Object[] keys = scoreMap.keySet().toArray();
-		
-		for (int i = 0; i < keys.length; i++) {
-			keylist[i] = Integer.parseInt(keys[i].toString());
-		}
-		
-		Arrays.sort(keylist);
-		StringBuilder scoreList = new StringBuilder();
-		int rankWorstCase = 0;
-		
-		for (int i = keylist.length-1; i >= 0; i--) {
-			boolean check = false;
-			for (int j = 0; j < scoreMap.get(keylist[i]).size(); j++) {
-				scoreList.append("\n" + keylist[i] + " - " + scoreMap.get(keylist[i]).get(j) + " [" + Math.round(candidateToEnergy.get(scoreMap.get(keylist[i]).get(j))) + "]");
-				if(correctCandidateID.equals(scoreMap.get(keylist[i]).get(j)))
-				{
-					check = true;
-				}
-				//worst case: count all which are better or have a equal position
-				rankWorstCase++;
-			}
-			if(check)
-			{
-				histogram += "\n" + file + "\t" + correctCandidateID + "\t" + rankWorstCase + "\t" + exactMass;
-			}
-		}
-		
-		if(correctCandidateID.equals("none"))
-		{
-			histogram += "\n" + file + "\t" + correctCandidateID + "\t\t" + exactMass;
-		}
-		
-		completeLog.append("\n\n*****************Scoring*****************************");
-		completeLog.append("Supposed to be: " + correctCandidateID);
-		completeLog.append(scoreList);
-		completeLog.append("\n*****************************************************\n\n");
-		//easy scoring end
-					
-		
-		//real scoring
-		if(config.isBondEnergyScoring())
-			realScoreMap = Scoring.getCombinedScore(realScoreMap, candidateToEnergy, candidateToHydrogenPenalty);
+
 		
 		//generate the parameter optimization matrix
+		String parameterOptimization = "";
 		if(generateOptimizationMatrix)
 		{
-			parameterOptimizationMatrix = prepareParameterOptimizationMatrix(pubChemIdentifier, exactMass);
-			generateOptimizationMatrix(candidateToOptimizationMatrixEntries);
+			String header = prepareParameterOptimizationMatrix(correctCandidateID, spectrum.getExactMass());
+			parameterOptimization = generateOptimizationMatrix(results.getCandidateToOptimizationMatrixEntries(), header);
 		}
 		
 					
@@ -395,24 +398,22 @@ public class MetFrag {
 		keysScore = realScoreMap.keySet().toArray(keysScore);
 		
 		Arrays.sort(keysScore);
-		String scoreListReal = "";
-		rankWorstCase = 0;
+		StringBuilder scoreListReal = new StringBuilder();
+		int rankWorstCase = 0;
 		int rankBestCase = 0;
-		int rankBestCaseGrouped = 0;
-		
-		
+		int rankBestCaseGrouped = 0;		
 		
 		//now create the tanimoto distance matrix
 		//to be able to group results with the same score
 		//search molecules with the same connectivity
-		String similarity = "";
+		StringBuilder similarity = new StringBuilder();
 		int rankTanimotoGroup = 0;
 		int rankIsomorphism = 0;
 		boolean stop = false;
 		try {
-			Similarity sim = new Similarity(candidateToSmiles, (float)0.95);
+			Similarity sim = new Similarity(candidateToStructure, (float)0.95, true);
 			for (int i = keysScore.length-1; i >= 0; i--) {
-				similarity += "\nScore: " + keysScore[i] + "\n";
+				similarity.append("\nScore: " + keysScore[i] + "\n");
 				List<String> candidateGroup = new ArrayList<String>();
 				for (int j = 0; j < realScoreMap.get(keysScore[i]).size(); j++) {
 					candidateGroup.add(realScoreMap.get(keysScore[i]).get(j));
@@ -422,25 +423,25 @@ public class MetFrag {
 				for (SimilarityGroup similarityGroup : groupedCandidates) {				
 					List<String> tempSimilar = similarityGroup.getSimilarCompounds();
 					List<Float> tempSimilarTanimoto = similarityGroup.getSimilarCompoundsTanimoto();
-					similarity += similarityGroup.getCandidateTocompare() + ": ";
+					similarity.append(similarityGroup.getCandidateTocompare() + ": ");
 					
-					if(pubChemIdentifier.equals(similarityGroup.getCandidateTocompare()))
+					if(correctCandidateID.equals(similarityGroup.getCandidateTocompare()))
 						stop = true;					
 					
 					for (int k = 0; k < tempSimilar.size(); k++) {
 
-						if(pubChemIdentifier.equals(tempSimilar.get(k)))
+						if(correctCandidateID.equals(tempSimilar.get(k)))
 							stop = true;
 						
-						similarity += tempSimilar.get(k) + "(" +  tempSimilarTanimoto.get(k);
+						similarity.append(tempSimilar.get(k) + "(" +  tempSimilarTanimoto.get(k));
 					
 						boolean isIsomorph = sim.isIsomorph(tempSimilar.get(k), similarityGroup.getCandidateTocompare());
 						if(!isIsomorph)
 							rankIsomorphism++;
 						
-						similarity += " -" + isIsomorph + ") ";
+						similarity.append(" -" + isIsomorph + ") ");
 					}
-					similarity += "\n";						
+					similarity.append("\n");						
 					rankTanimotoGroup++;
 					rankIsomorphism++;
 				}
@@ -452,98 +453,165 @@ public class MetFrag {
 			e.printStackTrace();
 		}
 		
-		
-		for (int i = keysScore.length-1; i >= 0; i--) {
-			boolean check = false;
-			int temp = 0;
-			for (int j = 0; j < realScoreMap.get(keysScore[i]).size(); j++) {
-				scoreListReal += "\n" + keysScore[i] + " - " + realScoreMap.get(keysScore[i]).get(j) + "[" + candidateToEnergy.get(realScoreMap.get(keysScore[i]).get(j)) + "]";
-				if(pubChemIdentifier.compareTo(realScoreMap.get(keysScore[i]).get(j)) == 0)
-				{
-					check = true;
-				}
-				//worst case: count all which are better or have a equal position
-				rankWorstCase++;
-				temp++;
-			}
-			rankBestCaseGrouped++;
-			if(!check)
-			{
-				rankBestCase += temp;
-			}
-			//add it to rank best case
-			else
-			{
-				histogramReal += "\n" + file + "\t" + pubChemIdentifier + "\t" + rankWorstCase + "\t" + rankTanimotoGroup + "\t" + rankIsomorphism + "\t" + exactMass;
-			}
-		}
-		
-		if(pubChemIdentifier.equals("none"))
-		{
-			histogramReal += "\n" + file + "\t" + pubChemIdentifier + "\t\t" + exactMass;
-		}
-		
+		String resultsTable = "";
 		//timing
 		long timeEnd = System.currentTimeMillis() - timeStart;
-        sumTime += timeEnd;
 		
-		completeLog += "\n\n*****************Scoring(Real)*****************************";
-		completeLog += "Supposed to be: " + pubChemIdentifier;
-		completeLog += "\nTime: " + timeEnd;
-		completeLog += scoreListReal;
+		if(correctCandidateID.equals("none"))
+		{
+			resultsTable += "\n" + file + "\t" + correctCandidateID + "\t\t\t" + spectrum.getExactMass();
+		}
+		else
+		{
+			for (int i = keysScore.length-1; i >= 0; i--) {
+				boolean check = false;
+				int temp = 0;
+				for (int j = 0; j < realScoreMap.get(keysScore[i]).size(); j++) {
+					scoreListReal.append("\n" + keysScore[i] + " - " + realScoreMap.get(keysScore[i]).get(j) + "[" + candidateToEnergy.get(realScoreMap.get(keysScore[i]).get(j)) + "]");
+					if(correctCandidateID.compareTo(realScoreMap.get(keysScore[i]).get(j)) == 0)
+					{
+						check = true;
+					}
+					//worst case: count all which are better or have a equal position
+					rankWorstCase++;
+					temp++;
+				}
+				rankBestCaseGrouped++;
+				if(!check)
+				{
+					rankBestCase += temp;
+				}
+				//add it to rank best case
+				else
+				{
+					resultsTable = "\n" + file + "\t" + correctCandidateID + "\t" + this.candidateCount + "\t" + rankWorstCase + "\t" + rankTanimotoGroup + "\t" + rankIsomorphism + "\t" + spectrum.getExactMass() + "\t" + timeEnd;
+				}
+			}
+		}
+		
+		
+		completeLog.append("\n\n*****************Scoring(Real)*****************************");
+		completeLog.append("Correct candidate ID: " + correctCandidateID);
+		completeLog.append("\nTime: " + timeEnd);
+		completeLog.append(scoreListReal);
 		
 		//write all tanimoto distances in one file
 		//similarityValues += sim.getAllSimilarityValues();
-		completeLog += similarity;			
+		completeLog.append("\n********************Similarity***********************\n\n");	
+		completeLog.append(similarity);			
+		completeLog.append("\n*****************************************************\n\n");	
+
+		System.out.println("Finished LOG!!! " + this.file);
 		
-		completeLog += "\n*****************************************************\n\n";	
+		//write string to disk
+		try
+		{
+			new File(folder + "logs/").mkdir();
+
+			//complete log
+			Writer.writeToFile(folder + "logs/" + date + "_log.txt", completeLog.toString());
+			//write peak data of the correct compounds to file
+			Writer.writeToFile(folder + "logs/" + date + "_results.txt", resultsTable);
+			new File(folder + "logs/" + date + "/").mkdirs();
+			Writer.writeToFile(folder + "logs/" + date + "/" + this.file, parameterOptimization);
+		}
+		catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * Prepare parameter optimization matrix.
+	 * 
+	 * @param realScoreMap the real score map
+	 * 
+	 * @return the string
+	 */
+	private String prepareParameterOptimizationMatrix(String pubChemIdentifier, Double exactMass)
+	{
+		String ret = "";
 		
+		ret += pubChemIdentifier + "\n";
+		ret += exactMass.toString() + "\n\n";
+		ret += "candidate\tpeakMass\tpeakInt\tbondEnergy\thydrogenPenalty\tpCharges\n";
 		
-		histogramPeaksAll += "//\n" + file + "\n";
-		//write the data for peak histogram to log file
-		for (int i = 0; i < listOfPeaks.size(); i++) {
-			histogramPeaksAll += listOfPeaks.get(i).getMass() + "\n";
-		}	
-		
-		//filter the peaks which are contained in the all peaks list. (exclusive)
-		for (int i = 0; i < listOfPeaksCorresponding.size(); i++) {
-			for (int j = 0; j < listOfPeaks.size(); j++) {
-				Double valueA = listOfPeaks.get(j).getMass();
-				Double valueB = listOfPeaksCorresponding.get(i).getMass();
-				if(valueA.equals(valueB))
-				{
-					listOfPeaks.remove(j);
-				}
+		return ret;
+	}
+			
+	
+	/**
+	 * Generate optimization matrix.
+	 * 
+	 * @param candidateToOptimizationMatrixEntries the candidate to optimization matrix entries
+	 */
+	private String generateOptimizationMatrix(Map<String, List<OptimizationMatrixEntry>> candidateToOptimizationMatrixEntries, String header)
+	{
+		StringBuilder parameterOptimizationMatrix = new StringBuilder();
+		parameterOptimizationMatrix.append(header);
+		for (String candidate : candidateToOptimizationMatrixEntries.keySet()) {
+			for (OptimizationMatrixEntry entry : candidateToOptimizationMatrixEntries.get(candidate)) {
+				parameterOptimizationMatrix.append(candidate + "\t" + entry.getPeakMass() + "\t" + entry.getPeakInt() + "\t" + entry.getBondEnergyString() + "\t" + entry.getHydrogenPenalty() + "\t" + entry.getChargesDiffString() + "\n");
 			}
 		}
 		
-		histogramPeaks += "//\n" + file + "\n";
-		for (int i = 0; i < listOfPeaks.size(); i++) {
-			histogramPeaks += listOfPeaks.get(i).getMass() + "\n";
-		}
-		
-		histogramPeaksReal += "//\n" + file + "\n";
-		for (int i = 0; i < listOfPeaksCorresponding.size(); i++) {
-			histogramPeaksReal += listOfPeaksCorresponding.get(i).getMass() + "\n";
-		}
-		
-		
-		//TODO
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
+		return parameterOptimizationMatrix.toString();
 	}
 	
 	
 	
+	
+	
+	/**
+	 * The main method to start metfrag using command line parameters and start evaluation
+	 * This is used for the gridengine.
+	 * 
+	 * @param args the arguments
+	 */
 	public static void main(String[] args) {
+		
+		String currentFile = "";
+		String date = "";
+		
+		try
+		{
+			//thats the current file
+			if(args[0] != null)
+			{
+				currentFile = args[0];
+			}
+			else
+			{
+				System.err.println("Error! Parameter missing!");
+				System.exit(1);
+			}
+			
+			//thats the date for the log file
+			if(args[1] != null)
+			{
+				date = args[1]; 
+			}
+			else
+			{
+				System.err.println("Error! Parameter missing!");
+				System.exit(1);
+			}
+		}
+		catch(Exception e)
+		{
+			System.err.println("Error! Parameter missing!");
+			System.exit(1);
+		}
+			
+		
+		MetFrag metFrag = new MetFrag(currentFile, date);
+		try {
+//			String resultsTable = "Spectrum\tCorrectCpdID\tHits\trankWorstCase\trankTanimoto\trankIsomorph\texactMass\tRuntime";
+			metFrag.startScriptable(true);
+		} catch (Exception e) {
+			System.exit(1);
+			e.printStackTrace();
+		}
 		
 	}
 

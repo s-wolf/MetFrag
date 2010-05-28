@@ -46,7 +46,6 @@ import org.openscience.cdk.tools.CDKHydrogenAdder;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 import org.openscience.cdk.tools.manipulator.AtomTypeManipulator;
 
-import de.ipbhalle.metfrag.main.PubChemSearch;
 import de.ipbhalle.metfrag.pubchem.PubChemWebService;
 
 public class ModifyHillMassBankFiles {

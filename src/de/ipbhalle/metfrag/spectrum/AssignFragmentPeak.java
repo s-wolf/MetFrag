@@ -26,7 +26,6 @@ import org.openscience.cdk.interfaces.IMolecularFormula;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 
-import de.ipbhalle.metfrag.classifier.BayesTraining;
 import de.ipbhalle.metfrag.massbankParser.Peak;
 import de.ipbhalle.metfrag.tools.MolecularFormulaTools;
 import de.ipbhalle.metfrag.tools.PPMTool;
@@ -46,7 +45,6 @@ public class AssignFragmentPeak {
 	private double mzabs;
 	private double mzppm;
 	private static final double hydrogenMass = MolecularFormulaTools.getMonoisotopicMass("H1");
-	private BayesTraining trainingTable = new BayesTraining();
 	private boolean hydrogenTest = true;
 	private Double matchedMass = 0.0;
 	private String molecularFormula = "";

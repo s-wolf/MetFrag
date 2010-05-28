@@ -40,7 +40,9 @@ import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 import de.ipbhalle.metfrag.fragmenter.Fragmenter;
 import de.ipbhalle.metfrag.fragmenter.NeutralLoss;
 import de.ipbhalle.metfrag.massbankParser.Peak;
+import de.ipbhalle.metfrag.massbankParser.Spectrum;
 import de.ipbhalle.metfrag.spectrum.PeakMolPair;
+import de.ipbhalle.metfrag.spectrum.WrapperSpectrum;
 
 
 
@@ -69,12 +71,13 @@ public class Scoring {
 	 * 
 	 * @param peakList the intensities
 	 */
-	public Scoring(Vector<Peak> peakList, String candidateID)
+	public Scoring(WrapperSpectrum spectrum, String candidateID)
 	{
 		this.mzToIntensity = new HashMap<Double, Double>();
 		this.peakToRank = new HashMap<Double, Integer>();
 		
 		//sum up intensities ... TODO or just take the maximum?!
+		Vector<Peak> peakList = spectrum.getPeakList();
 		for (int i = peakList.size()-1; i >= 0; i--) {
 			mzToIntensity.put(peakList.get(i).getMass(), peakList.get(i).getRelIntensity());
 			//rank the peaks from small to large....sorted is used as input
@@ -143,12 +146,67 @@ public class Scoring {
 		return score;
 	}
 	
+	
+	/**
+	 * Compute scoring optimized.
+	 * 
+	 * @param hits the hits
+	 * @param candidateExactMass the candidate exact mass
+	 * 
+	 * @return the double
+	 */
+	public double computeScoringOptimized(Vector<PeakMolPair> hits, double candidateExactMass)
+	{
+		double score = 0.0;
+		double weightedPeaks = 0.0;
+		double BDE = 0.0;
+		double hydrogenPenalty = 0.0;
+		double partialChargesDiff = 0.0;
+		
+		for (int i = 0; i < hits.size(); i++) {			
+			//Scoring like in Massbank paper m=0.6, n=3
+			//W = [Peak intensity]^m * [Mass]^n
+			weightedPeaks += Math.pow(this.mzToIntensity.get(hits.get(i).getPeak().getMass()), 0.6) * Math.pow(((hits.get(i).getPeak().getMass() / candidateExactMass) * 10),3);
+			
+			//bond energy
+			String bondEnergies = (String)hits.get(i).getFragment().getProperty("BondEnergy");
+			BDE += Fragmenter.getCombinedEnergy(bondEnergies);
+			
+			//hydrogen penalty
+			hydrogenPenalty += (hits.get(i).getHydrogenPenalty() * 100);
+			
+			//partial charges diff
+			String partialCharges = hits.get(i).getPartialChargeDiff();
+			partialChargesDiff += Fragmenter.getCombinedEnergy(partialCharges);
+		
+			//add new entry to optimization matrix
+			this.optimizationMatrixEntries.add(new OptimizationMatrixEntry(candidateID, hits.get(i).getPeak().getMass(), hits.get(i).getPeak().getIntensity(), bondEnergies, hits.get(i).getHydrogenPenalty(), partialCharges));
+			
+		}
+		
+		
+		this.scoreBondEnergy = BDE;
+		this.scoreChargesDiff = partialChargesDiff;
+		this.penalty = hydrogenPenalty;
+		
+		//best result so far
+		double a = 0.61;
+		double b = 1.05;
+		double tempBDE = 0.0;
+		if(hits.size() > 0)
+			tempBDE = BDE / hits.size();
+		score = (a * weightedPeaks) - (b * tempBDE);
+
+		return score;
+	}
+	
+	
 	/**
 	 * Gets the fragment bond energy.
 	 * 
 	 * @return the fragment bond energy
 	 */
-	public double getFragmentBondEnergy()
+	public double getBDE()
 	{
 		return this.scoreBondEnergy;
 	}
@@ -246,6 +304,7 @@ public class Scoring {
 		return ret;
 	}
 	
+
 	/**
 	 * Gets the optimization matrix entries.
 	 * 

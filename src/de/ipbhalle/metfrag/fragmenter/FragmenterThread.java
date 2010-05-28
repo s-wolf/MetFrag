@@ -21,32 +21,21 @@
 
 package de.ipbhalle.metfrag.fragmenter;
 
-import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
-import org.openscience.cdk.ChemFile;
-import org.openscience.cdk.ChemObject;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.graph.ConnectivityChecker;
 import org.openscience.cdk.interfaces.IAtomContainer;
-import org.openscience.cdk.io.MDLReader;
 import org.openscience.cdk.tools.CDKHydrogenAdder;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
-import org.openscience.cdk.tools.manipulator.ChemFileManipulator;
 
-import de.ipbhalle.metfrag.chemspiderClient.ChemSpider;
 import de.ipbhalle.metfrag.fragmenter.Fragmenter;
-import de.ipbhalle.metfrag.keggWebservice.KeggWebservice;
+import de.ipbhalle.metfrag.main.Config;
 import de.ipbhalle.metfrag.main.MetFrag;
 import de.ipbhalle.metfrag.massbankParser.Peak;
 import de.ipbhalle.metfrag.pubchem.PubChemWebService;
@@ -71,6 +60,7 @@ public class FragmenterThread implements Runnable{
 	private boolean neutralLossAdd = false;
 	private boolean bondEnergyScoring = false;
 	private boolean isOnlyBreakSelectedBonds = false;
+	private Config c = null;
 	
 	/**
 	 * Instantiates a new pubChem search thread.
@@ -94,7 +84,7 @@ public class FragmenterThread implements Runnable{
 	public FragmenterThread(String candidate, String database, PubChemWebService pw,
 			WrapperSpectrum spectrum, double mzabs, double mzppm, boolean sumFormulaRedundancyCheck,
 			boolean breakAromaticRings, int treeDepth, boolean showDiagrams, boolean hydrogenTest,
-			boolean neutralLossAdd, boolean bondEnergyScoring, boolean isOnlyBreakSelectedBonds)
+			boolean neutralLossAdd, boolean bondEnergyScoring, boolean isOnlyBreakSelectedBonds, Config c)
 	{
 		this.candidate = candidate;
 		this.pw = pw;
@@ -109,6 +99,7 @@ public class FragmenterThread implements Runnable{
 		this.bondEnergyScoring = bondEnergyScoring;
 		this.isOnlyBreakSelectedBonds = isOnlyBreakSelectedBonds;
 		this.treeDepth = treeDepth;
+		this.c = c;
 	}
 	
 	
@@ -118,41 +109,12 @@ public class FragmenterThread implements Runnable{
 		
 		try
 		{	    
-
-			if(database.equals("kegg"))
-			{		
-				candidate = candidate.substring(4);
-				String candidateMol = KeggWebservice.KEGGgetMol(candidate, "");
-				MDLReader reader;
-				List<IAtomContainer> containersList;
-				
-		        reader = new MDLReader(new StringReader(candidateMol));
-		        ChemFile chemFile = (ChemFile)reader.read((ChemObject)new ChemFile());
-		        containersList = ChemFileManipulator.getAllAtomContainers(chemFile);
-		        molecule = containersList.get(0);
-				
-			}
-			else if(database.equals("chemspider"))
-			{
-				String candidateMol = ChemSpider.getMolByID(candidate);
-				
-				MDLReader reader;
-				List<IAtomContainer> containersList;
-				
-		        reader = new MDLReader(new StringReader(candidateMol));
-		        ChemFile chemFile = (ChemFile)reader.read((ChemObject)new ChemFile());
-		        containersList = ChemFileManipulator.getAllAtomContainers(chemFile);
-		        molecule = containersList.get(0);
-		        
-			}
-			else if(database.equals("pubchem"))
-			{
-				molecule = pw.getMol(candidate);
-			}
+			
+			//retrieve the candidate from the database
+			if(pw == null)
+				molecule = Candidates.getCompoundLocally(this.database, candidate, c.getJdbc(), c.getUsername(), c.getPassword(), false);
 			else
-			{
-				System.err.println("No database selected or wrong database name?");
-			}
+				molecule = Candidates.getCompound(database, candidate, pw);
 			
 			
 			//molecule is not stored in the database or not chonsp!
@@ -220,14 +182,15 @@ public class FragmenterThread implements Runnable{
 				
 				
 				//now "real" scoring --> depends on intensities
-				Scoring score = new Scoring(spectrum.getPeakList(), candidate);
+				Scoring score = new Scoring(spectrum, candidate);
 				double currentScore = 0.0;
 				if(this.bondEnergyScoring)
-					currentScore = score.computeScoringWithBondEnergies(hits);
+//					currentScore = score.computeScoringWithBondEnergies(hits);
+					currentScore = score.computeScoringOptimized(hits, spectrum.getExactMass());
 				else
 					currentScore = score.computeScoringPeakMolPair(hits);
 				
-				double currentBondEnergy = score.getFragmentBondEnergy();
+				double currentBondEnergy = score.getBDE();
 	
 				if(currentBondEnergy > 0)
 					currentBondEnergy = currentBondEnergy / afp.getHits().size();
@@ -236,6 +199,9 @@ public class FragmenterThread implements Runnable{
 				MetFrag.results.getMapCandidateToEnergy().put(candidate, currentBondEnergy);
 				MetFrag.results.getMapCandidateToHydrogenPenalty().put(candidate, score.getPenalty());
 				MetFrag.results.getMapCandidateToPartialChargesDiff().put(candidate, score.getPartialChargesDiff());
+				
+				//also output the optimization matrix if needed
+				MetFrag.results.getCandidateToOptimizationMatrixEntries().put(candidate, score.getOptimizationMatrixEntries());	
 				
 				//also add the structure to results file
 				MetFrag.results.getMapCandidateToStructure().put(candidate, molecule);
@@ -282,7 +248,7 @@ public class FragmenterThread implements Runnable{
 				
 
 				//write things to log file
-				MetFrag.results.addToCompleteLog("\nFile: " + candidate + "\t #Peaks: " + spectrum.getPeakList().size() + "\t #Found: " + hits.size());
+				MetFrag.results.addToCompleteLog("\nCandidate: " + candidate + "\t #Peaks: " + spectrum.getPeakList().size() + "\t #Found: " + hits.size());
 				MetFrag.results.addToCompleteLog("\tPeaks: " + peaks);
 				
 				List<IAtomContainer> hitsListTest = new ArrayList<IAtomContainer>();

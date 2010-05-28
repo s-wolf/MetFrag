@@ -1,10 +1,41 @@
+/*
+*
+* Copyright (C) 2009-2010 IPB Halle, Sebastian Wolf
+*
+* Contact: swolf@ipb-halle.de
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*
+*/
+
+
 package de.ipbhalle.metfrag.fragmenter;
 
+import java.io.StringReader;
 import java.rmi.RemoteException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
+
+import org.openscience.cdk.ChemFile;
+import org.openscience.cdk.ChemObject;
+import org.openscience.cdk.exception.CDKException;
+import org.openscience.cdk.exception.InvalidSmilesException;
+import org.openscience.cdk.interfaces.IAtomContainer;
+import org.openscience.cdk.io.MDLReader;
+import org.openscience.cdk.tools.manipulator.ChemFileManipulator;
 
 import de.ipbhalle.metfrag.chemspiderClient.ChemSpider;
 import de.ipbhalle.metfrag.keggWebservice.KeggWebservice;
@@ -99,10 +130,103 @@ public class Candidates {
 		{
 			PubChemLocal pl = new PubChemLocal(databaseUrl, username, password);
 			double deviation =PPMTool.getPPMDeviation(exactMass, searchPPM);
-			pl.getHits((exactMass - deviation), (exactMass + deviation));
+			candidates = pl.getHits((exactMass - deviation), (exactMass + deviation));
 		}
 		
 		return candidates;
+	}
+
+	
+	/**
+	 * Gets the compound using the webservice.
+	 * 
+	 * @param database the database
+	 * @param candidate the candidate
+	 * @param pw the pw
+	 * 
+	 * @return the compound
+	 * @throws RemoteException 
+	 * @throws CDKException 
+	 */
+	public static IAtomContainer getCompound(String database, String candidate, PubChemWebService pw) throws RemoteException, CDKException
+	{
+		IAtomContainer molecule = null;
+		
+		if(database.equals("kegg"))
+		{		
+			candidate = candidate.substring(4);
+			String candidateMol = KeggWebservice.KEGGgetMol(candidate, "");
+			MDLReader reader;
+			List<IAtomContainer> containersList;
+			
+	        reader = new MDLReader(new StringReader(candidateMol));
+	        ChemFile chemFile = (ChemFile)reader.read((ChemObject)new ChemFile());
+	        containersList = ChemFileManipulator.getAllAtomContainers(chemFile);
+	        molecule = containersList.get(0);
+			
+		}
+		else if(database.equals("chemspider"))
+		{
+			String candidateMol = ChemSpider.getMolByID(candidate);
+			
+			MDLReader reader;
+			List<IAtomContainer> containersList;
+			
+	        reader = new MDLReader(new StringReader(candidateMol));
+	        ChemFile chemFile = (ChemFile)reader.read((ChemObject)new ChemFile());
+	        containersList = ChemFileManipulator.getAllAtomContainers(chemFile);
+	        molecule = containersList.get(0);
+	        
+		}
+		else if(database.equals("pubchem"))
+		{
+			molecule = pw.getMol(candidate);
+		}
+		else
+		{
+			System.err.println("No database selected or wrong database name?");
+		}
+		
+		return molecule;
+	}
+	
+	/**
+	 * Gets the compound locally.
+	 * 
+	 * @param database the database
+	 * @param candidate the candidate
+	 * @param jdbc the jdbc
+	 * @param username the username
+	 * @param password the password
+	 * @param getAll the get all
+	 * 
+	 * @return the compound locally
+	 * 
+	 * @throws ClassNotFoundException the class not found exception
+	 * @throws SQLException the SQL exception
+	 * @throws CDKException the CDK exception
+	 * @throws RemoteException the remote exception
+	 */
+	public static IAtomContainer getCompoundLocally(String database, String candidate, String jdbc, String username, String password, boolean getAll) throws SQLException, ClassNotFoundException, RemoteException, CDKException
+	{
+		IAtomContainer molecule = null;
+
+		if(database.equals("kegg"))
+		{
+			KEGGLocal kl = new KEGGLocal(jdbc, username, password);
+			molecule = kl.getMol(candidate);
+		}
+		else if(database.equals("chemspider"))
+		{
+			molecule = ChemSpider.getMol(candidate, true);
+		}
+		else if(database.equals("pubchem"))
+		{
+			PubChemLocal pl = new PubChemLocal(jdbc, username, password);
+			molecule = pl.getMol(candidate, getAll);
+		}
+		
+		return molecule;
 	}
 
 }

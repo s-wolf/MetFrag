@@ -1,3 +1,24 @@
+/*
+*
+* Copyright (C) 2009-2010 IPB Halle, Sebastian Wolf
+*
+* Contact: swolf@ipb-halle.de
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*
+*/
+
 package de.ipbhalle.metfrag.fragmenter;
 
 import java.util.Collections;
@@ -8,6 +29,7 @@ import java.util.Vector;
 
 import org.openscience.cdk.interfaces.IAtomContainer;
 
+import de.ipbhalle.metfrag.scoring.OptimizationMatrixEntry;
 import de.ipbhalle.metfrag.spectrum.PeakMolPair;
 
 public class FragmenterResult {
@@ -20,6 +42,8 @@ public class FragmenterResult {
 	private Map<Integer, List<String>> scoreMap = null;
 	private Map<String, IAtomContainer> mapCandidateToStructure = null;
 	private Map<String, Vector<PeakMolPair>> mapCandidateToFragments = null;
+	private Map<String, List<OptimizationMatrixEntry>> candidateToOptimizationMatrixEntries = null;
+
 	
 	public FragmenterResult()
 	{
@@ -31,6 +55,7 @@ public class FragmenterResult {
 		scoreMap = Collections.synchronizedMap(new HashMap<Integer, List<String>>());
 		mapCandidateToStructure = Collections.synchronizedMap(new HashMap<String, IAtomContainer>());
 		mapCandidateToFragments = Collections.synchronizedMap(new HashMap<String, Vector<PeakMolPair>>());
+		candidateToOptimizationMatrixEntries = Collections.synchronizedMap(new HashMap<String, List<OptimizationMatrixEntry>>());
 	}
 
 	/**
@@ -102,6 +127,15 @@ public class FragmenterResult {
 
 	public Map<String, Vector<PeakMolPair>> getMapCandidateToFragments() {
 		return mapCandidateToFragments;
+	}
+
+	public void setCandidateToOptimizationMatrixEntries(
+			Map<String, List<OptimizationMatrixEntry>> candidateToOptimizationMatrixEntries) {
+		this.candidateToOptimizationMatrixEntries = candidateToOptimizationMatrixEntries;
+	}
+
+	public Map<String, List<OptimizationMatrixEntry>> getCandidateToOptimizationMatrixEntries() {
+		return candidateToOptimizationMatrixEntries;
 	}
 
 }
