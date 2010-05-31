@@ -609,8 +609,8 @@ public class MetFrag {
 //			String resultsTable = "Spectrum\tCorrectCpdID\tHits\trankWorstCase\trankTanimoto\trankIsomorph\texactMass\tRuntime";
 			metFrag.startScriptable(true);
 		} catch (Exception e) {
-			System.exit(1);
 			e.printStackTrace();
+			System.exit(1);
 		}
 		
 	}
