@@ -40,10 +40,42 @@ public class MetFragResult {
 	 */
 	public MetFragResult( String candidateID, IAtomContainer structure, double score, int peaksExplained)
 	{
-		this.candidateID = candidateID;
-		this.score = score;
-		this.structure = structure;
+		this.setCandidateID(candidateID);
+		this.setScore(score);
+		this.setStructure(structure);
+		this.setPeaksExplained(peaksExplained);
+	}
+
+	public void setPeaksExplained(int peaksExplained) {
 		this.peaksExplained = peaksExplained;
+	}
+
+	public int getPeaksExplained() {
+		return peaksExplained;
+	}
+
+	public void setScore(double score) {
+		this.score = score;
+	}
+
+	public double getScore() {
+		return score;
+	}
+
+	public void setStructure(IAtomContainer structure) {
+		this.structure = structure;
+	}
+
+	public IAtomContainer getStructure() {
+		return structure;
+	}
+
+	public void setCandidateID(String candidateID) {
+		this.candidateID = candidateID;
+	}
+
+	public String getCandidateID() {
+		return candidateID;
 	}
 
 }

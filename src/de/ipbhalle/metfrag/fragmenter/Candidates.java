@@ -87,7 +87,7 @@ public class Candidates {
 				candidates = pubchem.getHitsByMass(exactMass, (PPMTool.getPPMDeviation(exactMass, searchPPM)), Integer.MAX_VALUE, useIPBProxy);
 		}
 		else if (!databaseID.equals(""))
-		{
+		{	
 			candidates = new Vector<String>();
 			candidates.add(databaseID);
 		}

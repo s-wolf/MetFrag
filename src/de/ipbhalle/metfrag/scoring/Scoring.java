@@ -180,7 +180,7 @@ public class Scoring {
 			partialChargesDiff += Fragmenter.getCombinedEnergy(partialCharges);
 		
 			//add new entry to optimization matrix
-			this.optimizationMatrixEntries.add(new OptimizationMatrixEntry(candidateID, hits.get(i).getPeak().getMass(), hits.get(i).getPeak().getIntensity(), bondEnergies, hits.get(i).getHydrogenPenalty(), partialCharges));
+			this.optimizationMatrixEntries.add(new OptimizationMatrixEntry(candidateID, hits.get(i).getPeak().getMass(), hits.get(i).getPeak().getRelIntensity(), bondEnergies, hits.get(i).getHydrogenPenalty(), partialCharges));
 			
 		}
 		
@@ -190,8 +190,8 @@ public class Scoring {
 		this.penalty = hydrogenPenalty;
 		
 		//best result so far
-		double a = 0.61;
-		double b = 1.05;
+		double a = 0.1049;
+		double b = 7.3030;
 		double tempBDE = 0.0;
 		if(hits.size() > 0)
 			tempBDE = BDE / hits.size();

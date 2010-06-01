@@ -256,9 +256,12 @@ public class Charges {
 		
 		//now add the complete combined result in front of the list
 		String combinedResults = "";
-		for (String bond : bondToBondLength.keySet()) {
-			combinedResults += bond + " " + bondToBondLength.get(bond);
+		for (IBond bond : this.mol.bonds()) {
+			combinedResults += bond.getAtom(0).getSymbol() + (Integer.parseInt(bond.getAtom(0).getID()) + 1) + "-" + bond.getAtom(1).getSymbol() + (Integer.parseInt(bond.getAtom(1).getID()) + 1) + " " + bondToBondLength.get(bond.getID()) + "\n";
 		}
+//		for (String bond : bondToBondLength.keySet()) {
+//			combinedResults += AtomContainerManipulator.g(this.mol, bond) bond + " " + bondToBondLength.get(bond);
+//		}
 		this.results.add(0, new ChargeResult(this.mol, combinedResults));
 		
 		

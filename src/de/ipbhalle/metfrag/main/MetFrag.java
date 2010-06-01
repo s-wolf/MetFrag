@@ -110,7 +110,8 @@ public class MetFrag {
 	
 	
 	/**
-	 * MetFrag. Start the fragmenter thread. Afterwards score the results.
+	 * MetFrag. Start the fragmenter thread. Afterwards score the results and write out a SDF file with 
+	 * all the candidates and an SDF file containing all fragments.
 	 * 
 	 * @param database the database
 	 * @param searchPPM the search ppm
@@ -187,8 +188,46 @@ public class MetFrag {
 				setOfMolecules.addAtomContainer(tmp);
 			}
 		}
-	
 		
+		MoleculeSet setOfFragments = null;
+		if(!databaseID.equals(""))
+		{
+			setOfFragments = new MoleculeSet();
+			
+			for (int i = scores.length -1; i >=0 ; i--) {
+				Vector<String> list = scoresNormalized.get(scores[i]);
+				for (String string : list) {
+					
+					Vector<PeakMolPair> fragments = candidateToFragments.get(string);
+					for (PeakMolPair frag : fragments) {
+						
+						//fix for bug in mdl reader setting where it happens that bond.stereo is null when the bond was read in as UP/DOWN (4)
+						for (IBond bond : frag.getFragment().bonds()) {
+							if(bond.getStereo() == null)
+								bond.setStereo(Stereo.UP_OR_DOWN);		
+						} 
+						IMolecule mol = new Molecule(frag.getFragment());
+						setOfFragments.addAtomContainer(mol);
+					}
+					
+					//write results file
+					try {
+						SDFWriter writer = new SDFWriter(new FileWriter(new File(outputFile + "_" + "fragments")));
+						writer.write(setOfFragments);
+						writer.close();
+					} catch (CDKException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					
+				}
+			}
+		}
+		
+
 		//write results file
 		try {
 			SDFWriter writer = new SDFWriter(new FileWriter(new File(outputFile)));
@@ -201,8 +240,7 @@ public class MetFrag {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		
+
 		return ret;
 	}
 	
@@ -488,6 +526,10 @@ public class MetFrag {
 				}
 			}
 		}
+		
+		//the correct candidate was not in the pubchem results
+		if(resultsTable.equals(""))
+			resultsTable = "\n" + file + "\t" + correctCandidateID + "\t" + this.candidateCount + "\tERROR\tCORRECT\tNOT FOUND\t" + spectrum.getExactMass() + "\t" + timeEnd;
 		
 		
 		completeLog.append("\n\n*****************Scoring(Real)*****************************");

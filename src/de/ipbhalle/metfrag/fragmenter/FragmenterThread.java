@@ -114,7 +114,11 @@ public class FragmenterThread implements Runnable{
 			if(pw == null)
 				molecule = Candidates.getCompoundLocally(this.database, candidate, c.getJdbc(), c.getUsername(), c.getPassword(), false);
 			else
+			{
 				molecule = Candidates.getCompound(database, candidate, pw);
+				if(molecule == null && database.equals("pubchem"))
+					molecule = pw.getSingleMol(candidate, false);
+			}
 			
 			
 			//molecule is not stored in the database or not chonsp!
@@ -185,8 +189,8 @@ public class FragmenterThread implements Runnable{
 				Scoring score = new Scoring(spectrum, candidate);
 				double currentScore = 0.0;
 				if(this.bondEnergyScoring)
-//					currentScore = score.computeScoringWithBondEnergies(hits);
-					currentScore = score.computeScoringOptimized(hits, spectrum.getExactMass());
+					currentScore = score.computeScoringWithBondEnergies(hits);
+//					currentScore = score.computeScoringOptimized(hits, spectrum.getExactMass());
 				else
 					currentScore = score.computeScoringPeakMolPair(hits);
 				
