@@ -177,6 +177,7 @@ public class MetFrag {
 				//get corresponding structure
 				IAtomContainer tmp = candidateToStructure.get(string);
 				tmp = AtomContainerManipulator.removeHydrogens(tmp);
+				tmp.setProperty("DatabaseID", string);
 				tmp.setProperty("Score", scores[i]);
 				tmp.setProperty("PeaksExplained", candidateToFragments.get(string).size());
 				
@@ -346,7 +347,7 @@ public class MetFrag {
 	 * 
 	 * @throws Exception the exception
 	 */
-	public void startScriptable(boolean useProxy) throws Exception
+	public void startScriptable(boolean useProxy, boolean writeSDF) throws Exception
 	{
 		//get configuration
 		Config config = new Config("outside");
@@ -401,11 +402,57 @@ public class MetFrag {
 		
 		//TODO fix database id
 		if(config.isPubChem())
-			evaluateResults(spectrum.getCID() + "", spectrum, true, config.getFolder());
+			evaluateResults(spectrum.getCID() + "", spectrum, true, config.getFolder(), writeSDF);
 		else if(config.isKEGG())
-			evaluateResults(spectrum.getKEGG() + "", spectrum, true, config.getFolder());
+			evaluateResults(spectrum.getKEGG() + "", spectrum, true, config.getFolder(), writeSDF);
 		
 		
+	}
+	
+	
+	/**
+	 * Write sdf file with all processed structures.
+	 * 
+	 * @param keysScore the keys score
+	 * @param folder the folder
+	 */
+	private void writeSDF(Double[] keysScore, String folder)
+	{
+		Map<String, Vector<PeakMolPair>> candidateToFragments = results.getMapCandidateToFragments();
+		Map<Double, Vector<String>> realScoreMap = results.getRealScoreMap();
+		Map<String, IAtomContainer> candidateToStructure = results.getMapCandidateToStructure();
+		
+		MoleculeSet setOfMolecules = new MoleculeSet();
+		for (int i = keysScore.length -1; i >=0 ; i--) {
+			Vector<String> list = realScoreMap.get(keysScore[i]);
+			for (String string : list) {
+				//get corresponding structure
+				IAtomContainer tmp = candidateToStructure.get(string);
+				tmp = AtomContainerManipulator.removeHydrogens(tmp);
+				tmp.setProperty("DatabaseID", string);
+				tmp.setProperty("Score", keysScore[i]);
+				tmp.setProperty("PeaksExplained", candidateToFragments.get(string).size());
+				
+				//fix for bug in mdl reader setting where it happens that bond.stereo is null when the bond was read in as UP/DOWN (4)
+				for (IBond bond : tmp.bonds()) {
+					if(bond.getStereo() == null)
+						bond.setStereo(Stereo.UP_OR_DOWN);		
+				} 
+				setOfMolecules.addAtomContainer(tmp);
+			}
+		}
+		//write results file
+		try {
+			SDFWriter writer = new SDFWriter(new FileWriter(new File(folder + "logs/" + date + "_Structures.sdf")));
+			writer.write(setOfMolecules);
+			writer.close();
+		} catch (CDKException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	
@@ -413,14 +460,14 @@ public class MetFrag {
 	 * Evaluate results and write them to the log files
 	 * @throws InterruptedException 
 	 */
-	private void evaluateResults(String correctCandidateID, WrapperSpectrum spectrum, boolean generateOptimizationMatrix, String folder) throws InterruptedException
+	private void evaluateResults(String correctCandidateID, WrapperSpectrum spectrum, boolean generateOptimizationMatrix, String folder, boolean writeSDF) throws InterruptedException
 	{
 		//now collect the result
 		Map<String, IAtomContainer> candidateToStructure = results.getMapCandidateToStructure();
 		Map<String, Double> candidateToEnergy = results.getMapCandidateToEnergy();
 		Map<Double, Vector<String>> realScoreMap = results.getRealScoreMap();
 		StringBuilder completeLog = results.getCompleteLog();
-
+		
 		
 		//generate the parameter optimization matrix
 		String parameterOptimization = "";
@@ -434,8 +481,16 @@ public class MetFrag {
 		
 		Double[] keysScore = new Double[realScoreMap.keySet().size()];
 		keysScore = realScoreMap.keySet().toArray(keysScore);
-		
 		Arrays.sort(keysScore);
+		
+		//write out SDF with all the structures
+		if(writeSDF)
+		{
+			writeSDF(keysScore, folder);
+		}
+		
+		
+		
 		StringBuilder scoreListReal = new StringBuilder();
 		int rankWorstCase = 0;
 		int rankBestCase = 0;
@@ -614,6 +669,7 @@ public class MetFrag {
 		
 		String currentFile = "";
 		String date = "";
+		boolean writeSDF = false;
 		
 		try
 		{
@@ -638,6 +694,10 @@ public class MetFrag {
 				System.err.println("Error! Parameter missing!");
 				System.exit(1);
 			}
+			if(args[2] != null)
+			{
+				writeSDF = true;
+			}
 		}
 		catch(Exception e)
 		{
@@ -649,7 +709,7 @@ public class MetFrag {
 		MetFrag metFrag = new MetFrag(currentFile, date);
 		try {
 //			String resultsTable = "Spectrum\tCorrectCpdID\tHits\trankWorstCase\trankTanimoto\trankIsomorph\texactMass\tRuntime";
-			metFrag.startScriptable(true);
+			metFrag.startScriptable(true, writeSDF);
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(1);
