@@ -40,8 +40,8 @@ public class StructureRendererTable {
 	public static void Draw(IAtomContainer original, List<IAtomContainer> l, String name) {
 		
 		List<IAtomContainer> containers = new ArrayList<IAtomContainer>();
-		containers.add(original);
 		containers.addAll(l);
+		containers.add(0,original);
         
         MoleculeTableJFrame example = new MoleculeTableJFrame(containers);
         

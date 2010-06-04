@@ -207,7 +207,7 @@ public class StructureToFile {
 			//IMolecule chain = MoleculeFactory.makeIndole();
 			
         	PubChemWebService pw = new PubChemWebService();
-        	String PCID = "1148";
+        	String PCID = "2520";
         	IAtomContainer container = pw.getSingleMol(PCID, true);
         	container = AtomContainerManipulator.removeHydrogens(container);
         	IMolecule mol = new Molecule(container);

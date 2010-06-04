@@ -191,16 +191,16 @@ public class FragmentSingleCompound {
 	
 	public static void main(String[] args) {
 		//example values
-		String smiles = "C1=CC(=C(C=C1C2=C(C(=O)C3=C(C=C(C=C3O2)O)O)OC4C(C(C(C(O4)CO)O)O)O)O)O";
-		Double minMass = 303.0499;
-		Boolean render = false;
+		String smiles = "C1=CC(=CC=C1C(CC(=O)O)CN)Cl";
+		Double minMass = 100.0;
+		Boolean render = true;
 		Boolean writeToFile = false;
 		int treeDEpth = 2;
 		
 		//get command line arguments
 		if(args != null && args.length == 5)
 		{
-			smiles = args[0];
+//			smiles = args[0];
 			minMass = Double.parseDouble(args[1]);
 			if(args[2].equals("1"))
 				render = true;
@@ -208,7 +208,7 @@ public class FragmentSingleCompound {
 		}
 		else if(args != null && args.length == 4)
 		{
-			smiles = args[0];
+//			smiles = args[0];
 			minMass = Double.parseDouble(args[1]);
 			if(args[2].equals("1"))
 				render = true;
