@@ -153,8 +153,10 @@ public class Candidates {
 		IAtomContainer molecule = null;
 		
 		if(database.equals("kegg"))
-		{		
-			candidate = candidate.substring(4);
+		{	
+			if(candidate.startsWith("cpd:"))
+				candidate = candidate.substring(4);
+			
 			String candidateMol = KeggWebservice.KEGGgetMol(candidate, "");
 			MDLReader reader;
 			List<IAtomContainer> containersList;

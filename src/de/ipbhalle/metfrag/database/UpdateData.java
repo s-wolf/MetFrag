@@ -39,9 +39,10 @@ public class UpdateData {
 	public UpdateData()
 	{
 		map = new HashMap<String, Boolean>(2500000);
+		generateMap();
 	}
 	
-	public void generateMap() {
+	private void generateMap() {
 		try{
 		    // Open the file that is the first 
 		    FileInputStream fstream = new FileInputStream("/home/swolf/metfragLongs.csv");
