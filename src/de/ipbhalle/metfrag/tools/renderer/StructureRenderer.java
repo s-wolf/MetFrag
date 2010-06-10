@@ -45,6 +45,7 @@ import org.openscience.cdk.renderer.Renderer;
 import org.openscience.cdk.renderer.RendererModel;
 import org.openscience.cdk.renderer.font.AWTFontManager;
 import org.openscience.cdk.renderer.font.IFontManager;
+import org.openscience.cdk.renderer.generators.AtomContainerBoundsGenerator;
 import org.openscience.cdk.renderer.generators.AtomNumberGenerator;
 import org.openscience.cdk.renderer.generators.BasicAtomGenerator;
 import org.openscience.cdk.renderer.generators.BasicBondGenerator;
@@ -53,11 +54,16 @@ import org.openscience.cdk.renderer.generators.BasicSceneGenerator;
 import org.openscience.cdk.renderer.generators.ExtendedAtomGenerator;
 import org.openscience.cdk.renderer.generators.HighlightAtomGenerator;
 import org.openscience.cdk.renderer.generators.HighlightBondGenerator;
-import org.openscience.cdk.renderer.generators.IAtomContainerGenerator;
 import org.openscience.cdk.renderer.generators.IGenerator;
 import org.openscience.cdk.renderer.generators.IGeneratorParameter;
 import org.openscience.cdk.renderer.generators.LonePairGenerator;
+import org.openscience.cdk.renderer.generators.RadicalGenerator;
 import org.openscience.cdk.renderer.generators.RingGenerator;
+import org.openscience.cdk.renderer.generators.BasicAtomGenerator.CompactAtom;
+import org.openscience.cdk.renderer.generators.BasicAtomGenerator.KekuleStructure;
+import org.openscience.cdk.renderer.generators.BasicSceneGenerator.Margin;
+import org.openscience.cdk.renderer.generators.BasicSceneGenerator.ShowMoleculeTitle;
+import org.openscience.cdk.renderer.generators.RingGenerator.ShowAromaticity;
 import org.openscience.cdk.renderer.visitor.AWTDrawVisitor;
 import org.openscience.cdk.smiles.SmilesParser;
 import org.openscience.cdk.templates.MoleculeFactory;
@@ -91,28 +97,43 @@ public class StructureRenderer extends JFrame {
             this.setBackground(Color.WHITE);
             this.setBorder(BorderFactory.createRaisedBevelBorder());
             
-            List<IAtomContainerGenerator> generators = new ArrayList<IAtomContainerGenerator>();
+            List<IGenerator<IAtomContainer>> generators = new ArrayList<IGenerator<IAtomContainer>>();
+            AtomNumberGenerator ang = new AtomNumberGenerator();
             generators.add(new BasicSceneGenerator());
-            generators.add(new RingGenerator());
-            generators.add(new ExtendedAtomGenerator());
+            generators.add(new BasicBondGenerator());
+            generators.add(ang);
+            generators.add(new BasicAtomGenerator());
+//            generators.add(new RingGenerator());
+            generators.add(new RadicalGenerator());
                                       
          
             IFontManager fm = new AWTFontManager();
             this.renderer = new Renderer(generators, fm); 
+            RendererModel rm = renderer.getRenderer2DModel();
+            List<IGeneratorParameter<?>> parameterList = rm.getRenderingParameters();
+            for (IGeneratorParameter<?> parameter : parameterList) {
+				System.out.println(parameter.getClass().getName() + ": " +  parameter.getValue());
+			}
             
-            for (IGenerator generator : renderer.getGenerators()) {
-            	for (IGeneratorParameter parameter : generator.getParameters()) {
+            
+//            rm.set(ShowAromaticity.class, true);
+            rm.set(KekuleStructure.class, true); 
+            rm.set(CompactAtom.class, true);
+            
+            
+//            for (IGenerator generator : renderer.getGenerators()) {
+//            	for (Object parameter : generator.getParameters()) {
 //            		System.out.println("parameter: " +
 //            	      parameter.getClass().getName().substring(40) +
 //            	      " -> " +
-//            	      parameter.getValue());
-            		if(parameter.getClass().getName().substring(40).equals("BasicAtomGenerator$KekuleStructure"))
-            			parameter.setValue(true);
-            		
-            	}
-            }
+//            	      parameter.toString());
+////            		if(parameter.getClass().getName().substring(40).equals("BasicAtomGenerator$KekuleStructure"))
+////            			parameter.setValue((Object)true);
+//            		
+//            	}
+//            }
             
-            renderer.getRenderer2DModel().setDrawNumbers(true);
+//            renderer.getRenderer2DModel().setDrawNumbers(true);
 //            System.out.println("Numbers: " + renderer.getRenderer2DModel().drawNumbers());
                         
             this.isNew = true;
@@ -130,7 +151,7 @@ public class StructureRenderer extends JFrame {
             this.setBackground(Color.WHITE);
             this.setBorder(BorderFactory.createRaisedBevelBorder());
             
-            List<IAtomContainerGenerator> generators = new ArrayList<IAtomContainerGenerator>();
+            List<IGenerator<IAtomContainer>> generators = new ArrayList<IGenerator<IAtomContainer>>();
             HighlightAtomGenerator ha = new HighlightAtomGenerator();
             HighlightBondGenerator hb = new HighlightBondGenerator();
             
@@ -143,22 +164,23 @@ public class StructureRenderer extends JFrame {
          
             IFontManager fm = new AWTFontManager();
             this.renderer = new Renderer(generators, fm); 
+            
 
 //            ha.generate(highlight, renderer.getRenderer2DModel());
 //            hb.generate(highlight, renderer.getRenderer2DModel());
             
-            for (IGenerator generator : renderer.getGenerators()) {
-            	for (IGeneratorParameter parameter : generator.getParameters()) {
-//            		System.out.println("parameter: " +
-//            	      parameter.getClass().getName().substring(40) +
-//            	      " -> " +
-//            	      parameter.getValue());
-            		if(parameter.getClass().getName().substring(40).equals("BasicAtomGenerator$KekuleStructure"))
-            			parameter.setValue(true);
-            		
-            	}
-            } 
-            renderer.getRenderer2DModel().setDrawNumbers(true);
+//            for (IGenerator generator : renderer.getGenerators()) {
+//            	for (IGeneratorParameter parameter : generator.getParameters()) {
+////            		System.out.println("parameter: " +
+////            	      parameter.getClass().getName().substring(40) +
+////            	      " -> " +
+////            	      parameter.getValue());
+//            		if(parameter.getClass().getName().substring(40).equals("BasicAtomGenerator$KekuleStructure"))
+//            			parameter.setValue(true);
+//            		
+//            	}
+//            } 
+//            renderer.getRenderer2DModel().setDrawNumbers(true);
 //            System.out.println("Numbers: " + renderer.getRenderer2DModel().drawNumbers());
                         
             this.isNew = true;
@@ -266,7 +288,7 @@ public class StructureRenderer extends JFrame {
 			IAtomContainer ac = sp.parseSmiles("O=c1c2ccccc2[Se]n1c1ccccc1");
 			IAtomContainer ac2 = sp.parseSmiles("O=c1c2ccccc2[Se]n1c1ccccc1");
 			new StructureRenderer(ac, "test");
-			new StructureRenderer(ac, ac2, "test");
+//			new StructureRenderer(ac, ac2, "test");
 			
 		} catch (InvalidSmilesException e) {
 			// TODO Auto-generated catch block

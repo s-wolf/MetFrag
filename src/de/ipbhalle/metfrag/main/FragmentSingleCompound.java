@@ -123,6 +123,8 @@ public class FragmentSingleCompound {
 			else
 				fromNeutralLoss.add((String)fragment.getProperty("NeutralLossRule"));
 			
+			System.out.println(fragment.getProperty("TreeDepth").toString());
+			
 //			System.out.println(fragment.getProperty((String)fragment.getProperty("BondEnergy")));
 		}
 		
@@ -191,11 +193,10 @@ public class FragmentSingleCompound {
 	
 	public static void main(String[] args) {
 		//example values
-		String smiles = "C1=CC(=CC=C1C(CC(=O)O)CN)Cl";
+		String smiles = "C1=CC(=C(C(=C1)O)N)C(=O)CC(C(=O)O)N";
 		Double minMass = 100.0;
 		Boolean render = true;
 		Boolean writeToFile = false;
-		int treeDEpth = 2;
 		
 		//get command line arguments
 		if(args != null && args.length == 5)

@@ -40,6 +40,7 @@ import java.util.zip.GZIPInputStream;
 import org.openscience.cdk.DefaultChemObjectBuilder;
 import org.openscience.cdk.exception.InvalidSmilesException;
 import org.openscience.cdk.interfaces.IAtomContainer;
+import org.openscience.cdk.nonotify.NoNotificationChemObjectBuilder;
 import org.openscience.cdk.smiles.SmilesParser;
 
 
@@ -164,7 +165,7 @@ public class PubChemLocal {
         con = DriverManager.getConnection(url, username, password);
         Statement stmt = con.createStatement();
 	    ResultSet rs = stmt.executeQuery("SELECT SMILES, CHONSP FROM RECORD WHERE SUBSTRING(ID,1,1) != 'C' and SUBSTRING(ID,1,1) != 'B' and ID = '" + pubChemID + "' limit 1;");
-	    SmilesParser sp1 = new SmilesParser(DefaultChemObjectBuilder.getInstance());
+	    SmilesParser sp1 = new SmilesParser(NoNotificationChemObjectBuilder.getInstance());
 	    IAtomContainer molecule = null;
 	    Boolean chonsp = false;
 	    while(rs.next())

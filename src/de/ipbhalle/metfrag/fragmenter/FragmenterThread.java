@@ -44,6 +44,7 @@ import de.ipbhalle.metfrag.spectrum.AssignFragmentPeak;
 import de.ipbhalle.metfrag.spectrum.CleanUpPeakList;
 import de.ipbhalle.metfrag.spectrum.PeakMolPair;
 import de.ipbhalle.metfrag.spectrum.WrapperSpectrum;
+import de.ipbhalle.metfrag.tools.renderer.StructureRenderer;
 
 public class FragmenterThread implements Runnable{
 	
@@ -120,7 +121,6 @@ public class FragmenterThread implements Runnable{
 					molecule = pw.getSingleMol(candidate, false);
 			}
 			
-			
 			//molecule is not stored in the database or not chonsp!
 			if(molecule == null)
 				return;
@@ -189,8 +189,8 @@ public class FragmenterThread implements Runnable{
 				Scoring score = new Scoring(spectrum, candidate);
 				double currentScore = 0.0;
 				if(this.bondEnergyScoring)
-					currentScore = score.computeScoringWithBondEnergies(hits);
-//					currentScore = score.computeScoringOptimized(hits, spectrum.getExactMass());
+//					currentScore = score.computeScoringWithBondEnergies(hits);
+					currentScore = score.computeScoringOptimized(hits, spectrum.getExactMass());
 				else
 					currentScore = score.computeScoringPeakMolPair(hits);
 				
@@ -209,7 +209,8 @@ public class FragmenterThread implements Runnable{
 				
 				//also add the structure to results file
 				MetFrag.results.getMapCandidateToStructure().put(candidate, molecule);
-				MetFrag.results.getMapCandidateToFragments().put(candidate, hits);
+				MetFrag.results.getMapCandidateToFragments().put(candidate, afp);
+				
 				
 				
 				Map<Double, Vector<String>> realScoreMap = MetFrag.results.getRealScoreMap();

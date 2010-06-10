@@ -108,7 +108,6 @@ public class ChargesExperiment {
 		
 	
 		List<IAtomContainer> containersList;
-		DefaultChemObjectBuilder builder = DefaultChemObjectBuilder.getInstance();	
 		
 		String firstFile = files.get(0);
 		

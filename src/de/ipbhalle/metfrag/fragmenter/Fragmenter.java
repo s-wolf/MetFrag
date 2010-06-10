@@ -43,6 +43,7 @@ import java.util.Vector;
 
 
 import org.openscience.cdk.Atom;
+import org.openscience.cdk.AtomContainer;
 import org.openscience.cdk.AtomContainerSet;
 import org.openscience.cdk.DefaultChemObjectBuilder;
 import org.openscience.cdk.LonePair;
@@ -54,6 +55,7 @@ import org.openscience.cdk.config.IsotopeFactory;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.exception.NoSuchAtomException;
 import org.openscience.cdk.formula.MolecularFormula;
+import org.openscience.cdk.interfaces.IChemObjectBuilder;
 import org.openscience.cdk.interfaces.IElement;
 import org.openscience.cdk.interfaces.ILonePair;
 import org.openscience.cdk.interfaces.IMolecularFormula;
@@ -72,6 +74,7 @@ import org.openscience.cdk.io.SDFWriter;
 import org.openscience.cdk.isomorphism.IsomorphismTester;
 import org.openscience.cdk.isomorphism.UniversalIsomorphismTester;
 import org.openscience.cdk.isomorphism.matchers.IQueryAtomContainer;
+import org.openscience.cdk.nonotify.NoNotificationChemObjectBuilder;
 import org.openscience.cdk.ringsearch.AllRingsFinder;
 import org.openscience.cdk.smiles.SmilesGenerator;
 import org.openscience.cdk.smiles.SmilesParser;
@@ -86,6 +89,7 @@ import de.ipbhalle.metfrag.tools.MolecularFormulaTools;
 import de.ipbhalle.metfrag.tools.MoleculeTools;
 import de.ipbhalle.metfrag.tools.Number;
 import de.ipbhalle.metfrag.tools.PPMTool;
+import de.ipbhalle.metfrag.tools.renderer.StructureRenderer;
 
 
 public class Fragmenter {
@@ -361,27 +365,15 @@ public class Fragmenter {
      */
     public IAtomContainer markAllBonds(IAtomContainer original)
     {
-    	List<IBond> bondList = new ArrayList<IBond>();
-    	
     	MoleculeTools.moleculeNumbering(original);
     	bondNumber = original.getBondCount();
     	atomsContained = original.getAtomCount();
     	
-    	//get all the bonds    	
-    	for (IBond bond : original.bonds()) {
-    		bondList.add(bond);
-		}
-    	
-    	IAtomContainer ret = makeAtomContainer(bondList.get(0).getAtom(0), bondList);
-    	
-    	return ret;
+    	return original;
     }
     
     private void preprocessMolecule(IAtomContainer original) throws IOException, CDKException 
-    {
-    	//Render.Draw(original, "Preprocessing!");
-    	
-    	
+    {    	
     	//read in bondenergies.txt
     	bondEnergies = new HashMap<String, Double>();
         try 
@@ -610,7 +602,7 @@ public class Fragmenter {
 //            System.out.println("Benötigte Zeit Split Molecule: " + this.endSplitable + " Insgesamt: " + this.sumSplitableBonds);
             
           //generate only fragments until a specified depth
-	      if(treeDepth >= (treeDepthMax))
+	      if(treeDepth > (treeDepthMax))
 	    	  break;
     
         }
@@ -756,7 +748,7 @@ public class Fragmenter {
 //            System.out.println("Benötigte Zeit Split Molecule: " + this.endSplitable + " Insgesamt: " + this.sumSplitableBonds);
             
           //generate only fragments until a specified depth
-	      if(treeDepth >= (treeDepthMax))
+	      if(treeDepth > (treeDepthMax))
 	    	  break;
     
         }
@@ -1763,8 +1755,10 @@ public class Fragmenter {
     	
     	boolean[] atomsDone = new boolean[this.atomsContained];
     	
-        IAtomContainer partContainer = new AtomContainerMetFrag();
+    	IChemObjectBuilder builder = NoNotificationChemObjectBuilder.getInstance();
+        IAtomContainer partContainer = builder.newInstance(IAtomContainer.class);
         partContainer.addAtom(atom);
+        
         atomsDone[Integer.parseInt(atom.getID())] = true;
                   
         for (IBond aBond : parts) {
@@ -1778,6 +1772,7 @@ public class Fragmenter {
             }
             partContainer.addBond(aBond);
         }
+
         return partContainer;
     }
     

@@ -106,7 +106,7 @@ public class StartMetFrag {
 		try {
 			boolean useIPBProxy = false;
 			//possible databases: kegg, pubchem, chemspider
-			output = MetFrag.start("pubchem", "932", "", exactMass, spectrum, useIPBProxy, "/home/swolf/test.sdf");
+			output = MetFrag.start("pubchem", "932", "", exactMass, spectrum, useIPBProxy, "/home/swolf/metFrag/");
 		} catch (Exception e) {
 			System.err.println("Error: " + e.getMessage());
 			e.printStackTrace();

@@ -102,7 +102,7 @@ public class StructureToFile {
     	
     	
 		// generators make the image elements
-		List<IAtomContainerGenerator> generators = new ArrayList<IAtomContainerGenerator>();
+		List<IGenerator<IAtomContainer>> generators = new ArrayList<IGenerator<IAtomContainer>>();
 		generators.add(new BasicBondGenerator());
 		generators.add(new BasicAtomGenerator());
 //		generators.add(new LonePairGenerator());
@@ -110,7 +110,7 @@ public class StructureToFile {
 		   
 		// the renderer needs to have a toolkit-specific font manager 
 		Renderer renderer = new Renderer(generators, new AWTFontManager());
-		renderer.getRenderer2DModel().setDrawNumbers(true);
+//		renderer.getRenderer2DModel().setDrawNumbers(true);
 
 		
 		// the call to 'setup' only needs to be done on the first paint
@@ -141,7 +141,7 @@ public class StructureToFile {
         // creates CDK Molecule object and get the renderer
         //Molecule   mol      = prepareMolecule(MOLString);
     	// generators make the image elements
-		List<IAtomContainerGenerator> generators = new ArrayList<IAtomContainerGenerator>();
+    	List<IGenerator<IAtomContainer>> generators = new ArrayList<IGenerator<IAtomContainer>>();
 		generators.add(new BasicBondGenerator());
 		generators.add(new BasicAtomGenerator());
 		   

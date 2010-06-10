@@ -168,7 +168,7 @@ public class MetFrag {
 		
 		//now collect the result
 		Map<String, IAtomContainer> candidateToStructure = results.getMapCandidateToStructure();
-		Map<String, Vector<PeakMolPair>> candidateToFragments = results.getMapCandidateToFragments();
+		Map<String, AssignFragmentPeak> candidateToFragments = results.getMapCandidateToFragments();
 		MoleculeSet setOfMolecules = new MoleculeSet();
 		for (int i = scores.length -1; i >=0 ; i--) {
 			Vector<String> list = scoresNormalized.get(scores[i]);
@@ -179,7 +179,7 @@ public class MetFrag {
 				tmp = AtomContainerManipulator.removeHydrogens(tmp);
 				tmp.setProperty("DatabaseID", string);
 				tmp.setProperty("Score", scores[i]);
-				tmp.setProperty("PeaksExplained", candidateToFragments.get(string).size());
+				tmp.setProperty("PeaksExplained", candidateToFragments.get(string).getHits().size());
 				
 				//fix for bug in mdl reader setting where it happens that bond.stereo is null when the bond was read in as UP/DOWN (4)
 				for (IBond bond : tmp.bonds()) {
@@ -195,11 +195,14 @@ public class MetFrag {
 		{
 			setOfFragments = new MoleculeSet();
 			
+			
 			for (int i = scores.length -1; i >=0 ; i--) {
 				Vector<String> list = scoresNormalized.get(scores[i]);
 				for (String string : list) {
 					
-					Vector<PeakMolPair> fragments = candidateToFragments.get(string);
+					//original molecule
+					setOfFragments.addAtomContainer(new Molecule(candidateToStructure.get(string)));
+					Vector<PeakMolPair> fragments = candidateToFragments.get(string).getHits();
 					for (PeakMolPair frag : fragments) {
 						
 						//fix for bug in mdl reader setting where it happens that bond.stereo is null when the bond was read in as UP/DOWN (4)
@@ -213,7 +216,7 @@ public class MetFrag {
 					
 					//write results file
 					try {
-						SDFWriter writer = new SDFWriter(new FileWriter(new File(outputFile + "_" + "fragments")));
+						SDFWriter writer = new SDFWriter(new FileWriter(new File(outputFile + databaseID + "_" + "fragments.sdf")));
 						writer.write(setOfFragments);
 						writer.close();
 					} catch (CDKException e) {
@@ -231,7 +234,7 @@ public class MetFrag {
 
 		//write results file
 		try {
-			SDFWriter writer = new SDFWriter(new FileWriter(new File(outputFile + "_" + database + ".sdf")));
+			SDFWriter writer = new SDFWriter(new FileWriter(new File(outputFile + "metfrag" + "_" + database + ".sdf")));
 			writer.write(setOfMolecules);
 			writer.close();
 		} catch (CDKException e) {
@@ -313,7 +316,7 @@ public class MetFrag {
 
 		//now collect the result
 		Map<String, IAtomContainer> candidateToStructure = results.getMapCandidateToStructure();
-		Map<String, Vector<PeakMolPair>> candidateToFragments = results.getMapCandidateToFragments();
+		Map<String, AssignFragmentPeak> candidateToFragments = results.getMapCandidateToFragments();
 
 		List<MetFragResult> results = new ArrayList<MetFragResult>();
 		for (int i = scores.length -1; i >=0 ; i--) {
@@ -323,7 +326,7 @@ public class MetFrag {
 				IAtomContainer tmp = candidateToStructure.get(string);
 				tmp = AtomContainerManipulator.removeHydrogens(tmp);
 				
-				results.add(new MetFragResult(string, tmp, scores[i], candidateToFragments.get(string).size()));
+				results.add(new MetFragResult(string, tmp, scores[i], candidateToFragments.get(string).getHits().size()));
 			}
 		}		
 		
@@ -364,7 +367,7 @@ public class MetFrag {
 		
 		this.candidateCount = candidates.size();
 		results.addToCompleteLog("\n*****************************************************\n\n");
-		results.addToCompleteLog("\nFile: " + file);
+		results.addToCompleteLog("\nFile: " + file + " ====> " + getCorrectCandidateID(spectrum, config));
 		
 		
 		//now fill executor!!!
@@ -400,13 +403,19 @@ public class MetFrag {
 			count++;
 		}
 		
-		//TODO fix database id
+
+		evaluateResults(getCorrectCandidateID(spectrum, config), spectrum, true, config.getFolder(), writeSDF);		
+	}
+	
+	
+	private String getCorrectCandidateID(WrapperSpectrum spectrum, Config config)
+	{
+		String candidate = "";
 		if(config.isPubChem())
-			evaluateResults(spectrum.getCID() + "", spectrum, true, config.getFolder(), writeSDF);
+			candidate = Integer.toString(spectrum.getCID());
 		else if(config.isKEGG())
-			evaluateResults(spectrum.getKEGG() + "", spectrum, true, config.getFolder(), writeSDF);
-		
-		
+			candidate = spectrum.getKEGG();
+		return candidate;
 	}
 	
 	
@@ -418,7 +427,7 @@ public class MetFrag {
 	 */
 	private void writeSDF(Double[] keysScore, String folder)
 	{
-		Map<String, Vector<PeakMolPair>> candidateToFragments = results.getMapCandidateToFragments();
+		Map<String, AssignFragmentPeak> candidateToFragments = results.getMapCandidateToFragments();
 		Map<Double, Vector<String>> realScoreMap = results.getRealScoreMap();
 		Map<String, IAtomContainer> candidateToStructure = results.getMapCandidateToStructure();
 		
@@ -431,7 +440,7 @@ public class MetFrag {
 				tmp = AtomContainerManipulator.removeHydrogens(tmp);
 				tmp.setProperty("DatabaseID", string);
 				tmp.setProperty("Score", keysScore[i]);
-				tmp.setProperty("PeaksExplained", candidateToFragments.get(string).size());
+				tmp.setProperty("PeaksExplained", candidateToFragments.get(string).getHits().size());
 				
 				//fix for bug in mdl reader setting where it happens that bond.stereo is null when the bond was read in as UP/DOWN (4)
 				for (IBond bond : tmp.bonds()) {
@@ -694,7 +703,7 @@ public class MetFrag {
 				System.err.println("Error! Parameter missing!");
 				System.exit(1);
 			}
-			if(args[2] != null)
+			if(args.length > 2 && args[2] != null)
 			{
 				writeSDF = true;
 			}

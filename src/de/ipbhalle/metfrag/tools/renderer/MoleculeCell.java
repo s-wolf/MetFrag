@@ -42,7 +42,6 @@ import org.openscience.cdk.renderer.font.AWTFontManager;
 import org.openscience.cdk.renderer.generators.BasicAtomGenerator;
 import org.openscience.cdk.renderer.generators.BasicSceneGenerator;
 import org.openscience.cdk.renderer.generators.ExtendedAtomGenerator;
-import org.openscience.cdk.renderer.generators.IAtomContainerGenerator;
 import org.openscience.cdk.renderer.generators.IGenerator;
 import org.openscience.cdk.renderer.generators.RingGenerator;
 import org.openscience.cdk.renderer.visitor.AWTDrawVisitor;
@@ -77,7 +76,7 @@ public class MoleculeCell extends JPanel{
         else
         	this.setBorder(BorderFactory.createEtchedBorder());
         
-        List<IAtomContainerGenerator> generators = new ArrayList<IAtomContainerGenerator>();
+        List<IGenerator<IAtomContainer>> generators = new ArrayList<IGenerator<IAtomContainer>>();
         generators.add(new BasicSceneGenerator());
         generators.add(new RingGenerator());
         generators.add(new ExtendedAtomGenerator());
@@ -109,6 +108,11 @@ public class MoleculeCell extends JPanel{
         
         g.drawString(formulaString, 5, 12);
         g.drawString(mass.toString(), (preferredWidth + 10), 12);
+        if(this.atomContainer.getProperty("TreeDepth") != null)
+        {
+        	System.out.println(this.atomContainer.getProperty("TreeDepth").toString());
+        	g.drawString(this.atomContainer.getProperty("TreeDepth").toString(), (preferredWidth + 10), 22);
+        }
     }
 
 

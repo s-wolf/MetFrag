@@ -192,8 +192,8 @@ public class Scoring {
 		//best result so far
 //		double a = 0.1049;
 //		double b = 7.3030;
-		double a = 0.61;
-		double b = 1.05;
+		double a = 0.328;
+		double b = 1.3699;
 		double tempBDE = 0.0;
 		if(hits.size() > 0)
 			tempBDE = BDE / hits.size();

@@ -62,6 +62,11 @@ public class UpdateData {
 	    }
 	}
 	
+	public Map<String, Boolean> getMap()
+	{
+		return this.map;
+	}
+	
 	public boolean isContained(String id)
 	{
 		boolean ret = false;

@@ -81,7 +81,6 @@ public class ChargesExperiment2 {
 		
 	
 		List<IAtomContainer> containersList;
-		DefaultChemObjectBuilder builder = DefaultChemObjectBuilder.getInstance();	
 		
 		
 		try {

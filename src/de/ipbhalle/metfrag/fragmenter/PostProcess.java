@@ -58,6 +58,7 @@ import org.openscience.cdk.interfaces.IMolecularFormula;
 import org.openscience.cdk.interfaces.IMolecule;
 import org.openscience.cdk.interfaces.IMoleculeSet;
 import org.openscience.cdk.interfaces.IRingSet;
+import org.openscience.cdk.nonotify.NoNotificationChemObjectBuilder;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 
@@ -136,7 +137,8 @@ public class PostProcess {
 			allRings = validRings;
 		}
 		
-		IAtomContainer temp = new AtomContainerMetFrag();
+		IChemObjectBuilder builder = NoNotificationChemObjectBuilder.getInstance();
+        IAtomContainer temp = builder.newInstance(IAtomContainer.class);
 		List<IAtom> doneAtoms = new ArrayList<IAtom>();
 		List<IBond> doneBonds = new ArrayList<IBond>();	
 			
@@ -197,7 +199,7 @@ public class PostProcess {
 							}
 						}
 						//create a atom container
-						temp = new AtomContainerMetFrag();
+						temp = builder.newInstance(IAtomContainer.class);
 					}
 				}
 			}
@@ -219,7 +221,8 @@ public class PostProcess {
      */
     private IAtomContainer checkForCompleteNeutralLoss(IAtomContainer frag, IAtom candidateAtom, double neutralLossMass) throws CloneNotSupportedException, CDKException
     {
-    	IAtomContainer ret = new AtomContainerMetFrag();
+    	IChemObjectBuilder builder = NoNotificationChemObjectBuilder.getInstance();
+        IAtomContainer ret = builder.newInstance(IAtomContainer.class);
 
     	//create a copy from the original fragment
     	List<IBond> part = new ArrayList<IBond>();
@@ -440,7 +443,10 @@ public class PostProcess {
     }
     
     private IAtomContainer makeAtomContainer(IAtom atom, List<IBond> parts) {
-        IAtomContainer partContainer = new AtomContainerMetFrag();
+        
+    	IChemObjectBuilder builder = NoNotificationChemObjectBuilder.getInstance();
+        IAtomContainer partContainer = builder.newInstance(IAtomContainer.class);
+
         partContainer.addAtom(atom);
         for (IBond aBond : parts) {
             for (IAtom bondedAtom : aBond.atoms()) {

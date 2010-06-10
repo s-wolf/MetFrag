@@ -24,7 +24,6 @@ import org.openscience.cdk.renderer.generators.BasicAtomGenerator;
 import org.openscience.cdk.renderer.generators.BasicBondGenerator;
 import org.openscience.cdk.renderer.generators.BasicSceneGenerator;
 import org.openscience.cdk.renderer.generators.ExtendedAtomGenerator;
-import org.openscience.cdk.renderer.generators.IAtomContainerGenerator;
 import org.openscience.cdk.renderer.generators.IGenerator;
 import org.openscience.cdk.renderer.generators.IGeneratorParameter;
 import org.openscience.cdk.renderer.generators.RingGenerator;
@@ -142,7 +141,7 @@ public class WritePDFTable extends MoleculeCell {
 		molSource = sdg.getMolecule();
     	
     	
-		List<IAtomContainerGenerator> generators = new ArrayList<IAtomContainerGenerator>();
+		List<IGenerator<IAtomContainer>> generators = new ArrayList<IGenerator<IAtomContainer>>();
         generators.add(new BasicSceneGenerator());
         generators.add(new RingGenerator());
         generators.add(new ExtendedAtomGenerator());
@@ -151,14 +150,14 @@ public class WritePDFTable extends MoleculeCell {
 
         // the renderer needs to have a toolkit-specific font manager 
 		Renderer renderer = new Renderer(generators, new AWTFontManager());
-        for (IGenerator generator : renderer.getGenerators()) {
-        	for (IGeneratorParameter parameter : generator.getParameters()) {
-        		if(parameter.getClass().getName().substring(40).equals("BasicAtomGenerator$KekuleStructure"))
-        			parameter.setValue(true);
-        	}
-        }
-
-		renderer.getRenderer2DModel().setDrawNumbers(true);
+//        for (IGenerator generator : renderer.getGenerators()) {
+//        	for (IGeneratorParameter parameter : generator.getParameters()) {
+//        		if(parameter.getClass().getName().substring(40).equals("BasicAtomGenerator$KekuleStructure"))
+//        			parameter.setValue(true);
+//        	}
+//        }
+//
+//		renderer.getRenderer2DModel().setDrawNumbers(true);
 
 		
 		// the call to 'setup' only needs to be done on the first paint

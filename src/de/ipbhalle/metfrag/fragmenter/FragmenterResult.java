@@ -30,6 +30,7 @@ import java.util.Vector;
 import org.openscience.cdk.interfaces.IAtomContainer;
 
 import de.ipbhalle.metfrag.scoring.OptimizationMatrixEntry;
+import de.ipbhalle.metfrag.spectrum.AssignFragmentPeak;
 import de.ipbhalle.metfrag.spectrum.PeakMolPair;
 
 public class FragmenterResult {
@@ -41,7 +42,7 @@ public class FragmenterResult {
 	private Map<Double, Vector<String>> realScoreMap = null;
 	private Map<Integer, List<String>> scoreMap = null;
 	private Map<String, IAtomContainer> mapCandidateToStructure = null;
-	private Map<String, Vector<PeakMolPair>> mapCandidateToFragments = null;
+	private Map<String, AssignFragmentPeak> mapCandidateToFragments = null;
 	private Map<String, List<OptimizationMatrixEntry>> candidateToOptimizationMatrixEntries = null;
 
 	
@@ -54,7 +55,7 @@ public class FragmenterResult {
 		realScoreMap = Collections.synchronizedMap(new HashMap<Double, Vector<String>>());
 		scoreMap = Collections.synchronizedMap(new HashMap<Integer, List<String>>());
 		mapCandidateToStructure = Collections.synchronizedMap(new HashMap<String, IAtomContainer>());
-		mapCandidateToFragments = Collections.synchronizedMap(new HashMap<String, Vector<PeakMolPair>>());
+		mapCandidateToFragments = Collections.synchronizedMap(new HashMap<String, AssignFragmentPeak>());
 		candidateToOptimizationMatrixEntries = Collections.synchronizedMap(new HashMap<String, List<OptimizationMatrixEntry>>());
 	}
 
@@ -121,11 +122,11 @@ public class FragmenterResult {
 		return mapCandidateToStructure;
 	}
 
-	public void setMapCandidateToFragments(Map<String, Vector<PeakMolPair>> mapCandidateToFragments) {
+	public void setMapCandidateToFragments(Map<String, AssignFragmentPeak> mapCandidateToFragments) {
 		this.mapCandidateToFragments = mapCandidateToFragments;
 	}
 
-	public Map<String, Vector<PeakMolPair>> getMapCandidateToFragments() {
+	public Map<String, AssignFragmentPeak> getMapCandidateToFragments() {
 		return mapCandidateToFragments;
 	}
 

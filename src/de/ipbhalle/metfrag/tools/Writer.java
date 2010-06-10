@@ -16,7 +16,7 @@ public class Writer {
 	{
 		try
 		{
-			LockableFileWriter lfw = new LockableFileWriter(file, true);
+			LockableFileWriter lfw = new LockableFileWriter(file, true, "/home/swolf/locks/");
 			lfw.write(content);
 			lfw.close();
 		}
