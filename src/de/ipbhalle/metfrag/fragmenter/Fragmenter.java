@@ -124,7 +124,7 @@ public class Fragmenter {
     private boolean molecularFormulaRedundancyCheck = false;
     private boolean smilesRedundancyCheck = false;
     private boolean realIsomorphism = false;
-    private boolean lonePairGeneration = false;
+    private boolean lonePairGeneration = true;
     private boolean neutralLossAdd = true;
     private int atomsContained;
     private Map<String, Double> bondEnergies;
