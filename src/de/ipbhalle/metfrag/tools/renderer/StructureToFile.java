@@ -103,14 +103,15 @@ public class StructureToFile {
     	
 		// generators make the image elements
 		List<IGenerator<IAtomContainer>> generators = new ArrayList<IGenerator<IAtomContainer>>();
-		generators.add(new BasicBondGenerator());
-		generators.add(new BasicAtomGenerator());
-//		generators.add(new LonePairGenerator());
+		generators.add(new BasicSceneGenerator());
+        generators.add(new BasicBondGenerator());
+        generators.add(new BasicAtomGenerator());
+        generators.add(new RingGenerator());
+        generators.add(new RadicalGenerator());
 				
 		   
 		// the renderer needs to have a toolkit-specific font manager 
 		Renderer renderer = new Renderer(generators, new AWTFontManager());
-//		renderer.getRenderer2DModel().setDrawNumbers(true);
 
 		
 		// the call to 'setup' only needs to be done on the first paint
@@ -142,8 +143,11 @@ public class StructureToFile {
         //Molecule   mol      = prepareMolecule(MOLString);
     	// generators make the image elements
     	List<IGenerator<IAtomContainer>> generators = new ArrayList<IGenerator<IAtomContainer>>();
-		generators.add(new BasicBondGenerator());
-		generators.add(new BasicAtomGenerator());
+    	generators.add(new BasicSceneGenerator());
+        generators.add(new BasicBondGenerator());
+        generators.add(new BasicAtomGenerator());
+        generators.add(new RingGenerator());
+        generators.add(new RadicalGenerator());
 		   
 		// the renderer needs to have a toolkit-specific font manager 
 		Renderer renderer = new Renderer(generators, new AWTFontManager());
@@ -213,6 +217,7 @@ public class StructureToFile {
         	IMolecule mol = new Molecule(container);
 			
 			sr = new StructureToFile(200,200, "/home/swolf/", false, false);
+			sr.writeMOL2PNGFile(mol, PCID + ".png");
 			sr.writeMOL2SVGFile(mol, PCID + ".svg");
 			
 		} catch (Exception e) {

@@ -210,7 +210,7 @@ public class MetFrag {
 							if(bond.getStereo() == null)
 								bond.setStereo(Stereo.UP_OR_DOWN);		
 						} 
-						IMolecule mol = new Molecule(frag.getFragment());
+						IMolecule mol = new Molecule(AtomContainerManipulator.removeHydrogens(frag.getFragment()));
 						setOfFragments.addAtomContainer(mol);
 					}
 					
