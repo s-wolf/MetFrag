@@ -78,25 +78,6 @@ public class StartMetFrag {
 		   "273.076 10000.000\n" +
 		   "274.083 318.003\n";
 		
-		//alternatively read peaklist from file
-//		String peaks = "";
-//		try
-//		{
-//			FileInputStream fstream = new FileInputStream("/path/to/file");
-//		    DataInputStream in = new DataInputStream(fstream);
-//		    BufferedReader br = new BufferedReader(new InputStreamReader(in));
-//		    String strLine;
-//		    //Read File Line By Line
-//		    while ((strLine = br.readLine()) != null)   {
-//		      peaks += strLine;
-//		    }
-//		    in.close();
-//		}
-//		catch(IOException e)
-//		{
-//			System.err.println("File not found! " + e.getMessage());
-//		}
-		
 		//create spectrum
 		WrapperSpectrum spectrum = new WrapperSpectrum(peaks, 1, exactMass);
 		

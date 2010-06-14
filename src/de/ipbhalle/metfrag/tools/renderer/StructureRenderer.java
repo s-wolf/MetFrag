@@ -98,11 +98,10 @@ public class StructureRenderer extends JFrame {
             this.setBorder(BorderFactory.createRaisedBevelBorder());
             
             List<IGenerator<IAtomContainer>> generators = new ArrayList<IGenerator<IAtomContainer>>();
-            AtomNumberGenerator ang = new AtomNumberGenerator();
             generators.add(new BasicSceneGenerator());
             generators.add(new BasicBondGenerator());
-            generators.add(ang);
             generators.add(new BasicAtomGenerator());
+            generators.add(new AtomNumberGenerator());
 //            generators.add(new RingGenerator());
             generators.add(new RadicalGenerator());
                                       
@@ -118,8 +117,7 @@ public class StructureRenderer extends JFrame {
             
 //            rm.set(ShowAromaticity.class, true);
             rm.set(KekuleStructure.class, true); 
-            rm.set(CompactAtom.class, true);
-            
+            rm.set(AtomNumberGenerator.Offset.class, new javax.vecmath.Vector2d(15,0));
             
 //            for (IGenerator generator : renderer.getGenerators()) {
 //            	for (Object parameter : generator.getParameters()) {

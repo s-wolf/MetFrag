@@ -602,7 +602,7 @@ public class Fragmenter {
 //            System.out.println("Benötigte Zeit Split Molecule: " + this.endSplitable + " Insgesamt: " + this.sumSplitableBonds);
             
           //generate only fragments until a specified depth
-	      if(treeDepth > (treeDepthMax))
+	      if(treeDepth >= (treeDepthMax))
 	    	  break;
     
         }
@@ -748,7 +748,7 @@ public class Fragmenter {
 //            System.out.println("Benötigte Zeit Split Molecule: " + this.endSplitable + " Insgesamt: " + this.sumSplitableBonds);
             
           //generate only fragments until a specified depth
-	      if(treeDepth > (treeDepthMax))
+	      if(treeDepth >= (treeDepthMax))
 	    	  break;
     
         }
