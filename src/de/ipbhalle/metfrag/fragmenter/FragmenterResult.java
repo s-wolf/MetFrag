@@ -42,7 +42,7 @@ public class FragmenterResult {
 	private Map<Double, Vector<String>> realScoreMap = null;
 	private Map<Integer, List<String>> scoreMap = null;
 	private Map<String, IAtomContainer> mapCandidateToStructure = null;
-	private Map<String, AssignFragmentPeak> mapCandidateToFragments = null;
+	private Map<String, Vector<PeakMolPair>> mapCandidateToFragments = null;
 	private Map<String, List<OptimizationMatrixEntry>> candidateToOptimizationMatrixEntries = null;
 
 	
@@ -55,7 +55,7 @@ public class FragmenterResult {
 		realScoreMap = Collections.synchronizedMap(new HashMap<Double, Vector<String>>());
 		scoreMap = Collections.synchronizedMap(new HashMap<Integer, List<String>>());
 		mapCandidateToStructure = Collections.synchronizedMap(new HashMap<String, IAtomContainer>());
-		mapCandidateToFragments = Collections.synchronizedMap(new HashMap<String, AssignFragmentPeak>());
+		mapCandidateToFragments = Collections.synchronizedMap(new HashMap<String, Vector<PeakMolPair>>());
 		candidateToOptimizationMatrixEntries = Collections.synchronizedMap(new HashMap<String, List<OptimizationMatrixEntry>>());
 	}
 
@@ -122,11 +122,11 @@ public class FragmenterResult {
 		return mapCandidateToStructure;
 	}
 
-	public void setMapCandidateToFragments(Map<String, AssignFragmentPeak> mapCandidateToFragments) {
+	public void setMapCandidateToFragments(Map<String, Vector<PeakMolPair>> mapCandidateToFragments) {
 		this.mapCandidateToFragments = mapCandidateToFragments;
 	}
 
-	public Map<String, AssignFragmentPeak> getMapCandidateToFragments() {
+	public Map<String, Vector<PeakMolPair>> getMapCandidateToFragments() {
 		return mapCandidateToFragments;
 	}
 

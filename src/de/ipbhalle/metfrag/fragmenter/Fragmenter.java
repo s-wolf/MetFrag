@@ -124,7 +124,7 @@ public class Fragmenter {
     private boolean molecularFormulaRedundancyCheck = false;
     private boolean smilesRedundancyCheck = false;
     private boolean realIsomorphism = false;
-    private boolean lonePairGeneration = true;
+    private boolean radicalGeneration = true;
     private boolean neutralLossAdd = true;
     private int atomsContained;
     private Map<String, Double> bondEnergies;
@@ -530,6 +530,11 @@ public class Fragmenter {
                       
             String atomCount = "";
             for (IAtomContainer fragNL : fragsNL) {
+            	
+            	//fix for sdf reader bug
+            	fragNL.removeProperty("cdk:Remark");
+            	fragNL.removeProperty("cdk:Title");
+            	
             	atomCount +=  (String)fragNL.getProperty("NeutralLossRule") + "[" + fragNL.getAtomCount() + "] ";
             	fragmentQueue.offer(new Node(globalCount, 0, fragNL, treeDepth));    
             	fragNL.setProperty("TreeDepth", "1");
@@ -575,6 +580,11 @@ public class Fragmenter {
                 this.sumSplitableBonds += this.endSplitable;
                                 
                 for (IAtomContainer partContainer : parts) {
+                	
+                	//fix for sdf reader bug
+                	partContainer.removeProperty("cdk:Remark");
+                	partContainer.removeProperty("cdk:Title");
+                	
                 	//Render.Draw(partContainer, "Round: " + this.nround);
                     fragmentQueue.offer(new Node(globalCount, parent, partContainer, treeDepth));
                     fragmentsReturn.add(writeMoleculeToTemp(partContainer, identifier, globalCount, (String)partContainer.getProperty("BondEnergy"), treeDepth));                    
@@ -953,25 +963,10 @@ public class Fragmenter {
                         temp = setCharge(temp, bondPrediction.getBondLength(bondInRing.getID()), bondPrediction.getBondLength(bond.getID()));
                         
                         
-                        if(lonePairGeneration)
+                        if(radicalGeneration)
                         {
-                        	//create the single electron (radical site)
-                        	for (IAtom bondAtom : bond.atoms()) {
-                        		ILonePair lonePair = new LonePair(bondAtom);
-                        		temp.addLonePair(lonePair);
-                        		
-                        		ISingleElectron singleElectron = new SingleElectron(bondAtom);
-                        		temp.addSingleElectron(singleElectron);
-                        	}
-                        	for (IAtom bondAtom : bondInRing.atoms()) {
-                        		ILonePair lonePair = new LonePair(bondAtom);
-                        		temp.addLonePair(lonePair);
-                        		
-                        		ISingleElectron singleElectron = new SingleElectron(bondAtom);
-                        		temp.addSingleElectron(singleElectron);
-                        	}
-                        	//temp.addSingleElectron(temp.getAtomNumber(currentAtom));
-                        	//AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(temp);
+                        	ISingleElectron singleElectron = new SingleElectron(currentAtom);
+                    		temp.addSingleElectron(singleElectron);
                         }
                         
                         set.add(temp);
@@ -1057,16 +1052,10 @@ public class Fragmenter {
                 temp = setBondEnergy(temp, currentBondEnergy);
                 temp = setCharge(temp, bondPrediction.getBondLength(bond.getID()));
                 
-                if(lonePairGeneration)
+                if(radicalGeneration)
                 {
-                	//create the single electron (radical site)
-                	for (IAtom bondAtom : bond.atoms()) {
-                		ILonePair lonePair = new LonePair(bondAtom);
-                		temp.addLonePair(lonePair);
-                		
-                		ISingleElectron singleElectron = new SingleElectron(bondAtom);
-                		temp.addSingleElectron(singleElectron);
-                	}
+                	ISingleElectron singleElectron = new SingleElectron(currentAtom);
+            		temp.addSingleElectron(singleElectron);
                 }
                 set.add(temp);
                 

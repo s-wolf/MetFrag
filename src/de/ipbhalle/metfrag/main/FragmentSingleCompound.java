@@ -123,8 +123,7 @@ public class FragmentSingleCompound {
 			else
 				fromNeutralLoss.add((String)fragment.getProperty("NeutralLossRule"));
 			
-			System.out.println(fragment.getProperty("TreeDepth").toString());
-			
+//			System.out.println(fragment.getProperty("TreeDepth").toString());
 //			System.out.println(fragment.getProperty((String)fragment.getProperty("BondEnergy")));
 		}
 		

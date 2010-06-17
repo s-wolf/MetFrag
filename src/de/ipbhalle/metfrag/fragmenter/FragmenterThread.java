@@ -209,7 +209,7 @@ public class FragmenterThread implements Runnable{
 				
 				//also add the structure to results file
 				MetFrag.results.getMapCandidateToStructure().put(candidate, molecule);
-				MetFrag.results.getMapCandidateToFragments().put(candidate, afp);
+				MetFrag.results.getMapCandidateToFragments().put(candidate, afp.getHits());
 				
 				
 				

@@ -168,7 +168,7 @@ public class MetFrag {
 		
 		//now collect the result
 		Map<String, IAtomContainer> candidateToStructure = results.getMapCandidateToStructure();
-		Map<String, AssignFragmentPeak> candidateToFragments = results.getMapCandidateToFragments();
+		Map<String, Vector<PeakMolPair>> candidateToFragments = results.getMapCandidateToFragments();
 		MoleculeSet setOfMolecules = new MoleculeSet();
 		for (int i = scores.length -1; i >=0 ; i--) {
 			Vector<String> list = scoresNormalized.get(scores[i]);
@@ -179,7 +179,7 @@ public class MetFrag {
 				tmp = AtomContainerManipulator.removeHydrogens(tmp);
 				tmp.setProperty("DatabaseID", string);
 				tmp.setProperty("Score", scores[i]);
-				tmp.setProperty("PeaksExplained", candidateToFragments.get(string).getHits().size());
+				tmp.setProperty("PeaksExplained", candidateToFragments.get(string).size());
 				
 				//fix for bug in mdl reader setting where it happens that bond.stereo is null when the bond was read in as UP/DOWN (4)
 				for (IBond bond : tmp.bonds()) {
@@ -202,7 +202,7 @@ public class MetFrag {
 					
 					//original molecule
 					setOfFragments.addAtomContainer(new Molecule(candidateToStructure.get(string)));
-					Vector<PeakMolPair> fragments = candidateToFragments.get(string).getHits();
+					Vector<PeakMolPair> fragments = candidateToFragments.get(string);
 					for (PeakMolPair frag : fragments) {
 						
 						//fix for bug in mdl reader setting where it happens that bond.stereo is null when the bond was read in as UP/DOWN (4)
@@ -316,7 +316,7 @@ public class MetFrag {
 
 		//now collect the result
 		Map<String, IAtomContainer> candidateToStructure = results.getMapCandidateToStructure();
-		Map<String, AssignFragmentPeak> candidateToFragments = results.getMapCandidateToFragments();
+		Map<String, Vector<PeakMolPair>> candidateToFragments = results.getMapCandidateToFragments();
 
 		List<MetFragResult> results = new ArrayList<MetFragResult>();
 		for (int i = scores.length -1; i >=0 ; i--) {
@@ -326,7 +326,7 @@ public class MetFrag {
 				IAtomContainer tmp = candidateToStructure.get(string);
 				tmp = AtomContainerManipulator.removeHydrogens(tmp);
 				
-				results.add(new MetFragResult(string, tmp, scores[i], candidateToFragments.get(string).getHits().size()));
+				results.add(new MetFragResult(string, tmp, scores[i], candidateToFragments.get(string).size()));
 			}
 		}		
 		
@@ -427,7 +427,7 @@ public class MetFrag {
 	 */
 	private void writeSDF(Double[] keysScore, String folder)
 	{
-		Map<String, AssignFragmentPeak> candidateToFragments = results.getMapCandidateToFragments();
+		Map<String, Vector<PeakMolPair>> candidateToFragments = results.getMapCandidateToFragments();
 		Map<Double, Vector<String>> realScoreMap = results.getRealScoreMap();
 		Map<String, IAtomContainer> candidateToStructure = results.getMapCandidateToStructure();
 		
@@ -440,7 +440,7 @@ public class MetFrag {
 				tmp = AtomContainerManipulator.removeHydrogens(tmp);
 				tmp.setProperty("DatabaseID", string);
 				tmp.setProperty("Score", keysScore[i]);
-				tmp.setProperty("PeaksExplained", candidateToFragments.get(string).getHits().size());
+				tmp.setProperty("PeaksExplained", candidateToFragments.get(string).size());
 				
 				//fix for bug in mdl reader setting where it happens that bond.stereo is null when the bond was read in as UP/DOWN (4)
 				for (IBond bond : tmp.bonds()) {

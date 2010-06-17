@@ -38,12 +38,17 @@ import javax.swing.border.EtchedBorder;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IMolecularFormula;
 import org.openscience.cdk.renderer.Renderer;
+import org.openscience.cdk.renderer.RendererModel;
 import org.openscience.cdk.renderer.font.AWTFontManager;
 import org.openscience.cdk.renderer.generators.BasicAtomGenerator;
+import org.openscience.cdk.renderer.generators.BasicBondGenerator;
 import org.openscience.cdk.renderer.generators.BasicSceneGenerator;
 import org.openscience.cdk.renderer.generators.ExtendedAtomGenerator;
 import org.openscience.cdk.renderer.generators.IGenerator;
+import org.openscience.cdk.renderer.generators.LonePairGenerator;
+import org.openscience.cdk.renderer.generators.RadicalGenerator;
 import org.openscience.cdk.renderer.generators.RingGenerator;
+import org.openscience.cdk.renderer.generators.BasicAtomGenerator.AtomRadius;
 import org.openscience.cdk.renderer.visitor.AWTDrawVisitor;
 import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 
@@ -78,11 +83,15 @@ public class MoleculeCell extends JPanel{
         
         List<IGenerator<IAtomContainer>> generators = new ArrayList<IGenerator<IAtomContainer>>();
         generators.add(new BasicSceneGenerator());
-        generators.add(new RingGenerator());
-        generators.add(new ExtendedAtomGenerator());
+        generators.add(new BasicBondGenerator());
+        generators.add(new BasicAtomGenerator());
+        generators.add(new RadicalGenerator());
                
         
         this.renderer = new Renderer(generators, new AWTFontManager());
+        RendererModel rm = renderer.getRenderer2DModel();
+        rm.set(AtomRadius.class, 0.4);
+        
         this.isNew = true;
     }
     

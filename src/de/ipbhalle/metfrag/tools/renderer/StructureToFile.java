@@ -41,6 +41,7 @@ import org.openscience.cdk.layout.*;
 import org.openscience.cdk.renderer.*;
 import org.openscience.cdk.renderer.font.*;
 import org.openscience.cdk.renderer.generators.*;
+import org.openscience.cdk.renderer.generators.BasicAtomGenerator.AtomRadius;
 import org.openscience.cdk.renderer.visitor.*;
 import org.openscience.cdk.templates.*;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
@@ -106,13 +107,14 @@ public class StructureToFile {
 		generators.add(new BasicSceneGenerator());
         generators.add(new BasicBondGenerator());
         generators.add(new BasicAtomGenerator());
-        generators.add(new RingGenerator());
+//        generators.add(new RingGenerator());
         generators.add(new RadicalGenerator());
 				
 		   
 		// the renderer needs to have a toolkit-specific font manager 
 		Renderer renderer = new Renderer(generators, new AWTFontManager());
-
+		RendererModel rm = renderer.getRenderer2DModel();
+        rm.set(AtomRadius.class, 0.4);
 		
 		// the call to 'setup' only needs to be done on the first paint
 		renderer.setup(molSource, drawArea);

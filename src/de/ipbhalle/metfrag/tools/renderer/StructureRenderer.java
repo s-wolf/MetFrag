@@ -104,15 +104,16 @@ public class StructureRenderer extends JFrame {
             generators.add(new AtomNumberGenerator());
 //            generators.add(new RingGenerator());
             generators.add(new RadicalGenerator());
+            
                                       
-         
+            
             IFontManager fm = new AWTFontManager();
             this.renderer = new Renderer(generators, fm); 
             RendererModel rm = renderer.getRenderer2DModel();
-//            List<IGeneratorParameter<?>> parameterList = rm.getRenderingParameters();
-//            for (IGeneratorParameter<?> parameter : parameterList) {
-//				System.out.println(parameter.getClass().getName() + ": " +  parameter.getValue());
-//			}
+            List<IGeneratorParameter<?>> parameterList = rm.getRenderingParameters();
+            for (IGeneratorParameter<?> parameter : parameterList) {
+				System.out.println(parameter.getClass().getName() + ": " +  parameter.getValue());
+			}
             
             
 //            rm.set(ShowAromaticity.class, true);
