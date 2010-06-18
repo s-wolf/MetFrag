@@ -102,25 +102,21 @@ public class MassbankParser{
 				IUPAC = line.substring(line.indexOf("CH$IUPAC")+10);
 				 
 			    //CH$LINK - ID of other database with link
-			  	while (line != null && !line.contains("CH$LINK: PUBCHEM CID:") && !line.startsWith("AC")){
+			  	while (line != null && !line.contains("CH$LINK:") && !line.startsWith("AC")){
 				  	  line = reader.readLine();
 				}
 			  	
-			  	//pubchem id
-			  	if(!line.startsWith("AC"))
-			  		linkPubChem = Integer.parseInt(line.substring(line.indexOf("CH$LINK: PUBCHEM CID:")+21).split("\\ ")[0]);
-			  	else
-			  		linkPubChem = 0;
-			  	
-				
-				//CH$LINK - KEGG ID --> optional
-				line = reader.readLine();
-			  	if(line.startsWith("CH$LINK: KEGG"))
-			  	{
-					//kegg id
-					linkKEGG = line.substring(line.indexOf("CH$LINK: KEGG")+14);
-			  	}
-			  	
+			  	//pubchem and kegg id
+			  	while (line != null && line.contains("CH$LINK:") && !line.startsWith("AC"))
+	  			{
+			  		if(line.contains("PUBCHEM"))
+			  			Integer.parseInt(line.substring(line.indexOf("CH$LINK: PUBCHEM CID:")+21).split("\\ ")[0]);
+			  		else if(line.contains("KEGG"))
+			  			linkKEGG = line.substring(line.indexOf("CH$LINK: KEGG")+14);
+			  		
+			  		line = reader.readLine();
+	  			}
+
 			  	
 			  	while (line != null && !line.contains("AC$INSTRUMENT")){
 			  	  line = reader.readLine();
@@ -180,5 +176,10 @@ public class MassbankParser{
 			}
 		}
 		return spectra;
+	}
+	
+	public static void main(String[] args) {
+		Vector<Spectrum> spectra = Read("/tmp/microtofrecords/BR00003.txt");
+		
 	}
 }

@@ -40,6 +40,7 @@ import java.util.concurrent.Executors;
 import org.openscience.cdk.AtomContainerSet;
 import org.openscience.cdk.ChemFile;
 import org.openscience.cdk.ChemObject;
+import org.openscience.cdk.DefaultChemObjectBuilder;
 import org.openscience.cdk.Molecule;
 import org.openscience.cdk.MoleculeSet;
 import org.openscience.cdk.atomtype.CDKAtomTypeMatcher;
@@ -57,6 +58,8 @@ import org.openscience.cdk.interfaces.IBond.Stereo;
 import org.openscience.cdk.io.MDLReader;
 import org.openscience.cdk.io.SDFWriter;
 import org.openscience.cdk.isomorphism.matchers.smarts.StereoBond;
+import org.openscience.cdk.smiles.SmilesGenerator;
+import org.openscience.cdk.smiles.SmilesParser;
 import org.openscience.cdk.tools.CDKHydrogenAdder;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 import org.openscience.cdk.tools.manipulator.AtomContainerSetManipulator;
@@ -85,6 +88,7 @@ import de.ipbhalle.metfrag.spectrum.WrapperSpectrum;
 import de.ipbhalle.metfrag.tools.MolecularFormulaTools;
 import de.ipbhalle.metfrag.tools.PPMTool;
 import de.ipbhalle.metfrag.tools.Writer;
+import de.ipbhalle.metfrag.tools.renderer.StructureRendererTable;
 
 public class MetFrag {
 	
@@ -331,6 +335,60 @@ public class MetFrag {
 		}		
 		
 		return results;
+	}
+	
+	
+	/**
+	 * MetFrag. Start the fragmenter thread. Afterwards score the results. This method is used in the
+	 * webinterface to generate all the fragments for one structure.
+	 * 
+	 * @param database the database
+	 * @param databaseID the database id
+	 * @param mzabs the mzabs
+	 * @param mzppm the mzppm
+	 * @param treeDepth the tree depth
+	 * @param peakList the peak list
+	 * @param smiles the smiles
+	 * @param mode the mode
+	 * @param molFormulaRedundancyCheck the mol formula redundancy check
+	 * 
+	 * @return the string
+	 * 
+	 * @throws Exception the exception
+	 */
+	public static Vector<PeakMolPair> startConvenienceWeb(String peakList, String smiles, int mode, boolean molFormulaRedundancyCheck, double mzabs, double mzppm, int treeDepth) throws Exception
+	{
+		SmilesParser sp = new SmilesParser(DefaultChemObjectBuilder.getInstance());
+		//parse smiles
+		IAtomContainer molecule = sp.parseSmiles(smiles);
+		//configure atoms
+		AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(molecule);
+		//add all hydrogens explicitly
+		CDKHydrogenAdder adder1 = CDKHydrogenAdder.getInstance(molecule.getBuilder());
+        adder1.addImplicitHydrogens(molecule);
+        AtomContainerManipulator.convertImplicitToExplicitHydrogens(molecule); 
+        
+        Double molMass = MolecularFormulaTools.getMonoisotopicMass(MolecularFormulaManipulator.getMolecularFormula(molecule));
+		molMass = (double)Math.round((molMass)*10000)/10000;
+        
+		WrapperSpectrum spectrum = new WrapperSpectrum(peakList, mode, molMass);		
+		
+		//constructor for fragmenter
+		Fragmenter fragmenter = new Fragmenter((Vector<Peak>)spectrum.getPeakList().clone(), mzabs, mzppm, spectrum.getMode(), true, molFormulaRedundancyCheck, false, false);
+		List<IAtomContainer> listOfFrags = fragmenter.generateFragmentsInMemory(molecule, false, treeDepth);
+			
+		//clean up peak list
+		CleanUpPeakList cList = new CleanUpPeakList(spectrum.getPeakList());
+		Vector<Peak> cleanedPeakList = cList.getCleanedPeakList(spectrum.getExactMass());
+		
+		
+		//now find corresponding fragments to the mass
+		AssignFragmentPeak afp = new AssignFragmentPeak();
+		afp.setHydrogenTest(true);
+		afp.assignFragmentPeak(listOfFrags, cleanedPeakList, mzabs, mzppm, spectrum.getMode(), false);
+		Vector<PeakMolPair> hits = afp.getHits();
+
+		return hits;
 	}
 	
 	
