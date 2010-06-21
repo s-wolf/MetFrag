@@ -362,7 +362,7 @@ public class MetFrag {
 			
 			threadExecutor.execute(new FragmenterThread(candidates.get(c), database, null, spectrum, mzabs, mzppm, 
 					molecularFormulaRedundancyCheck, breakAromaticRings, treeDepth, false, hydrogenTest, neutralLossInEveryLayer, 
-					bondEnergyScoring, breakOnlySelectedBonds, null, true));		
+					bondEnergyScoring, breakOnlySelectedBonds, null, true, jdbc, username, password));		
 		}
 		
 		threadExecutor.shutdown();
