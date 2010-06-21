@@ -146,7 +146,7 @@ public class MetFrag {
 		for (int c = 0; c < candidates.size(); c++) {				
 			threadExecutor.execute(new FragmenterThread(candidates.get(c), database, pubchem, spectrum, config.getMzabs(), config.getMzppm(), 
 					config.isSumFormulaRedundancyCheck(), config.isBreakAromaticRings(), config.getTreeDepth(), false, config.isHydrogenTest(), config.isNeutralLossAdd(), 
-					config.isBondEnergyScoring(), config.isOnlyBreakSelectedBonds(), config));		
+					config.isBondEnergyScoring(), config.isOnlyBreakSelectedBonds(), config, false));		
 		}
 		
 		threadExecutor.shutdown();
@@ -298,7 +298,7 @@ public class MetFrag {
 		for (int c = 0; c < candidates.size(); c++) {				
 			threadExecutor.execute(new FragmenterThread(candidates.get(c), database, pubchem, spectrum, mzabs, mzppm, 
 					molecularFormulaRedundancyCheck, breakAromaticRings, treeDepth, false, hydrogenTest, neutralLossInEveryLayer, 
-					bondEnergyScoring, breakOnlySelectedBonds, null));		
+					bondEnergyScoring, breakOnlySelectedBonds, null, false));		
 		}
 		
 		threadExecutor.shutdown();
@@ -439,7 +439,7 @@ public class MetFrag {
 		for (int c = 0; c < candidates.size(); c++) {				
 			threadExecutor.execute(new FragmenterThread(candidates.get(c), database, pubchem, spectrum, config.getMzabs(), config.getMzppm(), 
 					config.isSumFormulaRedundancyCheck(), config.isBreakAromaticRings(), config.getTreeDepth(), false, config.isHydrogenTest(), config.isNeutralLossAdd(), 
-					config.isBondEnergyScoring(), config.isOnlyBreakSelectedBonds(), config));		
+					config.isBondEnergyScoring(), config.isOnlyBreakSelectedBonds(), config, true));		
 		}
 		
 		threadExecutor.shutdown();

@@ -21,6 +21,7 @@
 
 package de.ipbhalle.metfrag.fragmenter;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -39,6 +40,7 @@ import de.ipbhalle.metfrag.main.Config;
 import de.ipbhalle.metfrag.main.MetFrag;
 import de.ipbhalle.metfrag.massbankParser.Peak;
 import de.ipbhalle.metfrag.pubchem.PubChemWebService;
+import de.ipbhalle.metfrag.read.Molfile;
 import de.ipbhalle.metfrag.scoring.Scoring;
 import de.ipbhalle.metfrag.spectrum.AssignFragmentPeak;
 import de.ipbhalle.metfrag.spectrum.CleanUpPeakList;
@@ -62,30 +64,33 @@ public class FragmenterThread implements Runnable{
 	private boolean bondEnergyScoring = false;
 	private boolean isOnlyBreakSelectedBonds = false;
 	private Config c = null;
+	private boolean generateFragmentsInMemory = true;
 	
 	/**
 	 * Instantiates a new pubChem search thread.
 	 * 
-	 * @param molecule the molecule
 	 * @param candidate the candidate
-	 * @param folder the folder
-	 * @param file the file
-	 * @param recreateFrags the recreate frags
-	 * @param peakList the peak list
 	 * @param mzabs the mzabs
 	 * @param mzppm the mzppm
 	 * @param sumFormulaRedundancyCheck the sum formula redundancy check
-	 * @param mode the mode
 	 * @param breakAromaticRings the break aromatic rings
 	 * @param treeDepth the tree depth
 	 * @param showDiagrams the show diagrams
 	 * @param spectrum the spectrum
 	 * @param hydrogenTest the hydrogen test
+	 * @param database the database
+	 * @param pw the pw
+	 * @param neutralLossAdd the neutral loss add
+	 * @param bondEnergyScoring the bond energy scoring
+	 * @param isOnlyBreakSelectedBonds the is only break selected bonds
+	 * @param c the c
+	 * @param generateFragmentsInMemory the generate fragments in memory
 	 */
 	public FragmenterThread(String candidate, String database, PubChemWebService pw,
 			WrapperSpectrum spectrum, double mzabs, double mzppm, boolean sumFormulaRedundancyCheck,
 			boolean breakAromaticRings, int treeDepth, boolean showDiagrams, boolean hydrogenTest,
-			boolean neutralLossAdd, boolean bondEnergyScoring, boolean isOnlyBreakSelectedBonds, Config c)
+			boolean neutralLossAdd, boolean bondEnergyScoring, boolean isOnlyBreakSelectedBonds, Config c,
+			boolean generateFragmentsInMemory)
 	{
 		this.candidate = candidate;
 		this.pw = pw;
@@ -101,6 +106,7 @@ public class FragmenterThread implements Runnable{
 		this.isOnlyBreakSelectedBonds = isOnlyBreakSelectedBonds;
 		this.treeDepth = treeDepth;
 		this.c = c;
+		this.generateFragmentsInMemory = generateFragmentsInMemory;
 	}
 	
 	
@@ -156,7 +162,13 @@ public class FragmenterThread implements Runnable{
 	        List<IAtomContainer> generatedFrags = null;
 	        try
 	        {
-	        	generatedFrags = fragmenter.generateFragmentsInMemory(molecule, true, treeDepth);
+	        	if(generateFragmentsInMemory)
+	        		generatedFrags = fragmenter.generateFragmentsInMemory(molecule, true, treeDepth);
+	        	else
+	        	{
+	        		List<File> fragsFiles = fragmenter.generateFragmentsEfficient(molecule, false, treeDepth, candidate);
+	        		generatedFrags = Molfile.ReadfolderTemp(fragsFiles);
+	        	}
 	        }
 	        catch(OutOfMemoryError e)
 	        {

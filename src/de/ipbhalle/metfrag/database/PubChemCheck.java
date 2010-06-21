@@ -1,5 +1,7 @@
 package de.ipbhalle.metfrag.database;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -24,7 +26,8 @@ public class PubChemCheck {
 		String[] files = null;
 		
 		String driver = "com.mysql.jdbc.Driver"; 
-		String path = "/vol/mirrors/pubchem/";		
+		String path = "/vol/mirrors/pubchem/";	
+		StringBuilder sb = new StringBuilder();
 		
 		
 		try
@@ -49,10 +52,21 @@ public class PubChemCheck {
 			    ResultSet rs = pstmt.executeQuery();
 			    while(rs.next())
 	            {
-			    	System.out.println(rs.getString("ID"));
+			    	sb.append(rs.getString("ID") + "\n");
 	            }
 			}
 	        
+	        
+	        try{
+	            // Create file 
+	            FileWriter fstream = new FileWriter("/home/swolf/sgeQsubScripts/pubchemMissing.txt");
+	            BufferedWriter out = new BufferedWriter(fstream);
+	            out.write(sb.toString());
+	            //Close the output stream
+	            out.close();
+            }catch (Exception e){//Catch exception if any
+              System.err.println("Error: " + e.getMessage());
+            }
 	        
 	        
 		} catch (ClassNotFoundException e) {

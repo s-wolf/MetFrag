@@ -165,8 +165,9 @@ public class Scoring {
 		
 		for (int i = 0; i < hits.size(); i++) {			
 			//Scoring like in Massbank paper m=0.6, n=3
+			//NEW trained data from hill
 			//W = [Peak intensity]^m * [Mass]^n
-			weightedPeaks += Math.pow(this.mzToIntensity.get(hits.get(i).getPeak().getMass()), 0.6) * Math.pow(((hits.get(i).getPeak().getMass() / candidateExactMass) * 10),3);
+			weightedPeaks += Math.pow(this.mzToIntensity.get(hits.get(i).getPeak().getMass()), 0.8388) * Math.pow(((hits.get(i).getPeak().getMass() / candidateExactMass) * 10), 1.4305);
 			
 			//bond energy
 			String bondEnergies = (String)hits.get(i).getFragment().getProperty("BondEnergy");
@@ -192,8 +193,8 @@ public class Scoring {
 		//best result so far
 //		double a = 0.1049;
 //		double b = 7.3030;
-		double a = 0.328;
-		double b = 1.3699;
+		double a = 0.6809;
+		double b = 2.9603;
 		double tempBDE = 0.0;
 		if(hits.size() > 0)
 			tempBDE = BDE / hits.size();
