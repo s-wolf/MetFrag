@@ -280,7 +280,7 @@ public class MetFrag {
 	 */
 	public static List<MetFragResult> startConvenience(String database, String databaseID, String molecularFormula, Double exactMass, WrapperSpectrum spectrum, boolean useProxy, 
 			double mzabs, double mzppm, double searchPPM, boolean molecularFormulaRedundancyCheck, boolean breakAromaticRings, int treeDepth,
-			boolean hydrogenTest, boolean neutralLossInEveryLayer, boolean bondEnergyScoring, boolean breakOnlySelectedBonds) throws Exception
+			boolean hydrogenTest, boolean neutralLossInEveryLayer, boolean bondEnergyScoring, boolean breakOnlySelectedBonds, int limit) throws Exception
 	{
 		
 		PubChemWebService pubchem = new PubChemWebService();
@@ -295,7 +295,11 @@ public class MetFrag {
 	    System.out.println("Used Threads: " + threads);
 	    threadExecutor = Executors.newFixedThreadPool(threads);
 			
-		for (int c = 0; c < candidates.size(); c++) {				
+		for (int c = 0; c < candidates.size(); c++) {
+			
+			if(c > limit)
+				break;
+			
 			threadExecutor.execute(new FragmenterThread(candidates.get(c), database, pubchem, spectrum, mzabs, mzppm, 
 					molecularFormulaRedundancyCheck, breakAromaticRings, treeDepth, false, hydrogenTest, neutralLossInEveryLayer, 
 					bondEnergyScoring, breakOnlySelectedBonds, null, false));		
