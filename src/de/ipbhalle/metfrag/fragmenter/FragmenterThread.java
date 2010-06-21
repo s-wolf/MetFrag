@@ -65,6 +65,7 @@ public class FragmenterThread implements Runnable{
 	private boolean isOnlyBreakSelectedBonds = false;
 	private Config c = null;
 	private boolean generateFragmentsInMemory = true;
+	private String jdbc, username, password = "";
 	
 	/**
 	 * Instantiates a new pubChem search thread.
@@ -110,6 +111,52 @@ public class FragmenterThread implements Runnable{
 	}
 	
 	
+	/**
+	 * Instantiates a new pubChem search thread.
+	 * 
+	 * @param candidate the candidate
+	 * @param mzabs the mzabs
+	 * @param mzppm the mzppm
+	 * @param sumFormulaRedundancyCheck the sum formula redundancy check
+	 * @param breakAromaticRings the break aromatic rings
+	 * @param treeDepth the tree depth
+	 * @param showDiagrams the show diagrams
+	 * @param spectrum the spectrum
+	 * @param hydrogenTest the hydrogen test
+	 * @param database the database
+	 * @param pw the pw
+	 * @param neutralLossAdd the neutral loss add
+	 * @param bondEnergyScoring the bond energy scoring
+	 * @param isOnlyBreakSelectedBonds the is only break selected bonds
+	 * @param c the c
+	 * @param generateFragmentsInMemory the generate fragments in memory
+	 */
+	public FragmenterThread(String candidate, String database, PubChemWebService pw,
+			WrapperSpectrum spectrum, double mzabs, double mzppm, boolean sumFormulaRedundancyCheck,
+			boolean breakAromaticRings, int treeDepth, boolean showDiagrams, boolean hydrogenTest,
+			boolean neutralLossAdd, boolean bondEnergyScoring, boolean isOnlyBreakSelectedBonds, Config c,
+			boolean generateFragmentsInMemory, String jdbc, String username, String password)
+	{
+		this.candidate = candidate;
+		this.pw = pw;
+		this.database = database;
+		this.mzabs = mzabs;
+		this.mzppm = mzppm;
+		this.sumFormulaRedundancyCheck = sumFormulaRedundancyCheck;
+		this.breakAromaticRings = breakAromaticRings;
+		this.spectrum = spectrum;
+		this.hydrogenTest = hydrogenTest;
+		this.neutralLossAdd = neutralLossAdd;
+		this.bondEnergyScoring = bondEnergyScoring;
+		this.isOnlyBreakSelectedBonds = isOnlyBreakSelectedBonds;
+		this.treeDepth = treeDepth;
+		this.generateFragmentsInMemory = generateFragmentsInMemory;
+		this.username = username;
+		this.password = password;
+		this.jdbc = jdbc;
+	}
+	
+	
 	@Override public void run()
 	{		
 		IAtomContainer molecule = null;
@@ -118,7 +165,9 @@ public class FragmenterThread implements Runnable{
 		{	    
 			
 			//retrieve the candidate from the database
-			if(pw == null)
+			if(pw == null && c == null)
+				molecule = Candidates.getCompoundLocally(this.database, candidate, jdbc, username, password, false);
+			else if(pw == null)
 				molecule = Candidates.getCompoundLocally(this.database, candidate, c.getJdbc(), c.getUsername(), c.getPassword(), false);
 			else
 			{
