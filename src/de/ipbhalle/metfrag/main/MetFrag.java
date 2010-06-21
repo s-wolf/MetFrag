@@ -390,11 +390,20 @@ public class MetFrag {
 		AssignFragmentPeak afp = new AssignFragmentPeak();
 		afp.setHydrogenTest(true);
 		afp.assignFragmentPeak(listOfFrags, cleanedPeakList, mzabs, mzppm, spectrum.getMode(), false);
-		Vector<PeakMolPair> hits = afp.getHits();
+		Vector<PeakMolPair> hits = afp.getAllHits();
 
-		return hits;
+		return sortBackwards(hits);
 	}
 	
+	
+	private static Vector<PeakMolPair> sortBackwards(Vector<PeakMolPair> original)
+	{
+		Vector<PeakMolPair> ret = new Vector<PeakMolPair>();
+		for (int i = original.size() - 1; i >= 0 ; i--) {
+			ret.add(original.get(i));
+		}
+		return ret;
+	}
 	
 	
 	/**
