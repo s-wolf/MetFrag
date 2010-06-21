@@ -110,7 +110,7 @@ public class MassbankParser{
 			  	while (line != null && line.contains("CH$LINK:") && !line.startsWith("AC"))
 	  			{
 			  		if(line.contains("PUBCHEM"))
-			  			Integer.parseInt(line.substring(line.indexOf("CH$LINK: PUBCHEM CID:")+21).split("\\ ")[0]);
+			  			linkPubChem = Integer.parseInt(line.substring(line.indexOf("CH$LINK: PUBCHEM CID:")+21).split("\\ ")[0]);
 			  		else if(line.contains("KEGG"))
 			  			linkKEGG = line.substring(line.indexOf("CH$LINK: KEGG")+14);
 			  		
@@ -179,7 +179,7 @@ public class MassbankParser{
 	}
 	
 	public static void main(String[] args) {
-		Vector<Spectrum> spectra = Read("/tmp/microtofrecords/BR00003.txt");
+		Vector<Spectrum> spectra = Read("/home/swolf/MassBankData/MetFragSunGrid/HillPaperDataMerged/4_Aminoantipyrine_104_Aminoantipyrine_204_Aminoantipyrine_304_Aminoantipyrine_404_Aminoantipyrine_50.txt");
 		
 	}
 }
