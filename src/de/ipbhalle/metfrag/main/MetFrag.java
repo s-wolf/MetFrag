@@ -817,15 +817,6 @@ public class MetFrag {
 	 */
 	public static void main(String[] args) {
 		
-		
-		try {
-			MetFrag.startConvenienceMetFusion("pubchem", "", "", 203.1058, new WrapperSpectrum("153.019\t999", 1, 203.1058), false, 0.01, 10.0, 10.0, true, true, 2, true, false, true, false, 100, "jdbc:mysql://rdbms/MetFrag", "swolf", "populusromanus");
-		} catch (Exception e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		
-		
 		String currentFile = "";
 		String date = "";
 		boolean writeSDF = false;
