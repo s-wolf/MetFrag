@@ -49,7 +49,7 @@ public class PreprocessSpectra {
 	 * 
 	 * @param folder the folder
 	 */
-	private void Preprocess(String folder, double threshold)
+	private void Preprocess(String folder, double threshold, boolean compareNames)
 	{
 		//loop over all files in folder
 		File f = new File(folder);
@@ -80,16 +80,34 @@ public class PreprocessSpectra {
 				//same InchI
 				int j = 2;
 				String mergedNames = files[i].getName().split("\\.")[0];
-				while(spectrum.getInchI().compareTo(spectrumTemp.getInchI()) == 0 && (i+j) <= files.length)
+				
+				if(compareNames)
 				{
-					//same InchI --> add to list
-					spectra.add(spectrumTemp);
-					mergedNames += files[i+(j-1)].getName().split("\\.")[0];
-					//fix for last file
-					if((i+j) < files.length)
-						spectrumTemp = new WrapperSpectrum(files[i+j].toString());
-					j++;
+					while(spectrum.getCID() == spectrumTemp.getCID() && (i+j) <= files.length)
+					{
+						//same InchI --> add to list
+						spectra.add(spectrumTemp);
+						mergedNames += files[i+(j-1)].getName().split("\\.")[0];
+						//fix for last file
+						if((i+j) < files.length)
+							spectrumTemp = new WrapperSpectrum(files[i+j].toString());
+						j++;
+					}
 				}
+				else
+				{
+					while(spectrum.getInchI().compareTo(spectrumTemp.getInchI()) == 0 && (i+j) <= files.length)
+					{
+						//same InchI --> add to list
+						spectra.add(spectrumTemp);
+						mergedNames += files[i+(j-1)].getName().split("\\.")[0];
+						//fix for last file
+						if((i+j) < files.length)
+							spectrumTemp = new WrapperSpectrum(files[i+j].toString());
+						j++;
+					}
+				}
+				
 				i=i+(j-2);
 				
 				//now merge the peaks from the different collision energies
@@ -298,9 +316,9 @@ public class PreprocessSpectra {
 	
 	
 	public static void main(String[] args) {
-		String folder = "/home/swolf/MassBankData/MetFragSunGrid/RikenMassBank/";
+		String folder = "/home/swolf/MassBankData/MetFragSunGrid/BrukerMicroToFPubChem/";
 		PreprocessSpectra pps = new PreprocessSpectra();
-		pps.Preprocess(folder, 0.01);
+		pps.Preprocess(folder, 0.01, true);
 		System.out.println("Done!");
 	}
 

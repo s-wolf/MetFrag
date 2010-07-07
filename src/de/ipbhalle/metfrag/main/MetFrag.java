@@ -246,6 +246,8 @@ public class MetFrag {
 	 * @param neutralLossInEveryLayer the neutral loss in every layer
 	 * @param bondEnergyScoring the bond energy scoring
 	 * @param breakOnlySelectedBonds the break only selected bonds
+	 * @param limit the limit
+	 * @param isStoreFragments the is store fragments
 	 * 
 	 * @return the string
 	 * 
@@ -253,7 +255,7 @@ public class MetFrag {
 	 */
 	public static List<MetFragResult> startConvenience(String database, String databaseID, String molecularFormula, Double exactMass, WrapperSpectrum spectrum, boolean useProxy, 
 			double mzabs, double mzppm, double searchPPM, boolean molecularFormulaRedundancyCheck, boolean breakAromaticRings, int treeDepth,
-			boolean hydrogenTest, boolean neutralLossInEveryLayer, boolean bondEnergyScoring, boolean breakOnlySelectedBonds, int limit) throws Exception
+			boolean hydrogenTest, boolean neutralLossInEveryLayer, boolean bondEnergyScoring, boolean breakOnlySelectedBonds, int limit, boolean isStoreFragments) throws Exception
 	{
 		
 		PubChemWebService pubchem = new PubChemWebService();
@@ -307,7 +309,10 @@ public class MetFrag {
 				IAtomContainer tmp = candidateToStructure.get(string);
 				tmp = AtomContainerManipulator.removeHydrogens(tmp);
 				
-				results.add(new MetFragResult(string, tmp, scores[i], candidateToFragments.get(string).size()));
+				if(isStoreFragments)
+					results.add(new MetFragResult(string, tmp, scores[i], candidateToFragments.get(string).size(), candidateToFragments.get(string)));
+				else
+					results.add(new MetFragResult(string, tmp, scores[i], candidateToFragments.get(string).size()));
 			}
 		}		
 		
@@ -346,7 +351,8 @@ public class MetFrag {
 		
 		List<String> candidates = Candidates.getLocally(database, exactMass, searchPPM, jdbc, username, password);
 
-
+		System.out.println("Hits in database: " + candidates.size());
+		
 		//now fill executor!!!
 		//number of threads depending on the available processors
 	    int threads = Runtime.getRuntime().availableProcessors();
@@ -618,10 +624,14 @@ public class MetFrag {
 		}
 		
 					
-		
+		realScoreMap = Scoring.getCombinedScore(results.getRealScoreMap(), results.getMapCandidateToEnergy(), results.getMapCandidateToHydrogenPenalty());
 		Double[] keysScore = new Double[realScoreMap.keySet().size()];
 		keysScore = realScoreMap.keySet().toArray(keysScore);
 		Arrays.sort(keysScore);
+//		TODO: new scoring function
+//		Double[] keysScore = new Double[realScoreMap.keySet().size()];
+//		keysScore = realScoreMap.keySet().toArray(keysScore);
+//		Arrays.sort(keysScore);
 		
 		//write out SDF with all the structures
 		if(writeSDF)
@@ -806,6 +816,15 @@ public class MetFrag {
 	 * @param args the arguments
 	 */
 	public static void main(String[] args) {
+		
+		
+		try {
+			MetFrag.startConvenienceMetFusion("pubchem", "", "", 203.1058, new WrapperSpectrum("153.019\t999", 1, 203.1058), false, 0.01, 10.0, 10.0, true, true, 2, true, false, true, false, 100, "jdbc:mysql://rdbms/MetFrag", "swolf", "populusromanus");
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
 		
 		String currentFile = "";
 		String date = "";

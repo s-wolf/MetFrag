@@ -147,6 +147,62 @@ public class Scoring {
 	}
 	
 	
+//	/**
+//	 * Compute scoring optimized.
+//	 * 
+//	 * @param hits the hits
+//	 * @param candidateExactMass the candidate exact mass
+//	 * 
+//	 * @return the double
+//	 */
+//	public double computeScoringOptimized(Vector<PeakMolPair> hits, double candidateExactMass)
+//	{
+//		double score = 0.0;
+//		double weightedPeaks = 0.0;
+//		double BDE = 0.0;
+//		double hydrogenPenalty = 0.0;
+//		double partialChargesDiff = 0.0;
+//		
+//		for (int i = 0; i < hits.size(); i++) {			
+//			//Scoring like in Massbank paper m=0.6, n=3
+//			//NEW trained data from hill
+//			//W = [Peak intensity]^m * [Mass]^n
+//			weightedPeaks += Math.pow(this.mzToIntensity.get(hits.get(i).getPeak().getMass()), 0.8388) * Math.pow(((hits.get(i).getPeak().getMass() / candidateExactMass) * 10), 1.4305);
+//			
+//			//bond energy
+//			String bondEnergies = (String)hits.get(i).getFragment().getProperty("BondEnergy");
+//			BDE += Fragmenter.getCombinedEnergy(bondEnergies);
+//			
+//			//hydrogen penalty
+//			hydrogenPenalty += (hits.get(i).getHydrogenPenalty() * 100);
+//			
+//			//partial charges diff
+//			String partialCharges = hits.get(i).getPartialChargeDiff();
+//			partialChargesDiff += Fragmenter.getCombinedEnergy(partialCharges);
+//		
+//			//add new entry to optimization matrix
+//			this.optimizationMatrixEntries.add(new OptimizationMatrixEntry(candidateID, hits.get(i).getPeak().getMass(), hits.get(i).getPeak().getRelIntensity(), bondEnergies, hits.get(i).getHydrogenPenalty(), partialCharges));
+//			
+//		}
+//		
+//		
+//		this.scoreBondEnergy = BDE;
+//		this.scoreChargesDiff = partialChargesDiff;
+//		this.penalty = hydrogenPenalty;
+//		
+//		//best result so far
+////		double a = 0.1049;
+////		double b = 7.3030;
+//		double a = 0.6809;
+//		double b = 2.9603;
+//		double tempBDE = 0.0;
+//		if(hits.size() > 0)
+//			tempBDE = BDE / hits.size();
+//		score = (a * weightedPeaks) - (b * tempBDE);
+//
+//		return score;
+//	}
+	
 	/**
 	 * Compute scoring optimized.
 	 * 
@@ -165,9 +221,8 @@ public class Scoring {
 		
 		for (int i = 0; i < hits.size(); i++) {			
 			//Scoring like in Massbank paper m=0.6, n=3
-			//NEW trained data from hill
 			//W = [Peak intensity]^m * [Mass]^n
-			weightedPeaks += Math.pow(this.mzToIntensity.get(hits.get(i).getPeak().getMass()), 0.8388) * Math.pow(((hits.get(i).getPeak().getMass() / candidateExactMass) * 10), 1.4305);
+			weightedPeaks += Math.pow(this.mzToIntensity.get(hits.get(i).getPeak().getMass()), 0.6) * Math.pow(((hits.get(i).getPeak().getMass() / candidateExactMass) * 10),3);
 			
 			//bond energy
 			String bondEnergies = (String)hits.get(i).getFragment().getProperty("BondEnergy");
@@ -193,8 +248,8 @@ public class Scoring {
 		//best result so far
 //		double a = 0.1049;
 //		double b = 7.3030;
-		double a = 0.6809;
-		double b = 2.9603;
+		double a = 0.328;
+		double b = 1.3699;
 		double tempBDE = 0.0;
 		if(hits.size() > 0)
 			tempBDE = BDE / hits.size();
@@ -202,6 +257,65 @@ public class Scoring {
 
 		return score;
 	}
+	
+	
+	
+//	/**
+//	 * Compute scoring optimized.
+//	 * 
+//	 * @param hits the hits
+//	 * @param candidateExactMass the candidate exact mass
+//	 * 
+//	 * @return the double
+//	 */
+//	public double computeScoringOptimized(Vector<PeakMolPair> hits, double candidateExactMass)
+//	{
+//		double score = 0.0;
+//		double weightedPeaks = 0.0;
+//		double BDE = 0.0;
+//		double hydrogenPenalty = 0.0;
+//		double partialChargesDiff = 0.0;
+//		
+//		for (int i = 0; i < hits.size(); i++) {			
+//			//Scoring like in Massbank paper m=0.6, n=3
+//			//NEW trained data from hill
+//			//W = [Peak intensity]^m * [Mass]^n
+//			weightedPeaks += Math.pow(this.mzToIntensity.get(hits.get(i).getPeak().getMass()), 0.8388) * Math.pow(((hits.get(i).getPeak().getMass() / candidateExactMass) * 10), 1.4305);
+//			
+//			//bond energy
+//			String bondEnergies = (String)hits.get(i).getFragment().getProperty("BondEnergy");
+//			BDE += Fragmenter.getCombinedEnergy(bondEnergies);
+//			
+//			//hydrogen penalty
+//			hydrogenPenalty += (hits.get(i).getHydrogenPenalty() * 100);
+//			
+//			//partial charges diff
+//			String partialCharges = hits.get(i).getPartialChargeDiff();
+//			partialChargesDiff += Fragmenter.getCombinedEnergy(partialCharges);
+//		
+//			//add new entry to optimization matrix
+//			this.optimizationMatrixEntries.add(new OptimizationMatrixEntry(candidateID, hits.get(i).getPeak().getMass(), hits.get(i).getPeak().getRelIntensity(), bondEnergies, hits.get(i).getHydrogenPenalty(), partialCharges));
+//			
+//		}
+//		
+//		
+//		this.scoreBondEnergy = BDE;
+//		this.scoreChargesDiff = partialChargesDiff;
+//		this.penalty = hydrogenPenalty;
+//		
+//		//best result so far
+////		double a = 0.1049;
+////		double b = 7.3030;
+//		double a = 0.6809;
+//		double b = 2.9603;
+//		double tempBDE = 0.0;
+//		if(hits.size() > 0)
+//			tempBDE = BDE / hits.size();
+//		score = (a * weightedPeaks) - (b * tempBDE);
+//
+//		return score;
+//	}
+	
 	
 	
 	/**

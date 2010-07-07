@@ -192,7 +192,7 @@ public class FragmentSingleCompound {
 	
 	public static void main(String[] args) {
 		//example values
-		String smiles = "C1=CC(=C(C(=C1)O)N)C(=O)CC(C(=O)O)N";
+		String smiles = "CC(=O)C1=CC2=C(C=C1)N(C3=CC=CC=C3S2)CCCN4CCN(CC4)CCO";
 		Double minMass = 100.0;
 		Boolean render = true;
 		Boolean writeToFile = false;
