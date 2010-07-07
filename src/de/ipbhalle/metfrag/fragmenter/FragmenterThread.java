@@ -250,8 +250,8 @@ public class FragmenterThread implements Runnable{
 				Scoring score = new Scoring(spectrum, candidate);
 				double currentScore = 0.0;
 				if(this.bondEnergyScoring)
-					currentScore = score.computeScoringWithBondEnergies(hits);
-//					currentScore = score.computeScoringOptimized(hits, spectrum.getExactMass());
+//					currentScore = score.computeScoringWithBondEnergies(hits);
+					currentScore = score.computeScoringOptimized(hits, spectrum.getExactMass());
 				else
 					currentScore = score.computeScoringPeakMolPair(hits);
 				
