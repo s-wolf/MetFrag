@@ -171,7 +171,7 @@ public class PubChemLocal {
 	    while(rs.next())
 	    {
 	    	//Name
-	    	System.out.println(pubChemID);
+//	    	System.out.println(pubChemID);
 	    	String smiles = rs.getString("smiles");
 	    	this.lastSmiles = smiles;
 	    	boolean bioTest = smiles.contains("C") && (!smiles.contains("O") && !smiles.contains("N") && !smiles.contains("S") && !smiles.contains("P"));
