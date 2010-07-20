@@ -26,6 +26,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
@@ -652,12 +653,22 @@ public class MetFrag {
 		int rankIsomorphism = 0;
 		boolean stop = false;
 		try {
-			Similarity sim = new Similarity(candidateToStructure, (float)0.95, true);
 			for (int i = keysScore.length-1; i >= 0; i--) {
 				similarity.append("\nScore: " + keysScore[i] + "\n");
 				List<String> candidateGroup = new ArrayList<String>();
+				
+				Map<String, IAtomContainer> candidateToStructureTemp = new HashMap<String, IAtomContainer>();
 				for (int j = 0; j < realScoreMap.get(keysScore[i]).size(); j++) {
 					candidateGroup.add(realScoreMap.get(keysScore[i]).get(j));
+					candidateToStructureTemp.put(realScoreMap.get(keysScore[i]).get(j), candidateToStructure.get(realScoreMap.get(keysScore[i]).get(j)));
+				}
+				
+				Similarity sim = null;
+				try {
+					sim = new Similarity(candidateToStructureTemp, (float)0.95, true);
+				} catch (CDKException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
 
 				List<SimilarityGroup> groupedCandidates = sim.getTanimotoDistanceList(candidateGroup);
