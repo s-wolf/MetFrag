@@ -111,7 +111,8 @@ public class SpectrumDeviation {
 	
 	
 	public static void main(String[] args) {
-		String folder = "/home/swolf/MassBankData/MetFragSunGrid/RikenDataMerged/CHONPS/useable/";
+//		String folder = "/home/swolf/MassBankData/MetFragSunGrid/RikenDataMerged/CHONPS/useable/";
+		String folder = "/home/swolf/MassBankData/MetFragSunGrid/HillPaperDataMerged/";
 		SpectrumDeviation sd = new SpectrumDeviation();
 		try {
 			sd.analyseSpectra(folder, "pubchem", 0.01, 10.0);
