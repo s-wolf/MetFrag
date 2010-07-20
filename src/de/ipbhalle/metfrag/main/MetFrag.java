@@ -397,9 +397,7 @@ public class MetFrag {
 			Vector<String> list = scoresNormalized.get(scores[i]);
 			for (String string : list) {
 				//get corresponding structure
-				IAtomContainer tmp = candidateToStructure.get(string);
-				tmp = AtomContainerManipulator.removeHydrogens(tmp);
-				
+				IAtomContainer tmp = candidateToStructure.get(string);				
 				results.add(new MetFragResult(string, tmp, scores[i], candidateToFragments.get(string).size()));
 			}
 		}		
