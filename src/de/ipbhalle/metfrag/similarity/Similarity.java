@@ -56,7 +56,7 @@ public class Similarity {
 		matrix = new float[candidatesToSmiles.size()][candidatesToSmiles.size()];
 		for (int i = 0; i < matrix.length; i++) {
 			for (int j = 0; j < matrix.length; j++) {
-				matrix[i][j] = Float.MIN_VALUE;
+				matrix[i][j] = Float.POSITIVE_INFINITY;
 			}
 		}
 		this.candidateToStructure = new HashMap<String, IAtomContainer>(candidatesToSmiles.size());
@@ -230,7 +230,7 @@ public class Similarity {
 		{
 			return 0;
 		}
-		if(matrix[pos1][pos2] != Float.MIN_VALUE)
+		if(matrix[pos1][pos2] != Float.POSITIVE_INFINITY)
 			return matrix[pos1][pos2];
 		else
 			return matrix[pos2][pos1];
