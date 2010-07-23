@@ -665,7 +665,7 @@ public class MetFrag {
 				
 				Similarity sim = null;
 				try {
-					sim = new Similarity(candidateToStructureTemp, (float)0.95, true);
+					sim = new Similarity(candidateToStructureTemp, (float)0.95, true, false);
 				} catch (CDKException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -674,7 +674,7 @@ public class MetFrag {
 				List<SimilarityGroup> groupedCandidates = sim.getTanimotoDistanceList(candidateGroup);
 				for (SimilarityGroup similarityGroup : groupedCandidates) {				
 					List<String> tempSimilar = similarityGroup.getSimilarCompounds();
-					List<Float> tempSimilarTanimoto = similarityGroup.getSimilarCompoundsTanimoto();
+					List<Float> tempSimilarTanimoto = similarityGroup.getTanimotoSimilarities();
 					similarity.append(similarityGroup.getCandidateTocompare() + ": ");
 					
 					if(correctCandidateID.equals(similarityGroup.getCandidateTocompare()))

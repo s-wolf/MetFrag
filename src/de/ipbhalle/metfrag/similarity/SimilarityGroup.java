@@ -23,17 +23,20 @@ package de.ipbhalle.metfrag.similarity;
 import java.util.ArrayList;
 import java.util.List;
 
+
 public class SimilarityGroup {
 	
 	private List<String> similarCandidates = new ArrayList<String>();
 	private List<String> similarCandidatesWithBase = new ArrayList<String>();
-	private List<Float> tanimotoCandidates = new ArrayList<Float>();
+	private List<Float> tanimotoSimilarities = new ArrayList<Float>();
+	private boolean isAlreadyInCluster;
 	private String candidateTocompare;
 	
 	public SimilarityGroup(String candidateToCompare)
 	{
 		this.candidateTocompare = candidateToCompare;
 		this.similarCandidatesWithBase.add(candidateToCompare);
+		isAlreadyInCluster = false;
 	}
 	
 	/**
@@ -45,7 +48,8 @@ public class SimilarityGroup {
 	{
 		similarCandidates.add(candidate);
 		similarCandidatesWithBase.add(candidate);
-		tanimotoCandidates.add(tanimotoDist);
+		tanimotoSimilarities.add(tanimotoDist);
+		isAlreadyInCluster = false;
 	}
 	
 	/**
@@ -58,22 +62,24 @@ public class SimilarityGroup {
 		return similarCandidates;
 	}
 	
-	
-	
 	/**
 	 * Gets the similar compounds' tanimoto distances
 	 * 
 	 * @return the similar compounds
 	 */
-	public List<Float> getSimilarCompoundsTanimoto()
+	public List<Float> getTanimotoSimilarities()
 	{
-		return tanimotoCandidates;
+		return tanimotoSimilarities;
 	}
 
+	/**
+	 * Gets the candidate tocompare.
+	 * 
+	 * @return the candidate tocompare
+	 */
 	public String getCandidateTocompare() {
 		return candidateTocompare;
 	}
-
 
 	/**
 	 * Gets the similar candidates with base.
@@ -82,6 +88,24 @@ public class SimilarityGroup {
 	 */
 	public List<String> getSimilarCandidatesWithBase() {
 		return similarCandidatesWithBase;
+	}
+
+	/**
+	 * Sets the already in cluster.
+	 * 
+	 * @param isAlreadyInCluster the new already in cluster
+	 */
+	public void setAlreadyInCluster(boolean isAlreadyInCluster) {
+		this.isAlreadyInCluster = isAlreadyInCluster;
+	}
+
+	/**
+	 * Checks if is already in cluster.
+	 * 
+	 * @return true, if is already in cluster
+	 */
+	public boolean isAlreadyInCluster() {
+		return isAlreadyInCluster;
 	}
 	
 
