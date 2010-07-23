@@ -51,7 +51,7 @@ public class Similarity {
 	private float similarityThreshold;
 	private boolean hasAtomContainer = false;
 	
-	public Similarity(Map<String,String> candidatesToSmiles, float similarityThreshold) throws CDKException
+	public Similarity(Map<String,String> candidatesToSmiles, float similarityThreshold, boolean completeMatrix) throws CDKException
 	{
 		matrix = new float[candidatesToSmiles.size()][candidatesToSmiles.size()];
 		for (int i = 0; i < matrix.length; i++) {
@@ -63,22 +63,22 @@ public class Similarity {
 		this.similarityThreshold = similarityThreshold;
 		this.candidatesToSmiles = candidatesToSmiles;
 		initializePositions();
-		calculateSimilarity(similarityThreshold);
+		calculateSimilarity(similarityThreshold, completeMatrix);
 	}
 	
-	public Similarity(Map<String, IAtomContainer> candidateToStructure, float similarityThreshold, boolean check) throws CDKException
+	public Similarity(Map<String, IAtomContainer> candidateToStructure, float similarityThreshold, boolean check, boolean completeMatrix) throws CDKException
 	{
 		matrix = new float[candidateToStructure.size()][candidateToStructure.size()];
 		for (int i = 0; i < matrix.length; i++) {
 			for (int j = 0; j < matrix.length; j++) {
-				matrix[i][j] = Float.MIN_VALUE;
+				matrix[i][j] = Float.POSITIVE_INFINITY;
 			}
 		}
 		this.candidateToStructure = candidateToStructure;
 		this.similarityThreshold = similarityThreshold;
 		this.hasAtomContainer = check;
 		initializePositions();
-		calculateSimilarity(similarityThreshold);
+		calculateSimilarity(similarityThreshold, completeMatrix);
 	}
 	
 	//initialize the position of the candidates in the matrix
@@ -114,7 +114,7 @@ public class Similarity {
 	 * 
 	 * @throws CDKException the CDK exception
 	 */
-	private float[][] calculateSimilarity(float similarityThreshold) throws CDKException
+	private float[][] calculateSimilarity(float similarityThreshold, boolean completeMatrix) throws CDKException
 	{
 		Map<String, BitSet> candidateToFingerprint = new HashMap<String, BitSet>();
 		
@@ -153,7 +153,7 @@ public class Similarity {
 			for (String candidate1 : candidatesToSmiles.keySet()) {
 	//			System.out.print(candidate1 + " ");
 				for (String candidate2 : candidatesToSmiles.keySet()) {
-					if(countJ < countI || candidate1.equals(candidate2))
+					if((countJ < countI || candidate1.equals(candidate2)) && !completeMatrix)
 					{
 	//					System.out.print("x ");
 						countJ++;
@@ -176,7 +176,7 @@ public class Similarity {
 			for (String candidate1 : candidateToStructure.keySet()) {
 	//			System.out.print(candidate1 + " ");
 				for (String candidate2 : candidateToStructure.keySet()) {
-					if(countJ < countI || candidate1.equals(candidate2))
+					if((countJ < countI || candidate1.equals(candidate2))  && !completeMatrix)
 					{
 	//					System.out.print("x ");
 						countJ++;
@@ -345,6 +345,26 @@ public class Similarity {
 			for (SimilarityGroup simGroup : toRemove) {
 				groupedCandidates.remove(simGroup);
 			}
+			
+			//now remove elements which are contained in both lists
+			for (SimilarityGroup simGroup1 : groupedCandidates) {
+				for (SimilarityGroup simGroup2 : groupedCandidates) {
+					if(simGroup1.equals(simGroup2))
+						continue;
+					
+					List<String> temp1 = simGroup1.getSimilarCompounds();
+					List<String> temp2 = simGroup2.getSimilarCompounds();
+					String cand1 = simGroup1.getCandidateTocompare();
+					String cand2 = simGroup2.getCandidateTocompare();
+					
+					if(temp1.size() > temp2.size())
+						temp1.removeAll(temp2);
+					else
+						temp2.removeAll(temp1);
+					
+				}
+			}
+			
 			return groupedCandidates;
 		}
 	}
@@ -465,6 +485,17 @@ public class Similarity {
 	}
 	
 	
+	/**
+	 * Gets the similarity matrix.
+	 * 
+	 * @return the similarity matrix
+	 */
+	public float[][] getSimilarityMatrix()
+	{
+		return this.matrix;
+	}
+	
+	
 	
 	public static void main(String[] args) {
 		SmilesParser sp = new SmilesParser(DefaultChemObjectBuilder.getInstance());
@@ -500,7 +531,7 @@ public class Similarity {
 			cands.add("13889010");
 			cands.add("125100");
 			
-			Similarity sim = new Similarity(testMap, 0.95f);
+			Similarity sim = new Similarity(testMap, 0.95f, false);
 //			System.out.println(sim.getTanimotoDistance("cand3", "cand1"));
 			
 			List<SimilarityGroup> groupedCandidates = sim.getTanimotoDistanceList(cands);
@@ -511,7 +542,7 @@ public class Similarity {
 				{
 					System.out.print("Group of " + similarityGroup.getSimilarCompounds().size() + " " + similarityGroup.getCandidateTocompare() +  ": ");
 					for (int i = 0; i < similarityGroup.getSimilarCompounds().size(); i++) {
-						System.out.print(similarityGroup.getSimilarCompounds().get(i) + "(" + similarityGroup.getSimilarCompoundsTanimoto().get(i) + ") ");
+						System.out.print(similarityGroup.getSimilarCompounds().get(i) + "(" + similarityGroup.getTanimotoSimilarities().get(i) + ") ");
 					}
 					System.out.println("");
 				}
