@@ -48,10 +48,9 @@ public class Similarity {
 	private Map<String, Integer> candidateToPosition = null;
 	private Map<String, String> candidatesToSmiles = null;
 	private StringBuilder allSimilarityValues = new StringBuilder();
-	private float similarityThreshold;
 	private boolean hasAtomContainer = false;
 	
-	public Similarity(Map<String,String> candidatesToSmiles, float similarityThreshold, boolean completeMatrix) throws CDKException
+	public Similarity(Map<String,String> candidatesToSmiles, boolean completeMatrix) throws CDKException
 	{
 		matrix = new float[candidatesToSmiles.size()][candidatesToSmiles.size()];
 		for (int i = 0; i < matrix.length; i++) {
@@ -60,13 +59,12 @@ public class Similarity {
 			}
 		}
 		this.candidateToStructure = new HashMap<String, IAtomContainer>(candidatesToSmiles.size());
-		this.similarityThreshold = similarityThreshold;
 		this.candidatesToSmiles = candidatesToSmiles;
 		initializePositions();
-		calculateSimilarity(similarityThreshold, completeMatrix);
+		calculateSimilarity(completeMatrix);
 	}
 	
-	public Similarity(Map<String, IAtomContainer> candidateToStructure, float similarityThreshold, boolean check, boolean completeMatrix) throws CDKException
+	public Similarity(Map<String, IAtomContainer> candidateToStructure, boolean check, boolean completeMatrix) throws CDKException
 	{
 		matrix = new float[candidateToStructure.size()][candidateToStructure.size()];
 		for (int i = 0; i < matrix.length; i++) {
@@ -75,10 +73,9 @@ public class Similarity {
 			}
 		}
 		this.candidateToStructure = candidateToStructure;
-		this.similarityThreshold = similarityThreshold;
 		this.hasAtomContainer = check;
 		initializePositions();
-		calculateSimilarity(similarityThreshold, completeMatrix);
+		calculateSimilarity(completeMatrix);
 	}
 	
 	//initialize the position of the candidates in the matrix
@@ -114,7 +111,7 @@ public class Similarity {
 	 * 
 	 * @throws CDKException the CDK exception
 	 */
-	private float[][] calculateSimilarity(float similarityThreshold, boolean completeMatrix) throws CDKException
+	private float[][] calculateSimilarity(boolean completeMatrix) throws CDKException
 	{
 		Map<String, BitSet> candidateToFingerprint = new HashMap<String, BitSet>();
 		
@@ -237,43 +234,6 @@ public class Similarity {
 	}
 	
 	
-	
-	/**
-	 * Gets the tanimoto distance from a list of candidates and groups them!.
-	 * 
-	 * @param candidateGroup the candidate group
-	 * @param threshold the threshold
-	 * 
-	 * @return the tanimoto distance list
-	 */
-	public List<SimilarityGroup> getTanimotoDistanceList(List<String> candidateGroup)
-	{
-		
-		
-		List<SimilarityGroup> groupedCandidates = new ArrayList<SimilarityGroup>();
-		for (String cand1 : candidateGroup) {
-			SimilarityGroup simGroup = new SimilarityGroup(cand1);
-			for (String cand2 : candidateGroup) {
-				if(cand1.equals(cand2))
-					continue;
-				else if(cand1 == null || cand2 == null)
-					continue;
-				else
-				{
-					Float tanimoto = getTanimotoDistance(cand1, cand2);
-					if(tanimoto > similarityThreshold)
-						simGroup.addSimilarCompound(cand2, tanimoto);
-				}
-			}
-			//now add similar compound to the group list
-			//if(!isContainedInPreviousResults(groupedCandidates, simGroup))
-			groupedCandidates.add(simGroup);
-		}
-		groupedCandidates = cleanList(groupedCandidates);
-		return groupedCandidates;
-	}
-	
-	
 	/**
 	 * Checks if is identical.
 	 * 
@@ -302,138 +262,15 @@ public class Similarity {
 		return isAlreadyContained;
 	}
 	
-	/**
-	 * Removes the duplicates.
-	 * 
-	 * @param groupedCandidates the grouped candidates
-	 * 
-	 * @return the list< similarity group>
-	 */
-	private List<SimilarityGroup> removeDuplicates(List<SimilarityGroup> groupedCandidates)
-	{		
-		List<SimilarityGroup> toRemove = new ArrayList<SimilarityGroup>();
-		
-		
-		if(groupedCandidates.size() == 1)
-			return groupedCandidates;
-		else
-		{
-			for (SimilarityGroup simGroup1 : groupedCandidates) {
-				
-				if(toRemove.contains(simGroup1))
-					continue;
-				
-				String[] candidatesToCompare = new String[simGroup1.getSimilarCandidatesWithBase().size()];
-				candidatesToCompare = simGroup1.getSimilarCandidatesWithBase().toArray(candidatesToCompare);
-				Arrays.sort(candidatesToCompare);
-				
-				
-				for (SimilarityGroup simGroup2 : groupedCandidates) {
-										
-					if(simGroup1.equals(simGroup2) || toRemove.contains(simGroup2))
-						continue;
-					
-					List<String> temp = simGroup2.getSimilarCandidatesWithBase();
-					String[] candidateListTemp = new String[temp.size()];
-					candidateListTemp = simGroup2.getSimilarCandidatesWithBase().toArray(candidateListTemp);
-					Arrays.sort(candidateListTemp);
-					if(Arrays.equals(candidatesToCompare, candidateListTemp))
-						toRemove.add(simGroup2);			
-				}
-			}
-			
-			for (SimilarityGroup simGroup : toRemove) {
-				groupedCandidates.remove(simGroup);
-			}
-			
-			//now remove elements which are contained in both lists
-			for (SimilarityGroup simGroup1 : groupedCandidates) {
-				for (SimilarityGroup simGroup2 : groupedCandidates) {
-					if(simGroup1.equals(simGroup2))
-						continue;
-					
-					List<String> temp1 = simGroup1.getSimilarCompounds();
-					List<String> temp2 = simGroup2.getSimilarCompounds();
-					String cand1 = simGroup1.getCandidateTocompare();
-					String cand2 = simGroup2.getCandidateTocompare();
-					
-					if(temp1.size() > temp2.size())
-						temp1.removeAll(temp2);
-					else
-						temp2.removeAll(temp1);
-					
-				}
-			}
-			
-			return groupedCandidates;
-		}
+
+	public Map<String, Integer> getCandidateToPosition() {
+		return candidateToPosition;
 	}
-	
-	
-	/**
-	 * Cleans list: remove transitive relations
-	 * Only the largest sets are used
-	 * 
-	 * @param groupedCandidates the grouped candidates
-	 * 
-	 * @return the list< similarity group>
-	 */
-	private List<SimilarityGroup> cleanList(List<SimilarityGroup> groupedCandidates)
-	{
-		List<SimilarityGroup> cleanedList = new ArrayList<SimilarityGroup>();		
-		List<SimilarityGroup> alreadyRemoved = new ArrayList<SimilarityGroup>();
-		
-		Map<String, List<String>> candidatesToCompareMapBase = new HashMap<String, List<String>>();
-		Map<String, SimilarityGroup> candidatesToCompareMap = new HashMap<String, SimilarityGroup>();
-		for (SimilarityGroup simGroup : groupedCandidates) {
-			candidatesToCompareMap.put(simGroup.getCandidateTocompare(), simGroup);
-			candidatesToCompareMapBase.put(simGroup.getCandidateTocompare(), simGroup.getSimilarCandidatesWithBase());
-		}
-		
-		if(groupedCandidates.size() == 1)
-			cleanedList = groupedCandidates;
-		else
-		{	
-			//initialize with one value
-			cleanedList.add(groupedCandidates.get(0));
-			for (String key1 : candidatesToCompareMap.keySet()) {
-				for (String key2 : candidatesToCompareMap.keySet()) {
-					if(key1.equals(key2))
-						continue;
-					
-					List<String> similar1 = candidatesToCompareMapBase.get(key1);
-					List<String> similar2 = candidatesToCompareMapBase.get(key2);
-					
-					if(isIdentical(similar1, similar2))
-					{
-						continue;
-					}
-					
-					if(similar1.size() > similar2.size() && similar1.containsAll(similar2))
-					{
-						cleanedList.remove(candidatesToCompareMap.get(key2));
-						alreadyRemoved.add(candidatesToCompareMap.get(key2));
-					}
-					else if(similar2.containsAll(similar1))
-					{
-						cleanedList.remove(candidatesToCompareMap.get(key1));
-						alreadyRemoved.add(candidatesToCompareMap.get(key1));
-					}
-					else
-					{
-						if(!cleanedList.contains(candidatesToCompareMap.get(key2)) && !alreadyRemoved.contains(candidatesToCompareMap.get(key2)))
-							cleanedList.add(candidatesToCompareMap.get(key2));
-						if(!cleanedList.contains(candidatesToCompareMap.get(key1)) && !alreadyRemoved.contains(candidatesToCompareMap.get(key1)))
-							cleanedList.add(candidatesToCompareMap.get(key1));
-					}
-						
-				}
-			}
-			cleanedList = removeDuplicates(cleanedList);
-		}
-		return cleanedList;
+
+	public void setCandidateToPosition(Map<String, Integer> candidateToPosition) {
+		this.candidateToPosition = candidateToPosition;
 	}
-	
+
 	
 	/**
 	 * Checks if the given structures are isomorph.
@@ -531,22 +368,22 @@ public class Similarity {
 			cands.add("13889010");
 			cands.add("125100");
 			
-			Similarity sim = new Similarity(testMap, 0.95f, false);
+			Similarity sim = new Similarity(testMap, false);
 //			System.out.println(sim.getTanimotoDistance("cand3", "cand1"));
-			
-			List<SimilarityGroup> groupedCandidates = sim.getTanimotoDistanceList(cands);
-			for (SimilarityGroup similarityGroup : groupedCandidates) {
-				if(similarityGroup.getSimilarCompounds().size() == 0)
-					System.out.print("Single: " + similarityGroup.getCandidateTocompare() + "\n");
-				else
-				{
-					System.out.print("Group of " + similarityGroup.getSimilarCompounds().size() + " " + similarityGroup.getCandidateTocompare() +  ": ");
-					for (int i = 0; i < similarityGroup.getSimilarCompounds().size(); i++) {
-						System.out.print(similarityGroup.getSimilarCompounds().get(i) + "(" + similarityGroup.getTanimotoSimilarities().get(i) + ") ");
-					}
-					System.out.println("");
-				}
-			}
+//			DEPRECATED
+//			List<SimilarityGroup> groupedCandidates = sim.getTanimotoDistanceList(cands);
+//			for (SimilarityGroup similarityGroup : groupedCandidates) {
+//				if(similarityGroup.getSimilarCompounds().size() == 0)
+//					System.out.print("Single: " + similarityGroup.getCandidateTocompare() + "\n");
+//				else
+//				{
+//					System.out.print("Group of " + similarityGroup.getSimilarCompounds().size() + " " + similarityGroup.getCandidateTocompare() +  ": ");
+//					for (int i = 0; i < similarityGroup.getSimilarCompounds().size(); i++) {
+//						System.out.print(similarityGroup.getSimilarCompounds().get(i).getCompoundID() + "(" + similarityGroup.getTanimotoSimilarities().get(i) + ") ");
+//					}
+//					System.out.println("");
+//				}
+//			}
 			
 		} catch (InvalidSmilesException e) {
 			// TODO Auto-generated catch block
