@@ -57,6 +57,7 @@ import de.ipbhalle.metfrag.scoring.OptimizationMatrixEntry;
 import de.ipbhalle.metfrag.scoring.Scoring;
 import de.ipbhalle.metfrag.similarity.Similarity;
 import de.ipbhalle.metfrag.similarity.SimilarityGroup;
+import de.ipbhalle.metfrag.similarity.TanimotoClusterer;
 import de.ipbhalle.metfrag.spectrum.AssignFragmentPeak;
 import de.ipbhalle.metfrag.spectrum.CleanUpPeakList;
 import de.ipbhalle.metfrag.spectrum.PeakMolPair;
@@ -667,33 +668,33 @@ public class MetFrag {
 				
 				Similarity sim = null;
 				try {
-					sim = new Similarity(candidateToStructureTemp, (float)0.95, true, false);
+					sim = new Similarity(candidateToStructureTemp, true, false);
 				} catch (CDKException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 
-				List<SimilarityGroup> groupedCandidates = sim.getTanimotoDistanceList(candidateGroup);
-				for (SimilarityGroup similarityGroup : groupedCandidates) {				
-					List<String> tempSimilar = similarityGroup.getSimilarCompounds();
-					List<Float> tempSimilarTanimoto = similarityGroup.getTanimotoSimilarities();
-					similarity.append(similarityGroup.getCandidateTocompare() + ": ");
-					
-					if(correctCandidateID.equals(similarityGroup.getCandidateTocompare()))
-						stop = true;					
+				//now cluster 
+				TanimotoClusterer tanimoto = new TanimotoClusterer(sim.getSimilarityMatrix(), sim.getCandidateToPosition());
+				List<SimilarityGroup> clusteredCpds = tanimoto.clusterCandididates(candidateGroup, 0.95f);
+				List<SimilarityGroup> groupedCandidates = tanimoto.getCleanedClusters(clusteredCpds);
+				
+				for (SimilarityGroup similarityGroup : groupedCandidates) {			
+										
+					List<String> tempSimilar = similarityGroup.getSimilarCompoundsWithBaseAsArray();				
 					
 					for (int k = 0; k < tempSimilar.size(); k++) {
 
 						if(correctCandidateID.equals(tempSimilar.get(k)))
 							stop = true;
 						
-						similarity.append(tempSimilar.get(k) + "(" +  tempSimilarTanimoto.get(k));
+						similarity.append(tempSimilar.get(k));
 					
 						boolean isIsomorph = sim.isIsomorph(tempSimilar.get(k), similarityGroup.getCandidateTocompare());
 						if(!isIsomorph)
 							rankIsomorphism++;
 						
-						similarity.append(" -" + isIsomorph + ") ");
+						similarity.append(" (" + isIsomorph + ") ");
 					}
 					similarity.append("\n");						
 					rankTanimotoGroup++;

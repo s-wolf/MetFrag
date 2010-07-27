@@ -26,18 +26,18 @@ import java.util.List;
 
 public class SimilarityGroup {
 	
-	private List<String> similarCandidates = new ArrayList<String>();
-	private List<String> similarCandidatesWithBase = new ArrayList<String>();
+	private List<SimilarityCompound> similarCandidates = new ArrayList<SimilarityCompound>();
+	private List<SimilarityCompound> similarCandidatesWithBase = new ArrayList<SimilarityCompound>();
 	private List<Float> tanimotoSimilarities = new ArrayList<Float>();
-	private boolean isAlreadyInCluster;
+	
 	private String candidateTocompare;
 	
 	public SimilarityGroup(String candidateToCompare)
 	{
 		this.candidateTocompare = candidateToCompare;
-		this.similarCandidatesWithBase.add(candidateToCompare);
-		isAlreadyInCluster = false;
+		this.similarCandidatesWithBase.add(new SimilarityCompound(candidateToCompare));
 	}
+	
 	
 	/**
 	 * Adds the similar compound.
@@ -46,10 +46,20 @@ public class SimilarityGroup {
 	 */
 	public void addSimilarCompound(String candidate, float tanimotoDist)
 	{
-		similarCandidates.add(candidate);
-		similarCandidatesWithBase.add(candidate);
+		similarCandidates.add(new SimilarityCompound(candidate));
+		similarCandidatesWithBase.add(new SimilarityCompound(candidate));
 		tanimotoSimilarities.add(tanimotoDist);
-		isAlreadyInCluster = false;
+	}
+	
+	/**
+	 * Adds the similar compound.
+	 * 
+	 * @param candidate the candidate
+	 */
+	public void addSimilarCompound(String candidate)
+	{
+		similarCandidates.add(new SimilarityCompound(candidate));
+		similarCandidatesWithBase.add(new SimilarityCompound(candidate));
 	}
 	
 	/**
@@ -57,9 +67,37 @@ public class SimilarityGroup {
 	 * 
 	 * @return the similar compounds
 	 */
-	public List<String> getSimilarCompounds()
+	public List<SimilarityCompound> getSimilarCompounds()
 	{
 		return similarCandidates;
+	}
+	
+	/**
+	 * Gets the similar compounds as an array of compound id's.
+	 * 
+	 * @return the similar compounds
+	 */
+	public List<String> getSimilarCompoundsAsArray()
+	{
+		List<String> similarArray = new ArrayList<String>();
+		for (SimilarityCompound simCpd : this.similarCandidates) {
+			similarArray.add(simCpd.getCompoundID());
+		}
+		return similarArray;
+	}
+	
+	/**
+	 * Gets the similar compounds with base compound as an array of compound id's.
+	 * 
+	 * @return the similar compounds
+	 */
+	public List<String> getSimilarCompoundsWithBaseAsArray()
+	{
+		List<String> similarArray = new ArrayList<String>();
+		for (SimilarityCompound simCpd : this.similarCandidatesWithBase) {
+			similarArray.add(simCpd.getCompoundID());
+		}
+		return similarArray;
 	}
 	
 	/**
@@ -86,26 +124,8 @@ public class SimilarityGroup {
 	 * 
 	 * @return the similar candidates with base
 	 */
-	public List<String> getSimilarCandidatesWithBase() {
+	public List<SimilarityCompound> getSimilarCandidatesWithBase() {
 		return similarCandidatesWithBase;
-	}
-
-	/**
-	 * Sets the already in cluster.
-	 * 
-	 * @param isAlreadyInCluster the new already in cluster
-	 */
-	public void setAlreadyInCluster(boolean isAlreadyInCluster) {
-		this.isAlreadyInCluster = isAlreadyInCluster;
-	}
-
-	/**
-	 * Checks if is already in cluster.
-	 * 
-	 * @return true, if is already in cluster
-	 */
-	public boolean isAlreadyInCluster() {
-		return isAlreadyInCluster;
 	}
 	
 
