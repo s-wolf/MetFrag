@@ -619,6 +619,8 @@ public class MetFrag {
 		Map<Double, Vector<String>> realScoreMap = results.getRealScoreMap();
 		StringBuilder completeLog = results.getCompleteLog();
 		
+		//set the number of candidate compounds
+		this.candidateCount = candidateToStructure.size();
 		
 		//generate the parameter optimization matrix
 		String parameterOptimization = "";
