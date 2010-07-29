@@ -105,6 +105,7 @@ public class MetFrag {
 	 */
 	public static String start(String database, String databaseID, String molecularFormula, Double exactMass, WrapperSpectrum spectrum, boolean useProxy, String outputFile) throws Exception
 	{
+		results = new FragmenterResult();
 		//get configuration
 		Config config = new Config();
 		PubChemWebService pubchem = new PubChemWebService();
@@ -260,6 +261,7 @@ public class MetFrag {
 			boolean hydrogenTest, boolean neutralLossInEveryLayer, boolean bondEnergyScoring, boolean breakOnlySelectedBonds, int limit, boolean isStoreFragments) throws Exception
 	{
 		
+		results = new FragmenterResult();
 		PubChemWebService pubchem = new PubChemWebService();
 		Vector<String> candidates = Candidates.getOnline(database, databaseID, molecularFormula, exactMass, searchPPM, useProxy, pubchem);
 
@@ -351,6 +353,7 @@ public class MetFrag {
 			boolean hydrogenTest, boolean neutralLossInEveryLayer, boolean bondEnergyScoring, boolean breakOnlySelectedBonds, int limit, String jdbc, String username, String password) throws Exception
 	{
 		
+		results = new FragmenterResult();
 		List<String> candidates = Candidates.getLocally(database, exactMass, searchPPM, jdbc, username, password);
 
 		System.out.println("Hits in database: " + candidates.size());
@@ -491,6 +494,7 @@ public class MetFrag {
 	 */
 	public void startScriptable(boolean useProxy, boolean writeSDF) throws Exception
 	{
+		results = new FragmenterResult();
 		//get configuration
 		Config config = new Config("outside");
 		WrapperSpectrum spectrum = new WrapperSpectrum(config.getFolder() + file);
@@ -504,7 +508,7 @@ public class MetFrag {
 		PubChemWebService pubchem = null;
 		List<String> candidates = Candidates.getLocally(database, spectrum.getExactMass(), config.getSearchPPM(), config.getJdbc(), config.getUsername(), config.getPassword());
 		
-		this.candidateCount = candidates.size();
+//		this.candidateCount = candidates.size();
 		results.addToCompleteLog("\n*****************************************************\n\n");
 		results.addToCompleteLog("\nFile: " + file + " ====> " + getCorrectCandidateID(spectrum, config));
 		
@@ -615,6 +619,9 @@ public class MetFrag {
 		Map<String, Double> candidateToEnergy = results.getMapCandidateToEnergy();
 		Map<Double, Vector<String>> realScoreMap = results.getRealScoreMap();
 		StringBuilder completeLog = results.getCompleteLog();
+		
+		//this is the real candidate count after filtering not connected compounds
+		this.candidateCount = results.getMapCandidateToStructure().size();
 		
 		
 		//generate the parameter optimization matrix

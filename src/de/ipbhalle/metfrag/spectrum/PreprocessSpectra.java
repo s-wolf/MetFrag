@@ -57,11 +57,11 @@ public class PreprocessSpectra {
 		Arrays.sort(files);
 		
 		//create new folder
-		String path = folder + "Proccessed";
+		String path = folder + "Merged";
 		new File(path).mkdir();
 		
 		int temp = 0;
-		for(int i=0;i<files.length-1;i++)
+		for(int i=0;i < (files.length - 1);i++)
 		{
 			if(files[i].isFile())
 			{
@@ -80,7 +80,8 @@ public class PreprocessSpectra {
 				//same InchI
 				int j = 2;
 				String mergedNames = files[i].getName().split("\\.")[0];
-				while(spectrum.getInchI().compareTo(spectrumTemp.getInchI()) == 0 && (i+j) <= files.length)
+//				while(spectrum.getInchI().compareTo(spectrumTemp.getInchI()) == 0 && (i+j) <= files.length)
+				while(spectrum.getTrivialName().equals(spectrumTemp.getTrivialName()) && (i+j) <= files.length)
 				{
 					//same InchI --> add to list
 					spectra.add(spectrumTemp);
@@ -298,7 +299,8 @@ public class PreprocessSpectra {
 	
 	
 	public static void main(String[] args) {
-		String folder = "/home/swolf/MassBankData/MetFragSunGrid/RikenMassBank/";
+//		String folder = "/home/swolf/MassBankData/MetFragSunGrid/BrukerRawData/Processed/";
+		String folder = "/home/swolf/test/";
 		PreprocessSpectra pps = new PreprocessSpectra();
 		pps.Preprocess(folder, 0.01);
 		System.out.println("Done!");

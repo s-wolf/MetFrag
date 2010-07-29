@@ -36,7 +36,7 @@ public class SpectrumDeviation {
 		
 		FileWriter fstream = new FileWriter(path + "spectrumDeviation.txt", true);
         BufferedWriter out = new BufferedWriter(fstream);
-        out.write("File\tAverage\tMedian\tDev. Molpeak\n");
+        out.write("File\tAverage\tMedian\tDev. Molpeak\tPeaks Explained\n");
         out.close();
 		
 		for(int i=0;i<files.length-1;i++)
@@ -46,10 +46,23 @@ public class SpectrumDeviation {
 				WrapperSpectrum spectrum = new WrapperSpectrum(files[i].toString());
 				
 				//only 1 result because only the correct compound is fragmented
-				List<MetFragResult> result = MetFrag.startConvenience(database, Integer.toString(spectrum.getCID()), "", spectrum.getExactMass(), new WrapperSpectrum(files[i].toString()), false, mzabs, mzppm, 0.0, true, true, 2, true, false, true, false, Integer.MAX_VALUE, true);
+//				Config c = new Config("outside");
+//				List<MetFragResult> result = MetFrag.startConvenienceMetFusion(database, Integer.toString(spectrum.getCID()), "", 0.0, new WrapperSpectrum(files[i].toString()), false, mzabs, mzppm, 10.0, true, true, 2, true, false, true, false, 10, c.getJdbc(), c.getUsername(), c.getPassword()); 
+				List<MetFragResult> result = MetFrag.startConvenience(database, Integer.toString(spectrum.getCID()), "", spectrum.getExactMass(), new WrapperSpectrum(files[i].toString()), false, mzabs, mzppm, 0.0, true, true, 3, true, false, true, false, Integer.MAX_VALUE, true);
 				List<Double> deviations = new ArrayList<Double>();
 				
+				if(result == null || result.size() == 0 || result.get(0) == null || result.get(0).getFragments().size() == 0)
+				{
+					fstream = new FileWriter(path + "spectrumDeviation.txt", true);
+			        out = new BufferedWriter(fstream);
+					out.write(files[i].getName() + "\tERROR\tERROR\tERROR\t0\n");
+					out.close();
+					continue;
+				}
+					
+				
 				for (PeakMolPair explainedPeak : result.get(0).getFragments()) {
+					System.out.println("Measured Peak: " + explainedPeak.getMatchedMass() + "(Mass: " + explainedPeak.getPeak().getMass() + ")");
 					deviations.add(Math.abs(PPMTool.getPPMWeb(explainedPeak.getMatchedMass(), explainedPeak.getPeak().getMass())));
 				}
 				
@@ -88,8 +101,8 @@ public class SpectrumDeviation {
 				}
 				
 				
-				double deviation = 2.5;
-				Double deviationMolPeak = 0.0;
+				double deviation = 1.5;
+				Double deviationMolPeak = -1.0;
 				if(closestPeak.getMass() > (calculatedPeak - deviation) && closestPeak.getMass() < (calculatedPeak + deviation))
 				{
 					deviationMolPeak = Math.abs(PPMTool.getPPMWeb(calculatedPeak, closestPeak.getMass()));
@@ -97,11 +110,11 @@ public class SpectrumDeviation {
 				
 				
 				//write everything to log file
-				System.out.println(files[i].getName() + "\t" + average + "\t" + median + "\t" + deviationMolPeak);
+				System.out.println(files[i].getName() + "\t" + average + "\t" + median + "\t" + deviationMolPeak + "\t" + result.get(0).getFragments().size());
 				
 				fstream = new FileWriter(path + "spectrumDeviation.txt", true);
 		        out = new BufferedWriter(fstream);
-				out.write(files[i].getName() + "\t" + average + "\t" + median + "\t" + deviationMolPeak + "\n");
+				out.write(files[i].getName() + "\t" + average + "\t" + median + "\t" + deviationMolPeak + "\t" + result.get(0).getFragments().size() + "\n");
 				out.close();
 			}
 		}
@@ -112,7 +125,12 @@ public class SpectrumDeviation {
 	
 	public static void main(String[] args) {
 //		String folder = "/home/swolf/MassBankData/MetFragSunGrid/RikenDataMerged/CHONPS/useable/";
-		String folder = "/home/swolf/MassBankData/MetFragSunGrid/HillPaperDataMerged/";
+//		String folder = "/home/swolf/MassBankData/MetFragSunGrid/HillPaperDataMerged/";
+		String folder = "/home/swolf/MassBankData/MetFragSunGrid/BrukerRawData/Processed/Merged/";
+		
+		if(args != null && args.length > 0)
+			folder = args[0];
+		
 		SpectrumDeviation sd = new SpectrumDeviation();
 		try {
 			sd.analyseSpectra(folder, "pubchem", 0.01, 10.0);
