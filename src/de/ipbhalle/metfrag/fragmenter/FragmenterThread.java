@@ -66,6 +66,7 @@ public class FragmenterThread implements Runnable{
 	private Config c = null;
 	private boolean generateFragmentsInMemory = true;
 	private String jdbc, username, password = "";
+	private IAtomContainer candidateStructure = null;
 	
 	/**
 	 * Instantiates a new pubChem search thread.
@@ -108,6 +109,31 @@ public class FragmenterThread implements Runnable{
 		this.treeDepth = treeDepth;
 		this.c = c;
 		this.generateFragmentsInMemory = generateFragmentsInMemory;
+	}
+	
+	
+	public FragmenterThread(IAtomContainer candidateStructure, String candidate, String database, PubChemWebService pw,
+			WrapperSpectrum spectrum, double mzabs, double mzppm, boolean sumFormulaRedundancyCheck,
+			boolean breakAromaticRings, int treeDepth, boolean showDiagrams, boolean hydrogenTest,
+			boolean neutralLossAdd, boolean bondEnergyScoring, boolean isOnlyBreakSelectedBonds, Config c,
+			boolean generateFragmentsInMemory)
+	{
+		this.candidate = candidate;
+		this.pw = pw;
+		this.database = database;
+		this.mzabs = mzabs;
+		this.mzppm = mzppm;
+		this.sumFormulaRedundancyCheck = sumFormulaRedundancyCheck;
+		this.breakAromaticRings = breakAromaticRings;
+		this.spectrum = spectrum;
+		this.hydrogenTest = hydrogenTest;
+		this.neutralLossAdd = neutralLossAdd;
+		this.bondEnergyScoring = bondEnergyScoring;
+		this.isOnlyBreakSelectedBonds = isOnlyBreakSelectedBonds;
+		this.treeDepth = treeDepth;
+		this.c = c;
+		this.generateFragmentsInMemory = generateFragmentsInMemory;
+		this.candidateStructure = candidateStructure;
 	}
 	
 	
@@ -165,7 +191,9 @@ public class FragmenterThread implements Runnable{
 		{	    
 			
 			//retrieve the candidate from the database
-			if(pw == null && c == null)
+			if(this.candidateStructure != null)
+				molecule = this.candidateStructure;
+			else if(pw == null && c == null)
 				molecule = Candidates.getCompoundLocally(this.database, candidate, jdbc, username, password, false);
 			else if(pw == null)
 				molecule = Candidates.getCompoundLocally(this.database, candidate, c.getJdbc(), c.getUsername(), c.getPassword(), false);

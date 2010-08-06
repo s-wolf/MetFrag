@@ -50,6 +50,7 @@ import de.ipbhalle.metfrag.tools.renderer.StructureRenderer;
 public class Charges {
 	
 	private IAtomContainer mol;
+	private IAtomContainer molWithAllProtonationSites;
 	private Map<String, Double> bondToBondLength;
 	private boolean verbose = false;
 	private List<ChargeResult> results= null;
@@ -134,6 +135,7 @@ public class Charges {
 		
 		IAtomContainer[] molArray = new IAtomContainer[2];
 		molArray[0] = this.mol;
+		this.molWithAllProtonationSites = (IAtomContainer)mol.clone();
 		List<Distance> cpd1BondToDistance = new ArrayList<Distance>();
 		
 		//now add to every candidate atom a hydrogen and calculate the charges again
@@ -154,6 +156,10 @@ public class Charges {
 				IBond hydrogenBond = new Bond(AtomContainerManipulator.getAtomById(protonatedMol, chargesArray[i].getAtom().getID()), hydrogenAtom);
 				protonatedMol.addAtom(hydrogenAtom);
 				protonatedMol.addBond(hydrogenBond);
+				
+				IBond hydrogenBondAll = new Bond(AtomContainerManipulator.getAtomById(this.molWithAllProtonationSites, chargesArray[i].getAtom().getID()), hydrogenAtom);
+				this.molWithAllProtonationSites.addAtom(hydrogenAtom);
+				this.molWithAllProtonationSites.addBond(hydrogenBondAll);
 				
 				AtomContainerManipulator.convertImplicitToExplicitHydrogens(protonatedMol);
 	            AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(protonatedMol);
@@ -218,7 +224,8 @@ public class Charges {
 					double distRound = Math.round(dist*1000.0)/1000.0;
 					//now save only the maximum bond length change...
 					bondToBondLength = saveMaximum(bondToBondLength, cpd1BondToDistance.get(i1).getBondID(), distRound);
-					tempResult += cpd1BondToDistance.get(i1).getBond() + " " + cpd1BondToDistance.get(i1).getBondLength() + " " + cpd2BondToDistance.get(i1 + offset).getBondLength() + ": " + distRound + "\n";
+//					tempResult += cpd1BondToDistance.get(i1).getBond() + " " + cpd1BondToDistance.get(i1).getBondLength() + " " + cpd2BondToDistance.get(i1 + offset).getBondLength() + ": " + distRound + "\n";
+					tempResult += cpd1BondToDistance.get(i1).getBond() +  "\t" + distRound + "\n";
 				}
 				else
 				{
@@ -230,7 +237,7 @@ public class Charges {
 			
 			if(verbose)
 				System.out.println(tempResult);
-			this.results.add(new ChargeResult(protonatedMol, tempResult));
+			this.results.add(new ChargeResult(this.mol, protonatedMol, tempResult));
 
 //			for (String string : notMatched) {
 //				System.out.println(string);
@@ -257,12 +264,16 @@ public class Charges {
 		//now add the complete combined result in front of the list
 		String combinedResults = "";
 		for (IBond bond : this.mol.bonds()) {
-			combinedResults += bond.getAtom(0).getSymbol() + (Integer.parseInt(bond.getAtom(0).getID()) + 1) + "-" + bond.getAtom(1).getSymbol() + (Integer.parseInt(bond.getAtom(1).getID()) + 1) + " " + bondToBondLength.get(bond.getID()) + "\n";
+			combinedResults += bond.getAtom(0).getSymbol() + (Integer.parseInt(bond.getAtom(0).getID()) + 1) + "-" + bond.getAtom(1).getSymbol() + (Integer.parseInt(bond.getAtom(1).getID()) + 1) + "\t" + bondToBondLength.get(bond.getID()) + "\n";
 		}
 //		for (String bond : bondToBondLength.keySet()) {
 //			combinedResults += AtomContainerManipulator.g(this.mol, bond) bond + " " + bondToBondLength.get(bond);
 //		}
-		this.results.add(0, new ChargeResult(this.mol, combinedResults));
+		
+		AtomContainerManipulator.convertImplicitToExplicitHydrogens(this.molWithAllProtonationSites);
+        AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(this.molWithAllProtonationSites);
+        this.molWithAllProtonationSites = MoleculeTools.moleculeNumbering(this.molWithAllProtonationSites);
+		this.results.add(0, new ChargeResult(this.mol, this.molWithAllProtonationSites, combinedResults));
 		
 		
 		return bondsToBreak;

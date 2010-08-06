@@ -6,9 +6,12 @@ import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import org.openscience.cdk.interfaces.IAtomContainer;
 
 import de.ipbhalle.metfrag.fragmenter.Candidates;
 import de.ipbhalle.metfrag.fragmenter.FragmenterThread;
@@ -16,6 +19,7 @@ import de.ipbhalle.metfrag.main.Config;
 import de.ipbhalle.metfrag.main.MetFrag;
 import de.ipbhalle.metfrag.main.MetFragResult;
 import de.ipbhalle.metfrag.massbankParser.Peak;
+import de.ipbhalle.metfrag.pubchem.ESearchDownload;
 import de.ipbhalle.metfrag.pubchem.PubChemWebService;
 import de.ipbhalle.metfrag.tools.MolecularFormulaTools;
 import de.ipbhalle.metfrag.tools.PPMTool;
@@ -38,6 +42,19 @@ public class SpectrumDeviation {
         BufferedWriter out = new BufferedWriter(fstream);
         out.write("File\tAverage\tMedian\tDev. Molpeak\tPeaks Explained\n");
         out.close();
+        
+        List<String> idList = new ArrayList<String>();
+        for(int i=0;i<files.length-1;i++)
+		{
+			if(files[i].isFile())
+			{
+				WrapperSpectrum spectrum = new WrapperSpectrum(files[i].toString());
+				idList.add(Integer.toString(spectrum.getCID()));
+			}
+		}
+        
+        Map<String, IAtomContainer> idToStructure = ESearchDownload.ESearchDownloadPubChemIDs(idList);
+		
 		
 		for(int i=0;i<files.length-1;i++)
 		{
@@ -48,7 +65,7 @@ public class SpectrumDeviation {
 				//only 1 result because only the correct compound is fragmented
 //				Config c = new Config("outside");
 //				List<MetFragResult> result = MetFrag.startConvenienceMetFusion(database, Integer.toString(spectrum.getCID()), "", 0.0, new WrapperSpectrum(files[i].toString()), false, mzabs, mzppm, 10.0, true, true, 2, true, false, true, false, 10, c.getJdbc(), c.getUsername(), c.getPassword()); 
-				List<MetFragResult> result = MetFrag.startConvenience(database, Integer.toString(spectrum.getCID()), "", spectrum.getExactMass(), new WrapperSpectrum(files[i].toString()), false, mzabs, mzppm, 0.0, true, true, 3, true, false, true, false, Integer.MAX_VALUE, true);
+				List<MetFragResult> result = MetFrag.startConvenienceWithStructure(database, idToStructure.get(Integer.toString(spectrum.getCID())), Integer.toString(spectrum.getCID()), "", spectrum.getExactMass(), new WrapperSpectrum(files[i].toString()), false, mzabs, mzppm, 0.0, true, true, 3, true, false, true, false, Integer.MAX_VALUE, true);
 				List<Double> deviations = new ArrayList<Double>();
 				
 				if(result == null || result.size() == 0 || result.get(0) == null || result.get(0).getFragments().size() == 0)
@@ -114,7 +131,7 @@ public class SpectrumDeviation {
 				
 				fstream = new FileWriter(path + "spectrumDeviation.txt", true);
 		        out = new BufferedWriter(fstream);
-				out.write(files[i].getName() + "\t" + average + "\t" + median + "\t" + deviationMolPeak + "\t" + result.get(0).getFragments().size() + "\n");
+				out.write(files[i].getName() + "\t" + average + "\t" + median + "\t" + deviationMolPeak + "\t" + result.get(0).getPeaksExplained() + "\n");
 				out.close();
 			}
 		}
@@ -125,8 +142,8 @@ public class SpectrumDeviation {
 	
 	public static void main(String[] args) {
 //		String folder = "/home/swolf/MassBankData/MetFragSunGrid/RikenDataMerged/CHONPS/useable/";
-//		String folder = "/home/swolf/MassBankData/MetFragSunGrid/HillPaperDataMerged/";
-		String folder = "/home/swolf/MassBankData/MetFragSunGrid/BrukerRawData/Processed/Merged/";
+		String folder = "/home/swolf/MassBankData/MetFragSunGrid/HillPaperDataMerged/";
+//		String folder = "/home/swolf/MassBankData/MetFragSunGrid/BrukerRawData/Processed/Merged/";
 		
 		if(args != null && args.length > 0)
 			folder = args[0];

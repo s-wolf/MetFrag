@@ -4,7 +4,8 @@ import org.openscience.cdk.interfaces.IAtomContainer;
 
 public class ChargeResult {
 	
-	private IAtomContainer mol = null;
+	private IAtomContainer originalMol = null;
+	private IAtomContainer molWithProton = null;
 	private String chargeString = "";
 	
 	/**
@@ -13,18 +14,19 @@ public class ChargeResult {
 	 * @param mol the mol
 	 * @param chargeString the charge string
 	 */
-	public ChargeResult(IAtomContainer mol, String chargeString)
+	public ChargeResult(IAtomContainer originalMol, IAtomContainer molWithProton, String chargeString)
 	{
-		this.setMol(mol);
+		this.setOriginalMol(originalMol);
+		this.setMol(molWithProton);
 		this.setChargeString(chargeString);
 	}
 
-	public void setMol(IAtomContainer mol) {
-		this.mol = mol;
+	public void setMol(IAtomContainer molWithProton) {
+		this.molWithProton = molWithProton;
 	}
 
-	public IAtomContainer getMol() {
-		return mol;
+	public IAtomContainer getMolWithProton() {
+		return molWithProton;
 	}
 
 	public void setChargeString(String chargeString) {
@@ -33,6 +35,14 @@ public class ChargeResult {
 
 	public String getChargeString() {
 		return chargeString;
+	}
+
+	public void setOriginalMol(IAtomContainer originalMol) {
+		this.originalMol = originalMol;
+	}
+
+	public IAtomContainer getOriginalMol() {
+		return originalMol;
 	}
 
 }

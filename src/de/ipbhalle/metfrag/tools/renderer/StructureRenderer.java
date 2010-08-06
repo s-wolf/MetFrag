@@ -25,8 +25,11 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
@@ -34,15 +37,22 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.vecmath.Vector2d;
 
+import org.openscience.cdk.AtomContainer;
 import org.openscience.cdk.CDKConstants;
 import org.openscience.cdk.DefaultChemObjectBuilder;
 import org.openscience.cdk.Molecule;
+import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.exception.InvalidSmilesException;
+import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
+import org.openscience.cdk.interfaces.IBond;
+import org.openscience.cdk.interfaces.IChemObject;
 import org.openscience.cdk.interfaces.IMolecule;
 import org.openscience.cdk.layout.StructureDiagramGenerator;
 import org.openscience.cdk.renderer.Renderer;
 import org.openscience.cdk.renderer.RendererModel;
+import org.openscience.cdk.renderer.RendererModel.ColorHash;
+import org.openscience.cdk.renderer.RendererModel.ExternalHighlightColor;
 import org.openscience.cdk.renderer.font.AWTFontManager;
 import org.openscience.cdk.renderer.font.IFontManager;
 import org.openscience.cdk.renderer.generators.AtomContainerBoundsGenerator;
@@ -59,6 +69,7 @@ import org.openscience.cdk.renderer.generators.IGeneratorParameter;
 import org.openscience.cdk.renderer.generators.LonePairGenerator;
 import org.openscience.cdk.renderer.generators.RadicalGenerator;
 import org.openscience.cdk.renderer.generators.RingGenerator;
+import org.openscience.cdk.renderer.generators.BasicAtomGenerator.AtomColorer;
 import org.openscience.cdk.renderer.generators.BasicAtomGenerator.CompactAtom;
 import org.openscience.cdk.renderer.generators.BasicAtomGenerator.KekuleStructure;
 import org.openscience.cdk.renderer.generators.BasicSceneGenerator.Margin;
@@ -66,7 +77,11 @@ import org.openscience.cdk.renderer.generators.BasicSceneGenerator.ShowMoleculeT
 import org.openscience.cdk.renderer.generators.RingGenerator.ShowAromaticity;
 import org.openscience.cdk.renderer.visitor.AWTDrawVisitor;
 import org.openscience.cdk.smiles.SmilesParser;
+import org.openscience.cdk.smsd.SMSD;
+import org.openscience.cdk.smsd.interfaces.Algorithm;
 import org.openscience.cdk.templates.MoleculeFactory;
+
+import de.ipbhalle.metfrag.similarity.Subgraph;
 
 /**
 * Example code for implementing a scrolling panel.
@@ -119,68 +134,43 @@ public class StructureRenderer extends JFrame {
 //            rm.set(ShowAromaticity.class, true);
             rm.set(KekuleStructure.class, true); 
             rm.set(AtomNumberGenerator.Offset.class, new javax.vecmath.Vector2d(15,0));
-            
-//            for (IGenerator generator : renderer.getGenerators()) {
-//            	for (Object parameter : generator.getParameters()) {
-//            		System.out.println("parameter: " +
-//            	      parameter.getClass().getName().substring(40) +
-//            	      " -> " +
-//            	      parameter.toString());
-////            		if(parameter.getClass().getName().substring(40).equals("BasicAtomGenerator$KekuleStructure"))
-////            			parameter.setValue((Object)true);
-//            		
-//            	}
-//            }
-            
-//            renderer.getRenderer2DModel().setDrawNumbers(true);
-//            System.out.println("Numbers: " + renderer.getRenderer2DModel().drawNumbers());
                         
             this.isNew = true;
         }
         
         
-        public MoleculePanel(IAtomContainer atomContainer, IAtomContainer highlight) {
+        public MoleculePanel(IAtomContainer atomContainer, IAtomContainer highlight) throws CDKException, IOException, CloneNotSupportedException {
 
         	this.atomContainer = atomContainer;           
             this.initialWidth = 300;
             this.initialHeight = 300;
             
-            this.setPreferredSize(
-                    new Dimension(this.initialWidth + 10, this.initialHeight + 10));
+            this.setPreferredSize(new Dimension(this.initialWidth + 10, this.initialHeight + 10));
             this.setBackground(Color.WHITE);
             this.setBorder(BorderFactory.createRaisedBevelBorder());
             
             List<IGenerator<IAtomContainer>> generators = new ArrayList<IGenerator<IAtomContainer>>();
-            HighlightAtomGenerator ha = new HighlightAtomGenerator();
-            HighlightBondGenerator hb = new HighlightBondGenerator();
             
-            
-            generators.add(new BasicAtomGenerator());
+            generators.add(new BasicSceneGenerator());
             generators.add(new BasicBondGenerator());
-            generators.add(ha);
-            generators.add(hb);
-                                      
-         
+            generators.add(new BasicAtomGenerator());
+            
             IFontManager fm = new AWTFontManager();
             this.renderer = new Renderer(generators, fm); 
-            
+            RendererModel rm = renderer.getRenderer2DModel();
 
-//            ha.generate(highlight, renderer.getRenderer2DModel());
-//            hb.generate(highlight, renderer.getRenderer2DModel());
+            IAtomContainer subgraph = Subgraph.getSubgraphsSMSD(highlight, atomContainer, false, true);
+			Map<IChemObject, Color> colorMap = new HashMap<IChemObject, Color>();
+			
+            for (IBond bond : subgraph.bonds()) {
+            	colorMap.put(bond, new Color(0, 255, 0));
+            }
             
-//            for (IGenerator generator : renderer.getGenerators()) {
-//            	for (IGeneratorParameter parameter : generator.getParameters()) {
-////            		System.out.println("parameter: " +
-////            	      parameter.getClass().getName().substring(40) +
-////            	      " -> " +
-////            	      parameter.getValue());
-//            		if(parameter.getClass().getName().substring(40).equals("BasicAtomGenerator$KekuleStructure"))
-//            			parameter.setValue(true);
-//            		
-//            	}
-//            } 
-//            renderer.getRenderer2DModel().setDrawNumbers(true);
-//            System.out.println("Numbers: " + renderer.getRenderer2DModel().drawNumbers());
+            for (IAtom atom : subgraph.atoms()) {
+                colorMap.put(atom, new Color(0, 255, 0));
+            }
+            
+            rm.getParameter(ColorHash.class).setValue(colorMap);
                         
             this.isNew = true;
         }
@@ -255,6 +245,7 @@ public class StructureRenderer extends JFrame {
         this.setVisible(true);
     }
     
+    
     /**
      * Instantiates a new structure renderer.
      * Displays the structure in a window and highlights the given structure
@@ -274,7 +265,10 @@ public class StructureRenderer extends JFrame {
             sdg.generateCoordinates();
             MoleculePanel molPanel = new MoleculePanel(sdg.getMolecule(), highlight);
             this.add(new JScrollPane(molPanel));
-        } catch (Exception e) {}
+        } catch (Exception e) {
+        	System.err.println("Error: " + e.getMessage() + "\n\n");
+        	e.printStackTrace();
+        }
         
         this.pack();
         this.setVisible(true);
@@ -284,10 +278,11 @@ public class StructureRenderer extends JFrame {
     public static void main(String[] args) {
     	SmilesParser sp = new SmilesParser(DefaultChemObjectBuilder.getInstance());
     	try {
-			IAtomContainer ac = sp.parseSmiles("O=c1c2ccccc2[Se]n1c1ccccc1");
-			IAtomContainer ac2 = sp.parseSmiles("O=c1c2ccccc2[Se]n1c1ccccc1");
+			IAtomContainer ac = sp.parseSmiles("C1C(OC2=CC(=CC(=C2C1=O)O)O)C3=CC=C(C=C3)O");
+			IAtomContainer ac2 = sp.parseSmiles("C1=CC=CC=C1");
 			new StructureRenderer(ac, "test");
-//			new StructureRenderer(ac, ac2, "test");
+			new StructureRenderer(ac2, "test");
+			new StructureRenderer(ac, ac2, "test");
 			
 		} catch (InvalidSmilesException e) {
 			// TODO Auto-generated catch block

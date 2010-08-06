@@ -7,31 +7,44 @@ import com.lowagie.text.pdf.PdfWriter;
 
 import de.ipbhalle.metfrag.bondPrediction.ChargeResult;
 import de.ipbhalle.metfrag.bondPrediction.Charges;
+import de.ipbhalle.metfrag.similarity.Subgraph;
+import de.ipbhalle.metfrag.tools.renderer.StructureRenderer.MoleculePanel;
 
 
 import org.openscience.cdk.DefaultChemObjectBuilder;
 import org.openscience.cdk.Molecule;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.exception.InvalidSmilesException;
+import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
+import org.openscience.cdk.interfaces.IBond;
+import org.openscience.cdk.interfaces.IChemObject;
 import org.openscience.cdk.interfaces.IChemObjectBuilder;
 import org.openscience.cdk.interfaces.IMolecule;
 import org.openscience.cdk.layout.StructureDiagramGenerator;
 import org.openscience.cdk.renderer.Renderer;
+import org.openscience.cdk.renderer.RendererModel;
+import org.openscience.cdk.renderer.RendererModel.ColorHash;
 import org.openscience.cdk.renderer.font.AWTFontManager;
 import org.openscience.cdk.renderer.font.IFontManager;
+import org.openscience.cdk.renderer.generators.AtomNumberGenerator;
 import org.openscience.cdk.renderer.generators.BasicAtomGenerator;
 import org.openscience.cdk.renderer.generators.BasicBondGenerator;
 import org.openscience.cdk.renderer.generators.BasicSceneGenerator;
 import org.openscience.cdk.renderer.generators.ExtendedAtomGenerator;
 import org.openscience.cdk.renderer.generators.IGenerator;
 import org.openscience.cdk.renderer.generators.IGeneratorParameter;
+import org.openscience.cdk.renderer.generators.RadicalGenerator;
 import org.openscience.cdk.renderer.generators.RingGenerator;
+import org.openscience.cdk.renderer.generators.BasicAtomGenerator.KekuleStructure;
 import org.openscience.cdk.renderer.visitor.AWTDrawVisitor;
 import org.openscience.cdk.smiles.SmilesParser;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 
 import javax.imageio.ImageIO;
+import javax.swing.BorderFactory;
+import javax.swing.JScrollPane;
+
 import java.awt.*;
 import java.awt.Image;
 import java.awt.Rectangle;
@@ -39,7 +52,9 @@ import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
 import java.io.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 public class WritePDFTable extends MoleculeCell {
@@ -47,7 +62,7 @@ public class WritePDFTable extends MoleculeCell {
     private Document document;
     private int width;
     private int height;
-    int ncol = 2;
+    int ncol = 3;
     private int imageCount = 0;
     
     
@@ -71,24 +86,43 @@ public class WritePDFTable extends MoleculeCell {
             PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(file));
 
             float[] widths = new float[ncol];
-            for (int i = 0; i < ncol; i += 2) {
-                    widths[i] = 2f;
-                    widths[i + 1] = 2f;
+            for (int i = 0; i < ncol; i += 3) {
+                    widths[i] = 2.5f;
+                    widths[i + 1] = 0.75f;
+                    widths[i + 2] = 0.75f;
             }
             table = new PdfPTable(widths);
             document.open();
             
             for (ChargeResult result : chargeResults) {
-            	PdfPCell cell = new PdfPCell();
-                Phrase phrase = new Phrase();
+            	PdfPCell cellBonds = new PdfPCell();
+            	PdfPCell cellBondsDist = new PdfPCell();
+                Phrase phraseBonds = new Phrase();
+                Phrase phraseBondsDist = new Phrase();
 
-                com.lowagie.text.Image image = com.lowagie.text.Image.getInstance(writeMOL2PNGFile(result.getMol()).getAbsolutePath());
+                com.lowagie.text.Image image = com.lowagie.text.Image.getInstance(writeMOL2PNGFile(result.getOriginalMol(), result.getMolWithProton()).getAbsolutePath());
                 image.setAbsolutePosition(0, 0);
                 table.addCell(image);
-                addProperty(phrase, result.getChargeString());
-//              cell.addElement(image);
-                cell.addElement(phrase);
-                table.addCell(cell);
+                
+                String stringPDFBonds = "";
+                String stringPDFBondsDist = "";
+                String[] lines = result.getChargeString().split("\n");
+                for (int i = 0; i < lines.length; i++) {
+                	boolean carbonHydrogenBond = lines[i].matches("[A-Z]+[0-9]+-H[0-9]+.*");
+					if(!carbonHydrogenBond)
+					{
+						String[] linesArr = lines[i].split("\t");
+						stringPDFBondsDist += linesArr[1] + "\n";
+						stringPDFBonds += linesArr[0] + "\n";
+					}
+				}
+                
+                addProperty(phraseBonds, stringPDFBonds);
+                addProperty(phraseBondsDist, stringPDFBondsDist);
+                cellBonds.addElement(phraseBonds);
+                cellBondsDist.addElement(phraseBondsDist);
+                table.addCell(cellBonds);
+                table.addCell(cellBondsDist);
 			}
             
             document.add(table);
@@ -107,14 +141,14 @@ public class WritePDFTable extends MoleculeCell {
         ));
     }
     
-    private File writeMOL2PNGFile(IAtomContainer mol) {
+    private File writeMOL2PNGFile(IAtomContainer originalMol, IAtomContainer protonatedMol) {
 
         RenderedImage rImage = null;
         File tempFile = null;
         
         try {
-        	tempFile = File.createTempFile(imageCount + "_Temp", "png");
-            rImage = (BufferedImage) getImage4MOL(mol);
+        	tempFile = File.createTempFile(imageCount + "_Temp", ".png");
+            rImage = (BufferedImage) getImage4MOL(originalMol, protonatedMol);
             ImageIO.write(rImage, "png", tempFile);
 
         } catch (Exception e) {
@@ -124,52 +158,91 @@ public class WritePDFTable extends MoleculeCell {
         return tempFile;
     }
     
-    private RenderedImage getImage4MOL(IAtomContainer molAC) throws Exception {
+
+    
+    /**
+     * Gets the image 4 mol.
+     * 
+     * @param protonatedMol the mol ac
+     * 
+     * @return the image4 mol
+     * 
+     * @throws Exception the exception
+     */
+    private RenderedImage getImage4MOL(IAtomContainer originalMol, IAtomContainer protonatedMol) throws Exception {
     	    	
+//    	protonatedMol = AtomContainerManipulator.removeHydrogens(protonatedMol);
         // creates CDK Molecule object and get the renderer
-    	IMolecule molSource = new Molecule(molAC);
+    	IMolecule molSource = new Molecule(protonatedMol);
     	
-    	Rectangle drawArea = new Rectangle(this.width, this.height);
-		Image image = new BufferedImage(this.width, this.height, BufferedImage.TYPE_INT_RGB);
-    	
-    	
-		StructureDiagramGenerator sdg = new StructureDiagramGenerator();
+    	StructureDiagramGenerator sdg = new StructureDiagramGenerator();
 		sdg.setMolecule(molSource);
 		try {
 	       sdg.generateCoordinates();
 		} catch (Exception e) { }
 		molSource = sdg.getMolecule();
-    	
-    	
-		List<IGenerator<IAtomContainer>> generators = new ArrayList<IGenerator<IAtomContainer>>();
-        generators.add(new BasicSceneGenerator());
-        generators.add(new RingGenerator());
-        generators.add(new ExtendedAtomGenerator());
-
-        IFontManager fm = new AWTFontManager();
-
-        // the renderer needs to have a toolkit-specific font manager 
-		Renderer renderer = new Renderer(generators, new AWTFontManager());
-//        for (IGenerator generator : renderer.getGenerators()) {
-//        	for (IGeneratorParameter parameter : generator.getParameters()) {
-//        		if(parameter.getClass().getName().substring(40).equals("BasicAtomGenerator$KekuleStructure"))
-//        			parameter.setValue(true);
-//        	}
-//        }
-//
-//		renderer.getRenderer2DModel().setDrawNumbers(true);
-
 		
-		// the call to 'setup' only needs to be done on the first paint
+		List<IGenerator<IAtomContainer>> generators = new ArrayList<IGenerator<IAtomContainer>>();
+		generators.add(new BasicSceneGenerator());
+        generators.add(new BasicBondGenerator());
+        generators.add(new BasicAtomGenerator());
+        generators.add(new AtomNumberGenerator());
+//        generators.add(new RingGenerator());
+//        generators.add(new RadicalGenerator());
+        
+        IFontManager fm = new AWTFontManager();
+        Renderer renderer = new Renderer(generators, fm);
+        RendererModel rm = renderer.getRenderer2DModel();
+        rm.set(KekuleStructure.class, true); 
+        rm.set(AtomNumberGenerator.Offset.class, new javax.vecmath.Vector2d(10,0));
+        
+        
+        //Highlight the structure
+        IAtomContainer subgraph = Subgraph.getSubgraphsSMSD(originalMol, molSource, true, false);
+	   	IAtomContainer invertedSubgraph = Subgraph.getInvertedSubgraph(molSource, subgraph);
+	   	
+	   	//now remove all hydrogens and add those which were protonated
+	   	molSource = (IMolecule) AtomContainerManipulator.removeHydrogens(molSource);
+	   	for (IBond bond : invertedSubgraph.bonds()) {
+			molSource.addBond(bond);
+		}
+	   	for (IAtom atom : invertedSubgraph.atoms()) {
+			molSource.addAtom(atom);
+		}
+	   	
+	   	
+	   	Map<IChemObject, Color> colorMap = new HashMap<IChemObject, Color>();
+        for (IBond bond : invertedSubgraph.bonds()) {
+        	colorMap.put(bond, new Color(0, 255, 0));
+        }
+        
+//        for (IAtom atom : subgraph.atoms()) {
+//            colorMap.put(atom, new Color(0, 255, 0));
+//        }
+        
+        rm.getParameter(ColorHash.class).setValue(colorMap);
+
+			
+        this.setPreferredSize(new Dimension(this.width, this.height));
+        this.setBackground(Color.WHITE);
+        
+		Image image = new BufferedImage(this.width, this.height, BufferedImage.TYPE_INT_RGB);
+		Rectangle drawArea = new Rectangle(0, 0, this.width, this.height);
+		
 		renderer.setup(molSource, drawArea);
-		   
-		// paint the background
+		
+		Rectangle diagramRectangle = renderer.calculateDiagramBounds(molSource);
+        
+        Rectangle result = renderer.shift(drawArea, diagramRectangle);
+        this.setPreferredSize(new Dimension(result.width, result.height));
+        this.revalidate();
+        
+        
+        // paint the background
 		Graphics2D g2 = (Graphics2D)image.getGraphics();
 	   	g2.setColor(Color.WHITE);
 	   	g2.fillRect(0, 0, this.width, this.height);
-	   	
-	   	// the paint method also needs a toolkit-specific renderer
-	   	renderer.paintMolecule(molSource, new AWTDrawVisitor(g2), drawArea, true);
+        renderer.paintMolecule(molSource, new AWTDrawVisitor((Graphics2D) g2), drawArea, true);
 
 	   	return (RenderedImage) image;       
 

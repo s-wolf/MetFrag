@@ -324,6 +324,65 @@ public class MetFrag {
 	}
 	
 	
+	public static List<MetFragResult> startConvenienceWithStructure(String database, IAtomContainer candidateStructure, String candidate, String molecularFormula, Double exactMass, WrapperSpectrum spectrum, boolean useProxy, 
+			double mzabs, double mzppm, double searchPPM, boolean molecularFormulaRedundancyCheck, boolean breakAromaticRings, int treeDepth,
+			boolean hydrogenTest, boolean neutralLossInEveryLayer, boolean bondEnergyScoring, boolean breakOnlySelectedBonds, int limit, boolean isStoreFragments) throws Exception
+	{
+		
+		results = new FragmenterResult();
+		PubChemWebService pubchem = new PubChemWebService();
+
+	    //thread executor
+	    ExecutorService threadExecutor = null;
+	    System.out.println("Used Threads: 1");
+	    threadExecutor = Executors.newFixedThreadPool(1);
+			
+	
+			
+		threadExecutor.execute(new FragmenterThread(candidateStructure, candidate, database, pubchem, spectrum, mzabs, mzppm, 
+				molecularFormulaRedundancyCheck, breakAromaticRings, treeDepth, false, hydrogenTest, neutralLossInEveryLayer, 
+				bondEnergyScoring, breakOnlySelectedBonds, null, false));		
+		
+		threadExecutor.shutdown();
+		
+		//wait until all threads are finished
+		while(!threadExecutor.isTerminated())
+		{
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}//sleep for 1000 ms
+		}
+
+		Map<Double, Vector<String>> scoresNormalized = Scoring.getCombinedScore(results.getRealScoreMap(), results.getMapCandidateToEnergy(), results.getMapCandidateToHydrogenPenalty());
+		Double[] scores = new Double[scoresNormalized.size()];
+		scores = scoresNormalized.keySet().toArray(scores);
+		Arrays.sort(scores);
+
+		//now collect the result
+		Map<String, IAtomContainer> candidateToStructure = results.getMapCandidateToStructure();
+		Map<String, Vector<PeakMolPair>> candidateToFragments = results.getMapCandidateToFragments();
+
+		List<MetFragResult> results = new ArrayList<MetFragResult>();
+		for (int i = scores.length -1; i >=0 ; i--) {
+			Vector<String> list = scoresNormalized.get(scores[i]);
+			for (String string : list) {
+				//get corresponding structure
+				IAtomContainer tmp = candidateToStructure.get(string);
+				tmp = AtomContainerManipulator.removeHydrogens(tmp);
+				
+				if(isStoreFragments)
+					results.add(new MetFragResult(string, tmp, scores[i], candidateToFragments.get(string).size(), candidateToFragments.get(string)));
+				else
+					results.add(new MetFragResult(string, tmp, scores[i], candidateToFragments.get(string).size()));
+			}
+		}		
+		
+		return results;
+	}
+	
+	
 	/**
 	 * MetFrag. Start the fragmenter thread. Afterwards score the results.
 	 * 

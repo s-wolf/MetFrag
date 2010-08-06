@@ -32,7 +32,7 @@
 	<classpathentry kind="lib" path="lib/saaj.jar"/>
 	<classpathentry kind="lib" path="lib/wsdl4j-1.5.1.jar"/>
 	<classpathentry kind="lib" path="lib/commons-io-1.4.jar"/>
-	<classpathentry kind="lib" path="lib/cdk-jchempaint-15.jar"/>
+	<classpathentry kind="lib" path="lib/cdk-jchempaint-15.jar" sourcepath="/home/swolf/cdk/cdk-jchempaint-15/trunk"/>
 	<classpathentry kind="lib" path="lib/cdk-1.3.5.jar" sourcepath="/home/swolf/cdk/cdk-src+libs-1.3.5"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER">
