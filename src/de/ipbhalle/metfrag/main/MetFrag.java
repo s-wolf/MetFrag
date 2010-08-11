@@ -260,7 +260,6 @@ public class MetFrag {
 			double mzabs, double mzppm, double searchPPM, boolean molecularFormulaRedundancyCheck, boolean breakAromaticRings, int treeDepth,
 			boolean hydrogenTest, boolean neutralLossInEveryLayer, boolean bondEnergyScoring, boolean breakOnlySelectedBonds, int limit, boolean isStoreFragments) throws Exception
 	{
-		
 		results = new FragmenterResult();
 		PubChemWebService pubchem = new PubChemWebService();
 		Vector<String> candidates = Candidates.getOnline(database, databaseID, molecularFormula, exactMass, searchPPM, useProxy, pubchem);
@@ -402,6 +401,10 @@ public class MetFrag {
 	 * @param neutralLossInEveryLayer the neutral loss in every layer
 	 * @param bondEnergyScoring the bond energy scoring
 	 * @param breakOnlySelectedBonds the break only selected bonds
+	 * @param limit the limit
+	 * @param jdbc the jdbc
+	 * @param username the username
+	 * @param password the password
 	 * 
 	 * @return the string
 	 * 
