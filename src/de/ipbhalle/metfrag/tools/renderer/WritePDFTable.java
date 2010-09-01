@@ -238,8 +238,8 @@ public class WritePDFTable extends MoleculeCell {
 		generators.add(new BasicSceneGenerator());
         generators.add(new BasicBondGenerator());
         generators.add(new BasicAtomGenerator());
+        generators.add(new RingGenerator());
         generators.add(new AtomNumberGenerator());
-//        generators.add(new RingGenerator());
 //        generators.add(new RadicalGenerator());
         
         IFontManager fm = new AWTFontManager();
@@ -301,8 +301,8 @@ public class WritePDFTable extends MoleculeCell {
 		generators.add(new BasicSceneGenerator());
         generators.add(new BasicBondGenerator());
         generators.add(new BasicAtomGenerator());
+        generators.add(new RingGenerator());
         generators.add(new AtomNumberGenerator());
-//        generators.add(new RingGenerator());
 //        generators.add(new RadicalGenerator());
         
         IFontManager fm = new AWTFontManager();
@@ -362,26 +362,5 @@ public class WritePDFTable extends MoleculeCell {
 	   	return (RenderedImage) image;       
 
     }
-    
-    
-    public static void main(String[] args) {
-    	SmilesParser sp = new SmilesParser(DefaultChemObjectBuilder.getInstance());
-		try {
-			IAtomContainer naringenin = sp.parseSmiles("C1C(OC2=CC(=CC(=C2C1=O)O)O)C3=CC=C(C=C3)O");
-			IAtomContainer ac = sp.parseSmiles("O=c1c2ccccc2[Se]n1c1ccccc1");
-			IAtomContainer ac2 = sp.parseSmiles("O=c1c2ccccc2[Se]n1c1ccccc1");
-			
-			Charges charge = new Charges();
-			charge.calculateBondsToBreak(naringenin);
-			
-			WritePDFTable wpdf = new WritePDFTable("/home/swolf/test.pdf", 600, 600, charge.getResults());
-		} catch (InvalidSmilesException e) {
-			e.printStackTrace();
-		} catch (CloneNotSupportedException e) {
-			e.printStackTrace();
-		} catch (CDKException e) {
-			e.printStackTrace();
-		}
-		
-	}
+   
 }

@@ -117,7 +117,7 @@ public class StructureRenderer extends JFrame {
             generators.add(new BasicBondGenerator());
             generators.add(new BasicAtomGenerator());
             generators.add(new AtomNumberGenerator());
-//            generators.add(new RingGenerator());
+            generators.add(new RingGenerator());
             generators.add(new RadicalGenerator());
             
                                       
@@ -154,6 +154,7 @@ public class StructureRenderer extends JFrame {
             generators.add(new BasicSceneGenerator());
             generators.add(new BasicBondGenerator());
             generators.add(new BasicAtomGenerator());
+            generators.add(new RingGenerator());
             
             IFontManager fm = new AWTFontManager();
             this.renderer = new Renderer(generators, fm); 
@@ -278,7 +279,7 @@ public class StructureRenderer extends JFrame {
     public static void main(String[] args) {
     	SmilesParser sp = new SmilesParser(DefaultChemObjectBuilder.getInstance());
     	try {
-			IAtomContainer ac = sp.parseSmiles("C1C(OC2=CC(=CC(=C2C1=O)O)O)C3=CC=C(C=C3)O");
+			IAtomContainer ac = sp.parseSmiles("CC1=NN=C(N1C2CC3CCC(C2)N3CCC(C4=CC=CC=C4)NC(=O)C5CCC(CC5)(F)F)C(C)C");
 			IAtomContainer ac2 = sp.parseSmiles("C1=CC=CC=C1");
 			new StructureRenderer(ac, "test");
 			new StructureRenderer(ac2, "test");

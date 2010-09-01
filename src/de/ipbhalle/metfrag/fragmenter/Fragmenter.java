@@ -134,6 +134,7 @@ public class Fragmenter {
     private List<String> bondsToBreak = null;
     private boolean isOnlyBreakSelectedBonds = false;
     private Charges bondPrediction = null;
+    private boolean partialChargesPreferred = true;
     
     //Timer
     long startTraverse = 0;
@@ -451,7 +452,7 @@ public class Fragmenter {
 
 		//now find all bonds which are worth splitting
     	try {
-    		bondPrediction = new Charges();
+    		bondPrediction = new Charges(this.aromaticBonds);
 			this.bondsToBreak = bondPrediction.calculateBondsToBreak(this.originalMolecule);
 		} catch (CloneNotSupportedException e) {
 			// TODO Auto-generated catch block
@@ -960,12 +961,8 @@ public class Fragmenter {
                         
                         //now set property from both bonds
                         temp = setBondEnergy(temp, currentBondEnergyRing, currentBondEnergy);
-                        
-                        //penalty for aromatic rings!!
-                        if(this.aromaticBonds.contains(bondInRing) || this.aromaticBonds.contains(bond))
-                        	temp = setCharge(temp, -1.0, -1.0);
-                        else
-                        	temp = setCharge(temp, bondPrediction.getBondLength(bondInRing.getID()), bondPrediction.getBondLength(bond.getID()));
+                        //set the partial charge diff 
+                        temp = setCharge(temp, bondPrediction.getBondLength(bondInRing.getID()), bondPrediction.getBondLength(bond.getID()));
                         
                         
                         if(radicalGeneration)
@@ -1376,14 +1373,29 @@ public class Fragmenter {
 	    		//now check if this fragment energy to create the fragment is lower 
 	    		if(molecularFormulaRedundancyCheck || smilesRedundancyCheck)
 	    		{
-	    			//now replace fragment if its "bond energy is less"
-		    		double bondEnergy = getCombinedEnergy((String)fragment.getProperty("BondEnergy"));
-		    		for (IAtomContainer atomContainer : fragsToCompare) {
-						if(getCombinedEnergy((String)atomContainer.getProperty("BondEnergy")) > bondEnergy )
-						{
-							addFragmentToListMapReplace(fragment, currentSumFormula);
+	    			if(partialChargesPreferred)
+	    			{
+	    				//now replace fragment if its "bond energy is less"
+			    		double partialChargeDiff = getCombinedEnergy((String)fragment.getProperty("PartialChargeDiff"));
+			    		for (IAtomContainer atomContainer : fragsToCompare) {
+							if(getCombinedEnergy((String)atomContainer.getProperty("PartialChargeDiff")) < partialChargeDiff )
+							{
+								addFragmentToListMapReplace(fragment, currentSumFormula);
+							}
 						}
-					}
+	    			}
+	    			else
+	    			{
+	    				//now replace fragment if its "bond energy is less"
+			    		double bondEnergy = getCombinedEnergy((String)fragment.getProperty("BondEnergy"));
+			    		for (IAtomContainer atomContainer : fragsToCompare) {
+							if(getCombinedEnergy((String)atomContainer.getProperty("BondEnergy")) > bondEnergy )
+							{
+								addFragmentToListMapReplace(fragment, currentSumFormula);
+							}
+						}
+	    			}
+	    			
 	    		}	    		
 	    	}
 	    	//if not in map (with this formula) add it

@@ -61,7 +61,7 @@ public class Charges {
 	 * Instantiates a new charges class.
 	 * 
 	 */
-	public Charges()
+	public Charges(List<IBond> aromaticBonds)
 	{
 		this.bondToBondLength = new HashMap<String, Double>();
 		this.setResults(new ArrayList<ChargeResult>());
@@ -222,10 +222,21 @@ public class Charges {
 								doubleBond = true;
 						}
 			        	
-						if(atom1.getSymbol().equals("O") && chargesArray[i].getAtom().getID().equals(atom1.getID()) && doubleBond)
+						
+						if(atom1.getSymbol().equals("H") || atom2.getSymbol().equals("H"))
+							continue;
+						
+						//give penalty for aromatic rings...they usually don't split...also assume the aromatic rings for the protonated molecule
+						if(this.aromaticBonds.contains(bond) || this.aromaticBonds.contains(molArray[0].getBond(AtomContainerManipulator.getAtomById(molArray[0], atom1.getID()), AtomContainerManipulator.getAtomById(molArray[0], atom2.getID()))))
 						{
 							dist = new Distance(atom1.getSymbol() + (Integer.parseInt(atom1.getID()) + 1) + "-" + atom2.getSymbol() + (Integer.parseInt(atom2.getID()) + 1), 0.0, bond.getID());
 						}
+						//penalty for double bond to terminal oxygen
+						else if(atom1.getSymbol().equals("O") && chargesArray[i].getAtom().getID().equals(atom1.getID()) && doubleBond)
+						{
+							dist = new Distance(atom1.getSymbol() + (Integer.parseInt(atom1.getID()) + 1) + "-" + atom2.getSymbol() + (Integer.parseInt(atom2.getID()) + 1), 0.0, bond.getID());
+						}
+						//penalty for double bond to terminal oxygen
 						else if(atom2.getSymbol().equals("O") && chargesArray[i].getAtom().getID().equals(atom2.getID()) && doubleBond)
 						{
 							dist = new Distance(atom1.getSymbol() + (Integer.parseInt(atom1.getID()) + 1) + "-" + atom2.getSymbol() + (Integer.parseInt(atom2.getID()) + 1), 0.0, bond.getID());
@@ -384,56 +395,4 @@ public class Charges {
 		return results;
 	}
 	
-	public static void main(String[] args) {
-		
-		try {
-			String naringenin = "C1C(OC2=CC(=CC(=C2C1=O)O)O)C3=CC=C(C=C3)O";
-			SmilesParser sp = new SmilesParser(DefaultChemObjectBuilder.getInstance());
-			IMolecule m = sp.parseSmiles(naringenin);
-			
-			AtomContainerManipulator.convertImplicitToExplicitHydrogens(m);
-            AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(m);
-            
-            MoleculeTools.moleculeNumbering(m);
-            
-//            IAtom s = new Atom("O");
-//            IAtom test = m.getAtom(1); // getAtomById(m, "0");
-//            test.setSymbol("S");
-//            m.setAtom(1, s);
-            
-            AtomContainerManipulator.convertImplicitToExplicitHydrogens(m);
-            AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(m);
-            
-			new StructureRenderer(m, "Naringenin"); 
-			IAtom[] atomList = AtomContainerManipulator.getAtomArray(m);			
-			for (int i = 0; i < atomList.length; i++) {
-				System.out.println(i + " id:" + (Integer.parseInt(atomList[i].getID()) + 1) +  " symbol:" + atomList[i].getSymbol() + " atomicNumber:" + atomList[i].getAtomicNumber());
-			}
-//			for (IBond bond : m.bonds()) {
-//				for (IAtom atom : bond.atoms()) {
-//					if(!alreadyDone.contains(atom))
-//					{
-//						System.out.println(atom.getAtomicNumber());
-//					}
-//				}
-//			}
-			
-			
-			Charges charges = new Charges();
-			charges.debug();
-			charges.calculateBondsToBreak(m);
-			
-			
-			
-		} catch (InvalidSmilesException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (CloneNotSupportedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (CDKException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
 }

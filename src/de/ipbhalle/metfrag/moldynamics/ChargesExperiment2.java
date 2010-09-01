@@ -93,8 +93,6 @@ public class ChargesExperiment2 {
 	        containersList = ChemFileManipulator.getAllAtomContainers(chemFile);
 	        IAtomContainer cpd = containersList.get(0);
 	        	        
-	        Charges chargesTest = new Charges();
-	        chargesTest.calculateBondsToBreak(cpd);
 	        
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
@@ -103,9 +101,6 @@ public class ChargesExperiment2 {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (CDKException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (CloneNotSupportedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
