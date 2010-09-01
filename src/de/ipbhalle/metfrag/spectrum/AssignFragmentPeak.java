@@ -27,6 +27,7 @@ import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 
 import de.ipbhalle.metfrag.massbankParser.Peak;
+import de.ipbhalle.metfrag.tools.Constants;
 import de.ipbhalle.metfrag.tools.MolecularFormulaTools;
 import de.ipbhalle.metfrag.tools.PPMTool;
 
@@ -44,7 +45,6 @@ public class AssignFragmentPeak {
 	//private Vector<PeakMolPair> noHits; TODO: for log file
 	private double mzabs;
 	private double mzppm;
-	private static final double hydrogenMass = MolecularFormulaTools.getMonoisotopicMass("H1");
 	private boolean hydrogenTest = true;
 	private Double matchedMass = 0.0;
 	private String molecularFormula = "";
@@ -141,8 +141,8 @@ public class AssignFragmentPeak {
         
         double peakLow = peak - this.mzabs - PPMTool.getPPMDeviation(peak, this.mzppm);
         double peakHigh = peak + this.mzabs + PPMTool.getPPMDeviation(peak, this.mzppm);
-        double protonMass = hydrogenMass * (double)mode;
-        double massToCompare = mass+protonMass;
+        double protonMass = Constants.PROTON_MASS * (double)mode;
+        double massToCompare = mass + protonMass;
         
         String neutralLoss = "";
     	if(ac.getProperty("NlElementalComposition") != null && ac.getProperty("NlElementalComposition") != "")
@@ -193,7 +193,7 @@ public class AssignFragmentPeak {
         		}
         		else
         		{
-        			double hMass = i * protonMass;
+        			double hMass = i * Constants.HYDROGEN_MASS;
         			
         			//found
         			if(((massToCompare - hMass) >= peakLow && (massToCompare - hMass) <= peakHigh))

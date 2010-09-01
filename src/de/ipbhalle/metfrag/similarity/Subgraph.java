@@ -61,7 +61,7 @@ public class Subgraph {
 		comparison.setChemFilters(false, false, false);
 
 		// Print the mapping between molecules
-		System.out.println(" Mappings: ");
+//		System.out.println(" Mappings: ");
 		List<IAtom> matchedAtoms = new ArrayList<IAtom>();
 		if (comparison.isSubgraph() && onlyBestMatch) {
 			for (Map.Entry<Integer, Integer>  mapping : comparison.getFirstMapping().entrySet()) {			
@@ -76,11 +76,11 @@ public class Subgraph {
                 IAtom targetAtom = targetTemp.getAtom(targetMappingNumber);
 
                 //Print mapped atom numbers
-                System.out.println(queryMappingNumber + " "
-                        + (targetMappingNumber));
-                //Print mapped atoms
-                System.out.println(queryAtom.getSymbol() + " "
-                        + targetAtom.getSymbol());
+//                System.out.println(queryMappingNumber + " "
+//                        + (targetMappingNumber));
+//                //Print mapped atoms
+//                System.out.println(queryAtom.getSymbol() + " "
+//                        + targetAtom.getSymbol());
 
 				
 				IAtom tAtom = target.getAtom(mapping.getValue());
@@ -113,10 +113,10 @@ public class Subgraph {
 	                //Get the mapped atom in Target Molecule
 	                IAtom targetAtom = targetTemp.getAtom(targetMappingNumber);
 
-	                //Print mapped atom numbers
-	                System.out.println(queryMappingNumber + " " + (targetMappingNumber));
-	                //Print mapped atoms
-	                System.out.println(queryAtom.getSymbol() + " " + targetAtom.getSymbol());
+//	                //Print mapped atom numbers
+//	                System.out.println(queryMappingNumber + " " + (targetMappingNumber));
+//	                //Print mapped atoms
+//	                System.out.println(queryAtom.getSymbol() + " " + targetAtom.getSymbol());
 					
 					IAtom tAtom = target.getAtom(mapping.getValue());
 					matchedAtoms.add(tAtom);
@@ -213,7 +213,7 @@ public class Subgraph {
 			//Get similarity score
 			System.out.println("A1 is a subgraph of A2:  " + comparison.isSubgraph());
 			// Print the mapping between molecules
-			System.out.println(" Mappings: ");
+//			System.out.println(" Mappings: ");
 			List<IAtom> matchedAtoms = new ArrayList<IAtom>();
 			for (Map.Entry<Integer, Integer>  mapping : comparison.getFirstMapping().entrySet()) {			
 				IAtom eAtom = mol1.getAtom(mapping.getKey());

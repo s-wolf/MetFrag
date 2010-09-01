@@ -391,10 +391,13 @@ public class KeggWebservice {
                //mol = bget("-f m cpd:C00111")
                
                
-               List<String> list = KeggWebservice.KEGGbySumFormula("C19H26N2");
-               for (String string : list) {
-				System.out.println(string);
-               }
+//               List<String> list = KeggWebservice.KEGGbySumFormula("C19H26N2");
+	    	   KeggWebservice.getMol("C00509", "/vol/mirrors/kegg/mol/", true);
+	    	   
+	    	   
+//               for (String string : list) {
+//				System.out.println(string);
+//               }
                
 
 	      } catch (Exception e) {

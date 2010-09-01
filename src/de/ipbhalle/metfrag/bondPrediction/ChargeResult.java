@@ -6,6 +6,7 @@ public class ChargeResult {
 	
 	private IAtomContainer originalMol = null;
 	private IAtomContainer molWithProton = null;
+	private IAtomContainer molWithCharge = null;
 	private String chargeString = "";
 	
 	/**
@@ -14,11 +15,12 @@ public class ChargeResult {
 	 * @param mol the mol
 	 * @param chargeString the charge string
 	 */
-	public ChargeResult(IAtomContainer originalMol, IAtomContainer molWithProton, String chargeString)
+	public ChargeResult(IAtomContainer originalMol, IAtomContainer molWithProton, IAtomContainer molWithCharge, String chargeString)
 	{
 		this.setOriginalMol(originalMol);
 		this.setMol(molWithProton);
 		this.setChargeString(chargeString);
+		this.setMolWithCharge(molWithCharge);
 	}
 
 	public void setMol(IAtomContainer molWithProton) {
@@ -43,6 +45,14 @@ public class ChargeResult {
 
 	public IAtomContainer getOriginalMol() {
 		return originalMol;
+	}
+
+	public void setMolWithCharge(IAtomContainer molWithCharge) {
+		this.molWithCharge = molWithCharge;
+	}
+
+	public IAtomContainer getMolWithCharge() {
+		return molWithCharge;
 	}
 
 }

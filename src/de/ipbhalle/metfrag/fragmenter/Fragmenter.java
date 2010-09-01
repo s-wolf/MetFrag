@@ -85,6 +85,7 @@ import de.ipbhalle.metfrag.bondPrediction.Charges;
 import de.ipbhalle.metfrag.graphviz.GraphViz;
 import de.ipbhalle.metfrag.massbankParser.Peak;
 import de.ipbhalle.metfrag.spectrum.AssignFragmentPeak;
+import de.ipbhalle.metfrag.tools.Constants;
 import de.ipbhalle.metfrag.tools.MolecularFormulaTools;
 import de.ipbhalle.metfrag.tools.MoleculeTools;
 import de.ipbhalle.metfrag.tools.Number;
@@ -113,7 +114,6 @@ public class Fragmenter {
     private boolean breakAromaticRings = false;
     private boolean givenPeaks = true;
     private int mode = 1;
-    private double protonMass = MolecularFormulaTools.getMonoisotopicMass("H1");
     private static int bondNumber = 0;
     private HashMap<String, Double> atomMasses = new HashMap<String, Double>();
     private Double currentFragWeight = 0.0;
@@ -960,7 +960,12 @@ public class Fragmenter {
                         
                         //now set property from both bonds
                         temp = setBondEnergy(temp, currentBondEnergyRing, currentBondEnergy);
-                        temp = setCharge(temp, bondPrediction.getBondLength(bondInRing.getID()), bondPrediction.getBondLength(bond.getID()));
+                        
+                        //penalty for aromatic rings!!
+                        if(this.aromaticBonds.contains(bondInRing) || this.aromaticBonds.contains(bond))
+                        	temp = setCharge(temp, -1.0, -1.0);
+                        else
+                        	temp = setCharge(temp, bondPrediction.getBondLength(bondInRing.getID()), bondPrediction.getBondLength(bond.getID()));
                         
                         
                         if(radicalGeneration)
@@ -1294,7 +1299,7 @@ public class Fragmenter {
     	if (this.givenPeaks)
     	{
     		//positive or negative mode!?
-    		protonMass = protonMass * (double)mode;
+    		double protonMass = Constants.PROTON_MASS * (double)mode;
     		double min = (this.minWeight - (mzabs + PPMTool.getPPMDeviation(this.minWeight, this.mzppm)));
 	    	if((mass + protonMass) > min)
 	    	{
@@ -1992,7 +1997,8 @@ public class Fragmenter {
         		{
         			IMolecularFormula neutralLossFormula = this.neutralLoss.get(neutralLossMass).getElementalComposition();
         			boolean isPossibleNeutralLoss = MolecularFormulaTools.isPossibleNeutralLoss(originalFormulaMap, neutralLossFormula);
-        			
+        			double protonMass = Constants.PROTON_MASS * mode;
+        				
     				if((isPossibleNeutralLoss && ((mass+protonMass)-neutralLossMass) >= peakLow && (((mass+protonMass)-neutralLossMass) <= peakHigh)) || initialMolecule)
     				{
     					List<IAtomContainer> fragmentsNL = pp.postProcess(fragment, neutralLossMass);
