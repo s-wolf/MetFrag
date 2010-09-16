@@ -40,11 +40,11 @@ public class SpectrumDeviation {
 		
 		FileWriter fstream = new FileWriter(path + "spectrumDeviation.txt", true);
         BufferedWriter out = new BufferedWriter(fstream);
-        out.write("File\tAverage\tMedian\tDev. Molpeak\tPeaks Explained\n");
+        out.write("File\tAverage\tMedian\tDev. Molpeak\tPeaks Explained\tPubChemID\n");
         out.close();
         
         List<String> idList = new ArrayList<String>();
-        for(int i=0;i<files.length-1;i++)
+        for(int i=0;i<files.length;i++)
 		{
 			if(files[i].isFile())
 			{
@@ -56,7 +56,7 @@ public class SpectrumDeviation {
         Map<String, IAtomContainer> idToStructure = ESearchDownload.ESearchDownloadPubChemIDs(idList);
 		
 		
-		for(int i=0;i<files.length-1;i++)
+		for(int i=0;i<files.length;i++)
 		{
 			if(files[i].isFile())
 			{
@@ -64,15 +64,15 @@ public class SpectrumDeviation {
 				
 				//only 1 result because only the correct compound is fragmented
 //				Config c = new Config("outside");
-//				List<MetFragResult> result = MetFrag.startConvenienceMetFusion(database, Integer.toString(spectrum.getCID()), "", 0.0, new WrapperSpectrum(files[i].toString()), false, mzabs, mzppm, 10.0, true, true, 2, true, false, true, false, 10, c.getJdbc(), c.getUsername(), c.getPassword()); 
-				List<MetFragResult> result = MetFrag.startConvenienceWithStructure(database, idToStructure.get(Integer.toString(spectrum.getCID())), Integer.toString(spectrum.getCID()), "", spectrum.getExactMass(), new WrapperSpectrum(files[i].toString()), false, mzabs, mzppm, 0.0, true, true, 3, true, false, true, false, Integer.MAX_VALUE, true);
+//				List<MetFragResult> result = MetFrag.startConvenienceMetFusion(database, Integer.toString(spectrum.getCID()), "", spectrum.getExactMass(), new WrapperSpectrum(files[i].toString()), false, mzabs, mzppm, 10.0, true, true, 2, true, false, true, false, 10, c.getJdbc(), c.getUsername(), c.getPassword()); 
+				List<MetFragResult> result = MetFrag.startConvenienceWithStructure(database, idToStructure.get(Integer.toString(spectrum.getCID())), Integer.toString(spectrum.getCID()), "", spectrum.getExactMass(), new WrapperSpectrum(files[i].toString()), false, mzabs, mzppm, 0.0, true, true, 2, true, false, true, false, Integer.MAX_VALUE, true);
 				List<Double> deviations = new ArrayList<Double>();
 				
 				if(result == null || result.size() == 0 || result.get(0) == null || result.get(0).getFragments().size() == 0)
 				{
 					fstream = new FileWriter(path + "spectrumDeviation.txt", true);
 			        out = new BufferedWriter(fstream);
-					out.write(files[i].getName() + "\tERROR\tERROR\tERROR\t0\n");
+					out.write(files[i].getName() + "\tERROR\tERROR\tERROR\t0\t" + spectrum.getCID() + "\n");
 					out.close();
 					continue;
 				}
@@ -127,11 +127,11 @@ public class SpectrumDeviation {
 				
 				
 				//write everything to log file
-				System.out.println(files[i].getName() + "\t" + average + "\t" + median + "\t" + deviationMolPeak + "\t" + result.get(0).getFragments().size());
+				System.out.println(files[i].getName() + "\t" + average + "\t" + median + "\t" + deviationMolPeak + "\t" + result.get(0).getFragments().size() + "\t" + spectrum.getCID());
 				
 				fstream = new FileWriter(path + "spectrumDeviation.txt", true);
 		        out = new BufferedWriter(fstream);
-				out.write(files[i].getName() + "\t" + average + "\t" + median + "\t" + deviationMolPeak + "\t" + result.get(0).getPeaksExplained() + "\n");
+				out.write(files[i].getName() + "\t" + average + "\t" + median + "\t" + deviationMolPeak + "\t" + result.get(0).getPeaksExplained() + "\t" + spectrum.getCID() + "\n");
 				out.close();
 			}
 		}
@@ -142,8 +142,12 @@ public class SpectrumDeviation {
 	
 	public static void main(String[] args) {
 //		String folder = "/home/swolf/MassBankData/MetFragSunGrid/RikenDataMerged/CHONPS/useable/";
-		String folder = "/home/swolf/MassBankData/MetFragSunGrid/HillPaperDataMerged/";
+//		String folder = "/home/swolf/MassBankData/MetFragSunGrid/HillPaperDataMerged/";
 //		String folder = "/home/swolf/MassBankData/MetFragSunGrid/BrukerRawData/Processed/Merged/";
+//		String folder = "/home/swolf/MassBankData/TestSpectra/Hill/";
+//		String folder = "/home/swolf/MassBankData/TestSpectra/HillMerged/";
+//		String folder = "/home/swolf/MassBankData/TestSpectra/Riken/";
+		String folder = "/home/swolf/MassBankData/TestSpectra/RikenMerged/";
 		
 		if(args != null && args.length > 0)
 			folder = args[0];

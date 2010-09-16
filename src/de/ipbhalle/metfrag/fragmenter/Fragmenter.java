@@ -21,7 +21,6 @@
 package de.ipbhalle.metfrag.fragmenter;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -30,23 +29,16 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
-import java.util.Stack;
 import java.util.Vector;
 
 
 import org.openscience.cdk.Atom;
-import org.openscience.cdk.AtomContainer;
-import org.openscience.cdk.AtomContainerSet;
-import org.openscience.cdk.DefaultChemObjectBuilder;
-import org.openscience.cdk.LonePair;
 import org.openscience.cdk.Molecule;
 import org.openscience.cdk.SingleElectron;
 import org.openscience.cdk.aromaticity.AromaticityCalculator;
@@ -57,28 +49,22 @@ import org.openscience.cdk.exception.NoSuchAtomException;
 import org.openscience.cdk.formula.MolecularFormula;
 import org.openscience.cdk.interfaces.IChemObjectBuilder;
 import org.openscience.cdk.interfaces.IElement;
-import org.openscience.cdk.interfaces.ILonePair;
 import org.openscience.cdk.interfaces.IMolecularFormula;
 import org.openscience.cdk.interfaces.IMolecularFormulaSet;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
-import org.openscience.cdk.interfaces.IAtomContainerSet;
 import org.openscience.cdk.interfaces.IBond;
 import org.openscience.cdk.interfaces.IMolecule;
 import org.openscience.cdk.interfaces.IRing;
 import org.openscience.cdk.interfaces.IRingSet;
 import org.openscience.cdk.interfaces.ISingleElectron;
 import org.openscience.cdk.interfaces.IBond.Stereo;
-import org.openscience.cdk.io.MDLWriter;
 import org.openscience.cdk.io.SDFWriter;
 import org.openscience.cdk.isomorphism.IsomorphismTester;
 import org.openscience.cdk.isomorphism.UniversalIsomorphismTester;
-import org.openscience.cdk.isomorphism.matchers.IQueryAtomContainer;
 import org.openscience.cdk.nonotify.NoNotificationChemObjectBuilder;
 import org.openscience.cdk.ringsearch.AllRingsFinder;
 import org.openscience.cdk.smiles.SmilesGenerator;
-import org.openscience.cdk.smiles.SmilesParser;
-import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 
 import de.ipbhalle.metfrag.bondPrediction.Charges;
@@ -88,9 +74,7 @@ import de.ipbhalle.metfrag.spectrum.AssignFragmentPeak;
 import de.ipbhalle.metfrag.tools.Constants;
 import de.ipbhalle.metfrag.tools.MolecularFormulaTools;
 import de.ipbhalle.metfrag.tools.MoleculeTools;
-import de.ipbhalle.metfrag.tools.Number;
 import de.ipbhalle.metfrag.tools.PPMTool;
-import de.ipbhalle.metfrag.tools.renderer.StructureRenderer;
 
 
 public class Fragmenter {
@@ -1764,6 +1748,7 @@ public class Fragmenter {
     	IChemObjectBuilder builder = NoNotificationChemObjectBuilder.getInstance();
         IAtomContainer partContainer = builder.newInstance(IAtomContainer.class);
         partContainer.addAtom(atom);
+        
         
         atomsDone[Integer.parseInt(atom.getID())] = true;
                   

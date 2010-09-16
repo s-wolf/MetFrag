@@ -13,7 +13,7 @@ import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IBond;
 import org.openscience.cdk.interfaces.IMolecule;
-import org.openscience.cdk.smsd.SMSD;
+import org.openscience.cdk.smsd.Isomorphism;
 import org.openscience.cdk.smsd.interfaces.Algorithm;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 
@@ -40,7 +40,7 @@ public class Subgraph {
 	public static IAtomContainer getSubgraphsSMSD(IAtomContainer query, IAtomContainer target, boolean onlyBestMatch, boolean removeHydrogens) throws CDKException, IOException, CloneNotSupportedException
     {
     	IAtomContainer subgraph = DefaultChemObjectBuilder.getInstance().newInstance(AtomContainer.class);
-		SMSD comparison = new SMSD(Algorithm.SubStructure, true);
+		Isomorphism comparison = new Isomorphism(Algorithm.SubStructure, true);
 		
 		IMolecule targetTemp = new Molecule((IAtomContainer)target.clone());
 		
@@ -56,7 +56,7 @@ public class Subgraph {
         
 
 		// set molecules and remove hydrogens
-		comparison.init(query, targetTemp, removeHydrogens);
+		comparison.init(query, targetTemp, removeHydrogens, false);
 		// set chemical filter true
 		comparison.setChemFilters(false, false, false);
 
@@ -194,7 +194,7 @@ public class Subgraph {
 	public static IAtomContainer getMCSSMSD(IAtomContainer mol1, IAtomContainer mol2) throws CDKException, IOException, CloneNotSupportedException
     {
     	IAtomContainer subgraph = DefaultChemObjectBuilder.getInstance().newInstance(AtomContainer.class);
-		SMSD comparison = new SMSD(Algorithm.SubStructure, true);
+		Isomorphism comparison = new Isomorphism(Algorithm.SubStructure, true);
 		
 		IMolecule A1 = new Molecule((IAtomContainer)mol1.clone());
 		IMolecule A2 = new Molecule((IAtomContainer)mol2.clone());
@@ -206,7 +206,7 @@ public class Subgraph {
         A2 = (IMolecule) AtomContainerManipulator.removeHydrogens(A2);
 
 		// set molecules and remove hydrogens
-		comparison.init(A1, A2, true);
+		comparison.init(A1, A2, true, false);
 		// set chemical filter true
 		comparison.setChemFilters(false, false, false);
 		if (comparison.getAllMapping() != null) {

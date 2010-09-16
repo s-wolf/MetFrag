@@ -323,6 +323,31 @@ public class MetFrag {
 	}
 	
 	
+	/**
+	 * Start convenience with a given structure. This structure is fragmented and mathed with the given peaks.
+	 *
+	 * @param database the database
+	 * @param candidateStructure the candidate structure
+	 * @param candidate the candidate
+	 * @param molecularFormula the molecular formula
+	 * @param exactMass the exact mass
+	 * @param spectrum the spectrum
+	 * @param useProxy the use proxy
+	 * @param mzabs the mzabs
+	 * @param mzppm the mzppm
+	 * @param searchPPM the search ppm
+	 * @param molecularFormulaRedundancyCheck the molecular formula redundancy check
+	 * @param breakAromaticRings the break aromatic rings
+	 * @param treeDepth the tree depth
+	 * @param hydrogenTest the hydrogen test
+	 * @param neutralLossInEveryLayer the neutral loss in every layer
+	 * @param bondEnergyScoring the bond energy scoring
+	 * @param breakOnlySelectedBonds the break only selected bonds
+	 * @param limit the limit
+	 * @param isStoreFragments the is store fragments
+	 * @return the list
+	 * @throws Exception the exception
+	 */
 	public static List<MetFragResult> startConvenienceWithStructure(String database, IAtomContainer candidateStructure, String candidate, String molecularFormula, Double exactMass, WrapperSpectrum spectrum, boolean useProxy, 
 			double mzabs, double mzppm, double searchPPM, boolean molecularFormulaRedundancyCheck, boolean breakAromaticRings, int treeDepth,
 			boolean hydrogenTest, boolean neutralLossInEveryLayer, boolean bondEnergyScoring, boolean breakOnlySelectedBonds, int limit, boolean isStoreFragments) throws Exception
