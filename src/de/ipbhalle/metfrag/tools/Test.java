@@ -30,7 +30,10 @@ public class Test {
 		// TODO Auto-generated method stub
 		double mass = MolecularFormulaTools.getMonoisotopicMass("C17H4O14");
 		System.out.println(mass);
-
+		
+		System.out.println(PPMTool.getPPMDeviation(200.0, 10));
+		System.out.println(PPMTool.getPPMDeviation(200.0, 20));
+		System.out.println(PPMTool.getPPMWeb(200.0, 200.004));
 	}
 
 }

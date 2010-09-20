@@ -46,7 +46,6 @@ public class StructureDownload {
         try {
 			Map<String, IAtomContainer> idToStructure = ESearchDownload.ESearchDownloadPubChemIDs(idList);
 			for (String string : idList) {
-				;
 				MDLV2000Writer writer = new MDLV2000Writer(new FileWriter(new File(path + string + ".mol")));
 				writer.write(idToStructure.get(string));
 				writer.close();

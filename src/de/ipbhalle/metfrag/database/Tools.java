@@ -25,6 +25,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import de.ipbhalle.metfrag.spectrum.WrapperSpectrum;
+
 public class Tools {
 	
 	public static int checkCHONSP(String molecularFormula)
@@ -68,6 +70,11 @@ public class Tools {
 		
 		
 		return chonsp;
+	}
+	
+	public static void main(String[] args) {
+		WrapperSpectrum spectrum = new WrapperSpectrum("/home/swolf/MassBankData/MetFragSunGrid/RikenDataMergedCorrect/NoCHONPS/PR101029.txt");
+		checkCHONSP(spectrum.getFormula());
 	}
 	
 }

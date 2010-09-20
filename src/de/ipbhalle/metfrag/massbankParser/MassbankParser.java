@@ -83,6 +83,9 @@ public class MassbankParser{
 			  	else
 			  	{
 			  		nameTrivial = name;
+			  		while (line != null && !line.contains("CH$FORMULA")){
+			  			line = reader.readLine();
+					}
 			  	}
 			  	
 				formula = line.substring(line.indexOf("CH$FORMULA")+12);

@@ -35,6 +35,7 @@ import java.util.Vector;
 
 
 import de.ipbhalle.metfrag.massbankParser.Peak;
+import de.ipbhalle.metfrag.tools.PPMTool;
 
 
 
@@ -54,7 +55,7 @@ public class PreprocessSpectra {
 	 * 
 	 * @param folder the folder
 	 */
-	private void PreprocessOverCompleteFolder(String folder, double mzabs, double mzppm)
+	private void preprocessUnsorted(String folder, double mzabs, double mzppm)
 	{
 		//loop over all files in folder
 		File f = new File(folder);
@@ -152,7 +153,7 @@ public class PreprocessSpectra {
 	 * 
 	 * @param folder the folder
 	 */
-	private void Preprocess(String folder, double threshold)
+	private void preprocess(String folder, double threshold)
 	{
 		//loop over all files in folder
 		File f = new File(folder);
@@ -415,7 +416,8 @@ public class PreprocessSpectra {
 
 		for (int i = 1; i < peakArray.length; i++) {
 			//found peak within a given threshold
-			if((currentPeak >= (peakArray[i] - threshold)) && (currentPeak <= (peakArray[i] + threshold)))
+			double peakdeviation = PPMTool.getPPMDeviation(peakArray[i], mzppm) + mzabs;
+			if((currentPeak >= (peakArray[i] - peakdeviation)) && (currentPeak <= (peakArray[i] + peakdeviation)))
 			{
 				temp.add(peakArray[i]);
 				//gets the max intensity from the same peaks
@@ -555,7 +557,8 @@ public class PreprocessSpectra {
 //		String folder = "/home/swolf/MassBankData/MetFragSunGrid/BrukerRawData/Processed/";
 		String folder = "/home/swolf/test/";
 		PreprocessSpectra pps = new PreprocessSpectra();
-		pps.Preprocess(folder, 0.01);
+		pps.preprocessUnsorted(folder, 0.002, 10);
+//		pps.Preprocess(folder, 0.01);
 		System.out.println("Done!");
 	}
 
