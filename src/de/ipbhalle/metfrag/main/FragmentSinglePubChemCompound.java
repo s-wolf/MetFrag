@@ -212,9 +212,9 @@ public class FragmentSinglePubChemCompound {
 	
 	
 	public static void main(String[] args) {
-		String file = "";
+		String file = "/home/swolf/MassBankData/TestSpectra/RikenMerged/PR100376.txt";
 		Double mzabs = 0.0;
-		Double mzppm = 0.0;
+		Double mzppm = 10.0;
 		Integer treeDepth = 2;
 		Integer allFragments = 0;
 		

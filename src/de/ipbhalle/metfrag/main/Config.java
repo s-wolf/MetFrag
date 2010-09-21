@@ -34,6 +34,9 @@ public class Config {
 	private String jdbc = "";
     private String username = "";
     private String password = "";
+    private String jdbcPostgres = "";
+    private String usernamePostgres = "";
+    private String passwordPostgres = "";
     private String file = "";
     private String folder = "";
     private int treeDepth = 0;
@@ -132,6 +135,14 @@ public class Config {
 		setUsername(properties.getProperty("username"));
 		//Password 
 		setPassword(properties.getProperty("password"));
+		
+		
+		//JDBC URL --> Postgres connection
+		setJdbcPostgres(properties.getProperty("jdbcPostgres"));
+		//Username
+		setUsernamePostgres(properties.getProperty("usernamePostgres"));
+		//Password 
+		setPasswordPostgres(properties.getProperty("passwordPostgres"));
 		
 		//Set folder and file to fragment...a new folder is created with the name of the file (in the folder given)
 		setFile(properties.getProperty("file"));
@@ -593,6 +604,30 @@ public class Config {
 
 	public boolean isOnlyBreakSelectedBonds() {
 		return isOnlyBreakSelectedBonds;
+	}
+
+	public void setPasswordPostgres(String passwordPostgres) {
+		this.passwordPostgres = passwordPostgres;
+	}
+
+	public String getPasswordPostgres() {
+		return passwordPostgres;
+	}
+
+	public void setUsernamePostgres(String usernamePostgres) {
+		this.usernamePostgres = usernamePostgres;
+	}
+
+	public String getUsernamePostgres() {
+		return usernamePostgres;
+	}
+
+	public void setJdbcPostgres(String jdbcPostgres) {
+		this.jdbcPostgres = jdbcPostgres;
+	}
+
+	public String getJdbcPostgres() {
+		return jdbcPostgres;
 	}
 
 }

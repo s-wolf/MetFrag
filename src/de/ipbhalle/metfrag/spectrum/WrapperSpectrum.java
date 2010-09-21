@@ -51,6 +51,7 @@ public class WrapperSpectrum {
 	private String nameTrivial;
 	private String filename;
 	private String formula;
+	private String precursorType;
 	
 	
 	/**
@@ -68,6 +69,7 @@ public class WrapperSpectrum {
 		this.CID = spectra.get(0).getCID();
 		this.KEGG = spectra.get(0).getKEGG();
 		this.nameTrivial = spectra.get(0).getTrivialName();
+		this.setPrecursorType(spectra.get(0).getPrecursorType());
 		String[] fileTemp = filename.split("\\/");
 		this.filename = fileTemp[fileTemp.length - 1];
 		this.setFormula(spectra.get(0).getFormula());
@@ -85,7 +87,7 @@ public class WrapperSpectrum {
 	public WrapperSpectrum(String peakString, int mode, double exactMass){
 		this.spectra = new Vector<Spectrum>();
 		this.collisionEnergy = -1;
-		spectra.add(new Spectrum(-1, parsePeaks(peakString), exactMass, mode, "none", -1, "none", "none",""));
+		spectra.add(new Spectrum(-1, parsePeaks(peakString), exactMass, mode, "none", -1, "none", "none","", ""));
 		
 		this.peaks = spectra.get(0).getPeaks(); //just one spectra for now
 		this.exactMass = spectra.get(0).getExactMass();
@@ -330,13 +332,43 @@ public class WrapperSpectrum {
 	}
 
 
+	/**
+	 * Sets the molecular formula.
+	 *
+	 * @param formula the new formula
+	 */
 	public void setFormula(String formula) {
 		this.formula = formula;
 	}
 
 
+	/**
+	 * Gets the molecular formula.
+	 *
+	 * @return the formula
+	 */
 	public String getFormula() {
 		return formula;
+	}
+
+
+	/**
+	 * Sets the precursor type as defined in the massbank record.
+	 *
+	 * @param precursorType the new precursor type
+	 */
+	public void setPrecursorType(String precursorType) {
+		this.precursorType = precursorType;
+	}
+
+
+	/**
+	 * Gets the precursor type as defined in the massbank record.
+	 *
+	 * @return the precursor type
+	 */
+	public String getPrecursorType() {
+		return precursorType;
 	}
 	
 }

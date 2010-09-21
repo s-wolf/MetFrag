@@ -357,7 +357,7 @@ public class Fragmenter {
     	return original;
     }
     
-    private void preprocessMolecule(IAtomContainer original) throws IOException, CDKException 
+    private void preprocessMolecule(IAtomContainer original) throws IOException, CDKException, CloneNotSupportedException 
     {    	
     	//read in bondenergies.txt
     	bondEnergies = new HashMap<String, Double>();
@@ -435,16 +435,8 @@ public class Fragmenter {
     	
 
 		//now find all bonds which are worth splitting
-    	try {
-    		bondPrediction = new Charges(this.aromaticBonds);
-			this.bondsToBreak = bondPrediction.calculateBondsToBreak(this.originalMolecule);
-		} catch (CloneNotSupportedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-    	
-    	
-    	
+		bondPrediction = new Charges(this.aromaticBonds);
+		this.bondsToBreak = bondPrediction.calculateBondsToBreak(this.originalMolecule);
     	
     } 
     

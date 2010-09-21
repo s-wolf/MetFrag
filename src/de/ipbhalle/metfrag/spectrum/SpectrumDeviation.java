@@ -64,8 +64,18 @@ public class SpectrumDeviation {
 				
 				//only 1 result because only the correct compound is fragmented
 //				Config c = new Config("outside");
-//				List<MetFragResult> result = MetFrag.startConvenienceMetFusion(database, Integer.toString(spectrum.getCID()), "", spectrum.getExactMass(), new WrapperSpectrum(files[i].toString()), false, mzabs, mzppm, 10.0, true, true, 2, true, false, true, false, 10, c.getJdbc(), c.getUsername(), c.getPassword()); 
-				List<MetFragResult> result = MetFrag.startConvenienceWithStructure(database, idToStructure.get(Integer.toString(spectrum.getCID())), Integer.toString(spectrum.getCID()), "", spectrum.getExactMass(), new WrapperSpectrum(files[i].toString()), false, mzabs, mzppm, 0.0, true, true, 2, true, false, true, false, Integer.MAX_VALUE, true);
+//				List<MetFragResult> result = MetFrag.startConvenienceMetFusion(database, Integer.toString(spectrum.getCID()), "", spectrum.getExactMass(), new WrapperSpectrum(files[i].toString()), false, mzabs, mzppm, 10.0, true, true, 2, true, false, true, false, 10, c.getJdbc(), c.getUsername(), c.getPassword());
+				List<MetFragResult> result = null;
+				try
+				{
+					System.out.println("Process: " + files[i].toString());
+					result = MetFrag.startConvenienceWithStructure(database, idToStructure.get(Integer.toString(spectrum.getCID())), Integer.toString(spectrum.getCID()), "", spectrum.getExactMass(), new WrapperSpectrum(files[i].toString()), false, mzabs, mzppm, 0.0, true, true, 2, true, false, true, false, Integer.MAX_VALUE, true);
+				}
+				catch (Exception e)
+				{
+					System.out.println("File: " + files[i].toString() + e.getMessage());
+					e.printStackTrace();
+				}
 				List<Double> deviations = new ArrayList<Double>();
 				
 				if(result == null || result.size() == 0 || result.get(0) == null || result.get(0).getFragments().size() == 0)
@@ -146,8 +156,8 @@ public class SpectrumDeviation {
 //		String folder = "/home/swolf/MassBankData/MetFragSunGrid/BrukerRawData/Processed/Merged/";
 //		String folder = "/home/swolf/MassBankData/TestSpectra/Hill/";
 //		String folder = "/home/swolf/MassBankData/TestSpectra/HillMerged/";
-//		String folder = "/home/swolf/MassBankData/TestSpectra/Riken/";
-		String folder = "/home/swolf/MassBankData/TestSpectra/RikenMerged/";
+		String folder = "/home/swolf/MassBankData/TestSpectra/Riken/";
+//		String folder = "/home/swolf/MassBankData/TestSpectra/RikenMerged/";
 		
 		if(args != null && args.length > 0)
 			folder = args[0];
