@@ -49,6 +49,7 @@ import org.openscience.cdk.DefaultChemObjectBuilder;
 import org.openscience.cdk.Molecule;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.io.iterator.IteratingMDLReader;
+import org.openscience.cdk.io.iterator.IteratingSMILESReader;
 import org.openscience.cdk.smiles.SmilesGenerator;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 
@@ -74,6 +75,8 @@ public class PubChemToDatabaseParallel implements Runnable {
 	//insert the data in postgres database
 	@Override public void run()
 	{
+		long start = System.currentTimeMillis();
+		
 		try {
 			System.out.println("Processing: " + path + file);
 			
@@ -82,9 +85,12 @@ public class PubChemToDatabaseParallel implements Runnable {
 			
 			File sdfFile = new File(path + file);
 			IteratingMDLReader reader = new IteratingMDLReader(new GZIPInputStream(new FileInputStream(sdfFile)), DefaultChemObjectBuilder.getInstance());
-
 			int count = 0;
-					
+			
+			PreparedStatement pstmtCompound = con.prepareStatement("INSERT INTO compound (compound_id, mol_structure, exact_mass, formula, smiles, inchi, inchi_key_1, inchi_key_2, inchi_key_3) VALUES (?,cast(? as molecule),?,?,?,?,?,?,?)");
+			PreparedStatement pstmtSubstance = con.prepareStatement("INSERT INTO substance (substance_id, library_id, compound_id, accession) VALUES (?,?,?,?)");
+			PreparedStatement pstmtName = con.prepareStatement("INSERT INTO name (substance_id, name) VALUES (?,?)");
+			
 			while (reader.hasNext()) {
 				IAtomContainer molecule = (IAtomContainer)reader.next();
 				  
@@ -101,15 +107,15 @@ public class PubChemToDatabaseParallel implements Runnable {
 			    String inchiKeyArray[] = inchiKey.split("-");
 			    
 			    //first check if the compound already exists (do not insert the same compound from different databases in the compound table)
-			    PreparedStatement pstmtCheck = con.prepareStatement("SELECT compound_id from compound where inchi_key_1 = ? and inchi_key_2 = ? and inchi_key_3 = ?");
-		        pstmtCheck.setString(1, inchiKeyArray[0]);
-		        pstmtCheck.setString(2, inchiKeyArray[1]);
-		        pstmtCheck.setString(3, inchiKeyArray[2]);
-		        ResultSet res = pstmtCheck.executeQuery();
+//			    PreparedStatement pstmtCheck = con.prepareStatement("SELECT compound_id from compound where inchi_key_1 = ? and inchi_key_2 = ? and inchi_key_3 = ?");
+//		        pstmtCheck.setString(1, inchiKeyArray[0]);
+//		        pstmtCheck.setString(2, inchiKeyArray[1]);
+//		        pstmtCheck.setString(3, inchiKeyArray[2]);
+//		        ResultSet res = pstmtCheck.executeQuery();
 		        Integer compoundID = null;
-		        while(res.next()){
-		        	compoundID = res.getInt(1);
-		        }
+//		        while(res.next()){
+//		        	compoundID = res.getInt(1);
+//		        }
 		        
 		        //no previously inserted compound matches
 		        if(compoundID == null || compoundID == 0)
@@ -119,17 +125,28 @@ public class PubChemToDatabaseParallel implements Runnable {
 				    rs.next();
 				    compoundID = rs.getInt(1);
 				    
-				    PreparedStatement pstmt = con.prepareStatement("INSERT INTO compound (compound_id, mol_structure, exact_mass, formula, smiles, inchi, inchi_key_1, inchi_key_2, inchi_key_3) VALUES (?, '" + inchi + "' ,?,?,?,?,?,?,?)");
-			        pstmt.setInt(1, compoundID);
-			        pstmt.setDouble(2, exactMass);
-			        pstmt.setString(3, molecularFormula);
-			        pstmt.setString(4, smiles);
-			        pstmt.setString(5, inchi);
-			        pstmt.setString(6, inchiKeyArray[0]);
-			        pstmt.setString(7, inchiKeyArray[1]);
-			        pstmt.setString(8, inchiKeyArray[2]);
-			        
-			        pstmt.executeUpdate();
+//				    PreparedStatement pstmt = con.prepareStatement("INSERT INTO compound (compound_id, mol_structure, exact_mass, formula, smiles, inchi, inchi_key_1, inchi_key_2, inchi_key_3) VALUES (?, '" + inchi + "' ,?,?,?,?,?,?,?)");
+//			        pstmt.setInt(1, compoundID);
+//			        pstmt.setDouble(2, exactMass);
+//			        pstmt.setString(3, molecularFormula);
+//			        pstmt.setString(4, smiles);
+//			        pstmt.setString(5, inchi);
+//			        pstmt.setString(6, inchiKeyArray[0]);
+//			        pstmt.setString(7, inchiKeyArray[1]);
+//			        pstmt.setString(8, inchiKeyArray[2]);
+				    
+				    
+			        pstmtCompound.setInt(1, compoundID);
+			        pstmtCompound.setString(2, inchi);
+			        pstmtCompound.setDouble(3, exactMass);
+			        pstmtCompound.setString(4, molecularFormula);
+			        pstmtCompound.setString(5, smiles);
+			        pstmtCompound.setString(6, inchi);
+			        pstmtCompound.setString(7, inchiKeyArray[0]);
+			        pstmtCompound.setString(8, inchiKeyArray[1]);
+			        pstmtCompound.setString(9, inchiKeyArray[2]);
+//			        pstmt.executeUpdate();
+			        pstmtCompound.addBatch();
 				    
 		        }
 		        
@@ -139,25 +156,34 @@ public class PubChemToDatabaseParallel implements Runnable {
 			    Integer substanceID = rs.getInt(1);
 		        
 		        //insert the information also in substance table
-		        PreparedStatement pstmt = con.prepareStatement("INSERT INTO substance (substance_id, library_id, compound_id, accession) VALUES (?,?,?,?)");
+		        
 		        //pubchem has library id = 2
-		        pstmt.setInt(1, substanceID);
-		        pstmt.setInt(2, 2);
-		        pstmt.setInt(3, compoundID);
-		        pstmt.setString(4, Integer.toString(pubChemID));		        
-		        pstmt.executeUpdate();
+		        pstmtSubstance.setInt(1, substanceID);
+		        pstmtSubstance.setInt(2, 2);
+		        pstmtSubstance.setInt(3, compoundID);
+		        pstmtSubstance.setString(4, Integer.toString(pubChemID));	
+		        pstmtSubstance.addBatch();
+//		        pstmt.executeUpdate();
 
 		        //iupac name data
 			    String name = (String)properties.get("PUBCHEM_IUPAC_NAME");
 				if(name != null && name != "")
 				{
-					PreparedStatement pstmtName = con.prepareStatement("INSERT INTO name (substance_id, name) VALUES (?,?)");
 			        pstmtName.setInt(1, substanceID);
 			        pstmtName.setString(2, name);
-			        pstmtName.executeUpdate();
+//			        pstmtName.executeUpdate();
+			        pstmtName.addBatch();
 				}
 			    count++;
+			    
 			}
+			
+			pstmtCompound.executeBatch();
+			pstmtSubstance.executeBatch();
+			pstmtName.executeBatch();
+			
+			long end = System.currentTimeMillis();
+			System.out.println("Execution time was "+(end-start)+" ms.");
 			System.out.println("DONE: " + path + file);
 			System.out.println("Got " + count + " structures!");
 		} catch (NumberFormatException e) {
@@ -370,6 +396,7 @@ public class PubChemToDatabaseParallel implements Runnable {
 				{
 					threadExecutor.execute(new PubChemToDatabaseParallel(path, queue.poll()));
 				}
+				threadExecutor.shutdown();
 				
 				while(!threadExecutor.isTerminated())
 				{
@@ -380,7 +407,7 @@ public class PubChemToDatabaseParallel implements Runnable {
 					    e.printStackTrace();
 					}
 				}
-				threadExecutor.shutdown();
+				
 			}
 			
 			
@@ -404,19 +431,6 @@ public class PubChemToDatabaseParallel implements Runnable {
 		      } 
 		      catch(SQLException e) {}
 		}
-
-		
-		while(!threadExecutor.isTerminated())
-		{
-			try {
-				Thread.currentThread().sleep(10000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}//sleep for 1000 ms
-		}
-		
-		threadExecutor.shutdown();
 		
 	}
 

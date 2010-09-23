@@ -31,6 +31,7 @@ import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -43,6 +44,11 @@ import java.util.Queue;
 import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import net.sf.jniinchi.INCHI_KEY;
+import net.sf.jniinchi.JniInchiInput;
+import net.sf.jniinchi.JniInchiWrapper;
+import net.sf.jniinchi.LoadNativeLibraryException;
 
 import org.openscience.cdk.ChemFile;
 import org.openscience.cdk.ChemObject;
@@ -88,6 +94,9 @@ public class KEGGToDatabase {
 	public void run(File file)
 	{
 		try{
+			
+			
+			
 			System.out.println("Processing: " + folder + file.getName());
 			
 			String keggID = file.getName().split("\\.")[0];
@@ -121,44 +130,62 @@ public class KEGGToDatabase {
 	        
 	        IMolecularFormula formulaOrig = MolecularFormulaManipulator.getMolecularFormula(molRead);
 			String formulaStringOrig = MolecularFormulaManipulator.getString(formulaOrig);
-			Double mass = MolecularFormulaTools.getMonoisotopicMass(formulaOrig);
-			int chonsp = Tools.checkCHONSP(formulaStringOrig);
-			
+			Double mass = MolecularFormulaTools.getMonoisotopicMass(formulaOrig);			
 			
 	        InChIGenerator gen = InChIGeneratorFactory.getInstance().getInChIGenerator(molRead);
-	        String iupac = gen.getInchi();
-			
+	        String inchi = gen.getInchi();
+			String inchiKey = gen.getInchiKey();
+			String inchiKeyArray[] = inchiKey.split("-");
+	        
 			
 			SmilesGenerator generatorSmiles = new SmilesGenerator();
 		    IAtomContainer molecule = AtomContainerManipulator.removeHydrogens(molRead);
 		    String smiles = generatorSmiles.createSMILES(new Molecule(molecule));
 	        
+			ResultSet rs = stmt.executeQuery("SELECT nextval('compound_compound_id_seq')");
+		    rs.next();
+		    Integer compoundID = rs.getInt(1);
 		    
-		    PreparedStatement pstmt = con.prepareStatement("INSERT INTO RECORD (ID, DATE, FORMULA, EXACT_MASS, SMILES, IUPAC, CHONSP) VALUES (?,?,?,?,?,?,?)");
-	        pstmt.setString(1, keggID);
-	        pstmt.setDate(2, dateSQL);
-	        pstmt.setString(3, formulaStringOrig);
-	        pstmt.setDouble(4, mass);
-	        pstmt.setString(5, smiles);
-	        pstmt.setString(6, iupac);
-	        pstmt.setInt(7, chonsp);
-	        pstmt.executeUpdate();
+		    PreparedStatement pstmtCompound = con.prepareStatement("INSERT INTO compound (compound_id, mol_structure, exact_mass, formula, smiles, inchi, inchi_key_1, inchi_key_2, inchi_key_3) VALUES (?,cast(? as molecule),?,?,?,?,?,?,?)");
+		    pstmtCompound.setInt(1, compoundID);
+	        pstmtCompound.setString(2, inchi);
+	        pstmtCompound.setDouble(3, mass);
+	        pstmtCompound.setString(4, formulaStringOrig);
+	        pstmtCompound.setString(5, smiles);
+	        pstmtCompound.setString(6, inchi);
+	        pstmtCompound.setString(7, inchiKeyArray[0]);
+	        pstmtCompound.setString(8, inchiKeyArray[1]);
+	        pstmtCompound.setString(9, "");
+	        pstmtCompound.executeUpdate();
+			
+	        
+	        
+	        //now get the next substance_id
+		    rs = stmt.executeQuery("SELECT nextval('substance_substance_id_seq')");
+		    rs.next();
+		    Integer substanceID = rs.getInt(1);
+	        
+	        //insert the information also in substance table
+	        
+	        //pubchem has library id = 2
+		    PreparedStatement pstmtSubstance = con.prepareStatement("INSERT INTO substance (substance_id, library_id, compound_id, accession) VALUES (?,?,?,?)");
+		    pstmtSubstance.setInt(1, substanceID);
+	        pstmtSubstance.setInt(2, 1);
+	        pstmtSubstance.setInt(3, compoundID);
+	        pstmtSubstance.setString(4, keggID);	
+	        pstmtSubstance.executeUpdate();
 	        
 	        //now insert all strings into database
 			String namesArray[] = KeggWebservice.KEGGgetNameByCpdLocally(keggID, "/vol/mirrors/kegg/compound");
 			for (int i = 0; i < namesArray.length; i++) {
-				PreparedStatement pstmtName = con.prepareStatement("INSERT INTO CH_NAME (ID, NAME) VALUES (?,?)");
-		        pstmtName.setString(1, keggID);
+				PreparedStatement pstmtName = con.prepareStatement("INSERT INTO name (substance_id, name) VALUES (?,?)");
+		        pstmtName.setInt(1, substanceID);
 		        pstmtName.setString(2, namesArray[i]);
 		        pstmtName.executeUpdate();
 			}
 			
 			
-			//link data
-		    PreparedStatement pstmtLink = con.prepareStatement("INSERT INTO CH_LINK (ID, KEGG) VALUES (?,?)");
-	        pstmtLink.setString(1, keggID);
-	        pstmtLink.setString(2, keggID);
-	        pstmtLink.executeUpdate();
+			
 			
 
 		} catch (NumberFormatException e) {
@@ -205,9 +232,9 @@ public class KEGGToDatabase {
 	        Class.forName(driver);
 	        //databse data
 	        Config c = new Config();
-	        String url = c.getJdbc();
-	        String username = c.getUsername();
-	        String password = c.getPassword();
+	        String url = c.getJdbcPostgres();
+	        String username = c.getUsernamePostgres();
+	        String password = c.getPasswordPostgres();
 	        con = DriverManager.getConnection(url, username, password);
 		    
 	        

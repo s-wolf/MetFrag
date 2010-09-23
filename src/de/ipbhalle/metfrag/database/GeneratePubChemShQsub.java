@@ -76,7 +76,7 @@ public class GeneratePubChemShQsub {
 				BufferedWriter out = new BufferedWriter(new FileWriter(f2));
 				out.write("#!/bin/bash");
 				out.newLine();
-		  		out.write("java -jar /home/swolf/sgeQsubScripts/PubChemToMassBankDB.jar \"" + fileNames + "\"");
+		  		out.write("java -Xms1500m -Xmx2500m -Dproperty.file.path=/home/swolf/sgeQsubScripts/ -jar /home/swolf/sgeQsubScripts/PubChemToMassBankDB.jar \"" + fileNames + "\"");
 			  	out.close();
 			  	
 			  	count = 0;
