@@ -79,7 +79,7 @@ public class GenerateKEGGShQsub {
 				out.newLine();
 				out.write("#-q MSBI");
 				out.newLine();
-		  		out.write("java -jar /home/swolf/sgeQsubScripts/KEGGToMassBankDB.jar \"" + fileNames + "\"");
+		  		out.write("java -Xms1500m -Xmx2500m -Dproperty.file.path=/home/swolf/src/MetFragNew/ -jar /home/swolf/sgeQsubScripts/KEGGToMassBankDB.jar \"" + fileNames + "\"");
 			  	out.close();
 			  	
 			  	count = 0;

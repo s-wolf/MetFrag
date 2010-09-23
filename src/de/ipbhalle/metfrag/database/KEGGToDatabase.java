@@ -112,20 +112,11 @@ public class KEGGToDatabase {
 	        IChemModel model = sequence.getChemModel(0);
 	        IAtomContainer molRead = model.getMoleculeSet().getAtomContainer(0);
 			
-			CDKHueckelAromaticityDetector.detectAromaticity(molRead);
-	        CDKAtomTypeMatcher matcher = CDKAtomTypeMatcher.getInstance(molRead.getBuilder());
-	        for (IAtom atom : molRead.atoms()) {
-				IAtomType type = matcher.findMatchingAtomType(molRead, atom);
-		        AtomTypeManipulator.configure(atom, type);
-			}
-	        
+			
+	        AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(molRead);
 	        CDKHydrogenAdder hAdder = CDKHydrogenAdder.getInstance(molRead.getBuilder());
 	        hAdder.addImplicitHydrogens(molRead);
 	        AtomContainerManipulator.convertImplicitToExplicitHydrogens(molRead);
-	        
-						
-			Date date = new Date();
-	        java.sql.Date dateSQL = new java.sql.Date(date.getTime());
 			
 	        
 	        IMolecularFormula formulaOrig = MolecularFormulaManipulator.getMolecularFormula(molRead);
