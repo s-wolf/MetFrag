@@ -23,7 +23,7 @@ import org.openscience.cdk.interfaces.IChemObject;
 import org.openscience.cdk.interfaces.IChemObjectBuilder;
 import org.openscience.cdk.interfaces.IMolecule;
 import org.openscience.cdk.layout.StructureDiagramGenerator;
-import org.openscience.cdk.renderer.Renderer;
+import org.openscience.cdk.renderer.AtomContainerRenderer;
 import org.openscience.cdk.renderer.RendererModel;
 import org.openscience.cdk.renderer.RendererModel.ColorHash;
 import org.openscience.cdk.renderer.font.AWTFontManager;
@@ -243,7 +243,7 @@ public class WritePDFTable extends MoleculeCell {
 //        generators.add(new RadicalGenerator());
         
         IFontManager fm = new AWTFontManager();
-        Renderer renderer = new Renderer(generators, fm);
+        AtomContainerRenderer renderer = new AtomContainerRenderer(generators, fm);
         RendererModel rm = renderer.getRenderer2DModel();
         rm.set(KekuleStructure.class, true); 
         rm.set(AtomNumberGenerator.Offset.class, new javax.vecmath.Vector2d(10,0));
@@ -268,7 +268,7 @@ public class WritePDFTable extends MoleculeCell {
 		Graphics2D g2 = (Graphics2D)image.getGraphics();
 	   	g2.setColor(Color.WHITE);
 	   	g2.fillRect(0, 0, this.width, this.height);
-        renderer.paintMolecule(molSource, new AWTDrawVisitor((Graphics2D) g2), drawArea, true);
+        renderer.paint(molSource, new AWTDrawVisitor((Graphics2D) g2), drawArea, true);
 
 	   	return (RenderedImage) image;       
 
@@ -306,7 +306,7 @@ public class WritePDFTable extends MoleculeCell {
 //        generators.add(new RadicalGenerator());
         
         IFontManager fm = new AWTFontManager();
-        Renderer renderer = new Renderer(generators, fm);
+        AtomContainerRenderer renderer = new AtomContainerRenderer(generators, fm);
         RendererModel rm = renderer.getRenderer2DModel();
         rm.set(KekuleStructure.class, true); 
         rm.set(AtomNumberGenerator.Offset.class, new javax.vecmath.Vector2d(10,0));
@@ -357,7 +357,7 @@ public class WritePDFTable extends MoleculeCell {
 		Graphics2D g2 = (Graphics2D)image.getGraphics();
 	   	g2.setColor(Color.WHITE);
 	   	g2.fillRect(0, 0, this.width, this.height);
-        renderer.paintMolecule(molSource, new AWTDrawVisitor((Graphics2D) g2), drawArea, true);
+        renderer.paint(molSource, new AWTDrawVisitor((Graphics2D) g2), drawArea, true);
 
 	   	return (RenderedImage) image;       
 

@@ -20,6 +20,9 @@
 */
 package de.ipbhalle.metfrag.tools;
 
+import org.openscience.cdk.exception.CDKException;
+import org.openscience.cdk.smiles.smarts.SMARTSQueryTool;
+
 
 public class Test {
 
@@ -34,6 +37,13 @@ public class Test {
 		System.out.println(PPMTool.getPPMDeviation(200.0, 10));
 		System.out.println(PPMTool.getPPMDeviation(200.0, 20));
 		System.out.println(PPMTool.getPPMWeb(200.0, 200.004));
+		
+		try {
+			SMARTSQueryTool sqt = new SMARTSQueryTool("");
+		} catch (CDKException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 }

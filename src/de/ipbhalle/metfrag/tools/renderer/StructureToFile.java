@@ -112,7 +112,7 @@ public class StructureToFile {
 				
 		   
 		// the renderer needs to have a toolkit-specific font manager 
-		Renderer renderer = new Renderer(generators, new AWTFontManager());
+		AtomContainerRenderer renderer = new AtomContainerRenderer(generators, new AWTFontManager());
 		RendererModel rm = renderer.getRenderer2DModel();
         rm.set(AtomRadius.class, 0.4);
 		
@@ -125,7 +125,7 @@ public class StructureToFile {
 	   	g2.fillRect(0, 0, this.width, this.height);
 	   	
 	   	// the paint method also needs a toolkit-specific renderer
-	   	renderer.paintMolecule(molSource, new AWTDrawVisitor(g2), drawArea, true);
+	   	renderer.paint(molSource, new AWTDrawVisitor(g2), drawArea, true);
 
 	   	return (RenderedImage)image;
     }
@@ -152,7 +152,7 @@ public class StructureToFile {
         generators.add(new RadicalGenerator());
 		   
 		// the renderer needs to have a toolkit-specific font manager 
-		Renderer renderer = new Renderer(generators, new AWTFontManager());
+		AtomContainerRenderer renderer = new AtomContainerRenderer(generators, new AWTFontManager());
 		
         try {
 
@@ -171,7 +171,7 @@ public class StructureToFile {
             p.setProperty("PageSize","A4");
             vg.setProperties(p);
             vg.startExport();
-            renderer.paintMolecule(mol, new AWTDrawVisitor(vg), new Rectangle(width, height), true);
+            renderer.paint(mol, new AWTDrawVisitor(vg), new Rectangle(width, height), true);
             vg.endExport();
         } catch (Exception e) {
             e.printStackTrace();

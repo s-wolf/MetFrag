@@ -46,7 +46,7 @@ import org.openscience.cdk.interfaces.IBond;
 import org.openscience.cdk.interfaces.IChemObject;
 import org.openscience.cdk.interfaces.IMolecule;
 import org.openscience.cdk.layout.StructureDiagramGenerator;
-import org.openscience.cdk.renderer.Renderer;
+import org.openscience.cdk.renderer.AtomContainerRenderer;
 import org.openscience.cdk.renderer.RendererModel;
 import org.openscience.cdk.renderer.RendererModel.ColorHash;
 import org.openscience.cdk.renderer.font.AWTFontManager;
@@ -78,7 +78,7 @@ public class StructureRenderer extends JFrame {
         
         private int initialWidth;
         private int initialHeight;
-        private Renderer renderer;
+        private AtomContainerRenderer renderer;
         private IAtomContainer atomContainer; 
         private boolean isNew;
         
@@ -106,7 +106,7 @@ public class StructureRenderer extends JFrame {
                                       
             
             IFontManager fm = new AWTFontManager();
-            this.renderer = new Renderer(generators, fm); 
+            this.renderer = new AtomContainerRenderer(generators, fm); 
             RendererModel rm = renderer.getRenderer2DModel();
             List<IGeneratorParameter<?>> parameterList = rm.getRenderingParameters();
             for (IGeneratorParameter<?> parameter : parameterList) {
@@ -140,7 +140,7 @@ public class StructureRenderer extends JFrame {
             generators.add(new RingGenerator());
             
             IFontManager fm = new AWTFontManager();
-            this.renderer = new Renderer(generators, fm); 
+            this.renderer = new AtomContainerRenderer(generators, fm); 
             RendererModel rm = renderer.getRenderer2DModel();
 
             IAtomContainer subgraph = Subgraph.getSubgraphsSMSD(highlight, atomContainer, false, true);
@@ -181,7 +181,7 @@ public class StructureRenderer extends JFrame {
             this.setPreferredSize(new Dimension(result.width, result.height));
             this.revalidate();
             
-            this.renderer.paintMolecule(this.atomContainer, new AWTDrawVisitor((Graphics2D) g), drawArea, true);
+            this.renderer.paint(this.atomContainer, new AWTDrawVisitor((Graphics2D) g), drawArea, true);
         }
     }
     
