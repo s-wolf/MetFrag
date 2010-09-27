@@ -107,15 +107,15 @@ public class PubChemToDatabaseParallel implements Runnable {
 			    String inchiKeyArray[] = inchiKey.split("-");
 			    
 			    //first check if the compound already exists (do not insert the same compound from different databases in the compound table)
-			    PreparedStatement pstmtCheck = con.prepareStatement("SELECT compound_id from compound where inchi_key_1 = ? and inchi_key_2 = ? and inchi_key_3 = ?");
-		        pstmtCheck.setString(1, inchiKeyArray[0]);
-		        pstmtCheck.setString(2, inchiKeyArray[1]);
-		        pstmtCheck.setString(3, inchiKeyArray[2]);
-		        ResultSet res = pstmtCheck.executeQuery();
+//			    PreparedStatement pstmtCheck = con.prepareStatement("SELECT compound_id from compound where inchi_key_1 = ? and inchi_key_2 = ? and inchi_key_3 = ?");
+//		        pstmtCheck.setString(1, inchiKeyArray[0]);
+//		        pstmtCheck.setString(2, inchiKeyArray[1]);
+//		        pstmtCheck.setString(3, inchiKeyArray[2]);
+//		        ResultSet res = pstmtCheck.executeQuery();
 		        Integer compoundID = null;
-		        while(res.next()){
-		        	compoundID = res.getInt(1);
-		        }
+//		        while(res.next()){
+//		        	compoundID = res.getInt(1);
+//		        }
 		        
 		        //no previously inserted compound matches
 		        if(compoundID == null || compoundID == 0)
@@ -127,7 +127,7 @@ public class PubChemToDatabaseParallel implements Runnable {
 								    
 				    
 			        pstmtCompound.setInt(1, compoundID);
-			        pstmtCompound.setString(2, inchi);
+			        pstmtCompound.setString(2, smiles);
 			        pstmtCompound.setDouble(3, exactMass);
 			        pstmtCompound.setString(4, molecularFormula);
 			        pstmtCompound.setString(5, smiles);
