@@ -128,6 +128,7 @@ public class ReactionRenderer {
 		generators.add(new BasicSceneGenerator());
         generators.add(new BasicBondGenerator());
         generators.add(new BasicAtomGenerator());
+        
 //        generators.add(new RingGenerator());
 //        generators.add(new RadicalGenerator());
         
@@ -137,7 +138,8 @@ public class ReactionRenderer {
 //        reactiongenerators.add(new ReactionPlusGenerator());
 		   
 		// the renderer needs to have a toolkit-specific font manager 
-		Renderer renderer = new Renderer(generators, reactiongenerators, new AWTFontManager());
+        org.openscience.cdk.renderer.ReactionRenderer renderer = new org.openscience.cdk.renderer.ReactionRenderer(generators, reactiongenerators, new AWTFontManager());
+//		ReactionRenderer renderer = new ReactionRenderer(generators, reactiongenerators, new AWTFontManager());
 		RendererModel rm = renderer.getRenderer2DModel();
 //        rm.set(AtomRadius.class, 0.4);
 //        rm.set(ShowReactionBoxes.class, true);
@@ -163,7 +165,7 @@ public class ReactionRenderer {
 	   	g2.fillRect(0, 0, this.width, this.height);
 	   	
 	   	// the paint method also needs a toolkit-specific renderer
-	   	renderer.paintReaction(reaction, new AWTDrawVisitor(g2));
+	   	renderer.paint(reaction, new AWTDrawVisitor(g2));
 
 
 	   	return (RenderedImage)image;

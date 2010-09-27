@@ -86,6 +86,7 @@ public class PubChemToDatabaseParallel implements Runnable {
 			File sdfFile = new File(path + file);
 			IteratingMDLReader reader = new IteratingMDLReader(new GZIPInputStream(new FileInputStream(sdfFile)), DefaultChemObjectBuilder.getInstance());
 			int count = 0;
+			int countPackage = 0;
 			
 			PreparedStatement pstmtCompound = con.prepareStatement("INSERT INTO compound (compound_id, mol_structure, exact_mass, formula, smiles, inchi, inchi_key_1, inchi_key_2, inchi_key_3) VALUES (?,cast(? as molecule),?,?,?,?,?,?,?)");
 			PreparedStatement pstmtSubstance = con.prepareStatement("INSERT INTO substance (substance_id, library_id, compound_id, accession) VALUES (?,?,?,?)");
@@ -165,12 +166,23 @@ public class PubChemToDatabaseParallel implements Runnable {
 			        pstmtName.addBatch();
 				}
 			    count++;
+			    countPackage++;
+			    
+			    if(countPackage >= 1000)
+			    {
+			    	pstmtCompound.executeBatch();
+					pstmtSubstance.executeBatch();
+					pstmtName.executeBatch();
+					con.commit();
+					countPackage = 0;
+			    }			    
 			    
 			}
 			
 			pstmtCompound.executeBatch();
 			pstmtSubstance.executeBatch();
 			pstmtName.executeBatch();
+			con.commit();
 			
 			long end = System.currentTimeMillis();
 			System.out.println("Execution time was "+(end-start)+" ms.");
@@ -310,7 +322,8 @@ public class PubChemToDatabaseParallel implements Runnable {
 	    java.sql.Connection conTemp = null; 
 	    
 	    //number of threads depending on the available processors
-	    int threads = Runtime.getRuntime().availableProcessors();
+//	    int threads = Runtime.getRuntime().availableProcessors();
+	    int threads = 1;
 	    
 	    //thread executor
 	    ExecutorService threadExecutor = null;
@@ -360,12 +373,12 @@ public class PubChemToDatabaseParallel implements Runnable {
 				Class.forName(driver); 
 				DriverManager.registerDriver(new org.postgresql.Driver()); 
 		        //databse data
-		        Config c = new Config();
+		        Config c = new Config("outside");
 		        String url = c.getJdbcPostgres();
 		        String username = c.getUsernamePostgres();
 		        String password = c.getPasswordPostgres();
 		        con = DriverManager.getConnection(url, username, password);
-			    
+			    con.setAutoCommit(false);
 		
 				//readCompounds = new HashMap<Integer, IAtomContainer>();
 				

@@ -20,6 +20,12 @@
 */
 package de.ipbhalle.metfrag.tools;
 
+import org.openscience.cdk.DefaultChemObjectBuilder;
+import org.openscience.cdk.exception.CDKException;
+import org.openscience.cdk.interfaces.IAtomContainer;
+import org.openscience.cdk.interfaces.IMolecule;
+import org.openscience.cdk.nonotify.NoNotificationChemObjectBuilder;
+import org.openscience.cdk.smiles.SmilesParser;
 import org.openscience.cdk.smiles.smarts.SMARTSQueryTool;
 
 
@@ -37,7 +43,20 @@ public class Test {
 		System.out.println(PPMTool.getPPMDeviation(200.0, 20));
 		System.out.println(PPMTool.getPPMWeb(200.0, 200.004));
 		
-//		SMARTSQueryTool sqt = new SMARTSQueryTool("");
+		try {
+			SmilesParser sp = new SmilesParser(DefaultChemObjectBuilder.getInstance());
+			IAtomContainer atomContainer = sp.parseSmiles("CC(=O)OC(=O)C");
+			SMARTSQueryTool querytool = new SMARTSQueryTool("O");
+			boolean status = querytool.matches(atomContainer);
+			if (status) {
+			   int nmatch = querytool.countMatches();
+			   System.out.println(nmatch);
+			}
+			
+		} catch (CDKException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 }
