@@ -20,13 +20,20 @@
 */
 package de.ipbhalle.metfrag.tools;
 
+import java.util.List;
+
 import org.openscience.cdk.DefaultChemObjectBuilder;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IMolecule;
 import org.openscience.cdk.nonotify.NoNotificationChemObjectBuilder;
+import org.openscience.cdk.smiles.SmilesGenerator;
 import org.openscience.cdk.smiles.SmilesParser;
 import org.openscience.cdk.smiles.smarts.SMARTSQueryTool;
+import org.openscience.cdk.tools.CDKHydrogenAdder;
+import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
+
+import de.ipbhalle.metfrag.tools.renderer.StructureRenderer;
 
 
 public class Test {
@@ -45,13 +52,43 @@ public class Test {
 		
 		try {
 			SmilesParser sp = new SmilesParser(DefaultChemObjectBuilder.getInstance());
-			IAtomContainer atomContainer = sp.parseSmiles("CC(=O)OC(=O)C");
-			SMARTSQueryTool querytool = new SMARTSQueryTool("O");
+			IAtomContainer atomContainer = sp.parseSmiles("C1C(OC2=CC(=CC(=C2C1=O)O)O)C3=CC=C(C=C3)O");
+			
+			
+			AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(atomContainer);
+			CDKHydrogenAdder hAdder = CDKHydrogenAdder.getInstance(atomContainer.getBuilder());
+	        hAdder.addImplicitHydrogens(atomContainer);
+	        AtomContainerManipulator.convertImplicitToExplicitHydrogens(atomContainer);
+	        new StructureRenderer(atomContainer, "test");
+	        
+	        SmilesGenerator sg = new SmilesGenerator();
+	        System.out.println(sg.createSMILES(atomContainer));
+			
+//			//WATER
+//			SMARTSQueryTool querytool = new SMARTSQueryTool("[H][$([OH1][#6])][#6][#6][H]");
+//			SMARTSQueryTool querytool1 = new SMARTSQueryTool("[H][$([OH1][#6H1])][#6H1]");
+	        
+//	        //APOMORPHINE CH3NH2 Verlust bei Apomorphine
+//			SMARTSQueryTool querytool = new SMARTSQueryTool("[#6H3][NR][#6H2]");
+	        
+	        //Alkaloids
+			SMARTSQueryTool querytool = new SMARTSQueryTool("[#6H3][NR][#6H2]");
+	        
 			boolean status = querytool.matches(atomContainer);
 			if (status) {
 			   int nmatch = querytool.countMatches();
 			   System.out.println(nmatch);
+			   
+			   List<List<Integer>> matchedAtoms = querytool.getMatchingAtoms();
+			   for (List<Integer> list : matchedAtoms) {
+				   for (Integer integer : list) {
+					   System.out.println("Atom " + (integer + 1));
+				   }
+				   System.out.println("");
+			   }
+				
 			}
+			   
 			
 		} catch (CDKException e) {
 			// TODO Auto-generated catch block

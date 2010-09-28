@@ -108,10 +108,10 @@ public class StructureRenderer extends JFrame {
             IFontManager fm = new AWTFontManager();
             this.renderer = new AtomContainerRenderer(generators, fm); 
             RendererModel rm = renderer.getRenderer2DModel();
-            List<IGeneratorParameter<?>> parameterList = rm.getRenderingParameters();
-            for (IGeneratorParameter<?> parameter : parameterList) {
-				System.out.println(parameter.getClass().getName() + ": " +  parameter.getValue());
-			}
+//            List<IGeneratorParameter<?>> parameterList = rm.getRenderingParameters();
+//            for (IGeneratorParameter<?> parameter : parameterList) {
+//				System.out.println(parameter.getClass().getName() + ": " +  parameter.getValue());
+//			}
             
             
 //            rm.set(ShowAromaticity.class, true);
