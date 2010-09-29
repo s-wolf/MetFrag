@@ -52,7 +52,7 @@ public class Test {
 		
 		try {
 			SmilesParser sp = new SmilesParser(DefaultChemObjectBuilder.getInstance());
-			IAtomContainer atomContainer = sp.parseSmiles("C1C(OC2=CC(=CC(=C2C1=O)O)O)C3=CC=C(C=C3)O");
+			IAtomContainer atomContainer = sp.parseSmiles("C1=CC=C(C=C1)C(=O)C2=C(C(=CC=C2)CC(=O)O)N");
 			
 			
 			AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(atomContainer);
@@ -64,15 +64,21 @@ public class Test {
 	        SmilesGenerator sg = new SmilesGenerator();
 	        System.out.println(sg.createSMILES(atomContainer));
 			
-//			//WATER
+//			//WATER //TODO check distance of 3
 //			SMARTSQueryTool querytool = new SMARTSQueryTool("[H][$([OH1][#6])][#6][#6][H]");
 //			SMARTSQueryTool querytool1 = new SMARTSQueryTool("[H][$([OH1][#6H1])][#6H1]");
 	        
-//	        //APOMORPHINE CH3NH2 Verlust bei Apomorphine
+//	        //APOMORPHINE CH3NH2 loss ... Apomorphine
 //			SMARTSQueryTool querytool = new SMARTSQueryTool("[#6H3][NR][#6H2]");
 	        
 	        //Alkaloids
-			SMARTSQueryTool querytool = new SMARTSQueryTool("[#6H3][NR][#6H2]");
+//			SMARTSQueryTool querytool = new SMARTSQueryTool("TODO");
+			
+			//NH3 Neutral loss TODO
+//	        SMARTSQueryTool querytool = new SMARTSQueryTool("[H][H][$([NH2][#6])][#6][#6][H]");
+//	        SMARTSQueryTool querytool = new SMARTSQueryTool("[H][H][$([NH2][#6])][#6][#6][#6H1][H]");
+	        SMARTSQueryTool querytool = new SMARTSQueryTool("[$([NH2][#6])]([H])([H])[#6][#6][#6H2]([H])([H])");
+//	        SMARTSQueryTool querytool = new SMARTSQueryTool("[H][H][$([NH1][#6H1])][#6H1]");
 	        
 			boolean status = querytool.matches(atomContainer);
 			if (status) {

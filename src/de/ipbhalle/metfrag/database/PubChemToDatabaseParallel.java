@@ -432,7 +432,9 @@ public class PubChemToDatabaseParallel implements Runnable {
 		    	  if(con != null)
 		    		  con.close();
 		      } 
-		      catch(SQLException e) {}
+		      catch(SQLException e) {
+		    	  e.printStackTrace();
+		      }
 		}
 		
 	}
