@@ -20,10 +20,12 @@
 */
 package de.ipbhalle.metfrag.tools;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.openscience.cdk.DefaultChemObjectBuilder;
 import org.openscience.cdk.exception.CDKException;
+import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IMolecule;
 import org.openscience.cdk.nonotify.NoNotificationChemObjectBuilder;
@@ -65,20 +67,23 @@ public class Test {
 	        System.out.println(sg.createSMILES(atomContainer));
 			
 //			//WATER //TODO check distance of 3
+//	        SMARTSQueryTool querytool = new SMARTSQueryTool("[H][$([OH1][#6])][#6][#6][#6][H]");
 //			SMARTSQueryTool querytool = new SMARTSQueryTool("[H][$([OH1][#6])][#6][#6][H]");
-//			SMARTSQueryTool querytool1 = new SMARTSQueryTool("[H][$([OH1][#6H1])][#6H1]");
+//			SMARTSQueryTool querytool1 = new SMARTSQueryTool("[H][$([OH1][#6])][#6][H]");
 	        
 //	        //APOMORPHINE CH3NH2 loss ... Apomorphine
 //			SMARTSQueryTool querytool = new SMARTSQueryTool("[#6H3][NR][#6H2]");
 	        
-	        //Alkaloids
-//			SMARTSQueryTool querytool = new SMARTSQueryTool("TODO");
+	        //Alkaloids HCN neutral loss TODO
+//			SMARTSQueryTool querytool = new SMARTSQueryTool("[N][C]");
+	        
+	        //COH to CO +H
+//	        SMARTSQueryTool querytool = new SMARTSQueryTool("[H][O][C]");
 			
-			//NH3 Neutral loss TODO
-//	        SMARTSQueryTool querytool = new SMARTSQueryTool("[H][H][$([NH2][#6])][#6][#6][H]");
-//	        SMARTSQueryTool querytool = new SMARTSQueryTool("[H][H][$([NH2][#6])][#6][#6][#6H1][H]");
-	        SMARTSQueryTool querytool = new SMARTSQueryTool("[$([NH2][#6])]([H])([H])[#6][#6][#6H2]([H])([H])");
-//	        SMARTSQueryTool querytool = new SMARTSQueryTool("[H][H][$([NH1][#6H1])][#6H1]");
+			//NH3 Neutral loss TODO (the N has 2 attached H!)
+//	        SMARTSQueryTool querytool = new SMARTSQueryTool("[$([NH2][#6])]([H])([H])[#6][#6][#6][H]");
+	        SMARTSQueryTool querytool = new SMARTSQueryTool("[$([NH2][#6])]([H])([H])[#6][#6][H]");
+//	        SMARTSQueryTool querytool = new SMARTSQueryTool("[$([NH2][#6])]([H])([H])[#6][H]");
 	        
 			boolean status = querytool.matches(atomContainer);
 			if (status) {
@@ -86,12 +91,16 @@ public class Test {
 			   System.out.println(nmatch);
 			   
 			   List<List<Integer>> matchedAtoms = querytool.getMatchingAtoms();
+			   List<Integer> matched = new ArrayList<Integer>();
 			   for (List<Integer> list : matchedAtoms) {
 				   for (Integer integer : list) {
 					   System.out.println("Atom " + (integer + 1));
 				   }
 				   System.out.println("");
+				   matched.addAll(list);			   
 			   }
+			   
+			   new StructureRenderer(atomContainer, matched, "matched");
 				
 			}
 			   

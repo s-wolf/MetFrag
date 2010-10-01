@@ -77,22 +77,66 @@ public class PubChemToDatabaseParallel implements Runnable {
 	{
 		long start = System.currentTimeMillis();
 		
+		File sdfFile = new File(path + file);
+		IteratingMDLReader reader = null;
 		try {
-			System.out.println("Processing: " + path + file);
-			
-			Statement stmt = null;
-		    stmt = con.createStatement();
-			
-			File sdfFile = new File(path + file);
-			IteratingMDLReader reader = new IteratingMDLReader(new GZIPInputStream(new FileInputStream(sdfFile)), DefaultChemObjectBuilder.getInstance());
-			int count = 0;
-			int countPackage = 0;
-			
-			PreparedStatement pstmtCompound = con.prepareStatement("INSERT INTO compound (compound_id, mol_structure, exact_mass, formula, smiles, inchi, inchi_key_1, inchi_key_2, inchi_key_3) VALUES (?,cast(? as molecule),?,?,?,?,?,?,?)");
-			PreparedStatement pstmtSubstance = con.prepareStatement("INSERT INTO substance (substance_id, library_id, compound_id, accession) VALUES (?,?,?,?)");
-			PreparedStatement pstmtName = con.prepareStatement("INSERT INTO name (substance_id, name) VALUES (?,?)");
-			
+			reader = new IteratingMDLReader(new GZIPInputStream(new FileInputStream(sdfFile)), DefaultChemObjectBuilder.getInstance());
+		} catch (FileNotFoundException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		} catch (IOException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
+		int count = 0;
+		int countPackage = 0;
+		
+		System.out.println("Processing: " + path + file);
+		
+		PreparedStatement pstmtCompound = null;
+		PreparedStatement pstmtSubstance = null;
+		PreparedStatement pstmtName = null;
+		Statement stmt = null;
+		
+		try
+		{
 			while (reader.hasNext()) {
+				
+				try {
+					if(con == null || con.isClosed())
+					{
+						String driver = "org.postgresql.Driver"; 
+						try {
+							Class.forName(driver);
+							DriverManager.registerDriver(new org.postgresql.Driver()); 
+					        //database data
+					        Config c = new Config("outside");
+					        String url = c.getJdbcPostgres();
+					        String username = c.getUsernamePostgres();
+					        String password = c.getPasswordPostgres();
+					        con = DriverManager.getConnection(url, username, password);
+						    con.setAutoCommit(false);
+						    
+						    
+						    stmt = con.createStatement();
+							pstmtCompound = con.prepareStatement("INSERT INTO compound (compound_id, mol_structure, exact_mass, formula, smiles, inchi, inchi_key_1, inchi_key_2, inchi_key_3) VALUES (?,cast(? as molecule),?,?,?,?,?,?,?)");
+							pstmtSubstance = con.prepareStatement("INSERT INTO substance (substance_id, library_id, compound_id, accession) VALUES (?,?,?,?)");
+							pstmtName = con.prepareStatement("INSERT INTO name (substance_id, name) VALUES (?,?)");
+	
+						} catch (ClassNotFoundException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} 
+					}
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+					
+	
 				IAtomContainer molecule = (IAtomContainer)reader.next();
 				  
 			    Map<Object, Object> properties = molecule.getProperties();
@@ -108,15 +152,15 @@ public class PubChemToDatabaseParallel implements Runnable {
 			    String inchiKeyArray[] = inchiKey.split("-");
 			    
 			    //first check if the compound already exists (do not insert the same compound from different databases in the compound table)
-//			    PreparedStatement pstmtCheck = con.prepareStatement("SELECT compound_id from compound where inchi_key_1 = ? and inchi_key_2 = ? and inchi_key_3 = ?");
-//		        pstmtCheck.setString(1, inchiKeyArray[0]);
-//		        pstmtCheck.setString(2, inchiKeyArray[1]);
-//		        pstmtCheck.setString(3, inchiKeyArray[2]);
-//		        ResultSet res = pstmtCheck.executeQuery();
+	//			    PreparedStatement pstmtCheck = con.prepareStatement("SELECT compound_id from compound where inchi_key_1 = ? and inchi_key_2 = ? and inchi_key_3 = ?");
+	//		        pstmtCheck.setString(1, inchiKeyArray[0]);
+	//		        pstmtCheck.setString(2, inchiKeyArray[1]);
+	//		        pstmtCheck.setString(3, inchiKeyArray[2]);
+	//		        ResultSet res = pstmtCheck.executeQuery();
 		        Integer compoundID = null;
-//		        while(res.next()){
-//		        	compoundID = res.getInt(1);
-//		        }
+	//		        while(res.next()){
+	//		        	compoundID = res.getInt(1);
+	//		        }
 		        
 		        //no previously inserted compound matches
 		        if(compoundID == null || compoundID == 0)
@@ -136,7 +180,7 @@ public class PubChemToDatabaseParallel implements Runnable {
 			        pstmtCompound.setString(7, inchiKeyArray[0]);
 			        pstmtCompound.setString(8, inchiKeyArray[1]);
 			        pstmtCompound.setString(9, inchiKeyArray[2]);
-//			        pstmt.executeUpdate();
+	//			        pstmt.executeUpdate();
 			        pstmtCompound.addBatch();
 				    
 		        }
@@ -154,15 +198,15 @@ public class PubChemToDatabaseParallel implements Runnable {
 		        pstmtSubstance.setInt(3, compoundID);
 		        pstmtSubstance.setString(4, Integer.toString(pubChemID));	
 		        pstmtSubstance.addBatch();
-//		        pstmt.executeUpdate();
-
+	//		        pstmt.executeUpdate();
+	
 		        //iupac name data
 			    String name = (String)properties.get("PUBCHEM_IUPAC_NAME");
 				if(name != null && name != "")
 				{
 			        pstmtName.setInt(1, substanceID);
 			        pstmtName.setString(2, name);
-//			        pstmtName.executeUpdate();
+	//			        pstmtName.executeUpdate();
 			        pstmtName.addBatch();
 				}
 			    count++;
@@ -174,33 +218,46 @@ public class PubChemToDatabaseParallel implements Runnable {
 					pstmtSubstance.executeBatch();
 					pstmtName.executeBatch();
 					con.commit();
+					con.close();
 					countPackage = 0;
 			    }			    
 			    
 			}
-			
-			pstmtCompound.executeBatch();
-			pstmtSubstance.executeBatch();
-			pstmtName.executeBatch();
-			con.commit();
-			
-			long end = System.currentTimeMillis();
-			System.out.println("Execution time was "+(end-start)+" ms.");
-			System.out.println("DONE: " + path + file);
-			System.out.println("Got " + count + " structures!");
 		} catch (NumberFormatException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
+		finally
+		{
+			try {
+				if(!con.isClosed())
+				{
+					pstmtCompound.executeBatch();
+					pstmtSubstance.executeBatch();					
+					pstmtName.executeBatch();
+					con.commit();
+					con.close();
+				}
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				try {
+					con.close();
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+		}
+				
+		long end = System.currentTimeMillis();
+		System.out.println("Execution time was "+(end-start)+" ms.");
+		System.out.println("DONE: " + path + file);
+		System.out.println("Got " + count + " structures!");	
+		
 	}
 	
 	
@@ -368,18 +425,7 @@ public class PubChemToDatabaseParallel implements Runnable {
 				threadExecutor.shutdown();
 			}
 			else
-			{
-				String driver = "org.postgresql.Driver"; 
-				Class.forName(driver); 
-				DriverManager.registerDriver(new org.postgresql.Driver()); 
-		        //databse data
-		        Config c = new Config("outside");
-		        String url = c.getJdbcPostgres();
-		        String username = c.getUsernamePostgres();
-		        String password = c.getPasswordPostgres();
-		        con = DriverManager.getConnection(url, username, password);
-			    con.setAutoCommit(false);
-		
+			{		
 				//readCompounds = new HashMap<Integer, IAtomContainer>();
 				
 				//loop over all files in folder

@@ -53,6 +53,8 @@ import org.openscience.cdk.renderer.font.AWTFontManager;
 import org.openscience.cdk.renderer.font.IFontManager;
 import org.openscience.cdk.renderer.generators.AtomNumberGenerator;
 import org.openscience.cdk.renderer.generators.BasicAtomGenerator;
+import org.openscience.cdk.renderer.generators.BasicAtomGenerator.AtomRadius;
+import org.openscience.cdk.renderer.generators.BasicAtomGenerator.ColorByType;
 import org.openscience.cdk.renderer.generators.BasicBondGenerator;
 import org.openscience.cdk.renderer.generators.BasicSceneGenerator;
 import org.openscience.cdk.renderer.generators.IGenerator;
@@ -63,6 +65,7 @@ import org.openscience.cdk.renderer.generators.BasicAtomGenerator.KekuleStructur
 import org.openscience.cdk.renderer.visitor.AWTDrawVisitor;
 import org.openscience.cdk.smiles.SmilesParser;
 import org.openscience.cdk.templates.MoleculeFactory;
+import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 
 import de.ipbhalle.metfrag.similarity.Subgraph;
 
@@ -160,6 +163,57 @@ public class StructureRenderer extends JFrame {
         }
         
         
+        public MoleculePanel(IAtomContainer atomContainer, List<Integer> atomsToHighlight) throws CDKException, IOException, CloneNotSupportedException {
+
+        	this.atomContainer = atomContainer;           
+            this.initialWidth = 300;
+            this.initialHeight = 300;
+            
+            this.setPreferredSize(new Dimension(this.initialWidth + 10, this.initialHeight + 10));
+            this.setBackground(Color.WHITE);
+            this.setBorder(BorderFactory.createRaisedBevelBorder());
+            
+            List<IGenerator<IAtomContainer>> generators = new ArrayList<IGenerator<IAtomContainer>>();
+            
+            generators.add(new BasicSceneGenerator());
+            generators.add(new BasicBondGenerator());
+            generators.add(new BasicAtomGenerator());
+//            generators.add(new RingGenerator());
+             
+            IFontManager fm = new AWTFontManager();
+            this.renderer = new AtomContainerRenderer(generators, fm); 
+            RendererModel rm = renderer.getRenderer2DModel();
+   
+            List<IBond> bondsToHighlight = new ArrayList<IBond>();
+            Map<IChemObject, Color> colorMap = new HashMap<IChemObject, Color>();
+            
+            List<IAtom> atomsMatched = new ArrayList<IAtom>();
+			for (Integer integer : atomsToHighlight) {
+				atomsMatched.add(atomContainer.getAtom(integer));			   
+			}
+            
+            for (IAtom atom : atomsMatched) {
+            	for (IAtom atom2 : atomsMatched) {
+            		
+                	IBond bond = atomContainer.getBond(atom, atom2);
+                	if(bond!= null)
+                		bondsToHighlight.add(bond);
+                }            	
+            }
+            for (IBond bond : bondsToHighlight) {
+                colorMap.put(bond, new Color(0, 255, 0));
+            }
+            rm.getParameter(ColorHash.class).setValue(colorMap);
+            
+//            List<IGeneratorParameter<?>> parameterList = rm.getRenderingParameters();
+//	        for (IGeneratorParameter<?> parameter : parameterList) {
+//	        	System.out.println(parameter.getClass().getName() + ": " +  parameter.getValue());
+//			}
+                        
+            this.isNew = true;
+        }
+        
+        
         
         
         public void paint(Graphics g) {
@@ -248,6 +302,27 @@ public class StructureRenderer extends JFrame {
         try {
             sdg.generateCoordinates();
             MoleculePanel molPanel = new MoleculePanel(sdg.getMolecule(), highlight);
+            this.add(new JScrollPane(molPanel));
+        } catch (Exception e) {
+        	System.err.println("Error: " + e.getMessage() + "\n\n");
+        	e.printStackTrace();
+        }
+        
+        this.pack();
+        this.setVisible(true);
+    }
+    
+    
+    public StructureRenderer(IAtomContainer original, List<Integer> atomsTohighlight, String name) {
+    	
+    	IMolecule mol = new Molecule(original);
+    	
+    	StructureDiagramGenerator sdg = new StructureDiagramGenerator();
+        sdg.setMolecule(mol);
+        
+        try {
+            sdg.generateCoordinates();
+            MoleculePanel molPanel = new MoleculePanel(sdg.getMolecule(), atomsTohighlight);
             this.add(new JScrollPane(molPanel));
         } catch (Exception e) {
         	System.err.println("Error: " + e.getMessage() + "\n\n");

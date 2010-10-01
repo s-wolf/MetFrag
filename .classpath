@@ -34,7 +34,7 @@
 	<classpathentry kind="lib" path="lib/commons-io-1.4.jar"/>
 	<classpathentry kind="lib" path="lib/cdk-1.3.6.jar" sourcepath="/home/swolf/cdk/cdk-src+libs-1.3.6"/>
 	<classpathentry kind="lib" path="lib/postgresql-9.0-801.jdbc4.jar"/>
-	<classpathentry kind="lib" path="lib/cdk-jchempaint-16.jar"/>
+	<classpathentry kind="lib" path="lib/cdk-jchempaint-16.jar" sourcepath="C:/Users/Basti/Documents/IPB Work/CDK/cdk-src+libs-1.3.5"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER">
 		<attributes>
