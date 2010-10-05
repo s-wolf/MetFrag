@@ -20,9 +20,12 @@
 */
 package de.ipbhalle.metfrag.database;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -261,6 +264,117 @@ public class PubChemToDatabaseParallel implements Runnable {
 	}
 	
 	
+	//insert the data in postgres database
+	public void createTSV(String outputFolder)
+	{
+		long start = System.currentTimeMillis();
+		
+		try {
+			System.out.println("Processing: " + path + file);
+						
+			File sdfFile = new File(path + file);
+			IteratingMDLReader reader = new IteratingMDLReader(new GZIPInputStream(new FileInputStream(sdfFile)), DefaultChemObjectBuilder.getInstance());
+			int count = 0;
+			
+			//read in last id inserted
+			File fCount = new File(outputFolder + "count.tsv");
+			if(fCount.exists())
+			{
+				FileReader fr = new FileReader(fCount);
+				BufferedReader br = new BufferedReader(fr); 
+				String s;
+				while((s = br.readLine()) != null) {
+					count = Integer.parseInt(s);
+				}
+			}			
+		
+			FileWriter fwCompound = new FileWriter(outputFolder + "compound.tsv", true);
+			FileWriter fwSubstance = new FileWriter(outputFolder + "substance.tsv", true);
+			FileWriter fwName = new FileWriter(outputFolder + "name.tsv", true);
+			FileWriter fwCount = new FileWriter(outputFolder + "count.tsv", false);
+			
+			
+			while (reader.hasNext()) {
+				IAtomContainer molecule = (IAtomContainer)reader.next();
+				  
+			    Map<Object, Object> properties = molecule.getProperties();
+			    
+			    //RECORD data
+			    String smiles = (String)properties.get("PUBCHEM_OPENEYE_CAN_SMILES");
+			    Integer pubChemID = Integer.parseInt((String)properties.get("PUBCHEM_COMPOUND_CID"));			    
+			    double exactMass = Double.parseDouble((String)properties.get("PUBCHEM_EXACT_MASS"));
+			    String molecularFormula = (String)properties.get("PUBCHEM_MOLECULAR_FORMULA");
+			    String inchi = (String)properties.get("PUBCHEM_NIST_INCHI");
+			    String inchiKey = (String)properties.get("PUBCHEM_NIST_INCHIKEY");
+			    //this should plit in 3 parts
+			    String inchiKeyArray[] = inchiKey.split("-");
+			    
+			    /*
+			    COMPOUND_ID SERIAL NOT NULL,
+				MOL_STRUCTURE MOLECULE NOT NULL,
+				EXACT_MASS DECIMAL(8,4) NOT NULL,
+				FORMULA VARCHAR NOT NULL,
+				SMILES VARCHAR NOT NULL,
+				INCHI VARCHAR NOT NULL,
+				-- First part of the InChi key (skeleton)
+				INCHI_KEY_1 VARCHAR(14) NOT NULL,
+				-- Second part
+				INCHI_KEY_2 VARCHAR(10) NOT NULL,
+				-- The last part of the InChI key.
+				INCHI_KEY_3 VARCHAR(1)
+				*/
+			    
+			    fwCompound.write(count + "\t" + inchi + "\t" + exactMass + "\t" + molecularFormula + "\t" + smiles + "\t" + inchi + "\t" + inchiKeyArray[0] + "\t"  + inchiKeyArray[1] + "\t"  + inchiKeyArray[2] + "\n");
+			    
+		        
+		        //insert the information also in substance table
+		        
+			    /*
+			    SUBSTANCE_ID SERIAL NOT NULL,
+				LIBRARY_ID INTEGER NOT NULL,
+				COMPOUND_ID INTEGER NOT NULL,
+				ACCESSION VARCHAR,
+			    */
+			    fwSubstance.write(count + "\t" + "2" + "\t" + count + "\t" + Integer.toString(pubChemID) + "\n");
+			    
+			    /*
+			    NAME VARCHAR,
+				SUBSTANCE_ID INTEGER NOT NULL
+			    */
+
+		        //iupac name data
+			    String name = (String)properties.get("PUBCHEM_IUPAC_NAME");
+			    fwName.write(count + "\t" + name + "\n");
+				
+			    
+			    count++;			    
+			}
+			
+			fwCompound.close();
+			fwSubstance.close();
+			fwName.close();
+			
+			fwCount.write(Integer.toString(count));
+			fwCount.close();
+			
+			
+			long end = System.currentTimeMillis();
+			System.out.println("Execution time was "+(end-start)+" ms.");
+			System.out.println("DONE: " + path + file);
+			System.out.println("Got " + count + " structures!");
+		} catch (NumberFormatException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	
 //	@Override public void run()
 //	{
 //		try {
@@ -370,6 +484,9 @@ public class PubChemToDatabaseParallel implements Runnable {
 		}
 		
 		boolean isMysql = false;
+		boolean isWriteTSV = true;
+		String outputFolder = "/home/swolf/sgeQsubScripts/PubChemDataTSV/";
+		
 		String path = "/vol/mirrors/pubchem/";		
 		//starting from this id the files are read in again!
 		//be shure to delete larger ids!!!
@@ -387,7 +504,14 @@ public class PubChemToDatabaseParallel implements Runnable {
 		
 		try
 		{
-			if(isMysql)
+			if(isWriteTSV)
+			{
+				for (int i = 0; i < files.length; i++) {
+					PubChemToDatabaseParallel p = new PubChemToDatabaseParallel(path, files[i]);
+					p.createTSV(outputFolder);
+				}				
+			}
+			else if(isMysql)
 			{
 				String driver = "com.mysql.jdbc.Driver"; 
 				Class.forName(driver); 

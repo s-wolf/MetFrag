@@ -157,10 +157,11 @@ public class MassbankParser{
 				}
 				
 				
-				while (line != null && !line.contains("MS$FOCUSED_ION: PRECURSOR_TYPE")){
+				while (!line.contains("PK$PEAK") && line != null && !line.contains("MS$FOCUSED_ION: PRECURSOR_TYPE")){
 				  	  line = reader.readLine();
 				}
-				precursorType = line.substring(31);
+				if(!line.contains("PK$PEAK"))
+					precursorType = line.substring(31);
 		  	
 		  	
 				while (line != null && !line.contains("PK$PEAK")){

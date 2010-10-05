@@ -75,15 +75,31 @@ public class Test {
 //			SMARTSQueryTool querytool = new SMARTSQueryTool("[#6H3][NR][#6H2]");
 	        
 	        //Alkaloids HCN neutral loss TODO
-//			SMARTSQueryTool querytool = new SMARTSQueryTool("[N][C]");
+//			SMARTSQueryTool querytool = new SMARTSQueryTool("[N][#6][H]");
 	        
 	        //COH to CO +H
-//	        SMARTSQueryTool querytool = new SMARTSQueryTool("[H][O][C]");
+//	        SMARTSQueryTool querytool = new SMARTSQueryTool("[H][O][#6]");
+	        
+	        //COH to COH2O
+//	        SMARTSQueryTool querytool = new SMARTSQueryTool("[H][O][#6][H]");
+//	        SMARTSQueryTool querytool = new SMARTSQueryTool("[H][O][#6][#6][H]");
+//	        SMARTSQueryTool querytool = new SMARTSQueryTool("[H][O][#6][#6][#6][H]");
+	        
+	        //COOH to CO2
+//	        SMARTSQueryTool querytool = new SMARTSQueryTool("[H][O][#6]=[O]");
+	        
+	        //COOH to CO2
+//	        SMARTSQueryTool querytool = new SMARTSQueryTool("[H][O][#6]([#6][H])=[O]");
+//	        SMARTSQueryTool querytool = new SMARTSQueryTool("[H][O][#6]([#6][#6][H])=[O]");
+//	        SMARTSQueryTool querytool = new SMARTSQueryTool("[H][O][#6]([#6][#6][#6][H])=[O]");
 			
 			//NH3 Neutral loss TODO (the N has 2 attached H!)
 //	        SMARTSQueryTool querytool = new SMARTSQueryTool("[$([NH2][#6])]([H])([H])[#6][#6][#6][H]");
-	        SMARTSQueryTool querytool = new SMARTSQueryTool("[$([NH2][#6])]([H])([H])[#6][#6][H]");
+//	        SMARTSQueryTool querytool = new SMARTSQueryTool("[$([NH2][#6])]([H])([H])[#6][#6][H]");
 //	        SMARTSQueryTool querytool = new SMARTSQueryTool("[$([NH2][#6])]([H])([H])[#6][H]");
+	        
+	        //TODO: SO3H
+	        SMARTSQueryTool querytool = new SMARTSQueryTool("[$([NH2][#6])]([H])([H])[#6][H]");
 	        
 			boolean status = querytool.matches(atomContainer);
 			if (status) {
