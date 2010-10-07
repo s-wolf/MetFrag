@@ -26,7 +26,7 @@ import java.util.Vector;
 
 import org.openscience.cdk.interfaces.IAtomContainer;
 
-import de.ipbhalle.metfrag.spectrum.PeakMolPair;
+import de.ipbhalle.metfrag.spectrum.MatchedFragment;
 
 public class MetFragResult {
 	
@@ -34,7 +34,7 @@ public class MetFragResult {
 	private IAtomContainer structure = null;
 	private double score = 0.0;
 	private int peaksExplained = 0;
-	private Vector<PeakMolPair> fragments = null;
+	private Vector<MatchedFragment> fragments = null;
 	
 	/**
 	 * Instantiates a new MetFrag result.
@@ -60,7 +60,7 @@ public class MetFragResult {
 	 * @param score the score
 	 * @param peaksExplained the peaks explained
 	 */
-	public MetFragResult( String candidateID, IAtomContainer structure, double score, int peaksExplained, Vector<PeakMolPair> fragments)
+	public MetFragResult( String candidateID, IAtomContainer structure, double score, int peaksExplained, Vector<MatchedFragment> fragments)
 	{
 		this.setCandidateID(candidateID);
 		this.setScore(score);
@@ -101,11 +101,11 @@ public class MetFragResult {
 		return candidateID;
 	}
 
-	public void setFragments(Vector<PeakMolPair> fragments) {
+	public void setFragments(Vector<MatchedFragment> fragments) {
 		this.fragments = fragments;
 	}
 
-	public Vector<PeakMolPair> getFragments() {
+	public Vector<MatchedFragment> getFragments() {
 		return fragments;
 	}
 

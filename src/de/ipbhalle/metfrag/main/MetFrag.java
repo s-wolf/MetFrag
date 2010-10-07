@@ -60,7 +60,7 @@ import de.ipbhalle.metfrag.similarity.SimilarityGroup;
 import de.ipbhalle.metfrag.similarity.TanimotoClusterer;
 import de.ipbhalle.metfrag.spectrum.AssignFragmentPeak;
 import de.ipbhalle.metfrag.spectrum.CleanUpPeakList;
-import de.ipbhalle.metfrag.spectrum.PeakMolPair;
+import de.ipbhalle.metfrag.spectrum.MatchedFragment;
 import de.ipbhalle.metfrag.spectrum.WrapperSpectrum;
 import de.ipbhalle.metfrag.tools.MolecularFormulaTools;
 import de.ipbhalle.metfrag.tools.Writer;
@@ -148,7 +148,7 @@ public class MetFrag {
 		
 		//now collect the result
 		Map<String, IAtomContainer> candidateToStructure = results.getMapCandidateToStructure();
-		Map<String, Vector<PeakMolPair>> candidateToFragments = results.getMapCandidateToFragments();
+		Map<String, Vector<MatchedFragment>> candidateToFragments = results.getMapCandidateToFragments();
 		MoleculeSet setOfMolecules = new MoleculeSet();
 		for (int i = scores.length -1; i >=0 ; i--) {
 			Vector<String> list = scoresNormalized.get(scores[i]);
@@ -182,15 +182,15 @@ public class MetFrag {
 					
 					//original molecule
 					setOfFragments.addAtomContainer(new Molecule(candidateToStructure.get(string)));
-					Vector<PeakMolPair> fragments = candidateToFragments.get(string);
-					for (PeakMolPair frag : fragments) {
+					Vector<MatchedFragment> fragments = candidateToFragments.get(string);
+					for (MatchedFragment frag : fragments) {
 						
 						//fix for bug in mdl reader setting where it happens that bond.stereo is null when the bond was read in as UP/DOWN (4)
-						for (IBond bond : frag.getFragment().bonds()) {
+						for (IBond bond : frag.getFragmentStructure().bonds()) {
 							if(bond.getStereo() == null)
 								bond.setStereo(Stereo.UP_OR_DOWN);		
 						} 
-						IMolecule mol = new Molecule(AtomContainerManipulator.removeHydrogens(frag.getFragment()));
+						IMolecule mol = new Molecule(AtomContainerManipulator.removeHydrogens(frag.getFragmentStructure()));
 						setOfFragments.addAtomContainer(mol);
 					}
 					
@@ -302,7 +302,7 @@ public class MetFrag {
 
 		//now collect the result
 		Map<String, IAtomContainer> candidateToStructure = results.getMapCandidateToStructure();
-		Map<String, Vector<PeakMolPair>> candidateToFragments = results.getMapCandidateToFragments();
+		Map<String, Vector<MatchedFragment>> candidateToFragments = results.getMapCandidateToFragments();
 
 		List<MetFragResult> results = new ArrayList<MetFragResult>();
 		for (int i = scores.length -1; i >=0 ; i--) {
@@ -386,7 +386,7 @@ public class MetFrag {
 
 		//now collect the result
 		Map<String, IAtomContainer> candidateToStructure = results.getMapCandidateToStructure();
-		Map<String, Vector<PeakMolPair>> candidateToFragments = results.getMapCandidateToFragments();
+		Map<String, Vector<MatchedFragment>> candidateToFragments = results.getMapCandidateToFragments();
 
 		List<MetFragResult> results = new ArrayList<MetFragResult>();
 		for (int i = scores.length -1; i >=0 ; i--) {
@@ -482,7 +482,7 @@ public class MetFrag {
 
 		//now collect the result
 		Map<String, IAtomContainer> candidateToStructure = results.getMapCandidateToStructure();
-		Map<String, Vector<PeakMolPair>> candidateToFragments = results.getMapCandidateToFragments();
+		Map<String, Vector<MatchedFragment>> candidateToFragments = results.getMapCandidateToFragments();
 
 		List<MetFragResult> results = new ArrayList<MetFragResult>();
 		for (int i = scores.length -1; i >=0 ; i--) {
@@ -518,7 +518,7 @@ public class MetFrag {
 	 * 
 	 * @throws Exception the exception
 	 */
-	public static Vector<PeakMolPair> startConvenienceWeb(String peakList, String smiles, int mode, boolean molFormulaRedundancyCheck, double mzabs, double mzppm, int treeDepth) throws Exception
+	public static Vector<MatchedFragment> startConvenienceWeb(String peakList, String smiles, int mode, boolean molFormulaRedundancyCheck, double mzabs, double mzppm, int treeDepth) throws Exception
 	{
 		SmilesParser sp = new SmilesParser(DefaultChemObjectBuilder.getInstance());
 		//parse smiles
@@ -536,7 +536,7 @@ public class MetFrag {
 		WrapperSpectrum spectrum = new WrapperSpectrum(peakList, mode, molMass);		
 		
 		//constructor for fragmenter
-		Fragmenter fragmenter = new Fragmenter((Vector<Peak>)spectrum.getPeakList().clone(), mzabs, mzppm, spectrum.getMode(), true, molFormulaRedundancyCheck, false, false);
+		Fragmenter fragmenter = new Fragmenter((Vector<Peak>)spectrum.getPeakList().clone(), mzabs, mzppm, spectrum.getMode(), true, molFormulaRedundancyCheck, false);
 		List<IAtomContainer> listOfFrags = fragmenter.generateFragmentsInMemory(molecule, false, treeDepth);
 			
 		//clean up peak list
@@ -548,15 +548,15 @@ public class MetFrag {
 		AssignFragmentPeak afp = new AssignFragmentPeak();
 		afp.setHydrogenTest(true);
 		afp.assignFragmentPeak(listOfFrags, cleanedPeakList, mzabs, mzppm, spectrum.getMode(), false);
-		Vector<PeakMolPair> hits = afp.getAllHits();
+		Vector<MatchedFragment> hits = afp.getAllHits();
 
 		return sortBackwards(hits);
 	}
 	
 	
-	private static Vector<PeakMolPair> sortBackwards(Vector<PeakMolPair> original)
+	private static Vector<MatchedFragment> sortBackwards(Vector<MatchedFragment> original)
 	{
-		Vector<PeakMolPair> ret = new Vector<PeakMolPair>();
+		Vector<MatchedFragment> ret = new Vector<MatchedFragment>();
 		for (int i = original.size() - 1; i >= 0 ; i--) {
 			ret.add(original.get(i));
 		}
@@ -657,7 +657,7 @@ public class MetFrag {
 	 */
 	private void writeSDF(Double[] keysScore, String folder)
 	{
-		Map<String, Vector<PeakMolPair>> candidateToFragments = results.getMapCandidateToFragments();
+		Map<String, Vector<MatchedFragment>> candidateToFragments = results.getMapCandidateToFragments();
 		Map<Double, Vector<String>> realScoreMap = results.getRealScoreMap();
 		Map<String, IAtomContainer> candidateToStructure = results.getMapCandidateToStructure();
 		

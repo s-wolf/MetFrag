@@ -44,9 +44,8 @@ import de.ipbhalle.metfrag.read.Molfile;
 import de.ipbhalle.metfrag.scoring.Scoring;
 import de.ipbhalle.metfrag.spectrum.AssignFragmentPeak;
 import de.ipbhalle.metfrag.spectrum.CleanUpPeakList;
-import de.ipbhalle.metfrag.spectrum.PeakMolPair;
+import de.ipbhalle.metfrag.spectrum.MatchedFragment;
 import de.ipbhalle.metfrag.spectrum.WrapperSpectrum;
-import de.ipbhalle.metfrag.tools.renderer.StructureRenderer;
 
 public class FragmenterThread implements Runnable{
 	
@@ -234,7 +233,7 @@ public class FragmenterThread implements Runnable{
 	        //get the original peak list again
 			Vector<Peak> peakList = spectrum.getPeakList();
 	        
-	        Fragmenter fragmenter = new Fragmenter((Vector<Peak>)peakList.clone(), mzabs, mzppm, spectrum.getMode(), breakAromaticRings, sumFormulaRedundancyCheck, neutralLossAdd, isOnlyBreakSelectedBonds);
+	        Fragmenter fragmenter = new Fragmenter((Vector<Peak>)peakList.clone(), mzabs, mzppm, spectrum.getMode(), breakAromaticRings, sumFormulaRedundancyCheck, isOnlyBreakSelectedBonds);
 	        long start = System.currentTimeMillis();
 	        List<IAtomContainer> generatedFrags = null;
 	        try
@@ -271,7 +270,7 @@ public class FragmenterThread implements Runnable{
 				AssignFragmentPeak afp = new AssignFragmentPeak();
 				afp.setHydrogenTest(hydrogenTest);
 				afp.assignFragmentPeak(l, cleanedPeakList, mzabs, mzppm, spectrum.getMode(), false);
-				Vector<PeakMolPair> hits = afp.getHits();
+				Vector<MatchedFragment> hits = afp.getHits();
 				
 				
 				//now "real" scoring --> depends on intensities
@@ -336,8 +335,8 @@ public class FragmenterThread implements Runnable{
 				String peaks = "";
 				Double bondEnergy = 0.0;
 				for (int i = 0; i < hits.size(); i++) {
-					bondEnergy += Fragmenter.getCombinedEnergy((String)hits.get(i).getFragment().getProperty("BondEnergy"));
-					peaks += hits.get(i).getPeak().getMass() + "[" + hits.get(i).getFragment().getProperty("BondEnergy") + "]" +  " ";
+					bondEnergy += Fragmenter.getCombinedEnergy((String)hits.get(i).getFragmentStructure().getProperty("BondEnergy"));
+					peaks += hits.get(i).getPeak().getMass() + "[" + hits.get(i).getFragmentStructure().getProperty("BondEnergy") + "]" +  " ";
 				}
 				
 
@@ -348,8 +347,8 @@ public class FragmenterThread implements Runnable{
 				List<IAtomContainer> hitsListTest = new ArrayList<IAtomContainer>();
 				for (int i = 0; i < hits.size(); i++) {
 					List<IAtomContainer> hitsList = new ArrayList<IAtomContainer>();
-					hitsList.add(AtomContainerManipulator.removeHydrogens(hits.get(i).getFragment()));
-					hitsListTest.add(hits.get(i).getFragment());
+					hitsList.add(AtomContainerManipulator.removeHydrogens(hits.get(i).getFragmentStructure()));
+					hitsListTest.add(hits.get(i).getFragmentStructure());
 				}
 
 			}

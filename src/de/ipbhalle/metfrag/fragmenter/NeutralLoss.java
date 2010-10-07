@@ -46,7 +46,9 @@ public class NeutralLoss {
 	private String atomToStart;
 	private int hydrogenOnStartAtom;
 	private List<String> mainAtoms;
-		
+	private String[] SMARTS;
+	private double mass;
+
 	/**
 	 * Instantiates a new neutral loss.
 	 * Mode
@@ -59,8 +61,9 @@ public class NeutralLoss {
 	 * @param atomToStart the atom to start
 	 * @param hydrogenOnStartAtom the hydrogen on start atom
 	 */
-	public NeutralLoss(IMolecularFormula elementalComposition, IMolecularFormula topoFragment, int mode, int hydrogenDifference, int distance, String atomToStart, int hydrogenOnStartAtom)
+	public NeutralLoss(double mass, IMolecularFormula elementalComposition, IMolecularFormula topoFragment, int mode, int hydrogenDifference, int distance, String atomToStart, int hydrogenOnStartAtom, String SMARTS)
 	{
+		setMass(mass);
 		setElementalComposition(elementalComposition);
 		setMode(mode); 
 		setTopoFragment(topoFragment);
@@ -69,6 +72,13 @@ public class NeutralLoss {
 		setAtomToStart(atomToStart);
 		setHydrogenOnStartAtom(hydrogenOnStartAtom);
 		mainAtomSet(topoFragment);
+		setSMARTS(parseSMARTSString(SMARTS));
+	}
+	
+	
+	private String[] parseSMARTSString(String SMARTSString)
+	{
+		return SMARTSString.trim().split(";");
 	}
 	
 	
@@ -173,5 +183,32 @@ public class NeutralLoss {
 	public List<String> getMainAtoms() {
 		return mainAtoms;
 	}
+
+
+	public void setSMARTS(String[] sMARTS) {
+		SMARTS = sMARTS;
+	}
+
+
+	/**
+	 * Gets the SMARTS expression to match the subgraph of the Neutral loss.
+	 * Several SMARTS can be given.
+	 *
+	 * @return the SMARTS
+	 */
+	public String[] getSMARTS() {
+		return SMARTS;
+	}
+
+
+	public void setMass(double mass) {
+		this.mass = mass;
+	}
+
+
+	public double getMass() {
+		return mass;
+	}
+
 
 }

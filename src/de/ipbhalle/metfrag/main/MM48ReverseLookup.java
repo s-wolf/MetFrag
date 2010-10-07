@@ -49,7 +49,7 @@ import de.ipbhalle.metfrag.massbankParser.Peak;
 import de.ipbhalle.metfrag.pubchem.PubChemWebService;
 import de.ipbhalle.metfrag.spectrum.AssignFragmentPeak;
 import de.ipbhalle.metfrag.spectrum.CleanUpPeakList;
-import de.ipbhalle.metfrag.spectrum.PeakMolPair;
+import de.ipbhalle.metfrag.spectrum.MatchedFragment;
 import de.ipbhalle.metfrag.spectrum.WrapperSpectrum;
 
 public class MM48ReverseLookup {
@@ -170,7 +170,7 @@ public class MM48ReverseLookup {
 		        
 		      Vector<Peak> peakListTemp = new Vector<Peak>();
 		      peakListTemp.add(new Peak(30, 200, 10));
-		      Fragmenter fragmenter = new Fragmenter(peakListTemp, mzabs, mzppm, 1, true, true, false, false);     
+		      Fragmenter fragmenter = new Fragmenter(peakListTemp, mzabs, mzppm, 1, true, true, false);     
 		      List<IAtomContainer> l = null;
 		      try
 		      {
@@ -215,7 +215,7 @@ public class MM48ReverseLookup {
     	    		  AssignFragmentPeak afp = new AssignFragmentPeak();
     	    		  afp.setHydrogenTest(true);
     	    		  afp.assignFragmentPeak(fragments, cleanedPeakList, mzabs, mzppm, spectrum.getMode(), true);
-    	    		  Vector<PeakMolPair> hits = afp.getHits();
+    	    		  Vector<MatchedFragment> hits = afp.getHits();
     	    		  
     	    		  //add to result map
     	    		  fileToHits.put(files[i].getName(), hits.size());

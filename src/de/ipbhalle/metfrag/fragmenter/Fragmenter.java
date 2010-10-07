@@ -88,10 +88,10 @@ public class Fragmenter {
     private double mzabs;
     private double mzppm;
     private Vector<Peak> peakList;
-    private IMolecularFormulaSet sumFormulas;
+    private IMolecularFormulaSet molecularFormulas;
     private Vector<HashMap<String, Integer>> peakSumFormulaTable;
     //store the sum formula with its atom container properties
-    private HashMap<String, List<IAtomContainer>> sumformulaToFragMap;
+    private HashMap<String, List<IAtomContainer>> molformulaToFragMap;
     //private String currentSumFormula;
     private int countIsomorph = 0;
     private IAtomContainer originalMolecule;
@@ -109,71 +109,16 @@ public class Fragmenter {
     private boolean smilesRedundancyCheck = false;
     private boolean realIsomorphism = false;
     private boolean radicalGeneration = true;
-    private boolean neutralLossAdd = true;
+
     private int atomsContained;
     private Map<String, Double> bondEnergies;
-    private Map<Double, NeutralLoss> neutralLoss;
     private int treeDepth = 0;
     private PostProcess pp = null;
     private List<String> bondsToBreak = null;
     private boolean isOnlyBreakSelectedBonds = false;
     private Charges bondPrediction = null;
     private boolean partialChargesPreferred = true;
-    
-    //Timer
-    long startTraverse = 0;
-    long endTraverse = 0;
-    long sumTraverse = 0;
-    long startMass = 0;
-    long endMass = 0;
-    long sumMass = 0;
-    long startSplitable = 0;
-    long endSplitable = 0;
-    long sumSplitableBonds = 0;
-    long startAtom = 0;
-    long endAtom = 0;
-    long sumAtom = 0;
-    long startExist = 0;
-    long endExist = 0;
-    long sumExist = 0;
-    long startIsomorph = 0;
-    long endIsomorph = 0;
-    long sumIsomorph = 0;
-    long startPartition = 0;
-    long endPartition = 0;
-    long sumPartition = 0; 
-    
-    
-    /**
-     * Instantiates a new fragmenter (heuristic) with no peaks. Test the fragmenter to split up the molecule.
-     * This method is something like Brute Force.
-     * 
-     * @param breakAromaticRings break aromatic rings?
-     * @param molecularFormulaRedundancyCheck the experimental isomorphism check
-     * @param isOnlyBreakSelectedBonds the is only break selected bonds
-     */
-    public Fragmenter(boolean breakAromaticRings, boolean molecularFormulaRedundancyCheck, boolean isOnlyBreakSelectedBonds)
-    {
-    	this.mzabs = 0.1;
-    	this.mzppm = 0.1;
-    	this.breakAromaticRings = breakAromaticRings;
-    	this.sumFormulas = null;
-    	//no peaks given
-    	this.givenPeaks = false;
-    	//HashMap which stores the sum formulas corresponding to the Atomcontainer (fragment)
-    	this.sumformulaToFragMap = new HashMap<String, List<IAtomContainer>>();
-    	//break up molecule into fragments ... they are all returned
-    	this.minWeight = 0;
-    	this.nround = 0;
-    	//graphviz output
-    	gv = new GraphViz();
-        gv.addln(gv.start_graph());
-        this.molecularFormulaRedundancyCheck = molecularFormulaRedundancyCheck;
-        ReadInNeutralLosses();
-    	
-    }
-    
-    
+      
     
     /**
      * Instantiates a new fragmenter (heuristic) with no peaks. Test the fragmenter to split up the molecule.
@@ -191,27 +136,24 @@ public class Fragmenter {
     	this.mzabs = 0;
     	this.mzppm = 0;
     	this.breakAromaticRings = breakAromaticRings;
-    	this.sumFormulas = null;
+    	this.molecularFormulas = null;
     	//HashMap which stores the sum formulas corresponding to the Atomcontainer (fragment)
-    	this.sumformulaToFragMap = new HashMap<String, List<IAtomContainer>>();
+    	this.molformulaToFragMap = new HashMap<String, List<IAtomContainer>>();
     	this.minWeight = minWeight;
     	this.nround = 0;
-    	this.neutralLossAdd = false;
     	//graphviz output
     	gv = new GraphViz();
         gv.addln(gv.start_graph());
         this.molecularFormulaRedundancyCheck = molecularFormulaRedundancyCheck;
-
-        ReadInNeutralLosses();
     }
     
     
     /**
-     * Instantiates a new fragmenter (heuristic). Given the peak list it gets the smallest mass.
+     * Instantiates a new fragmenter. Given the peak list it gets the smallest mass.
      * The fragmentation is only done if the resulting fragment is heavy enough and if there are enough elements if the
      * sum formula of the fragment.
      * 
-     * @param sumFormulas the sum formulas
+     * @param molecularFormulas the sum formulas
      * @param mzabs the mzabs
      * @param mzppm the mzppm
      * @param positiveMode the positive mode
@@ -221,24 +163,22 @@ public class Fragmenter {
      * @param neutralLossCheck the neutral loss check
      * @param isOnlyBreakSelectedBonds the is only break selected bonds
      */
-    public Fragmenter(Vector<Peak> peakList, IMolecularFormulaSet sumFormulas, double mzabs, double mzppm, int positiveMode, boolean breakAromaticRings, boolean molecularFormulaRedundancyCheck, boolean neutralLossCheck, boolean isOnlyBreakSelectedBonds)
+    public Fragmenter(Vector<Peak> peakList, IMolecularFormulaSet molecularFormulas, double mzabs, double mzppm, int positiveMode, boolean breakAromaticRings, boolean molecularFormulaRedundancyCheck, boolean isOnlyBreakSelectedBonds)
     {
     	this.peakList = peakList;
     	this.mzabs = mzabs;
     	this.mzppm = mzppm;
     	this.breakAromaticRings = breakAromaticRings;
     	this.mode = positiveMode;
-    	this.sumFormulas = sumFormulas;
-    	this.sumformulaToFragMap = new HashMap<String, List<IAtomContainer>>();
+    	this.molecularFormulas = molecularFormulas;
+    	this.molformulaToFragMap = new HashMap<String, List<IAtomContainer>>();
     	this.nround = 0;
     	this.molecularFormulaRedundancyCheck = molecularFormulaRedundancyCheck;
-    	this.neutralLossAdd = neutralLossCheck;
     	
     	//process the peaks sum formulas
     	parseFormula();
     	//set the minimum weight...the "leightest" peak
     	setMinWeight();
-    	ReadInNeutralLosses();
     	//graphviz output
     	gv = new GraphViz();
         gv.addln(gv.start_graph());
@@ -256,21 +196,19 @@ public class Fragmenter {
      * @param breakAromaticRings the break aromatic rings
      * @param molecularFormulaRedundancyCheck the experimental isomorphism check
      */
-    public Fragmenter(Vector<Peak> peakList, double mzabs, double mzppm, int positiveMode, boolean breakAromaticRings, boolean molecularFormulaRedundancyCheck, boolean neutralLossCheck, boolean isOnlyBreakSelectedBonds)
+    public Fragmenter(Vector<Peak> peakList, double mzabs, double mzppm, int positiveMode, boolean breakAromaticRings, boolean molecularFormulaRedundancyCheck, boolean isOnlyBreakSelectedBonds)
     {
     	this.peakList = peakList;
     	this.mzabs = mzabs;
     	this.mzppm = mzppm;
     	this.breakAromaticRings = breakAromaticRings;
     	this.mode = positiveMode;
-    	this.sumformulaToFragMap = new HashMap<String, List<IAtomContainer>>();
+    	this.molformulaToFragMap = new HashMap<String, List<IAtomContainer>>();
     	this.nround = 0;
     	this.molecularFormulaRedundancyCheck = molecularFormulaRedundancyCheck;
-    	this.neutralLossAdd = neutralLossCheck;
     	
     	//set the minimum weight...the "leightest" peak
     	setMinWeight();
-    	ReadInNeutralLosses();
     	//graphviz output
     	gv = new GraphViz();
         gv.addln(gv.start_graph());
@@ -288,22 +226,20 @@ public class Fragmenter {
      * @param removePeaks the remove peaks
      * @param molecularFormulaRedundancyCheck
      */
-    public Fragmenter(Vector<Peak> peakList, double mzabs, double mzppm, int positiveMode, boolean breakAromaticRings, boolean removePeaks, boolean molecularFormulaRedundancyCheck, boolean neutralLossCheck, boolean isOnlyBreakSelectedBonds)
+    public Fragmenter(Vector<Peak> peakList, double mzabs, double mzppm, int positiveMode, boolean breakAromaticRings, boolean removePeaks, boolean molecularFormulaRedundancyCheck, boolean isOnlyBreakSelectedBonds)
     {
     	this.peakList = peakList;
     	this.mzabs = mzabs;
     	this.mzppm = mzppm;
     	this.breakAromaticRings = breakAromaticRings;
     	this.mode = positiveMode;
-    	this.sumformulaToFragMap = new HashMap<String, List<IAtomContainer>>();
+    	this.molformulaToFragMap = new HashMap<String, List<IAtomContainer>>();
     	this.nround = 0;
     	this.molecularFormulaRedundancyCheck = molecularFormulaRedundancyCheck;
-    	this.neutralLossAdd = neutralLossCheck;
     	
     	//set the minimum weight...the "leightest" peak
     	setMinWeight();
     	this.removePeak = removePeaks;
-    	ReadInNeutralLosses();
     	//graphviz output
     	gv = new GraphViz();
         gv.addln(gv.start_graph());
@@ -487,40 +423,14 @@ public class Fragmenter {
         
 		//do preprocess: find all rings and aromatic rings...mark all bonds
 		preprocessMolecule(atomContainer);
-		//create new PostProcess object
-    	pp = new PostProcess(this.aromaticBonds, this.allRings, neutralLoss);
+
     	
 		//add original molecule to it
         fragmentQueue.offer(new Node(0, 0, this.originalMolecule, 0));       
 //        fragmentsReturn.add(writeMoleculeToTemp(this.originalMolecule, identifier, globalCount, "0", 0));
         globalCount++;
         int treeDepth = 1;
-        
-        //add neutral loss in the first step for sure
-        if(this.neutralLossAdd || true)
-        {
-        	IMolecularFormula molecularFormula = new MolecularFormula();
-        	molecularFormula = MolecularFormulaManipulator.getMolecularFormula(this.originalMolecule, molecularFormula);
-            //now add neutral losses to it
-            List<IAtomContainer> fragsNL = AddNeutralLosses(this.originalMolecule, molecularFormula, true);
-            
-                      
-            String atomCount = "";
-            for (IAtomContainer fragNL : fragsNL) {
-            	
-            	//fix for sdf reader bug
-            	fragNL.removeProperty("cdk:Remark");
-            	fragNL.removeProperty("cdk:Title");
-            	
-            	atomCount +=  (String)fragNL.getProperty("NeutralLossRule") + "[" + fragNL.getAtomCount() + "] ";
-            	fragmentQueue.offer(new Node(globalCount, 0, fragNL, treeDepth));    
-            	fragNL.setProperty("TreeDepth", "1");
-                fragmentsReturn.add(writeMoleculeToTemp(fragNL, identifier, globalCount, (String)fragNL.getProperty("BondEnergy"), treeDepth));
-                globalCount++;
-			}
-//            System.out.println("Original Candidate [" + this.originalMolecule.getAtomCount() + "]: Neutral Losses: " + fragsNL.size() + " --> " + atomCount);
-        }
-        
+                
         
         //get the number of preprocessed spectra
         tempLevelCount = fragmentQueue.size();
@@ -551,10 +461,7 @@ public class Fragmenter {
 
             for (IBond bond : splitableBonds) {
             	
-            	this.startSplitable = System.currentTimeMillis();
             	List<IAtomContainer> parts = splitMolecule(currentFragment, bond);
-                this.endSplitable = System.currentTimeMillis() - this.startSplitable;
-                this.sumSplitableBonds += this.endSplitable;
                                 
                 for (IAtomContainer partContainer : parts) {
                 	
@@ -637,40 +544,19 @@ public class Fragmenter {
     	int globalCount = 0; //count all frags --> labeling of the pictures
     	
     	//fragments not yet split up enough...QUEUE --> BFS
-        Queue<Node> fragmentQueue = new LinkedList<Node>();
-       
+        Queue<Node> fragmentQueue = new LinkedList<Node>();       
 		globalCount++;
         
 		//do preprocess: find all rings and aromatic rings...mark all bonds
 		preprocessMolecule(atomContainer);
-		//create new PostProcess object
-    	pp = new PostProcess(this.aromaticBonds, this.allRings, neutralLoss);
+
     	
 		//add original molecule to it
         fragmentQueue.offer(new Node(0, 0, this.originalMolecule, 0));       
-//        fragmentsReturn.add(writeMoleculeToTemp(this.originalMolecule, identifier, globalCount, "0", 0));
+        
         globalCount++;
         Integer treeDepth = 1;
-        
-        //add neutral loss in the first step for sure
-        if(this.neutralLossAdd || true)
-        {
-        	IMolecularFormula molecularFormula = new MolecularFormula();
-        	molecularFormula = MolecularFormulaManipulator.getMolecularFormula(this.originalMolecule, molecularFormula);
-            //now add neutral losses to it
-            List<IAtomContainer> fragsNL = AddNeutralLosses(this.originalMolecule, molecularFormula, true);
-            
-            String atomCount = "";
-            for (IAtomContainer fragNL : fragsNL) {
-            	atomCount +=  (String)fragNL.getProperty("NeutralLossRule") + "[" + fragNL.getAtomCount() + "] ";
-            	fragmentQueue.offer(new Node(globalCount, 0, fragNL, treeDepth));    
-            	fragNL.setProperty("TreeDepth", "1");
-                fragmentsReturn.add(fragNL);
-                globalCount++;
-			}
-//            System.out.println("Original Candidate [" + this.originalMolecule.getAtomCount() + "]: Neutral Losses: " + fragsNL.size() + " --> " + atomCount);
-        }
-        
+                
         
         //get the number of preprocessed spectra
         tempLevelCount = fragmentQueue.size();
@@ -700,11 +586,8 @@ public class Fragmenter {
             parent = currentNode.getCurrent();
 
             for (IBond bond : splitableBonds) {
-            	
-            	this.startSplitable = System.currentTimeMillis();
+
             	List<IAtomContainer> parts = splitMolecule(currentFragment, bond);
-                this.endSplitable = System.currentTimeMillis() - this.startSplitable;
-                this.sumSplitableBonds += this.endSplitable;
                                 
                 for (IAtomContainer partContainer : parts) {
                 	//Render.Draw(partContainer, "Round: " + this.nround);
@@ -766,37 +649,6 @@ public class Fragmenter {
     }
 
     
-    /*
-    private boolean fragmentExists(IAtomContainer atomContainer, List<IAtomContainer> fragments) {
-        boolean present = false;
-        for (IAtomContainer f : fragments) {
-            if (identicalAtoms(f, atomContainer)) {
-                present = true;
-                break;
-            }
-        }
-        return present;
-    }
-    
-    private boolean identicalAtoms(IAtomContainer molecule1, IAtomContainer molecule2) {
-        if (molecule1.getBondCount() != molecule2.getBondCount() 
-                && molecule1.getAtomCount() != molecule2.getAtomCount()) {
-            return false;
-        }
-
-        //int natom = molecule1.getAtomCount();
-        int n = 0;
-        for (int i = 0; i < molecule1.getAtomCount(); i++) {
-            for (int j = 0; j < molecule2.getAtomCount(); j++) {
-                if (molecule1.getAtom(i).equals(molecule2.getAtom(j))) {
-                    n++;
-                    break;
-                }
-            }
-        }
-        return n == molecule1.getAtomCount();
-    }
-    */
 
     /**
      * Gets the splitable bonds.
@@ -904,7 +756,7 @@ public class Fragmenter {
                 	List<Double> fragWeightList = new ArrayList<Double>();
 
                 	for (IAtom currentAtom : bond.atoms()) {
-                		this.startTraverse = System.currentTimeMillis();
+
                 		//List with bonds in Ring
             			List<IBond> partRing = new ArrayList<IBond>();
             			//reset the weight because it is computed inside the traverse
@@ -917,10 +769,6 @@ public class Fragmenter {
                 		
                 		bondListList.add(partRing);
                 		fragWeightList.add(this.currentFragWeight);
-                		this.endTraverse = System.currentTimeMillis() - this.startTraverse;
-                        this.sumTraverse += this.endTraverse;
-                        
-                        this.startAtom = System.currentTimeMillis();
                         
                         IAtomContainer temp = makeAtomContainer(currentAtom, partRing);
                         //set the properties again!
@@ -949,9 +797,6 @@ public class Fragmenter {
                         
                         set.add(temp);
                         
-                        this.endAtom = System.currentTimeMillis() - this.startAtom;
-                        this.sumAtom += this.endAtom;
-                        
                 	}
         			
                 	//now maybe add the fragments to the list
@@ -960,34 +805,21 @@ public class Fragmenter {
 	                    //Render.Draw(set.getAtomContainer(j), "");
 	    	            if (set.get(j).getAtomCount() > 0 && set.get(j).getBondCount() > 0 && 
 	    	            		set.get(j).getAtomCount() != atomContainer.getAtomCount())
-	    	            {
-	    	            	this.startMass = System.currentTimeMillis();  
+	    	            { 
 	                		
 	    	            	//now check the current mass
 	    	            	double fragMass = getFragmentMass(set.get(j), fragWeightList.get(j));
 	                		//check the weight of the current fragment
 	    	            	if(!isHeavyEnough(fragMass))
 	                			continue;
-	                		this.endMass = System.currentTimeMillis() - this.startMass;
-	                        this.sumMass += this.endMass;
-	                        
-	    	            	this.startIsomorph = System.currentTimeMillis();   
+
 	        	            //returns true if isomorph
 	    	            	//set the current sum formula
 	    	            	IMolecularFormula fragmentFormula = MolecularFormulaManipulator.getMolecularFormula(set.get(j));
 	    	            	String currentSumFormula = MolecularFormulaManipulator.getString(fragmentFormula);
 	    	            	if(isIdentical(set.get(j), currentSumFormula))
 	        	            	continue;
-	        	            this.endIsomorph = System.currentTimeMillis() - this.startIsomorph;
-	                        this.sumIsomorph += this.endIsomorph;
 	                        
-	                        if(this.neutralLossAdd)
-	                        {
-		                        //now add neutral losses to it
-		                        List<IAtomContainer> fragsNL = AddNeutralLosses(set.get(j), fragmentFormula, false);
-		                        //for now add all fragments to the list TODO
-		                        ret.addAll(fragsNL);
-	                        }
 	                        //add the fragment to the return list
 	    	                ret.add(set.get(j));
 	    	            }     
@@ -1004,19 +836,13 @@ public class Fragmenter {
         	//get the atoms from the splitting bond --> create 2 fragments
         	for (IAtom currentAtom : bond.atoms()) {
         		List<IBond> part = new ArrayList<IBond>();
-        		this.startTraverse = System.currentTimeMillis();
         		//reset the weight because it is computed inside the traverse
     			this.currentFragWeight = 0.0;
     			//initialize new atom list
     	        atomList = new ArrayList<IAtom>();
         		part = traverse(atomContainer, currentAtom, part, bond);
         		bondListList.add(part);        		
-        		this.endTraverse = System.currentTimeMillis() - this.startTraverse;
-                this.sumTraverse += this.endTraverse;
-                
-        		//create Atomcontainer out of bondList
-        		this.startAtom = System.currentTimeMillis(); 
-        		
+
         		IAtomContainer temp = makeAtomContainer(currentAtom, part);
         		//set the properties again!
                 Map<Object, Object> properties = atomContainer.getProperties();
@@ -1036,9 +862,7 @@ public class Fragmenter {
             		temp.addSingleElectron(singleElectron);
                 }
                 set.add(temp);
-                
-        		this.endAtom = System.currentTimeMillis() - this.startAtom;
-                this.sumAtom += this.endAtom;
+               
         	}
             
             
@@ -1050,33 +874,18 @@ public class Fragmenter {
 	            if (set.get(i).getAtomCount() > 0 && set.get(i).getBondCount() > 0 &&
 	            		set.get(i).getAtomCount() != atomContainer.getAtomCount())
 	            {
-	            	this.startMass = System.currentTimeMillis();
-	            	
 	            	//now check the current mass
 	            	double fragMass = getFragmentMass(set.get(i), fragWeightList.get(i));
             		//check the weight of the current fragment
 	            	if(!isHeavyEnough(fragMass))
-            			continue;
-            		this.endMass = System.currentTimeMillis() - this.startMass;
-                    this.sumMass += this.endMass;                   
-                    
-	            	this.startIsomorph = System.currentTimeMillis();   
+            			continue;                  
+
 		            //set the current sum formula
 	            	IMolecularFormula fragmentFormula = MolecularFormulaManipulator.getMolecularFormula(set.get(i));
 	            	String currentSumFormula = MolecularFormulaManipulator.getString(fragmentFormula);
 	            	//returns true if isomorph (fast isomorph check)
 	            	if(isIdentical(set.get(i), currentSumFormula))
 		            	continue;
-		            this.endIsomorph = System.currentTimeMillis() - this.startIsomorph;
-	                this.sumIsomorph += this.endIsomorph;
-	                
-	                if(this.neutralLossAdd)
-                    {
-		                //now add neutral losses to it
-	                    List<IAtomContainer> fragsNL = AddNeutralLosses(set.get(i), fragmentFormula, false);
-	                    //for now add all fragments to the list TODO
-	                    ret.addAll(fragsNL);
-                    }
 	                
 	                ret.add(set.get(i));
 	            }
@@ -1320,7 +1129,7 @@ public class Fragmenter {
     	
     	//if there is already a sum formula from the checks before or isHeavyEnough
     	//get lists of bond list  with the same sum formula
-    	List<IAtomContainer> fragsToCompare = sumformulaToFragMap.get(currentSumFormula);
+    	List<IAtomContainer> fragsToCompare = molformulaToFragMap.get(currentSumFormula);
     	
     	if(smilesRedundancyCheck)
     	{
@@ -1599,17 +1408,17 @@ public class Fragmenter {
     private void addFragmentToListMap(IAtomContainer frag, String currentSumFormula)
     {
     	//add sum formula molecule comb. to map
-        if(sumformulaToFragMap.containsKey(currentSumFormula))
+        if(molformulaToFragMap.containsKey(currentSumFormula))
         {
-        	List<IAtomContainer> tempList = sumformulaToFragMap.get(currentSumFormula);
+        	List<IAtomContainer> tempList = molformulaToFragMap.get(currentSumFormula);
         	tempList.add(frag);
-        	sumformulaToFragMap.put(currentSumFormula, tempList);
+        	molformulaToFragMap.put(currentSumFormula, tempList);
         }
         else
         {
         	List<IAtomContainer> temp = new ArrayList<IAtomContainer>();
         	temp.add(frag);
-        	sumformulaToFragMap.put(currentSumFormula, temp);
+        	molformulaToFragMap.put(currentSumFormula, temp);
         }
     }
     
@@ -1623,18 +1432,18 @@ public class Fragmenter {
     private void addFragmentToListMapReplace(IAtomContainer frag, String currentSumFormula)
     {
     	//add sum formula molecule comb. to map
-        if(sumformulaToFragMap.containsKey(currentSumFormula))
+        if(molformulaToFragMap.containsKey(currentSumFormula))
         {
-        	List<IAtomContainer> tempList = sumformulaToFragMap.get(currentSumFormula);
+        	List<IAtomContainer> tempList = molformulaToFragMap.get(currentSumFormula);
         	tempList.clear();
         	tempList.add(frag);
-        	sumformulaToFragMap.put(currentSumFormula, tempList);
+        	molformulaToFragMap.put(currentSumFormula, tempList);
         }
         else
         {
         	List<IAtomContainer> temp = new ArrayList<IAtomContainer>();
         	temp.add(frag);
-        	sumformulaToFragMap.put(currentSumFormula, temp);
+        	molformulaToFragMap.put(currentSumFormula, temp);
         }
     }
     
@@ -1678,9 +1487,9 @@ public class Fragmenter {
     {
     	peakSumFormulaTable = new Vector<HashMap<String,Integer>>();
     	
-    	for (int i = 0; i < this.sumFormulas.size(); i++) {
+    	for (int i = 0; i < this.molecularFormulas.size(); i++) {
     		
-    		String formula = MolecularFormulaManipulator.getString(this.sumFormulas.getMolecularFormula(i));
+    		String formula = MolecularFormulaManipulator.getString(this.molecularFormulas.getMolecularFormula(i));
             String[] elementArray = formula.split("[0-9]+");
             String[] intArray1 = formula.split("[A-Z]+");
             String[] intArray = new String[intArray1.length -1];
@@ -1940,178 +1749,6 @@ public class Fragmenter {
 			bond.setStereo(stereo.NONE);
 		}    	
     	return mol;
-    }
+    }  
 
-    
-    /**
-     * Adds the neutral losses but only where it possibly explaines a peak.
-     * Properties to be set seperated by ",", each column is one "entry":
-     * <ul>
-     * <li>Neutral loss list: elemental composition (-H2O,-HCOOH,CO2)
-     * <li>Neutral loss masses (18.01056, 46.00548, 43.98983)
-     * <li>Hydrogen difference (-H,-H,+H)
-     * <li>Current fragment mass...a single value (147.0232)
-     * </ul>
-     * 
-     * @param fragment the fragment
-     * @param fragmentFormula the fragment formula
-     * @param initialMolecule the initial molecule only important for the start
-     * 
-     * @return the list< i atom container>
-     * 
-     * @throws IOException Signals that an I/O exception has occurred.
-     * @throws CloneNotSupportedException the clone not supported exception
-     * @throws CDKException the CDK exception
-     */
-    private List<IAtomContainer> AddNeutralLosses(IAtomContainer fragment, IMolecularFormula fragmentFormula, boolean initialMolecule) throws IOException, CloneNotSupportedException, CDKException
-    {
-    	List<IAtomContainer> ret = new ArrayList<IAtomContainer>();
-    	double mass = MolecularFormulaTools.getMonoisotopicMass(fragmentFormula);
-    	Map<String, Double> originalFormulaMap = MolecularFormulaTools.parseFormula(fragmentFormula);
-    	boolean checked = false;
-    	
-    	//in the first layer add all neutral losses!!! afterwards only if it matches a peak!
-    	for (Peak peak : peakList) {
-    		
-    		if(initialMolecule && checked)
-    			break;
-    		
-    		double peakLow = peak.getMass() - this.mzabs - PPMTool.getPPMDeviation(peak.getMass(), this.mzppm);
-            double peakHigh = peak.getMass() + this.mzabs + PPMTool.getPPMDeviation(peak.getMass(), this.mzppm);
-    		checked = true;
-    		
-    		for (Double neutralLossMass : this.neutralLoss.keySet()) {
-        		//filter appropriate neutral losses by mode...0 means this occurs in both modes
-        		if(this.neutralLoss.get(neutralLossMass).getMode() == mode || this.neutralLoss.get(neutralLossMass).getMode() == 0)
-        		{
-        			IMolecularFormula neutralLossFormula = this.neutralLoss.get(neutralLossMass).getElementalComposition();
-        			boolean isPossibleNeutralLoss = MolecularFormulaTools.isPossibleNeutralLoss(originalFormulaMap, neutralLossFormula);
-        			double protonMass = Constants.PROTON_MASS * mode;
-        				
-    				if((isPossibleNeutralLoss && ((mass+protonMass)-neutralLossMass) >= peakLow && (((mass+protonMass)-neutralLossMass) <= peakHigh)) || initialMolecule)
-    				{
-    					List<IAtomContainer> fragmentsNL = pp.postProcess(fragment, neutralLossMass);
-    					for (IAtomContainer fragmentNL : fragmentsNL) {
-    						
-    						IMolecularFormula fragmentMolFormula = MolecularFormulaManipulator.getMolecularFormula(fragmentNL);
-    						Double fragmentMass = MolecularFormulaTools.getMonoisotopicMass(fragmentMolFormula);
-    						    						
-    						//skip this fragment which is lighter than the smallest peak
-    						if(fragmentMass < minWeight)
-    							continue;
-    						
-	    					//add neutral loss elemental composition to atomcontainer
-//	    					fragmentNL.setProperty("NlElementalComposition", AddToProperty((String)fragmentNL.getProperty("NlElementalComposition"), MolecularFormulaManipulator.getString(neutralLossFormula)));
-//	    					//add neutral loss mass
-//	    					fragmentNL.setProperty("NlMass", AddToProperty((String)fragmentNL.getProperty("NlMass"), neutralLossMass.toString()));
-//	    					//set H difference
-//	    					fragmentNL.setProperty("NlHydrogenDifference", AddToProperty((String)fragmentNL.getProperty("NlHydrogenDifference"), "" + this.neutralLoss.get(neutralLossMass).getHydrogenDifference()));
-//	    					//set current Fragment mass
-//	    					//fragmentNL.setProperty("FragmentMass", ReplaceMassProperty((String)fragmentNL.getProperty("FragmentMass"), fragmentFormula, neutralLossFormula));
-//	    					IMolecularFormula formulaFragment = MolecularFormulaManipulator.getMolecularFormula(fragmentNL);
-//	    					fragmentNL.setProperty("FragmentMass", MolecularFormulaTools.getMonoisotopicMass(formulaFragment));
-	    					//set bond energy
-	    					fragmentNL = setBondEnergy(fragment, fragmentNL, 500.0);
-	    					//set partial charge diff to 0
-	    					fragmentNL = setCharge(fragmentNL, 0.0);
-	    					
-	    					
-	    					Map<Object, Object> props = fragmentNL.getProperties();
-	    					props.put("NeutralLossRule", MolecularFormulaManipulator.getString(neutralLossFormula));
-	    					
-	    					if(smilesRedundancyCheck)
-	    					{
-	    						SmilesGenerator sg = new SmilesGenerator();
-		    					IMolecule fragNLMol = new Molecule(fragmentNL);
-		    					String smiles = sg.createSMILES(fragNLMol);
-		    					props.put("smiles", smiles);
-	    					}
-	    					
-	    					addFragmentToListMap(fragmentNL, MolecularFormulaManipulator.getString(fragmentMolFormula));
-	    					
-	    					//add to result list
-	    					ret.add(fragmentNL);
-						}
-    					//peak found....test another one
-    					continue;
-    				}
-        		}
-        	}
-		}
-    	return ret;
-    }
-    
-     
-    
-    /**
-	 * Gets the neutral losses which are stored in a file.
-	 * 
-	 * @return the neutral losses
-	 */
-	private Map<Double, NeutralLoss> ReadInNeutralLosses()
-	{
-		neutralLoss = new HashMap<Double, NeutralLoss>();
-		try 
-        {	
-			String file = "";
-        	if(System.getProperty("property.file.path") != null)
-        	{
-        		file = System.getProperty("property.file.path");
-        		file += "neutralLoss.csv";
-        	}
-        	else
-        	{
-        		URL url = AssignFragmentPeak.class.getClassLoader().getResource("neutralLoss.csv");
-    			file = url.getFile();
-        		//System.out.println("Pfad: " + url.getFile());
-        	}
-        	FileInputStream fstream = new FileInputStream(new File(file));
-    	    // Get the object of DataInputStream
-    	    DataInputStream in = new DataInputStream(fstream);
-    	    BufferedReader br = new BufferedReader(new InputStreamReader(in));
-    	    String strLine;
-    	    boolean first = true;
-    	    //Read File Line By Line
-    	    while ((strLine = br.readLine()) != null)   {
-    	    	//skip header
-    	    	if(first)
-    	    	{
-    	    		first = false;
-    	    		continue;
-    	    	}
-    	      if(strLine.equals("//"))
-    	    	  break;
-    	      
-    	      if(strLine.startsWith("#"))
-    	    	  continue;
-    	      
-    	      String[] lineArray = strLine.split("\t");
-    	      IMolecularFormula formula = new MolecularFormula();
-    	      int mode = 1;
-    	      //positive and negative mode
-    	      if(lineArray[0].equals("+ -"))
-    	    	  mode = 0;
-    	      //negative mode
-    	      else if(lineArray[0].equals("-"))
-    	    	  mode = -1;
-    	      
-    	      IMolecularFormula mfT = new MolecularFormula();
-    	      IMolecularFormula mfE = new MolecularFormula();
-    	      NeutralLoss nl = new NeutralLoss(MolecularFormulaManipulator.getMolecularFormula(lineArray[3], mfE), MolecularFormulaManipulator.getMolecularFormula(lineArray[2], mfT), mode, Integer.parseInt(lineArray[4]), Integer.parseInt(lineArray[5]), lineArray[6], Integer.parseInt(lineArray[7]));
-    	      double deltaM = Double.parseDouble(lineArray[1]);
-    	      neutralLoss.put(deltaM, nl);
-    	      //System.out.println("Bond: '" + bond + "' Energy: '" + energy + "'");
-    	    }
-    	    //Close the input stream
-    	    in.close();
-        } 
-        catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-        }
-        
-        return neutralLoss;
-	}
 }

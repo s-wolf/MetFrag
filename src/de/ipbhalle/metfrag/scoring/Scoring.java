@@ -20,33 +20,20 @@
 */
 package de.ipbhalle.metfrag.scoring;
 
-import java.io.BufferedReader;
-import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
-import org.openscience.cdk.formula.MolecularFormula;
-import org.openscience.cdk.interfaces.IMolecularFormula;
-import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
-
 import de.ipbhalle.metfrag.fragmenter.Fragmenter;
 import de.ipbhalle.metfrag.fragmenter.NeutralLoss;
 import de.ipbhalle.metfrag.massbankParser.Peak;
-import de.ipbhalle.metfrag.massbankParser.Spectrum;
-import de.ipbhalle.metfrag.spectrum.PeakMolPair;
+import de.ipbhalle.metfrag.spectrum.MatchedFragment;
 import de.ipbhalle.metfrag.spectrum.WrapperSpectrum;
 
 
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class Scoring.
  * f(X) = sum i = 1 to n ( (I_n/ I_g) * p_N)
@@ -98,7 +85,7 @@ public class Scoring {
 	 * 
 	 * @param hits the hits
 	 */
-	public double computeScoringPeakMolPair(Vector<PeakMolPair> hits)
+	public double computeScoringPeakMolPair(Vector<MatchedFragment> hits)
 	{
 		double score = 0.0;
 
@@ -119,7 +106,7 @@ public class Scoring {
 	 * 
 	 * @return the double
 	 */
-	public double computeScoringWithBondEnergies(Vector<PeakMolPair> hits)
+	public double computeScoringWithBondEnergies(Vector<MatchedFragment> hits)
 	{
 		double score = 0.0;
 		this.scoreBondEnergy = 0.0;
@@ -129,7 +116,7 @@ public class Scoring {
 			//W = [Peak intensity]^m * [Mass]^n
 			score += Math.pow(this.mzToIntensity.get(hits.get(i).getPeak().getMass()), 0.6) * Math.pow(hits.get(i).getPeak().getMass(),3);
 			
-			String bondEnergies = (String)hits.get(i).getFragment().getProperty("BondEnergy");
+			String bondEnergies = (String)hits.get(i).getFragmentStructure().getProperty("BondEnergy");
 			scoreBondEnergy = Fragmenter.getCombinedEnergy(bondEnergies);
 			
 			
@@ -139,7 +126,7 @@ public class Scoring {
 			penalty += (hits.get(i).getHydrogenPenalty() * 100);
 						
 			//add new entry to optimization matrix
-			this.optimizationMatrixEntries.add(new OptimizationMatrixEntry(candidateID, hits.get(i).getPeak().getMass(), hits.get(i).getPeak().getIntensity(), (String)hits.get(i).getFragment().getProperty("BondEnergy"), hits.get(i).getHydrogenPenalty(), hits.get(i).getPartialChargeDiff()));
+			this.optimizationMatrixEntries.add(new OptimizationMatrixEntry(candidateID, hits.get(i).getPeak().getMass(), hits.get(i).getPeak().getIntensity(), (String)hits.get(i).getFragmentStructure().getProperty("BondEnergy"), hits.get(i).getHydrogenPenalty(), hits.get(i).getPartialChargeDiff()));
 			
 		}
 
@@ -155,7 +142,7 @@ public class Scoring {
 	 * 
 	 * @return the double
 	 */
-	public double computeScoringOptimized(Vector<PeakMolPair> hits, double candidateExactMass)
+	public double computeScoringOptimized(Vector<MatchedFragment> hits, double candidateExactMass)
 	{
 		double score = 0.0;
 		double weightedPeaks = 0.0;
@@ -170,7 +157,7 @@ public class Scoring {
 			weightedPeaks += Math.pow(this.mzToIntensity.get(hits.get(i).getPeak().getMass()), 1.150429) * Math.pow(((hits.get(i).getPeak().getMass() / candidateExactMass) * 10), 1.843564);
 			
 			//bond energy
-			String bondEnergies = (String)hits.get(i).getFragment().getProperty("BondEnergy");
+			String bondEnergies = (String)hits.get(i).getFragmentStructure().getProperty("BondEnergy");
 			BDE += Fragmenter.getCombinedEnergy(bondEnergies);
 			
 			//hydrogen penalty

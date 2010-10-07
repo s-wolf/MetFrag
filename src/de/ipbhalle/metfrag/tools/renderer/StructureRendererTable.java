@@ -27,7 +27,7 @@ import java.util.Vector;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.templates.MoleculeFactory;
 
-import de.ipbhalle.metfrag.spectrum.PeakMolPair;
+import de.ipbhalle.metfrag.spectrum.MatchedFragment;
 
 public class StructureRendererTable {
 	
@@ -56,14 +56,14 @@ public class StructureRendererTable {
 	 * @param original the original molecule
 	 * @param List of Fragments
 	 */
-	public static void DrawHits(IAtomContainer original, Vector<PeakMolPair> l, String name) {
+	public static void DrawHits(IAtomContainer original, Vector<MatchedFragment> l, String name) {
 		
 		List<IAtomContainer> containers = new ArrayList<IAtomContainer>();
 		containers.add(original);
 		
 		//add fragments to list
-		for (PeakMolPair frag : l) {
-			containers.add(frag.getFragment());
+		for (MatchedFragment frag : l) {
+			containers.add(frag.getFragmentStructure());
 		}
 		
         

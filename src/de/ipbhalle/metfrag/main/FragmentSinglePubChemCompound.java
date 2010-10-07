@@ -50,7 +50,7 @@ import de.ipbhalle.metfrag.massbankParser.Peak;
 import de.ipbhalle.metfrag.pubchem.PubChemWebService;
 import de.ipbhalle.metfrag.spectrum.AssignFragmentPeak;
 import de.ipbhalle.metfrag.spectrum.CleanUpPeakList;
-import de.ipbhalle.metfrag.spectrum.PeakMolPair;
+import de.ipbhalle.metfrag.spectrum.MatchedFragment;
 import de.ipbhalle.metfrag.spectrum.WrapperSpectrum;
 
 public class FragmentSinglePubChemCompound {
@@ -147,7 +147,7 @@ public class FragmentSinglePubChemCompound {
 		//clean up peak list
 		CleanUpPeakList cList = new CleanUpPeakList((Vector<Peak>) peakListParsed.clone());
 		Vector<Peak> cleanedPeakList = cList.getCleanedPeakList(spectrum.getExactMass());
-	    Fragmenter fragmenter = new Fragmenter(cleanedPeakList, mzabs, mzppm, 1, true, sumFormulaRedundancyCheck, false, false);     
+	    Fragmenter fragmenter = new Fragmenter(cleanedPeakList, mzabs, mzppm, 1, true, sumFormulaRedundancyCheck, false);     
 	    List<IAtomContainer> l = null;
 	    try
 	    {
@@ -165,14 +165,14 @@ public class FragmentSinglePubChemCompound {
 		AssignFragmentPeak afp = new AssignFragmentPeak();
 		afp.setHydrogenTest(true);
 		afp.assignFragmentPeak(fragments, cleanedPeakList, mzabs, mzppm, spectrum.getMode(), true);
-		Vector<PeakMolPair> hits = afp.getHits();
+		Vector<MatchedFragment> hits = afp.getHits();
 		
 		if(isAllFragments())
 			ret = fragments;
 		else
 		{
-			for (PeakMolPair peakMolPair : hits) {
-				ret.add(peakMolPair.getFragment());
+			for (MatchedFragment peakMolPair : hits) {
+				ret.add(peakMolPair.getFragmentStructure());
 			}
 		}
 		

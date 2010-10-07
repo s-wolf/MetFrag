@@ -88,7 +88,7 @@ public class Test {
 	        //COOH to CO2
 //	        SMARTSQueryTool querytool = new SMARTSQueryTool("[H][O][#6]=[O]");
 	        
-	        //COOH to CO2
+	        //COOH to HCOOH
 //	        SMARTSQueryTool querytool = new SMARTSQueryTool("[H][O][#6]([#6][H])=[O]");
 //	        SMARTSQueryTool querytool = new SMARTSQueryTool("[H][O][#6]([#6][#6][H])=[O]");
 //	        SMARTSQueryTool querytool = new SMARTSQueryTool("[H][O][#6]([#6][#6][#6][H])=[O]");
