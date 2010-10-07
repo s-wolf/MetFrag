@@ -214,7 +214,7 @@ public class MetFrag {
 
 		//write results file
 		try {
-			SDFWriter writer = new SDFWriter(new FileWriter(new File(outputFile + "metfrag" + "_" + database + ".sdf")));
+			SDFWriter writer = new SDFWriter(new FileWriter(new File(outputFile + "metfrag" + "_" + database + "_" + spectrum.getFilename() +".sdf")));
 			writer.write(setOfMolecules);
 			writer.close();
 		} catch (CDKException e) {
