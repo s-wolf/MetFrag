@@ -61,6 +61,7 @@ public class Config {
     private boolean neutralLossAdd = false;
     private boolean bondEnergyScoring = false;
     private boolean isOnlyBreakSelectedBonds = false;
+    private int maximumNeutralLossCombination = 3;
 	
 	/**
 	 * Instantiates a new config.
@@ -216,6 +217,9 @@ public class Config {
 		
 		if(properties.getProperty("breakOnlySelectedBonds") != null && properties.getProperty("breakOnlySelectedBonds").equals("true"))
 			setOnlyBreakSelectedBonds(isOnlyBreakSelectedBonds);
+		
+		
+		setMaximumNeutralLossCombination(Integer.parseInt(properties.getProperty("maximumNeutralLossCombination")));
 	}
 
 	/**
@@ -628,6 +632,15 @@ public class Config {
 
 	public String getJdbcPostgres() {
 		return jdbcPostgres;
+	}
+
+	public void setMaximumNeutralLossCombination(
+			int maximumNeutralLossCombination) {
+		this.maximumNeutralLossCombination = maximumNeutralLossCombination;
+	}
+
+	public int getMaximumNeutralLossCombination() {
+		return maximumNeutralLossCombination;
 	}
 
 }

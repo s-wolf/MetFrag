@@ -63,6 +63,7 @@ import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 
 import de.ipbhalle.metfrag.spectrum.AssignFragmentPeak;
+import de.ipbhalle.metfrag.spectrum.NeutralLoss;
 
 public class PostProcess {
 	

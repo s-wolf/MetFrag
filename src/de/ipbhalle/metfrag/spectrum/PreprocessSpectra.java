@@ -436,7 +436,7 @@ public class PreprocessSpectra {
 	
 	public static void main(String[] args) {
 //		String folder = "/home/swolf/MassBankData/MetFragSunGrid/BrukerRawData/Processed/";
-		String folder = "/home/swolf/MassBankData/MetFragSunGrid/RikenDataMergedCorrect/";
+		String folder = "/home/swolf/MassBankData/TestSpectra/Riken/";
 //		String folder = "/home/swolf/test/";
 		PreprocessSpectra pps = new PreprocessSpectra();
 		pps.preprocessUnsorted(folder, 0.002, 10);

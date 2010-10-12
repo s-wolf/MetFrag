@@ -26,7 +26,6 @@ import java.util.List;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IMolecularFormula;
 
-import de.ipbhalle.metfrag.fragmenter.NeutralLoss;
 import de.ipbhalle.metfrag.massbankParser.Peak;
 
 public class MatchedFragment {
@@ -35,11 +34,11 @@ public class MatchedFragment {
 	private double fragmentMass;
 	private double matchedMass;
 	private IAtomContainer fragmentStructure;
-	private List<NeutralLoss> neutralLosses;
+	private NeutralLoss[] neutralLosses;
 	private IMolecularFormula molecularFormula;
 	private String molecularFormulaString;
 	private int hydrogenPenalty;
-	private String partialChargeDiff;
+	private Double partialChargeDiff;
 	
 	/**
 	 * Instantiates a new matched fragment.
@@ -51,7 +50,7 @@ public class MatchedFragment {
 	 * @param hydrogenPenalty the hydrogen penalty
 	 * @param partialChargeDiff the partial charge diff
 	 */
-	public MatchedFragment(Peak peak, double fragmentMass, double matchedMass, IAtomContainer fragmentStructure, List<NeutralLoss> neutralLosses, int hydrogenPenalty, String partialChargeDiff, String molecularFormulaString)
+	public MatchedFragment(Peak peak, double fragmentMass, double matchedMass, IAtomContainer fragmentStructure, NeutralLoss[] neutralLosses, int hydrogenPenalty, Double partialChargeDiff, String molecularFormulaString)
 	{
 		setFragmentMass(fragmentMass);
 		setPeakMass(peak);
@@ -62,7 +61,7 @@ public class MatchedFragment {
 		setMolecularFormulaString(molecularFormulaString);
 	}
 
-	public void setNeutralLosses(List<NeutralLoss> neutralLoss) {
+	public void setNeutralLosses(NeutralLoss[] neutralLoss) {
 		this.neutralLosses = neutralLoss;
 	}
 
@@ -71,7 +70,7 @@ public class MatchedFragment {
 	 *
 	 * @return the neutral loss
 	 */
-	public List<NeutralLoss> getNeutralLosses() {
+	public NeutralLoss[] getNeutralLosses() {
 		return neutralLosses;
 	}
 
@@ -140,7 +139,7 @@ public class MatchedFragment {
 		return molecularFormula;
 	}
 
-	public void setPartialChargeDiff(String partialChargeDiff) {
+	public void setPartialChargeDiff(Double partialChargeDiff) {
 		this.partialChargeDiff = partialChargeDiff;
 	}
 
@@ -149,7 +148,7 @@ public class MatchedFragment {
 	 *
 	 * @return the partial charge difference
 	 */
-	public String getPartialChargeDiff() {
+	public Double getPartialChargeDiff() {
 		return partialChargeDiff;
 	}
 

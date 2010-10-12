@@ -40,7 +40,6 @@ import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IMolecularFormula;
 import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 
-import de.ipbhalle.metfrag.fragmenter.NeutralLoss;
 import de.ipbhalle.metfrag.massbankParser.Peak;
 
 public class NeutralLossCheck {
@@ -384,6 +383,17 @@ public class NeutralLossCheck {
 	}
 
 
+	/**
+	 * Gets the neutral loss combinations.
+	 * 
+	 * The outer list contains the "layers" (e.g. the first layer are all neutral loss rules alone, 
+	 * the second are combinations of 2 neutral loss rules)
+	 * 
+	 * The containing list contains the array of neutral losses.
+	 * 
+	 *
+	 * @return the neutral loss combinations
+	 */
 	public List<List<NeutralLoss[]>> getNeutralLossCombinations() {
 		return neutralLossCombinations;
 	}

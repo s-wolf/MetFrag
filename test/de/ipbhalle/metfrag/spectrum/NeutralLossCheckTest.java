@@ -27,7 +27,6 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
-import de.ipbhalle.metfrag.fragmenter.NeutralLoss;
 
 public class NeutralLossCheckTest {
 	

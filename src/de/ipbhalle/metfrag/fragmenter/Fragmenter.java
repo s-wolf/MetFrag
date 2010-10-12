@@ -1161,9 +1161,9 @@ public class Fragmenter {
 	    			if(partialChargesPreferred)
 	    			{
 	    				//now replace fragment if its "bond energy is less"
-			    		double partialChargeDiff = getCombinedEnergy((String)fragment.getProperty("PartialChargeDiff"));
+			    		double partialChargeDiff = MoleculeTools.getCombinedEnergy((String)fragment.getProperty("PartialChargeDiff"));
 			    		for (IAtomContainer atomContainer : fragsToCompare) {
-							if(getCombinedEnergy((String)atomContainer.getProperty("PartialChargeDiff")) < partialChargeDiff )
+							if(MoleculeTools.getCombinedEnergy((String)atomContainer.getProperty("PartialChargeDiff")) < partialChargeDiff )
 							{
 								addFragmentToListMapReplace(fragment, currentSumFormula);
 							}
@@ -1172,9 +1172,9 @@ public class Fragmenter {
 	    			else
 	    			{
 	    				//now replace fragment if its "bond energy is less"
-			    		double bondEnergy = getCombinedEnergy((String)fragment.getProperty("BondEnergy"));
+			    		double bondEnergy = MoleculeTools.getCombinedEnergy((String)fragment.getProperty("BondEnergy"));
 			    		for (IAtomContainer atomContainer : fragsToCompare) {
-							if(getCombinedEnergy((String)atomContainer.getProperty("BondEnergy")) > bondEnergy )
+							if(MoleculeTools.getCombinedEnergy((String)atomContainer.getProperty("BondEnergy")) > bondEnergy )
 							{
 								addFragmentToListMapReplace(fragment, currentSumFormula);
 							}
@@ -1195,30 +1195,7 @@ public class Fragmenter {
     	return isomorph;
     }
     
-    
-    /**
-     * Gets the combined bond energy because the property stores every single energy in a list.
-     * 
-     * @param energyString the bond energy string
-     * 
-     * @return the combined bond energy
-     */
-    public static Double getCombinedEnergy(String energyString)
-    {
-    	double bondEnergy = 0.0;
-    	
-    	String[] arr1 = energyString.split(";");
-    	for (int i = 0; i < arr1.length; i++) {
-			String[] arr2 = arr1[i].split(",");
-			for (int j = 0; j < arr2.length; j++) {
-				bondEnergy += Double.parseDouble(arr2[j]);
-			}
-		}
-    	
-    	return bondEnergy;
-    }
-    
-    
+
     /**
      * Checks if two molecules are isomorph.
      * 

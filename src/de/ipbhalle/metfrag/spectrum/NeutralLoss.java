@@ -18,21 +18,11 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *
 */
-package de.ipbhalle.metfrag.fragmenter;
+package de.ipbhalle.metfrag.spectrum;
 
-import java.io.BufferedReader;
-import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IIsotope;
 import org.openscience.cdk.interfaces.IMolecularFormula;
 

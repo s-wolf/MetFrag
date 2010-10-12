@@ -27,9 +27,9 @@ import java.util.Map;
 import java.util.Vector;
 
 import de.ipbhalle.metfrag.fragmenter.Fragmenter;
-import de.ipbhalle.metfrag.fragmenter.NeutralLoss;
 import de.ipbhalle.metfrag.massbankParser.Peak;
 import de.ipbhalle.metfrag.spectrum.MatchedFragment;
+import de.ipbhalle.metfrag.spectrum.NeutralLoss;
 import de.ipbhalle.metfrag.spectrum.WrapperSpectrum;
 
 
