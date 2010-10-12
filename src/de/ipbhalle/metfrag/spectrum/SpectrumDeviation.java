@@ -69,7 +69,7 @@ public class SpectrumDeviation {
 				try
 				{
 					System.out.println("Process: " + files[i].toString());
-					result = MetFrag.startConvenienceWithStructure(database, idToStructure.get(Integer.toString(spectrum.getCID())), Integer.toString(spectrum.getCID()), "", spectrum.getExactMass(), new WrapperSpectrum(files[i].toString()), false, mzabs, mzppm, 0.0, true, true, 2, true, false, true, false, Integer.MAX_VALUE, true);
+					result = MetFrag.startConvenienceWithStructure(database, idToStructure.get(Integer.toString(spectrum.getCID())), Integer.toString(spectrum.getCID()), "", spectrum.getExactMass(), new WrapperSpectrum(files[i].toString()), false, mzabs, mzppm, 0.0, true, true, 2, true, false, true, false, Integer.MAX_VALUE, true, 3);
 				}
 				catch (Exception e)
 				{
@@ -88,7 +88,7 @@ public class SpectrumDeviation {
 				}
 					
 				
-				for (PeakMolPair explainedPeak : result.get(0).getFragments()) {
+				for (MatchedFragment explainedPeak : result.get(0).getFragments()) {
 					System.out.println("Measured Peak: " + explainedPeak.getMatchedMass() + "(Mass: " + explainedPeak.getPeak().getMass() + ")");
 					deviations.add(Math.abs(PPMTool.getPPMWeb(explainedPeak.getMatchedMass(), explainedPeak.getPeak().getMass())));
 				}

@@ -151,7 +151,7 @@ public class FragmenterTest {
 		AssignFragmentPeak afp = new AssignFragmentPeak();
 		afp.setHydrogenTest(false);
 		try {
-			afp.assignFragmentPeak(l, cleanedPeakList, mzabs, mzppm, spectrum.getMode(), false);
+			afp.assignFragmentPeak(l, cleanedPeakList, mzabs, mzppm, spectrum.getMode(), false, 3);
 		} catch (CDKException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -188,7 +188,7 @@ public class FragmenterTest {
 		AssignFragmentPeak afp = new AssignFragmentPeak();
 		afp.setHydrogenTest(true);
 		try {
-			afp.assignFragmentPeak(l, cleanedPeakList, mzabs, mzppm, spectrum.getMode(), false);
+			afp.assignFragmentPeak(l, cleanedPeakList, mzabs, mzppm, spectrum.getMode(), false, 3);
 		} catch (CDKException e) {
 			e.printStackTrace();
 		} catch (IOException e) {

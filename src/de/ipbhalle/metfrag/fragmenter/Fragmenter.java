@@ -471,7 +471,7 @@ public class Fragmenter {
                 	
                 	//Render.Draw(partContainer, "Round: " + this.nround);
                     fragmentQueue.offer(new Node(globalCount, parent, partContainer, treeDepth));
-                    fragmentsReturn.add(writeMoleculeToTemp(partContainer, identifier, globalCount, (String)partContainer.getProperty("BondEnergy"), treeDepth));                    
+                    fragmentsReturn.add(writeMoleculeToTemp(partContainer, identifier, globalCount, (String)partContainer.getProperty("BondEnergy"), treeDepth, (String)partContainer.getProperty("PartialChargeDiff")));                    
                     globalCount++;
                     int parentPP = globalCount - 1;
                 }
@@ -1689,7 +1689,7 @@ public class Fragmenter {
      * @throws IOException Signals that an I/O exception has occurred.
      * @throws CDKException the CDK exception
      */
-    private File writeMoleculeToTemp(IAtomContainer mol, String identifier, int globalCount, String bondEnergy, Integer treeDepth) throws IOException, CDKException
+    private File writeMoleculeToTemp(IAtomContainer mol, String identifier, int globalCount, String bondEnergy, Integer treeDepth, String partialChargeDiff) throws IOException, CDKException
     {
     	File temp = File.createTempFile(identifier + "_" + globalCount, ".sdf");
         // Delete temp file when program exits.
@@ -1705,6 +1705,7 @@ public class Fragmenter {
         test.setProperties(props);
         test.setProperty("BondEnergy", bondEnergy);
         test.setProperty("TreeDepth", treeDepth.toString());
+        test.setProperty("PartialChargeDiff", partialChargeDiff);
         mw.write(test);
         mw.close();
         

@@ -122,7 +122,7 @@ public class MetFrag {
 		for (int c = 0; c < candidates.size(); c++) {				
 			threadExecutor.execute(new FragmenterThread(candidates.get(c), database, pubchem, spectrum, config.getMzabs(), config.getMzppm(), 
 					config.isSumFormulaRedundancyCheck(), config.isBreakAromaticRings(), config.getTreeDepth(), false, config.isHydrogenTest(), config.isNeutralLossAdd(), 
-					config.isBondEnergyScoring(), config.isOnlyBreakSelectedBonds(), config, false));		
+					config.isBondEnergyScoring(), config.isOnlyBreakSelectedBonds(), config, false, config.getMaximumNeutralLossCombination()));		
 		}
 		
 		threadExecutor.shutdown();
@@ -258,7 +258,7 @@ public class MetFrag {
 	 */
 	public static List<MetFragResult> startConvenience(String database, String databaseID, String molecularFormula, Double exactMass, WrapperSpectrum spectrum, boolean useProxy, 
 			double mzabs, double mzppm, double searchPPM, boolean molecularFormulaRedundancyCheck, boolean breakAromaticRings, int treeDepth,
-			boolean hydrogenTest, boolean neutralLossInEveryLayer, boolean bondEnergyScoring, boolean breakOnlySelectedBonds, int limit, boolean isStoreFragments) throws Exception
+			boolean hydrogenTest, boolean neutralLossInEveryLayer, boolean bondEnergyScoring, boolean breakOnlySelectedBonds, int limit, boolean isStoreFragments, int maxNeutralLossCombination) throws Exception
 	{
 		results = new FragmenterResult();
 		PubChemWebService pubchem = new PubChemWebService();
@@ -280,7 +280,7 @@ public class MetFrag {
 			
 			threadExecutor.execute(new FragmenterThread(candidates.get(c), database, pubchem, spectrum, mzabs, mzppm, 
 					molecularFormulaRedundancyCheck, breakAromaticRings, treeDepth, false, hydrogenTest, neutralLossInEveryLayer, 
-					bondEnergyScoring, breakOnlySelectedBonds, null, false));		
+					bondEnergyScoring, breakOnlySelectedBonds, null, false, maxNeutralLossCombination));		
 		}
 		
 		threadExecutor.shutdown();
@@ -350,7 +350,7 @@ public class MetFrag {
 	 */
 	public static List<MetFragResult> startConvenienceWithStructure(String database, IAtomContainer candidateStructure, String candidate, String molecularFormula, Double exactMass, WrapperSpectrum spectrum, boolean useProxy, 
 			double mzabs, double mzppm, double searchPPM, boolean molecularFormulaRedundancyCheck, boolean breakAromaticRings, int treeDepth,
-			boolean hydrogenTest, boolean neutralLossInEveryLayer, boolean bondEnergyScoring, boolean breakOnlySelectedBonds, int limit, boolean isStoreFragments) throws Exception
+			boolean hydrogenTest, boolean neutralLossInEveryLayer, boolean bondEnergyScoring, boolean breakOnlySelectedBonds, int limit, boolean isStoreFragments, int maxNeutralLosscombination) throws Exception
 	{
 		
 		results = new FragmenterResult();
@@ -365,7 +365,7 @@ public class MetFrag {
 			
 		threadExecutor.execute(new FragmenterThread(candidateStructure, candidate, database, pubchem, spectrum, mzabs, mzppm, 
 				molecularFormulaRedundancyCheck, breakAromaticRings, treeDepth, false, hydrogenTest, neutralLossInEveryLayer, 
-				bondEnergyScoring, breakOnlySelectedBonds, null, false));		
+				bondEnergyScoring, breakOnlySelectedBonds, null, false, maxNeutralLosscombination));		
 		
 		threadExecutor.shutdown();
 		
@@ -437,7 +437,7 @@ public class MetFrag {
 	 */
 	public static List<MetFragResult> startConvenienceMetFusion(String database, String databaseID, String molecularFormula, Double exactMass, WrapperSpectrum spectrum, boolean useProxy, 
 			double mzabs, double mzppm, double searchPPM, boolean molecularFormulaRedundancyCheck, boolean breakAromaticRings, int treeDepth,
-			boolean hydrogenTest, boolean neutralLossInEveryLayer, boolean bondEnergyScoring, boolean breakOnlySelectedBonds, int limit, String jdbc, String username, String password) throws Exception
+			boolean hydrogenTest, boolean neutralLossInEveryLayer, boolean bondEnergyScoring, boolean breakOnlySelectedBonds, int limit, String jdbc, String username, String password, int maxNeutralLossCombination) throws Exception
 	{
 		
 		results = new FragmenterResult();
@@ -460,7 +460,7 @@ public class MetFrag {
 			
 			threadExecutor.execute(new FragmenterThread(candidates.get(c), database, null, spectrum, mzabs, mzppm, 
 					molecularFormulaRedundancyCheck, breakAromaticRings, treeDepth, false, hydrogenTest, neutralLossInEveryLayer, 
-					bondEnergyScoring, breakOnlySelectedBonds, null, true, jdbc, username, password));		
+					bondEnergyScoring, breakOnlySelectedBonds, null, true, jdbc, username, password, maxNeutralLossCombination));		
 		}
 		
 		threadExecutor.shutdown();
@@ -518,7 +518,7 @@ public class MetFrag {
 	 * 
 	 * @throws Exception the exception
 	 */
-	public static Vector<MatchedFragment> startConvenienceWeb(String peakList, String smiles, int mode, boolean molFormulaRedundancyCheck, double mzabs, double mzppm, int treeDepth) throws Exception
+	public static Vector<MatchedFragment> startConvenienceWeb(String peakList, String smiles, int mode, boolean molFormulaRedundancyCheck, double mzabs, double mzppm, int treeDepth, int maxNeutralLossCombination) throws Exception
 	{
 		SmilesParser sp = new SmilesParser(DefaultChemObjectBuilder.getInstance());
 		//parse smiles
@@ -547,7 +547,7 @@ public class MetFrag {
 		//now find corresponding fragments to the mass
 		AssignFragmentPeak afp = new AssignFragmentPeak();
 		afp.setHydrogenTest(true);
-		afp.assignFragmentPeak(listOfFrags, cleanedPeakList, mzabs, mzppm, spectrum.getMode(), false);
+		afp.assignFragmentPeak(listOfFrags, cleanedPeakList, mzabs, mzppm, spectrum.getMode(), false, maxNeutralLossCombination);
 		Vector<MatchedFragment> hits = afp.getAllHits();
 
 		return sortBackwards(hits);
@@ -611,7 +611,7 @@ public class MetFrag {
 		for (int c = 0; c < candidates.size(); c++) {				
 			threadExecutor.execute(new FragmenterThread(candidates.get(c), database, pubchem, spectrum, config.getMzabs(), config.getMzppm(), 
 					config.isSumFormulaRedundancyCheck(), config.isBreakAromaticRings(), config.getTreeDepth(), false, config.isHydrogenTest(), config.isNeutralLossAdd(), 
-					config.isBondEnergyScoring(), config.isOnlyBreakSelectedBonds(), config, true));		
+					config.isBondEnergyScoring(), config.isOnlyBreakSelectedBonds(), config, true, config.getMaximumNeutralLossCombination()));		
 		}
 		
 		threadExecutor.shutdown();

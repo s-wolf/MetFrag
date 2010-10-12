@@ -31,6 +31,7 @@ import de.ipbhalle.metfrag.massbankParser.Peak;
 import de.ipbhalle.metfrag.spectrum.MatchedFragment;
 import de.ipbhalle.metfrag.spectrum.NeutralLoss;
 import de.ipbhalle.metfrag.spectrum.WrapperSpectrum;
+import de.ipbhalle.metfrag.tools.MoleculeTools;
 
 
 
@@ -117,16 +118,14 @@ public class Scoring {
 			score += Math.pow(this.mzToIntensity.get(hits.get(i).getPeak().getMass()), 0.6) * Math.pow(hits.get(i).getPeak().getMass(),3);
 			
 			String bondEnergies = (String)hits.get(i).getFragmentStructure().getProperty("BondEnergy");
-			scoreBondEnergy = Fragmenter.getCombinedEnergy(bondEnergies);
-			
-			
-			String partialCharges = hits.get(i).getPartialChargeDiff();
-			scoreChargesDiff = Fragmenter.getCombinedEnergy(partialCharges);
+			scoreBondEnergy = MoleculeTools.getCombinedEnergy(bondEnergies);
+
+			scoreChargesDiff = hits.get(i).getPartialChargeDiff();
 			
 			penalty += (hits.get(i).getHydrogenPenalty() * 100);
 						
 			//add new entry to optimization matrix
-			this.optimizationMatrixEntries.add(new OptimizationMatrixEntry(candidateID, hits.get(i).getPeak().getMass(), hits.get(i).getPeak().getIntensity(), (String)hits.get(i).getFragmentStructure().getProperty("BondEnergy"), hits.get(i).getHydrogenPenalty(), hits.get(i).getPartialChargeDiff()));
+			this.optimizationMatrixEntries.add(new OptimizationMatrixEntry(candidateID, hits.get(i).getPeak().getMass(), hits.get(i).getPeak().getIntensity(), (String)hits.get(i).getFragmentStructure().getProperty("BondEnergy"), hits.get(i).getHydrogenPenalty(), (String)hits.get(i).getFragmentStructure().getProperty("PartialChargeDiff")));
 			
 		}
 
@@ -158,17 +157,16 @@ public class Scoring {
 			
 			//bond energy
 			String bondEnergies = (String)hits.get(i).getFragmentStructure().getProperty("BondEnergy");
-			BDE += Fragmenter.getCombinedEnergy(bondEnergies);
+			BDE += MoleculeTools.getCombinedEnergy(bondEnergies);
 			
 			//hydrogen penalty
 			hydrogenPenalty += (hits.get(i).getHydrogenPenalty() * 100);
 			
 			//partial charges diff
-			String partialCharges = hits.get(i).getPartialChargeDiff();
-			partialChargesDiff += Fragmenter.getCombinedEnergy(partialCharges);
+			partialChargesDiff += hits.get(i).getPartialChargeDiff();
 		
 			//add new entry to optimization matrix
-			this.optimizationMatrixEntries.add(new OptimizationMatrixEntry(candidateID, hits.get(i).getPeak().getMass(), hits.get(i).getPeak().getRelIntensity(), bondEnergies, hits.get(i).getHydrogenPenalty(), partialCharges));
+			this.optimizationMatrixEntries.add(new OptimizationMatrixEntry(candidateID, hits.get(i).getPeak().getMass(), hits.get(i).getPeak().getRelIntensity(), bondEnergies, hits.get(i).getHydrogenPenalty(), (String)hits.get(i).getFragmentStructure().getProperty("PartialChargeDiff")));
 			
 		}
 		

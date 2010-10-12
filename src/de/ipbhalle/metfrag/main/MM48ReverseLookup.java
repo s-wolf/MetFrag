@@ -214,7 +214,7 @@ public class MM48ReverseLookup {
     	    		  //now find corresponding fragments to the mass
     	    		  AssignFragmentPeak afp = new AssignFragmentPeak();
     	    		  afp.setHydrogenTest(true);
-    	    		  afp.assignFragmentPeak(fragments, cleanedPeakList, mzabs, mzppm, spectrum.getMode(), true);
+    	    		  afp.assignFragmentPeak(fragments, cleanedPeakList, mzabs, mzppm, spectrum.getMode(), true, 3);
     	    		  Vector<MatchedFragment> hits = afp.getHits();
     	    		  
     	    		  //add to result map

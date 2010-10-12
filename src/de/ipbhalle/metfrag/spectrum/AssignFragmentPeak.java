@@ -101,34 +101,19 @@ public class AssignFragmentPeak {
 							minHydrogenPenalty = matchedFragment.getHydrogenPenalty();
 						}
 					}
-					
 				}
 				
 				//now save this fragment in the list with the best hits
 				for (MatchedFragment matchedFragment : fragmentsMatched) {
 					if(matchedFragment.getPartialChargeDiff() == maxPartialChargeDiff && minHydrogenPenalty == matchedFragment.getHydrogenPenalty())
 					{
-						maxPartialChargeDiff = matchedFragment.getPartialChargeDiff();
+						hits.add(matchedFragment);
+						hitsPeaks.add(this.peakList.get(i).getMass());
 					}
 				}
 				
-				if()
-				{
-					//add hits to list...only 1...check if this found hydrogen penalty is less than the previous found one
-					if(test || hits.lastElement().getPartialChargeDiff() > this.hydrogenPenalty)
-					{
-						//exchange the last element...this is the one with the current peak
-						if(!test && hits.size() > 0 && hits.lastElement().getHydrogenPenalty() > this.hydrogenPenalty)
-							hits.remove(hits.size() - 1);
-						hits.add(new MatchedFragment(acs.get(j),this.peakList.get(i), this.matchedMass, this.molecularFormula, this.hydrogenPenalty, this.partialChargeDiff));
-						hitsPeaks.add(this.peakList.get(i).getMass());
-						test = false;
-					}
-				}
 				hitsAll.addAll(fragmentsMatched);
 
-				
-				
 			}
 		}
 	}
@@ -380,67 +365,6 @@ public class AssignFragmentPeak {
 	}
 	
 	
-	/**
-	 * Match by mass.
-	 * 
-	 * @param ac the ac
-	 * @param peak the peak
-	 * 
-	 * @return true, if successful
-	 * 
-	 * @throws CDKException the CDK exception
-	 * @throws IOException 
-	 */
-	private boolean matchByMass(IAtomContainer ac, double peak, int mode) throws CDKException, IOException
-	{
-		boolean found = false;
-		
-		IMolecularFormula molecularFormula = new MolecularFormula();
-        molecularFormula = MolecularFormulaManipulator.getMolecularFormula(ac, molecularFormula);         
-        double mass = 0.0;
-        //speed up and neutral loss matching!
-        if(ac.getProperty("FragmentMass") != null && ac.getProperty("FragmentMass") != "")
-        	mass = Double.parseDouble(ac.getProperty("FragmentMass").toString());
-        else
-        	mass = MolecularFormulaTools.getMonoisotopicMass(molecularFormula);
-        
-        
-        this.partialChargeDiff = (String)ac.getProperty("PartialChargeDiff");
-        
-        
-        double peakLow = peak - this.mzabs - PPMTool.getPPMDeviation(peak, this.mzppm);
-        double peakHigh = peak + this.mzabs + PPMTool.getPPMDeviation(peak, this.mzppm);
-        double protonMass = Constants.PROTON_MASS * (double)mode;
-        double massToCompare = mass + protonMass;
-        
-        
-        String modeString = (mode > 0) ? " +" : " -";
-        
-        
-        
-        
-        if((massToCompare >= peakLow && massToCompare <= peakHigh))
-        {
-        	found = true;
-        	matchedMass = Math.round(massToCompare*10000.0)/10000.0;
-        	this.hydrogenPenalty = 0;
-        	
-        	if(this.html)
-        		this.molecularFormula = MolecularFormulaManipulator.getHTML(molecularFormula) + modeString + "H";
-        	else
-        		this.molecularFormula = MolecularFormulaManipulator.getString(molecularFormula) + modeString + "H";
-        	
-        }
-        
-        //TODO: now do the neutral loss matching
-        Map<Double, IAtomContainer> 
-        
-        
-        		
-		return found;
-	}
-	
-
 	/**
 	 * Gets the hits.
 	 * 

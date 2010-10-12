@@ -46,6 +46,7 @@ import de.ipbhalle.metfrag.spectrum.AssignFragmentPeak;
 import de.ipbhalle.metfrag.spectrum.CleanUpPeakList;
 import de.ipbhalle.metfrag.spectrum.MatchedFragment;
 import de.ipbhalle.metfrag.spectrum.WrapperSpectrum;
+import de.ipbhalle.metfrag.tools.MoleculeTools;
 
 public class FragmenterThread implements Runnable{
 	
@@ -66,6 +67,7 @@ public class FragmenterThread implements Runnable{
 	private boolean generateFragmentsInMemory = true;
 	private String jdbc, username, password = "";
 	private IAtomContainer candidateStructure = null;
+	private int neutralLossCombination;
 	
 	/**
 	 * Instantiates a new pubChem search thread.
@@ -91,7 +93,7 @@ public class FragmenterThread implements Runnable{
 			WrapperSpectrum spectrum, double mzabs, double mzppm, boolean sumFormulaRedundancyCheck,
 			boolean breakAromaticRings, int treeDepth, boolean showDiagrams, boolean hydrogenTest,
 			boolean neutralLossAdd, boolean bondEnergyScoring, boolean isOnlyBreakSelectedBonds, Config c,
-			boolean generateFragmentsInMemory)
+			boolean generateFragmentsInMemory, int neutralLossCombination)
 	{
 		this.candidate = candidate;
 		this.pw = pw;
@@ -108,6 +110,7 @@ public class FragmenterThread implements Runnable{
 		this.treeDepth = treeDepth;
 		this.c = c;
 		this.generateFragmentsInMemory = generateFragmentsInMemory;
+		this.neutralLossCombination = neutralLossCombination;
 	}
 	
 	
@@ -115,7 +118,7 @@ public class FragmenterThread implements Runnable{
 			WrapperSpectrum spectrum, double mzabs, double mzppm, boolean sumFormulaRedundancyCheck,
 			boolean breakAromaticRings, int treeDepth, boolean showDiagrams, boolean hydrogenTest,
 			boolean neutralLossAdd, boolean bondEnergyScoring, boolean isOnlyBreakSelectedBonds, Config c,
-			boolean generateFragmentsInMemory)
+			boolean generateFragmentsInMemory, int neutralLossCombination)
 	{
 		this.candidate = candidate;
 		this.pw = pw;
@@ -133,6 +136,7 @@ public class FragmenterThread implements Runnable{
 		this.c = c;
 		this.generateFragmentsInMemory = generateFragmentsInMemory;
 		this.candidateStructure = candidateStructure;
+		this.neutralLossCombination = neutralLossCombination;
 	}
 	
 	
@@ -160,7 +164,7 @@ public class FragmenterThread implements Runnable{
 			WrapperSpectrum spectrum, double mzabs, double mzppm, boolean sumFormulaRedundancyCheck,
 			boolean breakAromaticRings, int treeDepth, boolean showDiagrams, boolean hydrogenTest,
 			boolean neutralLossAdd, boolean bondEnergyScoring, boolean isOnlyBreakSelectedBonds, Config c,
-			boolean generateFragmentsInMemory, String jdbc, String username, String password)
+			boolean generateFragmentsInMemory, String jdbc, String username, String password, int neutralLossCombination)
 	{
 		this.candidate = candidate;
 		this.pw = pw;
@@ -179,6 +183,7 @@ public class FragmenterThread implements Runnable{
 		this.username = username;
 		this.password = password;
 		this.jdbc = jdbc;
+		this.neutralLossCombination = neutralLossCombination;
 	}
 	
 	
@@ -269,7 +274,7 @@ public class FragmenterThread implements Runnable{
 				//now find corresponding fragments to the mass
 				AssignFragmentPeak afp = new AssignFragmentPeak();
 				afp.setHydrogenTest(hydrogenTest);
-				afp.assignFragmentPeak(l, cleanedPeakList, mzabs, mzppm, spectrum.getMode(), false);
+				afp.assignFragmentPeak(l, cleanedPeakList, mzabs, mzppm, spectrum.getMode(), false, neutralLossCombination);
 				Vector<MatchedFragment> hits = afp.getHits();
 				
 				
@@ -335,8 +340,8 @@ public class FragmenterThread implements Runnable{
 				String peaks = "";
 				Double bondEnergy = 0.0;
 				for (int i = 0; i < hits.size(); i++) {
-					bondEnergy += Fragmenter.getCombinedEnergy((String)hits.get(i).getFragmentStructure().getProperty("BondEnergy"));
-					peaks += hits.get(i).getPeak().getMass() + "[" + hits.get(i).getFragmentStructure().getProperty("BondEnergy") + "]" +  " ";
+					bondEnergy += MoleculeTools.getCombinedEnergy((String)hits.get(i).getFragmentStructure().getProperty("BondEnergy"));
+					peaks += hits.get(i).getPeak().getMass() + "[" + hits.get(i).getFragmentStructure().getProperty("BondEnergy") + ", " + hits.get(i).getPartialChargeDiff() + "]" +  " ";
 				}
 				
 
