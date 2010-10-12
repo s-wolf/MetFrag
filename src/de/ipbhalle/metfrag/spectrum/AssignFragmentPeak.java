@@ -88,6 +88,30 @@ public class AssignFragmentPeak {
 				//matched peak
 				List<MatchedFragment> fragmentsMatched = matchPeak(this.acs.get(j), this.peakList.get(i), mode, neutralLossCombination);
 				
+				//now find the best hit for the peak
+				//loop over every matched fragment and find the largest partial charge difference
+				double maxPartialChargeDiff = 0.0;
+				int minHydrogenPenalty = 10;
+				for (MatchedFragment matchedFragment : fragmentsMatched) {
+					if(matchedFragment.getPartialChargeDiff() > maxPartialChargeDiff)
+					{
+						maxPartialChargeDiff = matchedFragment.getPartialChargeDiff();
+						if(matchedFragment.getHydrogenPenalty() < minHydrogenPenalty)
+						{
+							minHydrogenPenalty = matchedFragment.getHydrogenPenalty();
+						}
+					}
+					
+				}
+				
+				//now save this fragment in the list with the best hits
+				for (MatchedFragment matchedFragment : fragmentsMatched) {
+					if(matchedFragment.getPartialChargeDiff() == maxPartialChargeDiff && minHydrogenPenalty == matchedFragment.getHydrogenPenalty())
+					{
+						maxPartialChargeDiff = matchedFragment.getPartialChargeDiff();
+					}
+				}
+				
 				if()
 				{
 					//add hits to list...only 1...check if this found hydrogen penalty is less than the previous found one
@@ -100,8 +124,9 @@ public class AssignFragmentPeak {
 						hitsPeaks.add(this.peakList.get(i).getMass());
 						test = false;
 					}
-					hitsAll.add(new PeakMolPair(acs.get(j),this.peakList.get(i), this.matchedMass, this.molecularFormula, this.hydrogenPenalty, this.partialChargeDiff));
 				}
+				hitsAll.addAll(fragmentsMatched);
+
 				
 				
 			}
@@ -121,8 +146,10 @@ public class AssignFragmentPeak {
 	 * @param mode the mode
 	 * @param neutralLossCombination the neutral loss combination
 	 * @return the list
+	 * @throws CDKException 
+	 * @throws IOException 
 	 */
-	private List<MatchedFragment> matchPeak(IAtomContainer fragmentStructure, Peak peak, int mode, int neutralLossCombination)
+	private List<MatchedFragment> matchPeak(IAtomContainer fragmentStructure, Peak peak, int mode, int neutralLossCombination) throws IOException, CDKException
 	{
 		List<MatchedFragment> matchedFragments = new ArrayList<MatchedFragment>();
 		
@@ -145,7 +172,7 @@ public class AssignFragmentPeak {
         double massToCompare = fragmentMass + protonMass;
         double matchedMass = 0.0;
         int hydrogenPenalty = 0;
-        String molecularFormulaString;
+        String molecularFormulaString = "";
         
         boolean explained = true;        
         
@@ -170,71 +197,7 @@ public class AssignFragmentPeak {
         //try to match the fragment to the peak with varying number of hydrogens
         else
         {
-        	for(int i= 0; i <= treeDepth; i++)
-        	{
-        		if(i==0)
-        		{
-        			//found
-        			if(((fragmentMass) >= peakLow && (fragmentMass) <= peakHigh))
-        			{
-        				hydrogenPenalty = 1;
-        				matchedMass = Math.round((fragmentMass)*10000.0)/10000.0;
-        				
-        				if(this.html)
-        	        		molecularFormulaString = MolecularFormulaManipulator.getHTML(molecularFormula) + neutralLoss;
-        	        	else
-        	        		molecularFormulaString = MolecularFormulaManipulator.getString(molecularFormula) + neutralLoss;
-        				
-        				matchedFragments.add(new MatchedFragment(peak, fragmentMass, fragmentMass, fragmentStructure, null, hydrogenPenalty, MoleculeTools.getCombinedEnergy(partialChargeDiffString), molecularFormulaString));
-
-        				break;
-        			}
-        		}
-        		else
-        		{
-        			double hMass = i * Constants.HYDROGEN_MASS;
-        			
-        			//found
-        			if(((massToCompare - hMass) >= peakLow && (massToCompare - hMass) <= peakHigh))
-        			{
-        				matchedMass = Math.round((massToCompare-hMass)*10000.0)/10000.0;
-        				
-        				if(mode == -1)
-        					hydrogenPenalty = (i);
-        				else
-        					hydrogenPenalty = (i + 1);
-        				
-        				if(this.html)
-        	        		molecularFormulaString = MolecularFormulaManipulator.getHTML(molecularFormula) + "-" + (i + 1) + "H";
-        	        	else
-        	        		molecularFormulaString = MolecularFormulaManipulator.getString(molecularFormula) + "-" + (i + 1) + "H";
-        				
-        				matchedFragments.add(new MatchedFragment(peak, fragmentMass, fragmentMass, fragmentStructure, null, hydrogenPenalty, MoleculeTools.getCombinedEnergy(partialChargeDiffString), molecularFormulaString));
-        				
-        				break;
-        			}
-        			else if(((massToCompare + hMass) >= peakLow && (massToCompare + hMass) <= peakHigh))
-        			{
-        				matchedMass = Math.round((massToCompare+hMass)*10000.0)/10000.0;
-        				//now add a bond energy equivalent to a H-C bond
-        				if(mode == 1)
-        					hydrogenPenalty = (i);
-        				else
-        					hydrogenPenalty = (i + 1);
-        				
-        				
-        				if(this.html)
-        	        		molecularFormulaString = MolecularFormulaManipulator.getHTML(molecularFormula) + "+" + (i + 1) + "H" + neutralLoss;
-        	        	else
-        	        		molecularFormulaString = MolecularFormulaManipulator.getString(molecularFormula) + "+" + (i + 1) + "H" + neutralLoss;
-        				
-        				matchedFragments.add(new MatchedFragment(peak, fragmentMass, fragmentMass, fragmentStructure, null, hydrogenPenalty, MoleculeTools.getCombinedEnergy(partialChargeDiffString), molecularFormulaString));
-
-        				
-        				break;
-        			}
-        		}	
-        	}
+        	matchWithVariableHydrogen(matchedFragments, treeDepth, partialChargeDiffString, mode, molecularFormula, fragmentMass, massToCompare, peak, fragmentStructure, peakLow, peakHigh, null, true);
         }
         
         
@@ -269,6 +232,29 @@ public class AssignFragmentPeak {
 							}							
 						}
 					}
+					//try to match the neutral loss with variable hydrogen count
+					else
+					{
+						double massToCompareTemp = massToCompare - calculateFragmentMassNeutralLoss(neutralLossRulesToApply[i], massToCompare);
+						double fragmentMassTemp = fragmentMass - calculateFragmentMassNeutralLoss(neutralLossRulesToApply[i], fragmentMass);
+						if(matchWithVariableHydrogen(matchedFragments, treeDepth, partialChargeDiffString, mode, molecularFormula, fragmentMassTemp, massToCompareTemp, peak, fragmentStructure, peakLow, peakHigh, null, false))
+						{
+							//check for molecular formula
+							if(MolecularFormulaTools.isPossibleNeutralLoss(MolecularFormulaTools.parseFormula(molecularFormula), neutralLossRulesToApply[i].getElementalComposition()))
+							{
+								String[] SMARTSStrings = neutralLossRulesToApply[i].getSMARTS();
+								//now check smarts...may e different SMARTS given for 1 neutral loss rule
+								for (int j = 0; j < SMARTSStrings.length; j++) {
+									//check if one of the supplied SMARTS matches
+									if(SMARTSTools.checkForSMARTS(SMARTSStrings[j], fragmentStructure))
+									{
+										countNL++;
+										break;
+									}
+								}							
+							}
+						}
+					}
 				}
 				
 				if(countNL == neutralLossRulesToApply.length)
@@ -276,15 +262,106 @@ public class AssignFragmentPeak {
 			}
 		}
 		
-		
-		
-		return mf;
+		return matchedFragments;
 	}
 	
 	
-	private boolean matchWithVariableHydrogen(int treeDepth, double mass, double massToCompare, double peakLow, double peakHigh)
+	/**
+	 * Match with variable hydrogen count the given peak.
+	 *
+	 * @param matchedFragments the matched fragments
+	 * @param treeDepth the tree depth
+	 * @param partialChargeDiffString the partial charge diff string
+	 * @param mode the mode
+	 * @param molecularFormula the molecular formula
+	 * @param fragmentMass the fragment mass
+	 * @param massToCompare the mass to compare
+	 * @param peak the peak
+	 * @param fragmentStructure the fragment structure
+	 * @param peakLow the peak low
+	 * @param peakHigh the peak high
+	 * @param neutralLoss the neutral loss
+	 * @return if a fragment was matched
+	 */
+	private boolean matchWithVariableHydrogen(List<MatchedFragment> matchedFragments, int treeDepth, String partialChargeDiffString, int mode, IMolecularFormula molecularFormula, double fragmentMass, double massToCompare, Peak peak, IAtomContainer fragmentStructure, double peakLow, double peakHigh, NeutralLoss[] neutralLoss, boolean addToResultsList)
 	{
+		int hydrogenPenalty = 0;
+		double matchedMass;
+		String molecularFormulaString;
+		boolean found = false;
 		
+		for(int i= 0; i <= treeDepth; i++)
+    	{
+    		if(i==0)
+    		{
+    			//found
+    			if(((fragmentMass) >= peakLow && (fragmentMass) <= peakHigh))
+    			{
+    				hydrogenPenalty = 1;
+    				matchedMass = Math.round((fragmentMass)*10000.0)/10000.0;
+    				
+    				if(this.html)
+    	        		molecularFormulaString = MolecularFormulaManipulator.getHTML(molecularFormula);
+    	        	else
+    	        		molecularFormulaString = MolecularFormulaManipulator.getString(molecularFormula);
+    				
+    				if(addToResultsList)
+    					matchedFragments.add(new MatchedFragment(peak, fragmentMass, matchedMass, fragmentStructure, neutralLoss, hydrogenPenalty, MoleculeTools.getCombinedEnergy(partialChargeDiffString), molecularFormulaString));
+    				found = true;
+    				
+    				break;
+    			}
+    		}
+    		else
+    		{
+    			double hMass = i * Constants.HYDROGEN_MASS;
+    			
+    			//found
+    			if(((massToCompare - hMass) >= peakLow && (massToCompare - hMass) <= peakHigh))
+    			{
+    				matchedMass = Math.round((massToCompare-hMass)*10000.0)/10000.0;
+    				
+    				if(mode == -1)
+    					hydrogenPenalty = (i);
+    				else
+    					hydrogenPenalty = (i + 1);
+    				
+    				if(this.html)
+    	        		molecularFormulaString = MolecularFormulaManipulator.getHTML(molecularFormula) + "-" + (i + 1) + "H";
+    	        	else
+    	        		molecularFormulaString = MolecularFormulaManipulator.getString(molecularFormula) + "-" + (i + 1) + "H";
+    				
+    				if(addToResultsList)
+    					matchedFragments.add(new MatchedFragment(peak, fragmentMass, matchedMass, fragmentStructure, neutralLoss, hydrogenPenalty, MoleculeTools.getCombinedEnergy(partialChargeDiffString), molecularFormulaString));
+    				found = true;
+    				
+    				break;
+    			}
+    			else if(((massToCompare + hMass) >= peakLow && (massToCompare + hMass) <= peakHigh))
+    			{
+    				matchedMass = Math.round((massToCompare+hMass)*10000.0)/10000.0;
+    				//now add a bond energy equivalent to a H-C bond
+    				if(mode == 1)
+    					hydrogenPenalty = (i);
+    				else
+    					hydrogenPenalty = (i + 1);
+    				
+    				
+    				if(this.html)
+    	        		molecularFormulaString = MolecularFormulaManipulator.getHTML(molecularFormula) + "+" + (i + 1) + "H" + neutralLoss;
+    	        	else
+    	        		molecularFormulaString = MolecularFormulaManipulator.getString(molecularFormula) + "+" + (i + 1) + "H" + neutralLoss;
+    				
+    				if(addToResultsList)
+    					matchedFragments.add(new MatchedFragment(peak, fragmentMass, matchedMass, fragmentStructure, neutralLoss, hydrogenPenalty, MoleculeTools.getCombinedEnergy(partialChargeDiffString), molecularFormulaString));
+    				found = true;
+    				
+    				break;
+    			}
+    		}	
+    	}
+		
+		return found;
 	}
 	
 	
