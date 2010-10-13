@@ -49,8 +49,20 @@ public class AssignFragmentPeak {
 	//private Vector<PeakMolPair> noHits; TODO: for log file
 	private double mzabs;
 	private double mzppm;
-	private boolean hydrogenTest = true;
 	private boolean html;
+	private NeutralLossCheck nlc;
+	private int neutralLossCombination;
+	
+	/**
+	 * Instantiates a new assign fragment peak.
+	 *
+	 * @param neutralLossCombination the neutral loss combination
+	 */
+	public AssignFragmentPeak(int neutralLossCombination)
+	{
+        this.nlc = new NeutralLossCheck(neutralLossCombination);
+        this.neutralLossCombination = neutralLossCombination;
+	}
 	
 	
 	/**
@@ -66,7 +78,7 @@ public class AssignFragmentPeak {
 	 * @throws CDKException the CDK exception
 	 * @throws IOException Signals that an I/O exception has occurred.
 	 */
-	public void assignFragmentPeak(List<IAtomContainer> acs, Vector<Peak> peakList, double mzabs, double mzppm, int mode, boolean html, int neutralLossCombination) throws CDKException, IOException
+	public void assignFragmentPeak(List<IAtomContainer> acs, Vector<Peak> peakList, double mzabs, double mzppm, int mode, boolean html) throws CDKException, IOException
 	{
 		this.acs = acs;
 		this.peakList = peakList;
@@ -157,9 +169,7 @@ public class AssignFragmentPeak {
         double massToCompare = fragmentMass + protonMass;
         double matchedMass = 0.0;
         int hydrogenPenalty = 0;
-        String molecularFormulaString = "";
-        
-        boolean explained = true;        
+        String molecularFormulaString = "";      
         
         String modeString = (mode > 0) ? " +" : " -";
         
@@ -167,7 +177,6 @@ public class AssignFragmentPeak {
         //first case: fragment matches directly peak without modifications
         if((massToCompare >= peakLow && massToCompare <= peakHigh))
         {
-        	explained = true;
         	matchedMass = Math.round(massToCompare*10000.0)/10000.0;
         	hydrogenPenalty = 0;
         	
@@ -187,7 +196,6 @@ public class AssignFragmentPeak {
         
         
         //second case: match the fragment with any combination of neutral losses
-        NeutralLossCheck nlc = new NeutralLossCheck(neutralLossCombination);
         List<List<NeutralLoss[]>> neutralLossCombinations = nlc.getNeutralLossCombinations();
         //iterate over layers
         for (List<NeutralLoss[]> layers : neutralLossCombinations) {
@@ -196,11 +204,12 @@ public class AssignFragmentPeak {
 				int countNL = 0;
 				for (int i = 0; i < neutralLossRulesToApply.length; i++) {
 					//check for mode when the neutral loss is applied
-					if(neutralLossRulesToApply[i].getMode() != mode)
+					if(neutralLossRulesToApply[i].getMode() != mode && neutralLossRulesToApply[i].getMode() != 0)
 						break;
 					
 					//now check for mass, molecular formula and smarts if the neutral loss is possible
-					if((massToCompare - calculateFragmentMassNeutralLoss(neutralLossRulesToApply[i], massToCompare)) >= peakLow && (massToCompare - calculateFragmentMassNeutralLoss(neutralLossRulesToApply[i], massToCompare)) <= peakHigh)
+					double massToCompareTemp = calculateFragmentMassNeutralLoss(neutralLossRulesToApply[i], massToCompare);
+					if(massToCompareTemp >= peakLow && massToCompareTemp <= peakHigh)
 					{						
 						//check for molecular formula
 						if(MolecularFormulaTools.isPossibleNeutralLoss(MolecularFormulaTools.parseFormula(molecularFormula), neutralLossRulesToApply[i].getElementalComposition()))
@@ -220,8 +229,7 @@ public class AssignFragmentPeak {
 					//try to match the neutral loss with variable hydrogen count
 					else
 					{
-						double massToCompareTemp = massToCompare - calculateFragmentMassNeutralLoss(neutralLossRulesToApply[i], massToCompare);
-						double fragmentMassTemp = fragmentMass - calculateFragmentMassNeutralLoss(neutralLossRulesToApply[i], fragmentMass);
+						double fragmentMassTemp = calculateFragmentMassNeutralLoss(neutralLossRulesToApply[i], fragmentMass);
 						if(matchWithVariableHydrogen(matchedFragments, treeDepth, partialChargeDiffString, mode, molecularFormula, fragmentMassTemp, massToCompareTemp, peak, fragmentStructure, peakLow, peakHigh, null, false))
 						{
 							//check for molecular formula
@@ -394,15 +402,4 @@ public class AssignFragmentPeak {
 	{
 		return this.hitsPeaks;
 	}
-	
-	/**
-	 * Sets the hydrogen test.
-	 * 
-	 * @param set the new hydrogen test
-	 */
-	public void setHydrogenTest(boolean set)
-	{
-		this.hydrogenTest = set;
-	}
-
 }

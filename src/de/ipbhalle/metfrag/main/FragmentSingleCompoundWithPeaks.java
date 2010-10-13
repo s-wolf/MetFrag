@@ -19,22 +19,18 @@
 *
 */
 
-package de.ipbhalle.metfrag.fragmenter;
-
-import static org.junit.Assert.*;
+package de.ipbhalle.metfrag.main;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Vector;
 
 import junit.framework.Assert;
 
-import org.junit.Test;
 import org.openscience.cdk.ChemFile;
 import org.openscience.cdk.ChemObject;
 import org.openscience.cdk.exception.CDKException;
@@ -57,7 +53,7 @@ import de.ipbhalle.metfrag.tools.MolecularFormulaTools;
 import de.ipbhalle.metfrag.tools.renderer.StructureRendererTable;
 
 
-public class FragmenterEfficientTest {
+public class FragmentSingleCompoundWithPeaks {
 	
 	private List<File> l1 = null;
 	WrapperSpectrum spectrum = null;
@@ -66,7 +62,7 @@ public class FragmenterEfficientTest {
 	IAtomContainer molecule = null;
 	
 
-	public FragmenterEfficientTest() {
+	public FragmentSingleCompoundWithPeaks() {
 		
 		String candidate = "C00509";
 		double exactMass = 272.06847;
@@ -130,12 +126,7 @@ public class FragmenterEfficientTest {
 		}
 	}
 	
-	/**
-	 * Test fragmenter without hydrogen.
-	 * @throws CDKException 
-	 * @throws FileNotFoundException 
-	 */
-	@Test
+	
 	public void testFragmenterWithoutHydrogen() throws FileNotFoundException, CDKException
 	{
 		//get the original peak list again
@@ -150,6 +141,8 @@ public class FragmenterEfficientTest {
 		List<IAtomContainer> l = new ArrayList<IAtomContainer>();
 		l = Molfile.ReadfolderTemp(l1);
 		
+		StructureRendererTable.Draw(molecule, l, "");
+		
 		//now find corresponding fragments to the mass
 		AssignFragmentPeak afp = new AssignFragmentPeak(3);
 		try {
@@ -167,48 +160,20 @@ public class FragmenterEfficientTest {
 			peaksFound.add(hits.get(i).getPeak().getMass());
 		}
 		
-		Assert.assertEquals(5, peaksFound.size());
+		StructureRendererTable.DrawHits(molecule, hits, "");
 	}
 	
 	
-	/**
-	 * Test fragmenter with hydrogen.
-	 * @throws CDKException 
-	 * @throws FileNotFoundException 
-	 */
-	@Test
-	public void testFragmenterWithHydrogen() throws FileNotFoundException, CDKException
-	{
-		
-		List<IAtomContainer> l = new ArrayList<IAtomContainer>();
-		l = Molfile.ReadfolderTemp(l1);
-		
-		//get the original peak list again
-		Vector<Peak> peakListParsed = spectrum.getPeakList();
-		
-		
-		//clean up peak list
-		CleanUpPeakList cList = new CleanUpPeakList((Vector<Peak>) peakListParsed.clone());
-		Vector<Peak> cleanedPeakList = cList.getCleanedPeakList(spectrum.getExactMass());
-		
-		
-		//now find corresponding fragments to the mass
-		AssignFragmentPeak afp = new AssignFragmentPeak(3);
+	public static void main(String[] args) {
+		FragmentSingleCompoundWithPeaks test = new FragmentSingleCompoundWithPeaks();
 		try {
-			afp.assignFragmentPeak(l, cleanedPeakList, mzabs, mzppm, spectrum.getMode(), false);
+			test.testFragmenterWithoutHydrogen();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		} catch (CDKException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		Vector<MatchedFragment> hits = afp.getHits();
-		Vector<Double> peaksFound = new Vector<Double>();
-		
-		//get all the identified peaks
-		for (int i = 0; i < hits.size(); i++) {
-			peaksFound.add(hits.get(i).getPeak().getMass());
-		}
-		
-		Assert.assertEquals(6, peaksFound.size());
 	}
 }

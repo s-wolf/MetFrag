@@ -545,9 +545,8 @@ public class MetFrag {
 		
 		
 		//now find corresponding fragments to the mass
-		AssignFragmentPeak afp = new AssignFragmentPeak();
-		afp.setHydrogenTest(true);
-		afp.assignFragmentPeak(listOfFrags, cleanedPeakList, mzabs, mzppm, spectrum.getMode(), false, maxNeutralLossCombination);
+		AssignFragmentPeak afp = new AssignFragmentPeak(maxNeutralLossCombination);
+		afp.assignFragmentPeak(listOfFrags, cleanedPeakList, mzabs, mzppm, spectrum.getMode(), false);
 		Vector<MatchedFragment> hits = afp.getAllHits();
 
 		return sortBackwards(hits);

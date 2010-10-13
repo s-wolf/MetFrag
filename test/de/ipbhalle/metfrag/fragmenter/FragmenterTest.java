@@ -148,10 +148,9 @@ public class FragmenterTest {
 		
 		
 		//now find corresponding fragments to the mass
-		AssignFragmentPeak afp = new AssignFragmentPeak();
-		afp.setHydrogenTest(false);
+		AssignFragmentPeak afp = new AssignFragmentPeak(3);
 		try {
-			afp.assignFragmentPeak(l, cleanedPeakList, mzabs, mzppm, spectrum.getMode(), false, 3);
+			afp.assignFragmentPeak(l, cleanedPeakList, mzabs, mzppm, spectrum.getMode(), false);
 		} catch (CDKException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -185,10 +184,9 @@ public class FragmenterTest {
 		
 		
 		//now find corresponding fragments to the mass
-		AssignFragmentPeak afp = new AssignFragmentPeak();
-		afp.setHydrogenTest(true);
+		AssignFragmentPeak afp = new AssignFragmentPeak(3);
 		try {
-			afp.assignFragmentPeak(l, cleanedPeakList, mzabs, mzppm, spectrum.getMode(), false, 3);
+			afp.assignFragmentPeak(l, cleanedPeakList, mzabs, mzppm, spectrum.getMode(), false);
 		} catch (CDKException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
