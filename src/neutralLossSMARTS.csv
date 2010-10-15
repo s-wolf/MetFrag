@@ -1,5 +1,5 @@
 Ion Mode	Exact DM	Topological fragment	Elemental Composition	H-Difference	Furthest Distance	Atom to start 	Hydrogen Connected to Start Atom	SMARTS	Substance Class Identifier
-+ -	18.01056	OH	H2O	-1	3	O	1	[H][$([OH1][#6])][#6][#6][#6][H];[H][$([OH1][#6])][#6][#6][H];[H][$([OH1][#6])][#6][H]	Non-specific (OH)
++ -	18.01056	OH	H2O	-1	3	O	1	[H][$([OH1][#6])][#6][H];[H][$([OH1][#6])][#6][#6][H];[H][$([OH1][#6])][#6][#6][#6][H]	Non-specific (OH)
 + -	27.0109	CN	HCN	-1	3	N	0	[N][#6][H]	Alkaloids
 + -	17.02655	NH2	NH3	-1	3	N	2	[$([NH2][#6])]([H])([H])[#6][H];[$([NH2][#6])]([H])([H])[#6][#6][H];[$([NH2][#6])]([H])([H])[#6][#6][#6][H]	not sure
 #+ -	27.99491	COH	CO	1	3	O	0	[H][O][#6]	Flavonoids, Coumarins, Chromones ….

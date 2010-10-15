@@ -52,6 +52,7 @@ public class AssignFragmentPeak {
 	private boolean html;
 	private NeutralLossCheck nlc;
 	private int neutralLossCombination;
+	private int hydrogenPenalty;
 	
 	/**
 	 * Instantiates a new assign fragment peak.
@@ -102,7 +103,7 @@ public class AssignFragmentPeak {
 				
 				//now find the best hit for the peak
 				//loop over every matched fragment and find the largest partial charge difference
-				double maxPartialChargeDiff = 0.0;
+				double maxPartialChargeDiff = -1.0;
 				int minHydrogenPenalty = 10;
 				for (MatchedFragment matchedFragment : fragmentsMatched) {
 					if(matchedFragment.getPartialChargeDiff() > maxPartialChargeDiff)
@@ -168,7 +169,7 @@ public class AssignFragmentPeak {
         double protonMass = Constants.PROTON_MASS * (double)mode;
         double massToCompare = fragmentMass + protonMass;
         double matchedMass = 0.0;
-        int hydrogenPenalty = 0;
+        hydrogenPenalty = 0;
         String molecularFormulaString = "";      
         
         String modeString = (mode > 0) ? " +" : " -";
@@ -202,13 +203,18 @@ public class AssignFragmentPeak {
         	//each layer has 1 to many neutral loss rule combinations 
 			for (NeutralLoss[] neutralLossRulesToApply : layers) {
 				int countNL = 0;
+				//save the mass of the fragment with all modifications
+				double massToCompareTemp = massToCompare;
+				hydrogenPenalty = 0;
+				List<List<Integer>> matchedAtomsSMARTS = new ArrayList<List<Integer>>();
 				for (int i = 0; i < neutralLossRulesToApply.length; i++) {
 					//check for mode when the neutral loss is applied
 					if(neutralLossRulesToApply[i].getMode() != mode && neutralLossRulesToApply[i].getMode() != 0)
 						break;
 					
 					//now check for mass, molecular formula and smarts if the neutral loss is possible
-					double massToCompareTemp = calculateFragmentMassNeutralLoss(neutralLossRulesToApply[i], massToCompare);
+					massToCompareTemp = calculateFragmentMassNeutralLoss(neutralLossRulesToApply[i], massToCompareTemp);
+					matchedMass = massToCompareTemp;
 					if(massToCompareTemp >= peakLow && massToCompareTemp <= peakHigh)
 					{						
 						//check for molecular formula
@@ -218,8 +224,10 @@ public class AssignFragmentPeak {
 							//now check smarts...may e different SMARTS given for 1 neutral loss rule
 							for (int j = 0; j < SMARTSStrings.length; j++) {
 								//check if one of the supplied SMARTS matches
-								if(SMARTSTools.checkForSMARTS(SMARTSStrings[j], fragmentStructure))
+								SMARTSTools st = new SMARTSTools(SMARTSStrings[j], fragmentStructure);
+								if(st.isMatched())
 								{
+									matchedAtomsSMARTS.addAll(st.getMatchedAtoms());
 									countNL++;
 									break;
 								}
@@ -239,8 +247,10 @@ public class AssignFragmentPeak {
 								//now check smarts...may e different SMARTS given for 1 neutral loss rule
 								for (int j = 0; j < SMARTSStrings.length; j++) {
 									//check if one of the supplied SMARTS matches
-									if(SMARTSTools.checkForSMARTS(SMARTSStrings[j], fragmentStructure))
+									SMARTSTools st = new SMARTSTools(SMARTSStrings[j], fragmentStructure);
+									if(st.isMatched())
 									{
+										matchedAtomsSMARTS.addAll(st.getMatchedAtoms());
 										countNL++;
 										break;
 									}
@@ -251,7 +261,7 @@ public class AssignFragmentPeak {
 				}
 				
 				if(countNL == neutralLossRulesToApply.length)
-					matchedFragments.add(new MatchedFragment(peak, fragmentMass, matchedMass, fragmentStructure, neutralLossRulesToApply , hydrogenPenalty, MoleculeTools.getCombinedEnergy(partialChargeDiffString), molecularFormulaString));
+					matchedFragments.add(new MatchedFragment(peak, fragmentMass, (matchedMass + (this.hydrogenPenalty * Constants.HYDROGEN_MASS)), fragmentStructure, neutralLossRulesToApply , hydrogenPenalty, MoleculeTools.getCombinedEnergy(partialChargeDiffString), molecularFormulaString, matchedAtomsSMARTS));
 			}
 		}
 		
@@ -278,7 +288,6 @@ public class AssignFragmentPeak {
 	 */
 	private boolean matchWithVariableHydrogen(List<MatchedFragment> matchedFragments, int treeDepth, String partialChargeDiffString, int mode, IMolecularFormula molecularFormula, double fragmentMass, double massToCompare, Peak peak, IAtomContainer fragmentStructure, double peakLow, double peakHigh, NeutralLoss[] neutralLoss, boolean addToResultsList)
 	{
-		int hydrogenPenalty = 0;
 		double matchedMass;
 		String molecularFormulaString;
 		boolean found = false;

@@ -58,7 +58,7 @@ public class FragmentSingleCompoundWithPeaks {
 	private List<File> l1 = null;
 	WrapperSpectrum spectrum = null;
 	double mzabs = 0.01;
-	double mzppm = 50.0;
+	double mzppm = 10.0;
 	IAtomContainer molecule = null;
 	
 
@@ -165,9 +165,15 @@ public class FragmentSingleCompoundWithPeaks {
 	
 	
 	public static void main(String[] args) {
+		long startTime = System.currentTimeMillis();
 		FragmentSingleCompoundWithPeaks test = new FragmentSingleCompoundWithPeaks();
+		long endTime = System.currentTimeMillis();
+		System.out.println("Fragmenter :"+ (endTime-startTime));
 		try {
+			startTime = System.currentTimeMillis();
 			test.testFragmenterWithoutHydrogen();
+			endTime = System.currentTimeMillis();
+			System.out.println("Assignment :"+ (endTime-startTime));
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

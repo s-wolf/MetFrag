@@ -68,7 +68,7 @@ public class Test {
 			
 //			//WATER //TODO check distance of 3
 //	        SMARTSQueryTool querytool = new SMARTSQueryTool("[H][$([OH1][#6])][#6][#6][#6][H]");
-//			SMARTSQueryTool querytool = new SMARTSQueryTool("[H][$([OH1][#6])][#6][#6][H]");
+			SMARTSQueryTool querytool = new SMARTSQueryTool("[H][$([OH1][#6])][#6][#6][H]");
 //			SMARTSQueryTool querytool1 = new SMARTSQueryTool("[H][$([OH1][#6])][#6][H]");
 	        
 //	        //APOMORPHINE CH3NH2 loss ... Apomorphine
@@ -99,7 +99,7 @@ public class Test {
 //	        SMARTSQueryTool querytool = new SMARTSQueryTool("[$([NH2][#6])]([H])([H])[#6][H]");
 	        
 	        //TODO: SO3H
-	        SMARTSQueryTool querytool = new SMARTSQueryTool("[$([NH2][#6])]([H])([H])[#6][H]");
+//	        SMARTSQueryTool querytool = new SMARTSQueryTool("[$([NH2][#6])]([H])([H])[#6][H]");
 	        
 			boolean status = querytool.matches(atomContainer);
 			if (status) {

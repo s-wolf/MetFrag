@@ -62,44 +62,4 @@ public class MoleculeTableJFrame extends JFrame {
 		this.getContentPane().add(scrollpane);
 		
     }
-    
-    public static void main(String[] args) {
-    	List<IAtomContainer> containers = new ArrayList<IAtomContainer>();
-        containers.add(MoleculeFactory.make123Triazole());
-        containers.add(MoleculeFactory.makeCyclobutadiene());
-        containers.add(MoleculeFactory.makeTetrahydropyran());
-        containers.add(MoleculeFactory.makeTetrahydropyran());
-        containers.add(MoleculeFactory.makeTetrahydropyran());
-        containers.add(MoleculeFactory.make123Triazole());
-        containers.add(MoleculeFactory.makeCyclobutadiene());
-        containers.add(MoleculeFactory.makeTetrahydropyran());
-        containers.add(MoleculeFactory.makeTetrahydropyran());
-        containers.add(MoleculeFactory.makeTetrahydropyran());
-        containers.add(MoleculeFactory.make123Triazole());
-        containers.add(MoleculeFactory.makeCyclobutadiene());
-        containers.add(MoleculeFactory.makeTetrahydropyran());
-        containers.add(MoleculeFactory.makeTetrahydropyran());
-        containers.add(MoleculeFactory.makeTetrahydropyran());
-        containers.add(MoleculeFactory.make123Triazole());
-        containers.add(MoleculeFactory.makeCyclobutadiene());
-        containers.add(MoleculeFactory.makeTetrahydropyran());
-        containers.add(MoleculeFactory.makeTetrahydropyran());
-        containers.add(MoleculeFactory.makeTetrahydropyran());
-        containers.add(MoleculeFactory.make123Triazole());
-        containers.add(MoleculeFactory.makeCyclobutadiene());
-        containers.add(MoleculeFactory.makeTetrahydropyran());
-        containers.add(MoleculeFactory.makeTetrahydropyran());
-        containers.add(MoleculeFactory.makeTetrahydropyran());
-        containers.add(MoleculeFactory.make123Triazole());
-        containers.add(MoleculeFactory.makeCyclobutadiene());
-        containers.add(MoleculeFactory.makeTetrahydropyran());
-        containers.add(MoleculeFactory.makeTetrahydropyran());
-        containers.add(MoleculeFactory.makeTetrahydropyran());
-        
-        MoleculeTableJFrame example = new MoleculeTableJFrame(containers);
-        
-        example.pack();
-        example.setVisible(true);
-	}
-
 }

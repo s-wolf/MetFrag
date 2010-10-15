@@ -39,6 +39,7 @@ public class MatchedFragment {
 	private String molecularFormulaString;
 	private int hydrogenPenalty;
 	private Double partialChargeDiff;
+	private List<List<Integer>> matchedAtoms;
 	
 	/**
 	 * Instantiates a new matched fragment.
@@ -53,12 +54,39 @@ public class MatchedFragment {
 	public MatchedFragment(Peak peak, double fragmentMass, double matchedMass, IAtomContainer fragmentStructure, NeutralLoss[] neutralLosses, int hydrogenPenalty, Double partialChargeDiff, String molecularFormulaString)
 	{
 		setFragmentMass(fragmentMass);
+		setMatchedMass(matchedMass);
 		setPeakMass(peak);
 		setFragmentStructure(fragmentStructure);
 		setNeutralLosses(neutralLosses);
 		setHydrogenPenalty(hydrogenPenalty);
 		setPartialChargeDiff(partialChargeDiff);
 		setMolecularFormulaString(molecularFormulaString);
+	}
+	
+	/**
+	 * Instantiates a new matched fragment with matched atoms from the neutral loss check.
+	 *
+	 * @param peak the peak
+	 * @param fragmentMass the fragment mass
+	 * @param matchedMass the matched mass
+	 * @param fragmentStructure the fragment structure
+	 * @param neutralLosses the neutral losses
+	 * @param hydrogenPenalty the hydrogen penalty
+	 * @param partialChargeDiff the partial charge diff
+	 * @param molecularFormulaString the molecular formula string
+	 * @param matchedAtoms the matched atoms
+	 */
+	public MatchedFragment(Peak peak, double fragmentMass, double matchedMass, IAtomContainer fragmentStructure, NeutralLoss[] neutralLosses, int hydrogenPenalty, Double partialChargeDiff, String molecularFormulaString, List<List<Integer>> matchedAtoms)
+	{
+		setFragmentMass(fragmentMass);
+		setMatchedMass(matchedMass);
+		setPeakMass(peak);
+		setFragmentStructure(fragmentStructure);
+		setNeutralLosses(neutralLosses);
+		setHydrogenPenalty(hydrogenPenalty);
+		setPartialChargeDiff(partialChargeDiff);
+		setMolecularFormulaString(molecularFormulaString);
+		setMatchedAtoms(matchedAtoms);
 	}
 
 	public void setNeutralLosses(NeutralLoss[] neutralLoss) {
@@ -176,6 +204,20 @@ public class MatchedFragment {
 	 */
 	public double getMatchedMass() {
 		return matchedMass;
+	}
+
+	public void setMatchedAtoms(List<List<Integer>> matchedAtoms) {
+		this.matchedAtoms = matchedAtoms;
+	}
+
+	/**
+	 * Gets the matched atoms from the neutral loss check.
+	 * Null if the neutral loss did not match!
+	 *
+	 * @return the matched atoms
+	 */
+	public List<List<Integer>> getMatchedAtoms() {
+		return matchedAtoms;
 	}
 
 }
