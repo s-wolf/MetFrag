@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
+
 import de.ipbhalle.metfrag.fragmenter.Fragmenter;
 import de.ipbhalle.metfrag.massbankParser.Peak;
 import de.ipbhalle.metfrag.spectrum.MatchedFragment;
@@ -131,9 +133,9 @@ public class Scoring {
 			{
 				for (int j = 0; j < nl.length; j++) {
 					if(j == (nl.length - 1))
-						neutralLossString += nl[j];
+						neutralLossString += MolecularFormulaManipulator.getString(nl[j].getTopoFragment());
 					else
-						neutralLossString += nl[j] + ",";
+						neutralLossString += MolecularFormulaManipulator.getString(nl[j].getTopoFragment()) + ",";
 				}
 			}
 						
@@ -185,9 +187,9 @@ public class Scoring {
 			{
 				for (int j = 0; j < nl.length; j++) {
 					if(i == (nl.length - 1))
-						neutralLossString += nl[j];
+						neutralLossString += MolecularFormulaManipulator.getString(nl[j].getTopoFragment());
 					else
-						neutralLossString += nl[j] + ",";
+						neutralLossString += MolecularFormulaManipulator.getString(nl[j].getTopoFragment()) + ",";
 				}
 			}
 			
