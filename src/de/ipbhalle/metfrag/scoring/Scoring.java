@@ -127,11 +127,14 @@ public class Scoring {
 			//get all neutral losses
 			NeutralLoss[] nl = hits.get(i).getNeutralLosses();
 			String neutralLossString = "";
-			for (int j = 0; j < nl.length; j++) {
-				if(i == (nl.length - 1))
-					neutralLossString += nl[i];
-				else
-					neutralLossString += nl[i] + ",";
+			if(nl != null)
+			{
+				for (int j = 0; j < nl.length; j++) {
+					if(i == (nl.length - 1))
+						neutralLossString += nl[i];
+					else
+						neutralLossString += nl[i] + ",";
+				}
 			}
 						
 			//add new entry to optimization matrix
@@ -178,11 +181,14 @@ public class Scoring {
 			//get all neutral losses
 			NeutralLoss[] nl = hits.get(i).getNeutralLosses();
 			String neutralLossString = "";
-			for (int j = 0; j < nl.length; j++) {
-				if(i == (nl.length - 1))
-					neutralLossString += nl[i];
-				else
-					neutralLossString += nl[i] + ",";
+			if(nl != null)
+			{
+				for (int j = 0; j < nl.length; j++) {
+					if(i == (nl.length - 1))
+						neutralLossString += nl[i];
+					else
+						neutralLossString += nl[i] + ",";
+				}
 			}
 			
 			//add new entry to optimization matrix
