@@ -33,9 +33,12 @@ import junit.framework.Assert;
 
 import org.openscience.cdk.ChemFile;
 import org.openscience.cdk.ChemObject;
+import org.openscience.cdk.DefaultChemObjectBuilder;
 import org.openscience.cdk.exception.CDKException;
+import org.openscience.cdk.exception.InvalidSmilesException;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.io.MDLReader;
+import org.openscience.cdk.smiles.SmilesParser;
 import org.openscience.cdk.tools.CDKHydrogenAdder;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 import org.openscience.cdk.tools.manipulator.ChemFileManipulator;
@@ -72,6 +75,15 @@ public class FragmentSingleCompoundWithPeaks {
 		   "153.019 10000.0 999\n" +
 		   "179.036 141.192 13\n" +
 		   "189.058 176.358 16\n";
+//		double exactMass = 504.252332;
+//		String peaks = "279.1745 250\n" + 
+//		   "301.1592 250\n" +
+//		   "319.1698 250\n" +
+//		   "337.1801 250\n" +
+//		   "355.1908 200\n" +
+//		   "393.2061 200\n" +
+//		   "411.2172 999 13\n" +
+//		   "485.2534 400 16\n";
 		int mode = 1;
 
 		spectrum = new WrapperSpectrum(peaks, mode, exactMass);		
@@ -93,8 +105,15 @@ public class FragmentSingleCompoundWithPeaks {
 		}
         containersList = ChemFileManipulator.getAllAtomContainers(chemFile);
         molecule = containersList.get(0);
-				
 		
+//		SmilesParser sp = new SmilesParser(DefaultChemObjectBuilder.getInstance());
+//		try {
+//			this.molecule = sp.parseSmiles("CCC(=O)OCC(=O)C1(C(CC2C1(CC(C3(C2CCC4=CC(=O)C=CC43C)F)O)C)C)OC(=O)CC");
+//		} catch (InvalidSmilesException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}				
+//		
         //add hydrogens
         try {
 			AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(molecule);

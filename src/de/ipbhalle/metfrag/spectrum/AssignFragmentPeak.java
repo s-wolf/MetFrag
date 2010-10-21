@@ -102,7 +102,7 @@ public class AssignFragmentPeak {
 				List<MatchedFragment> fragmentsMatched = matchPeak(this.acs.get(j), this.peakList.get(i), mode, neutralLossCombination);
 				
 				//now find the best hit for the peak
-				//loop over every matched fragment and find the largest partial charge difference
+				//loop over every matched fragment and find the largest partial charge difference and the smalles hydrogen penalty
 				double maxPartialChargeDiff = -1.0;
 				int minHydrogenPenalty = 10;
 				for (MatchedFragment matchedFragment : fragmentsMatched) {
@@ -116,12 +116,13 @@ public class AssignFragmentPeak {
 					}
 				}
 				
-				//now save this fragment in the list with the best hits
+				//now save this fragment in the list with the best hits...save only the best hit
 				for (MatchedFragment matchedFragment : fragmentsMatched) {
 					if(matchedFragment.getPartialChargeDiff() == maxPartialChargeDiff && minHydrogenPenalty == matchedFragment.getHydrogenPenalty())
 					{
 						hits.add(matchedFragment);
 						hitsPeaks.add(this.peakList.get(i).getMass());
+						break;
 					}
 				}
 				
@@ -170,7 +171,8 @@ public class AssignFragmentPeak {
         double massToCompare = fragmentMass + protonMass;
         double matchedMass = 0.0;
         hydrogenPenalty = 0;
-        String molecularFormulaString = "";      
+        String molecularFormulaString = ""; 
+        SMARTSTools st = new SMARTSTools(fragmentStructure);
         
         String modeString = (mode > 0) ? " +" : " -";
         
@@ -224,7 +226,7 @@ public class AssignFragmentPeak {
 							//now check smarts...may e different SMARTS given for 1 neutral loss rule
 							for (int j = 0; j < SMARTSStrings.length; j++) {
 								//check if one of the supplied SMARTS matches
-								SMARTSTools st = new SMARTSTools(SMARTSStrings[j], fragmentStructure);
+								st.matchSMARTS(SMARTSStrings[j]);
 								if(st.isMatched())
 								{
 									matchedAtomsSMARTS.addAll(st.getMatchedAtoms());
@@ -247,7 +249,7 @@ public class AssignFragmentPeak {
 								//now check smarts...may e different SMARTS given for 1 neutral loss rule
 								for (int j = 0; j < SMARTSStrings.length; j++) {
 									//check if one of the supplied SMARTS matches
-									SMARTSTools st = new SMARTSTools(SMARTSStrings[j], fragmentStructure);
+									st.matchSMARTS(SMARTSStrings[j]);
 									if(st.isMatched())
 									{
 										matchedAtomsSMARTS.addAll(st.getMatchedAtoms());

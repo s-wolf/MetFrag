@@ -26,6 +26,7 @@ import java.util.Vector;
 
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.templates.MoleculeFactory;
+import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 
 import de.ipbhalle.metfrag.massbankParser.Peak;
 import de.ipbhalle.metfrag.spectrum.MatchedFragment;
@@ -61,11 +62,22 @@ public class StructureRendererTable {
 		
 		List<MatchedFragment> containers = new ArrayList<MatchedFragment>();
 		containers.add(new MatchedFragment(new Peak(0.0, 0.0, 0), 0.0, 0.0, original, null, 0, 0.0, ""));
-		
+		boolean showHydrogen = true;
 		//add fragments to list
-		for (MatchedFragment frag : l) {
-			containers.add(frag);
+		if(!showHydrogen)
+		{
+			for (MatchedFragment frag : l) {
+				frag.setFragmentStructure(AtomContainerManipulator.removeHydrogens(frag.getFragmentStructure()));
+				containers.add(frag);
+			}
 		}
+		else
+		{
+			for (MatchedFragment frag : l) {
+				containers.add(frag);
+			}
+		}
+		
 		
         
         MoleculeTableJFrameHits example = new MoleculeTableJFrameHits(containers);

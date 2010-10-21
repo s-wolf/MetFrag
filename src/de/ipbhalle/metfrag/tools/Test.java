@@ -44,6 +44,9 @@ public class Test {
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		
+		System.out.println(181.049 - 0.002 - PPMTool.getPPMDeviation(181.049, 10));
+		
 		// TODO Auto-generated method stub
 		double mass = MolecularFormulaTools.getMonoisotopicMass("C17H4O14");
 		System.out.println(mass);

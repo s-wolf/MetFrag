@@ -1,7 +1,9 @@
 package de.ipbhalle.metfrag.tools;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.interfaces.IAtomContainer;
@@ -12,19 +14,33 @@ import de.ipbhalle.metfrag.tools.renderer.StructureRenderer;
 public class SMARTSTools {
 	
 	private List<List<Integer>> matchedAtoms;
+	private IAtomContainer target;
 	private boolean matched;
+	SMARTSQueryTool querytool;
 	
 	/**
-	 * Instantiates a new SMARTS tools which checks the target atomcontainer 
+	 * Instantiates a new SMARTS tools which checks the target atomcontainer
 	 * for substructures using the SMARTS string.
 	 *
-	 * @param SMARTS the sMARTS
 	 * @param target the target
 	 * @throws CDKException the cDK exception
 	 */
-	public SMARTSTools(String SMARTS, IAtomContainer target) throws CDKException
+	public SMARTSTools(IAtomContainer target) throws CDKException
 	{
-		SMARTSQueryTool querytool = new SMARTSQueryTool(SMARTS);
+		this.querytool = new SMARTSQueryTool("C");	
+		this.target = target;
+	}
+	
+	
+	/**
+	 * Match smarts with the given target atomcontainer.
+	 *
+	 * @param SMARTS the SMARTS String
+	 * @throws CDKException the cDK exception
+	 */
+	public void matchSMARTS(String SMARTS) throws CDKException
+	{
+		this.querytool.setSmarts(SMARTS);
 		matched = querytool.matches(target);
 		if(matched)
 			matchedAtoms = querytool.getMatchingAtoms();

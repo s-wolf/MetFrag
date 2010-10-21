@@ -28,6 +28,7 @@ public class OptimizationMatrixEntry {
 	private String bondEnergyString;
 	private int hydrogenPenalty;
 	private String chargesDiffString;
+	private String neutralLossRules;
 	
 	/**
 	 * Instantiates a new optimization matrix entry.
@@ -40,7 +41,7 @@ public class OptimizationMatrixEntry {
 	 * @param hydrogenPenalty the hydrogen penalty
 	 * @param chargesDiffString the charges diff string
 	 */
-	public OptimizationMatrixEntry(String candidateID, Double peakMass, Double peakInt, String bondEnergyString, int hydrogenPenalty, String chargesDiffString)
+	public OptimizationMatrixEntry(String candidateID, Double peakMass, Double peakInt, String bondEnergyString, int hydrogenPenalty, String chargesDiffString, String neutralLossRules)
 	{
 		setBondEnergyString(bondEnergyString);
 		setCandidateID(candidateID);
@@ -48,6 +49,7 @@ public class OptimizationMatrixEntry {
 		setHydrogenPenalty(hydrogenPenalty);
 		setPeakInt(peakInt);
 		setPeakMass(peakMass);
+		setNeutralLossRules(neutralLossRules);
 	}
 
 	/**
@@ -156,6 +158,24 @@ public class OptimizationMatrixEntry {
 	 */
 	public String getChargesDiffString() {
 		return chargesDiffString;
+	}
+
+	/**
+	 * Sets the neutral loss rules.
+	 *
+	 * @param neutralLossRules the new neutral loss rules
+	 */
+	public void setNeutralLossRules(String neutralLossRules) {
+		this.neutralLossRules = neutralLossRules;
+	}
+
+	/**
+	 * Gets the neutral loss rules.
+	 *
+	 * @return the neutral loss rules
+	 */
+	public String getNeutralLossRules() {
+		return neutralLossRules;
 	}
 
 }

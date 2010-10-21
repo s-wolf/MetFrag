@@ -123,9 +123,19 @@ public class Scoring {
 			scoreChargesDiff = hits.get(i).getPartialChargeDiff();
 			
 			penalty += (hits.get(i).getHydrogenPenalty() * 100);
+			
+			//get all neutral losses
+			NeutralLoss[] nl = hits.get(i).getNeutralLosses();
+			String neutralLossString = "";
+			for (int j = 0; j < nl.length; j++) {
+				if(i == (nl.length - 1))
+					neutralLossString += nl[i];
+				else
+					neutralLossString += nl[i] + ",";
+			}
 						
 			//add new entry to optimization matrix
-			this.optimizationMatrixEntries.add(new OptimizationMatrixEntry(candidateID, hits.get(i).getPeak().getMass(), hits.get(i).getPeak().getIntensity(), (String)hits.get(i).getFragmentStructure().getProperty("BondEnergy"), hits.get(i).getHydrogenPenalty(), (String)hits.get(i).getFragmentStructure().getProperty("PartialChargeDiff")));
+			this.optimizationMatrixEntries.add(new OptimizationMatrixEntry(candidateID, hits.get(i).getPeak().getMass(), hits.get(i).getPeak().getIntensity(), (String)hits.get(i).getFragmentStructure().getProperty("BondEnergy"), hits.get(i).getHydrogenPenalty(), (String)hits.get(i).getFragmentStructure().getProperty("PartialChargeDiff"), neutralLossString));
 			
 		}
 
@@ -164,9 +174,19 @@ public class Scoring {
 			
 			//partial charges diff
 			partialChargesDiff += hits.get(i).getPartialChargeDiff();
-		
+			
+			//get all neutral losses
+			NeutralLoss[] nl = hits.get(i).getNeutralLosses();
+			String neutralLossString = "";
+			for (int j = 0; j < nl.length; j++) {
+				if(i == (nl.length - 1))
+					neutralLossString += nl[i];
+				else
+					neutralLossString += nl[i] + ",";
+			}
+			
 			//add new entry to optimization matrix
-			this.optimizationMatrixEntries.add(new OptimizationMatrixEntry(candidateID, hits.get(i).getPeak().getMass(), hits.get(i).getPeak().getRelIntensity(), bondEnergies, hits.get(i).getHydrogenPenalty(), (String)hits.get(i).getFragmentStructure().getProperty("PartialChargeDiff")));
+			this.optimizationMatrixEntries.add(new OptimizationMatrixEntry(candidateID, hits.get(i).getPeak().getMass(), hits.get(i).getPeak().getRelIntensity(), bondEnergies, hits.get(i).getHydrogenPenalty(), (String)hits.get(i).getFragmentStructure().getProperty("PartialChargeDiff"), neutralLossString));
 			
 		}
 		

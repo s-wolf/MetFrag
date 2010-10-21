@@ -156,7 +156,15 @@ public class MoleculeCellHits extends JPanel{
 	        	
 	            List<IAtom> atomsMatched = new ArrayList<IAtom>();
 	    		for (Integer integer : matched) {
-	    			atomsMatched.add(atomContainer.getAtom(integer));			   
+	    			try
+	    			{
+	    				atomsMatched.add(atomContainer.getAtom(integer));
+	    			}
+	    			catch(IndexOutOfBoundsException e)
+	    			{
+	    				System.err.println("Cannot highlight removed hydrogen!");
+	    			}
+	    						   
 	    		}
 	            
 	    		
