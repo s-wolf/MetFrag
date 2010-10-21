@@ -130,10 +130,10 @@ public class Scoring {
 			if(nl != null)
 			{
 				for (int j = 0; j < nl.length; j++) {
-					if(i == (nl.length - 1))
-						neutralLossString += nl[i];
+					if(j == (nl.length - 1))
+						neutralLossString += nl[j];
 					else
-						neutralLossString += nl[i] + ",";
+						neutralLossString += nl[j] + ",";
 				}
 			}
 						
@@ -185,9 +185,9 @@ public class Scoring {
 			{
 				for (int j = 0; j < nl.length; j++) {
 					if(i == (nl.length - 1))
-						neutralLossString += nl[i];
+						neutralLossString += nl[j];
 					else
-						neutralLossString += nl[i] + ",";
+						neutralLossString += nl[j] + ",";
 				}
 			}
 			
