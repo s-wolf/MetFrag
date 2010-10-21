@@ -47,6 +47,10 @@ neutralLossAdd = false
 bondEnergyScoring = false
 #break only bonds which will most likely break
 breakOnlySelectedBonds = false
+#maximum neutral loss combination
+maximumNeutralLossCombination = 3
+#chemspider token for webservice
+chemspiderToken = todo
 
 
 #local kegg mol files

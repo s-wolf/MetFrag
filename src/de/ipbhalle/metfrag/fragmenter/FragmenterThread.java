@@ -198,12 +198,12 @@ public class FragmenterThread implements Runnable{
 			if(this.candidateStructure != null)
 				molecule = this.candidateStructure;
 			else if(pw == null && c == null)
-				molecule = Candidates.getCompoundLocally(this.database, candidate, jdbc, username, password, false);
+				molecule = Candidates.getCompoundLocally(this.database, candidate, jdbc, username, password, false, "");
 			else if(pw == null)
-				molecule = Candidates.getCompoundLocally(this.database, candidate, c.getJdbc(), c.getUsername(), c.getPassword(), false);
+				molecule = Candidates.getCompoundLocally(this.database, candidate, c.getJdbc(), c.getUsername(), c.getPassword(), false, c.getChemspiderToken());
 			else
 			{
-				molecule = Candidates.getCompound(database, candidate, pw);
+				molecule = Candidates.getCompound(database, candidate, pw, c.getChemspiderToken());
 				if(molecule == null && database.equals("pubchem"))
 					molecule = pw.getSingleMol(candidate, false);
 			}

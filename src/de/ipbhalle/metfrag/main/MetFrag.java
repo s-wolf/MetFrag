@@ -903,7 +903,7 @@ public class MetFrag {
 		parameterOptimizationMatrix.append(header);
 		for (String candidate : candidateToOptimizationMatrixEntries.keySet()) {
 			for (OptimizationMatrixEntry entry : candidateToOptimizationMatrixEntries.get(candidate)) {
-				parameterOptimizationMatrix.append(candidate + "\t" + entry.getPeakMass() + "\t" + entry.getPeakInt() + "\t" + entry.getBondEnergyString() + "\t" + entry.getHydrogenPenalty() + "\t" + entry.getChargesDiffString() + "\n");
+				parameterOptimizationMatrix.append(candidate + "\t" + entry.getPeakMass() + "\t" + entry.getPeakInt() + "\t" + entry.getBondEnergyString() + "\t" + entry.getHydrogenPenalty() + "\t" + entry.getChargesDiffString() + "\t" + entry.getNeutralLossRules() + "\n");
 			}
 		}
 		

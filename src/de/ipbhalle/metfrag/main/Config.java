@@ -62,6 +62,7 @@ public class Config {
     private boolean bondEnergyScoring = false;
     private boolean isOnlyBreakSelectedBonds = false;
     private int maximumNeutralLossCombination = 3;
+    private String chemspiderToken = "";
 	
 	/**
 	 * Instantiates a new config.
@@ -218,6 +219,7 @@ public class Config {
 		if(properties.getProperty("breakOnlySelectedBonds") != null && properties.getProperty("breakOnlySelectedBonds").equals("true"))
 			setOnlyBreakSelectedBonds(isOnlyBreakSelectedBonds);
 		
+		setChemspiderToken(properties.getProperty("chemspiderToken"));
 		
 		setMaximumNeutralLossCombination(Integer.parseInt(properties.getProperty("maximumNeutralLossCombination")));
 	}
@@ -641,6 +643,19 @@ public class Config {
 
 	public int getMaximumNeutralLossCombination() {
 		return maximumNeutralLossCombination;
+	}
+
+	public void setChemspiderToken(String chemspiderToken) {
+		this.chemspiderToken = chemspiderToken;
+	}
+
+	/**
+	 * Gets the chemspider token used for the webservice interface
+	 *
+	 * @return the chemspider token
+	 */
+	public String getChemspiderToken() {
+		return chemspiderToken;
 	}
 
 }

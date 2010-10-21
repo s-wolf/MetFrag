@@ -148,7 +148,7 @@ public class Candidates {
 	 * @throws RemoteException 
 	 * @throws CDKException 
 	 */
-	public static IAtomContainer getCompound(String database, String candidate, PubChemWebService pw) throws RemoteException, CDKException
+	public static IAtomContainer getCompound(String database, String candidate, PubChemWebService pw, String chemspiderToken) throws RemoteException, CDKException
 	{
 		IAtomContainer molecule = null;
 		
@@ -169,7 +169,7 @@ public class Candidates {
 		}
 		else if(database.equals("chemspider"))
 		{
-			String candidateMol = ChemSpider.getMolByID(candidate);
+			String candidateMol = ChemSpider.getMolByID(candidate, chemspiderToken);
 			
 			MDLReader reader;
 			List<IAtomContainer> containersList;
@@ -209,7 +209,7 @@ public class Candidates {
 	 * @throws CDKException the CDK exception
 	 * @throws RemoteException the remote exception
 	 */
-	public static IAtomContainer getCompoundLocally(String database, String candidate, String jdbc, String username, String password, boolean getAll) throws SQLException, ClassNotFoundException, RemoteException, CDKException
+	public static IAtomContainer getCompoundLocally(String database, String candidate, String jdbc, String username, String password, boolean getAll, String chemspiderToken) throws SQLException, ClassNotFoundException, RemoteException, CDKException
 	{
 		IAtomContainer molecule = null;
 
@@ -220,7 +220,7 @@ public class Candidates {
 		}
 		else if(database.equals("chemspider"))
 		{
-			molecule = ChemSpider.getMol(candidate, true);
+			molecule = ChemSpider.getMol(candidate, true, chemspiderToken);
 		}
 		else if(database.equals("pubchem"))
 		{

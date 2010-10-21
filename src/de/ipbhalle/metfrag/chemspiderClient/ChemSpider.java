@@ -35,20 +35,17 @@ import org.openscience.cdk.tools.manipulator.ChemFileManipulator;
 import com.chemspider.www.ExtendedCompoundInfo;
 import com.chemspider.www.MassSpecAPISoapProxy;
 
+import de.ipbhalle.metfrag.main.Config;
 import de.ipbhalle.metfrag.tools.MolecularFormulaTools;
 
 public class ChemSpider {
 	
-	private static String token = "4d6c67db-65d0-474e-9f5c-f70f5c85111c";
-	
 	/**
 	 * Gets Chemspider compound ID's by mass.
-	 * 
+	 *
 	 * @param mass the mass
 	 * @param error the error
-	 * 
 	 * @return the chemspider by mass
-	 * 
 	 * @throws RemoteException the remote exception
 	 */
 	public static Vector<String> getChemspiderByMass(Double mass, Double error) throws RemoteException
@@ -92,7 +89,7 @@ public class ChemSpider {
 	 * 
 	 * @throws RemoteException the remote exception
 	 */
-	public static String getMolByID(String ID) throws RemoteException
+	public static String getMolByID(String ID, String token) throws RemoteException
 	{
 		MassSpecAPISoapProxy chemSpiderProxy = new MassSpecAPISoapProxy();
 		String mol = chemSpiderProxy.getRecordMol(ID, false, token);
@@ -101,15 +98,15 @@ public class ChemSpider {
 	
 	/**
 	 * Gets the mol by id.
-	 * 
+	 *
 	 * @param ID the iD
-	 * 
+	 * @param getAll the get all
+	 * @param token the token
 	 * @return the molby id
-	 * 
 	 * @throws RemoteException the remote exception
-	 * @throws CDKException 
+	 * @throws CDKException the cDK exception
 	 */
-	public static IAtomContainer getMol(String ID, boolean getAll) throws RemoteException, CDKException
+	public static IAtomContainer getMol(String ID, boolean getAll, String token) throws RemoteException, CDKException
 	{
 		MassSpecAPISoapProxy chemSpiderProxy = new MassSpecAPISoapProxy();
 		String mol = chemSpiderProxy.getRecordMol(ID, false, token);
@@ -132,14 +129,13 @@ public class ChemSpider {
 	
 	/**
 	 * Gets the extended compound information like name, mass, InchI.....
-	 * 
+	 *
 	 * @param key the key
-	 * 
+	 * @param token the token
 	 * @return the extended cpd info
-	 * 
 	 * @throws RemoteException the remote exception
 	 */
-	public static ExtendedCompoundInfo getExtendedCpdInfo(int key) throws RemoteException
+	public static ExtendedCompoundInfo getExtendedCpdInfo(int key, String token) throws RemoteException
 	{
 		MassSpecAPISoapProxy chemSpiderProxy = new MassSpecAPISoapProxy();
 		ExtendedCompoundInfo cpdInfo = chemSpiderProxy.getExtendedCompoundInfo(key, token);
@@ -151,8 +147,8 @@ public class ChemSpider {
 		try {
 			MassSpecAPISoapProxy chemSpiderProxy = new MassSpecAPISoapProxy();
 			String[] resultIDs = chemSpiderProxy.searchByMass2(272.06847, 0.01);
-			
-			ExtendedCompoundInfo cpdInfo = chemSpiderProxy.getExtendedCompoundInfo(907, "4d6c67db-65d0-474e-9f5c-f70f5c85111c");
+			Config config = new Config();
+			ExtendedCompoundInfo cpdInfo = chemSpiderProxy.getExtendedCompoundInfo(907, config.getChemspiderToken());
 			
 			for (int i = 0; i < resultIDs.length; i++) {
 				System.out.println("Result: " + resultIDs[i]);
