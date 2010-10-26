@@ -293,7 +293,7 @@ public class Fragmenter {
     	return original;
     }
     
-    private void preprocessMolecule(IAtomContainer original) throws IOException, CDKException, CloneNotSupportedException 
+    private void preprocessMolecule(IAtomContainer original) throws Exception 
     {    	
     	//read in bondenergies.txt
     	bondEnergies = new HashMap<String, Double>();

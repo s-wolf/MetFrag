@@ -133,9 +133,9 @@ public class Scoring {
 			{
 				for (int j = 0; j < nl.length; j++) {
 					if(j == (nl.length - 1))
-						neutralLossString += MolecularFormulaManipulator.getString(nl[j].getTopoFragment());
+						neutralLossString += MolecularFormulaManipulator.getString(nl[j].getElementalComposition());
 					else
-						neutralLossString += MolecularFormulaManipulator.getString(nl[j].getTopoFragment()) + ",";
+						neutralLossString += MolecularFormulaManipulator.getString(nl[j].getElementalComposition()) + ",";
 				}
 			}
 						
@@ -186,10 +186,10 @@ public class Scoring {
 			if(nl != null)
 			{
 				for (int j = 0; j < nl.length; j++) {
-					if(i == (nl.length - 1))
-						neutralLossString += MolecularFormulaManipulator.getString(nl[j].getTopoFragment());
+					if(j == (nl.length - 1))
+						neutralLossString += MolecularFormulaManipulator.getString(nl[j].getElementalComposition());
 					else
-						neutralLossString += MolecularFormulaManipulator.getString(nl[j].getTopoFragment()) + ",";
+						neutralLossString += MolecularFormulaManipulator.getString(nl[j].getElementalComposition()) + ",";
 				}
 			}
 			

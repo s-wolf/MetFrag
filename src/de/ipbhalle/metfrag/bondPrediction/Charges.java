@@ -91,10 +91,9 @@ public class Charges {
 	 * It returns a list with bonds.
 	 * 
 	 * @return the list< i bond>
-	 * @throws CloneNotSupportedException 
-	 * @throws CDKException 
+	 * @throws Exception 
 	 */
-	public List<String> calculateBondsToBreak(IAtomContainer mol) throws CloneNotSupportedException, CDKException
+	public List<String> calculateBondsToBreak(IAtomContainer mol) throws Exception
 	{		
 		List<String> bondsToBreak = new ArrayList<String>();
 		this.mol = mol;
@@ -106,7 +105,7 @@ public class Charges {
             AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(this.mol);
             this.mol = MoleculeTools.moleculeNumbering(this.mol);
     		peoe.calculateCharges(this.mol);
-//	    	pepe.calculateCharges(cpd);
+//	    	pepe.calculateCharges(this.mol);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -164,6 +163,8 @@ public class Charges {
 				IBond hydrogenBond = new Bond(AtomContainerManipulator.getAtomById(protonatedMol, chargesArray[i].getAtom().getID()), hydrogenAtom);
 				protonatedMol.addAtom(hydrogenAtom);
 				protonatedMol.addBond(hydrogenBond);
+				AtomContainerManipulator.getAtomById(protonatedMol, chargesArray[i].getAtom().getID()).setFormalCharge(1);
+				AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(protonatedMol);
 				
 				//now set the charge of the atom...separate atom container
 				IAtomContainer outputStructure = (IAtomContainer) protonatedMol.clone();
@@ -175,11 +176,15 @@ public class Charges {
 				this.molWithAllProtonationSites.addAtom(hydrogenAtom);
 				this.molWithAllProtonationSites.addBond(hydrogenBondAll);
 				
+				AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(protonatedMol);
 				AtomContainerManipulator.convertImplicitToExplicitHydrogens(protonatedMol);
-	            AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(protonatedMol);
+	            
 //	            Render.Draw(this.mol, "original");
 	            if(verbose)
 	            	new StructureRenderer(protonatedMol, "protonated");
+	            
+//	            GasteigerPEPEPartialCharges pepe = new GasteigerPEPEPartialCharges();
+//	            pepe.calculateCharges(protonatedMol);
 	            GasteigerMarsiliPartialCharges peoe = new GasteigerMarsiliPartialCharges();
 	            peoe.calculateCharges(protonatedMol);
 	            protonatedMol = MoleculeTools.moleculeNumbering(protonatedMol);
@@ -204,13 +209,19 @@ public class Charges {
 			        			atom2 = atom;
 			        		
 						}
-//			        	System.out.println("Distance between " + atom1.getSymbol() + "-"  +	atom2.getSymbol() + "\t" +
-//			        			atom1.getPoint3d().distance(atom2.getPoint3d()));
-			        	
+
 			        	Double atom1Charge = (Math.round(atom1.getCharge() * 1000.0)/1000.0);
 			        	Double atom2Charge = (Math.round(atom2.getCharge() * 1000.0)/1000.0);
-			        	
+			        				        	
 			        	Double diffCharge = Math.abs(atom1Charge - atom2Charge);
+			        	if(verbose)
+			        	{
+			        		if(j == 0)
+			        			System.out.println("Neutral:" + atom1.getSymbol() + (Integer.parseInt(atom1.getID()) + 1) + "(" + atom1Charge  + ") -"  +	atom2.getSymbol() + (Integer.parseInt(atom2.getID()) + 1) + "(" + atom2Charge  + ") -" + "\t:" + diffCharge);
+			        		else
+			        			System.out.println("Protonated:" + atom1.getSymbol() + (Integer.parseInt(atom1.getID()) + 1) + "(" + atom1Charge  + ") -"  +	atom2.getSymbol() + (Integer.parseInt(atom2.getID()) + 1) + "(" + atom2Charge  + ") -" + "\t:" + diffCharge);
+			        	}
+			        	
 			        	Distance dist = null;
 			        	
 

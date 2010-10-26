@@ -152,11 +152,11 @@ public class SpectrumDeviation {
 	
 	public static void main(String[] args) {
 //		String folder = "/home/swolf/MassBankData/MetFragSunGrid/RikenDataMerged/CHONPS/useable/";
-//		String folder = "/home/swolf/MassBankData/MetFragSunGrid/HillPaperDataMerged/";
+		String folder = "/home/swolf/MassBankData/MetFragSunGrid/HillPaperDataMerged/";
 //		String folder = "/home/swolf/MassBankData/MetFragSunGrid/BrukerRawData/Processed/Merged/";
 //		String folder = "/home/swolf/MassBankData/TestSpectra/Hill/";
 //		String folder = "/home/swolf/MassBankData/TestSpectra/HillMerged/";
-		String folder = "/home/swolf/MassBankData/TestSpectra/Riken/";
+//		String folder = "/home/swolf/MassBankData/TestSpectra/Riken/";
 //		String folder = "/home/swolf/MassBankData/TestSpectra/RikenMerged/";
 		
 		if(args != null && args.length > 0)
@@ -164,7 +164,7 @@ public class SpectrumDeviation {
 		
 		SpectrumDeviation sd = new SpectrumDeviation();
 		try {
-			sd.analyseSpectra(folder, "pubchem", 0.01, 10.0);
+			sd.analyseSpectra(folder, "pubchem", 0, 10.0);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
