@@ -57,7 +57,7 @@ public class StreamGobbler extends Thread {
 			{
 				if(this.type.equals("OUTPUT"))
 					outputToFile += line + "\n"; 
-				System.out.println(type + ">" + line);
+//				System.out.println(type + ">" + line);
 			}			
 		} catch (IOException ioe) {
 			ioe.printStackTrace();

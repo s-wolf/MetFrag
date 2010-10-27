@@ -68,13 +68,13 @@ public class Mopac {
         outputGobbler.start();  
 
         int exitVal = pr.waitFor();
-        System.out.println("FF error code " + exitVal);
+
         FileWriter fstream = new FileWriter(tempFileFF.getPath());
         BufferedWriter out = new BufferedWriter(fstream);
         out.write(outputGobbler.getOutput());
         //Close the output stream
         out.close();
-        
+        System.out.println("FF error code " + exitVal);
 
 		//then optimize it using mopac
         //generate mopin from mol2
