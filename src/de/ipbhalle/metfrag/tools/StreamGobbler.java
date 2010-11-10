@@ -28,14 +28,16 @@ import java.io.*;
  * http://www.javaworld.com/javaworld/jw-12-2000/jw-1229-traps.html?page=4
  */
 public class StreamGobbler extends Thread {
-	InputStream is;
-	String type;
-	String outputToFile;
+	private InputStream is;
+	private String type;
+	private String outputToFile;
+	private boolean verbose;
 
-	public StreamGobbler(InputStream is, String type) {
+	public StreamGobbler(InputStream is, String type, boolean verbose) {
 		this.is = is;
 		this.type = type;
 		this.outputToFile = "";
+		this.verbose = verbose;
 	}
 	
 	/**
@@ -57,7 +59,9 @@ public class StreamGobbler extends Thread {
 			{
 				if(this.type.equals("OUTPUT"))
 					outputToFile += line + "\n"; 
-//				System.out.println(type + ">" + line);
+				
+				if(verbose)
+					System.out.println(type + ">" + line);
 			}			
 		} catch (IOException ioe) {
 			ioe.printStackTrace();

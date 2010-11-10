@@ -35,7 +35,7 @@ public class Mopac {
 	 * @throws InterruptedException the interrupted exception
 	 * @throws CDKException the cDK exception
 	 */
-	public IAtomContainer runOptimization(IAtomContainer molToOptimize, int ffSteps) throws IOException, InterruptedException, CDKException
+	public IAtomContainer runOptimization(IAtomContainer molToOptimize, int ffSteps, boolean verbose) throws IOException, InterruptedException, CDKException
 	{
 		//write out the molecule
 		File tempFile = File.createTempFile("mol",".mol2");
@@ -49,20 +49,24 @@ public class Mopac {
 		Runtime rt = Runtime.getRuntime();
 		//thats the ff optimized file
 		File tempFileFF = File.createTempFile("molFF",".pdb");
-		String command = "obminimize -n " + ffSteps +" -sd -ff MMFF94 " + tempFile.getPath();
+		String command = "obminimize -n " + ffSteps + " -sd -ff MMFF94 " + tempFile.getPath();
 		String[] psCmd =
 		{
 		    "sh",
 		    "-c", 
 		    command
 		};
-
+		
+		
+		if(verbose)
+			System.out.println("FF command: " + command);
+		
         Process pr = rt.exec(psCmd, null);
         
         // any error message?
-        StreamGobbler errorGobbler = new StreamGobbler(pr.getErrorStream(), "ERROR");            
+        StreamGobbler errorGobbler = new StreamGobbler(pr.getErrorStream(), "ERROR", false);            
         // any output?
-        StreamGobbler outputGobbler = new StreamGobbler(pr.getInputStream(), "OUTPUT");
+        StreamGobbler outputGobbler = new StreamGobbler(pr.getInputStream(), "OUTPUT", false);
         // start
         errorGobbler.start();
         outputGobbler.start();  
@@ -86,21 +90,49 @@ public class Mopac {
 		    "-c", 
 		    command
 		};
+        
+        if(verbose)
+        	System.out.println("MOPIN command: " + command);
+        
         Process prMopin = rt.exec(psCmdMOPIn);
         exitVal = prMopin.waitFor();
         System.out.println("MOP in error code " + exitVal);
         
+        
+        
         //now run mopac on mopin
-        File tempFileMOPOut = File.createTempFile("molMopOUT",".out");
-        command = "run_mopac7 " + tempFileMOPIn.getPath() + " > " + tempFileMOPOut.getPath();
-        Process prMopOut = rt.exec(command);
+        String tempStringMopacOut = tempFileMOPIn.getParent() + System.getProperty("file.separator") + tempFileMOPIn.getName().split("\\.")[0];
+        File tempFileMOPOut = new File(tempStringMopacOut);
+        command = "run_mopac7 " + tempStringMopacOut;
+        String[] psCmdMOPAC =
+		{
+		    "sh",
+		    "-c", 
+		    command
+		};
+        Process prMopOut = rt.exec(psCmdMOPAC);
         exitVal = prMopOut.waitFor();
+        
+        if(verbose)
+        	System.out.println("MOPAC command: " + command);
+        
         System.out.println("MOPAC error code " + exitVal);
        
         //now convert the result back to mol2
-        File tempFileMOPACMol2 = File.createTempFile("molMopac",".out");
-        Process prMopacMol2 = rt.exec("babel -i " + tempFileMOPOut.getPath() + " " + tempFileMOPACMol2);
+        File tempFileMOPACMol2 = File.createTempFile("molMopac",".mol2");
+        command = "babel -i mopout " + tempStringMopacOut + ".OUT" + " -o mol2 " + tempFileMOPACMol2;
+        String[] psCmdMOPACMol2 =
+		{
+		    "sh",
+		    "-c", 
+		    command
+		};
+        Process prMopacMol2 = rt.exec(psCmdMOPACMol2);
         exitVal = prMopacMol2.waitFor();
+        
+        if(verbose)
+        	System.out.println("MOPAC Mol2: " + command);
+        
         System.out.println("MOPAC Mol2 error code " + exitVal);
                 
 		//the read in the molecule again with the new coordinates

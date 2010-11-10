@@ -89,14 +89,12 @@ public class BondPrediction {
 		public List<String> calculateBondsToBreak(IAtomContainer mol) throws Exception
 		{		
 			List<String> bondsToBreak = new ArrayList<String>();
-			this.mol = mol;
 			
 			//now optimize the geometry of the neutral molecule
-    		
 			Mopac mopac = new Mopac();
 			try {				
 				//now optimize the structure of the neutral molecue
-	    		this.mol = mopac.runOptimization(this.mol, 1000);
+	    		this.mol = mopac.runOptimization(mol, 2000, true);
 	    		
 	        	GasteigerMarsiliPartialCharges peoe = new GasteigerMarsiliPartialCharges();
 //	        	GasteigerPEPEPartialCharges pepe = new GasteigerPEPEPartialCharges();
@@ -106,6 +104,7 @@ public class BondPrediction {
 	    		peoe.calculateCharges(this.mol);
 //		    	pepe.calculateCharges(this.mol);
 	    		
+	    		new StructureRenderer(this.mol, "Neutral");
 	    		
 	    		
 			} catch (Exception e) {
@@ -141,7 +140,8 @@ public class BondPrediction {
 			molArray[0] = this.mol;
 			this.molWithAllProtonationSites = (IAtomContainer)mol.clone();
 			
-			List<Distance> cpd1BondToDistance = new ArrayList<Distance>();
+			Map<String, Distance> cpd1BondToDistance = new HashMap<String, Distance>();
+			Map<String, Distance> cpd2BondToDistance = new HashMap<String, Distance>();
 			
 			//thats the smallest value for charge
 			Double minCharge = chargesArray[0].getCharge();
@@ -166,20 +166,21 @@ public class BondPrediction {
 					protonatedMol.addAtom(hydrogenAtom);
 					protonatedMol.addBond(hydrogenBond);
 					AtomContainerManipulator.getAtomById(protonatedMol, chargesArray[i].getAtom().getID()).setFormalCharge(1);
-					AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(protonatedMol);
+//					AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(protonatedMol);
 					
-					//now set the charge of the atom...separate atom container
+//					//now set the charge of the atom...separate atom container
 					IAtomContainer outputStructure = (IAtomContainer) protonatedMol.clone();
 					outputStructure = AtomContainerManipulator.removeHydrogens(outputStructure);
 					AtomContainerManipulator.getAtomById(outputStructure, chargesArray[i].getAtom().getID()).setFormalCharge(1);
+					AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(outputStructure);
+					AtomContainerManipulator.convertImplicitToExplicitHydrogens(outputStructure);
 					
 					
 					IBond hydrogenBondAll = new Bond(AtomContainerManipulator.getAtomById(this.molWithAllProtonationSites, chargesArray[i].getAtom().getID()), hydrogenAtom);
 					this.molWithAllProtonationSites.addAtom(hydrogenAtom);
 					this.molWithAllProtonationSites.addBond(hydrogenBondAll);
 					
-					AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(protonatedMol);
-					AtomContainerManipulator.convertImplicitToExplicitHydrogens(protonatedMol);
+					
 		            
 //		            Render.Draw(this.mol, "original");
 		            if(verbose)
@@ -187,7 +188,7 @@ public class BondPrediction {
 		            
 		            
 		            //optimize the geometry of the protonated molecule
-		            protonatedMol = mopac.runOptimization(this.mol, 500);
+		            protonatedMol = mopac.runOptimization(protonatedMol, 1, true);
 		            
 		            
 //		            GasteigerPEPEPartialCharges pepe = new GasteigerPEPEPartialCharges();
@@ -196,9 +197,6 @@ public class BondPrediction {
 		            peoe.calculateCharges(protonatedMol);
 		            protonatedMol = MoleculeTools.moleculeNumbering(protonatedMol);
 					molArray[1] = protonatedMol;
-					
-					cpd1BondToDistance = new ArrayList<Distance>();
-					List<Distance> cpd2BondToDistance = new ArrayList<Distance>();
 					
 					for (int j = 0; j < 2; j++) {
 						
@@ -224,9 +222,9 @@ public class BondPrediction {
 				        	if(verbose)
 				        	{
 				        		if(j == 0)
-				        			System.out.println("Neutral:" + atom1.getSymbol() + (Integer.parseInt(atom1.getID()) + 1) + "(" + atom1.getCharge()  + ") -"  +	atom2.getSymbol() + (Integer.parseInt(atom2.getID()) + 1) + "(" + atom2.getCharge()  + ") -" + "\t:" + distance);
+				        			System.out.println("Neutral: " + atom1.getSymbol() + (Integer.parseInt(atom1.getID()) + 1) + "(" + atom1.getCharge()  + ") -"  +	atom2.getSymbol() + (Integer.parseInt(atom2.getID()) + 1) + "(" + atom2.getCharge()  + ") -" + "\t:" + distance);
 				        		else
-				        			System.out.println("Protonated:" + atom1.getSymbol() + (Integer.parseInt(atom1.getID()) + 1) + "(" + atom1.getCharge()  + ") -"  +	atom2.getSymbol() + (Integer.parseInt(atom2.getID()) + 1) + "(" + atom2.getCharge()  + ") -" + "\t:" + distance);
+				        			System.out.println("Protonated: " + atom1.getSymbol() + (Integer.parseInt(atom1.getID()) + 1) + "(" + atom1.getCharge()  + ") -"  +	atom2.getSymbol() + (Integer.parseInt(atom2.getID()) + 1) + "(" + atom2.getCharge()  + ") -" + "\t:" + distance);
 				        	}
 				        	
 				        	Distance dist = null;
@@ -263,13 +261,13 @@ public class BondPrediction {
 							{
 								dist = new Distance(atom1.getSymbol() + (Integer.parseInt(atom1.getID()) + 1) + "-" + atom2.getSymbol() + (Integer.parseInt(atom2.getID()) + 1), distance, bond.getID());
 							}
-				        	
+							String key = atom1.getSymbol() + (Integer.parseInt(atom1.getID()) + 1) + "-"  +	atom2.getSymbol() + (Integer.parseInt(atom2.getID()) + 1);
 				        	//original molecule
-				        	if(j == 0 && !cpd1BondToDistance.contains(dist))
-				        		cpd1BondToDistance.add(dist);
+				        	if(j == 0 && !cpd1BondToDistance.containsKey(dist))
+				        		cpd1BondToDistance.put(key, dist);
 //					        		cpd1BondToDistance.add(new Distance(atom1.getSymbol() + "-" + atom2.getSymbol(), atom1.getPoint2d().distance(atom2.getPoint2d())));
-				        	else if(!cpd2BondToDistance.contains(dist))
-				        		cpd2BondToDistance.add(dist);
+				        	else if(!cpd2BondToDistance.containsKey(dist))
+				        		cpd2BondToDistance.put(key, dist);
 //					        		cpd2BondToDistance.add(new Distance(atom1.getSymbol() + "-" + atom2.getSymbol(), atom1.getPoint2d().distance(atom2.getPoint2d())));
 						}
 					}
@@ -278,13 +276,13 @@ public class BondPrediction {
 					List<String> notMatched = new ArrayList<String>();
 					
 					//now compare the results
-					int offset = 0;
 					String tempResult = "";
-					for (int i1 = 0; i1 < cpd1BondToDistance.size(); i1++) {
+					for (String bondID : cpd1BondToDistance.keySet()) {
+//					for (int i1 = 0; i1 < cpd1BondToDistance.size(); i1++) {
 						Double dist = -999.9;
-						if(cpd1BondToDistance.get(i1).getBond().equals(cpd2BondToDistance.get(i1 + offset).getBond()))
+						if(cpd1BondToDistance.get(bondID).getBond().equals(cpd2BondToDistance.get(bondID).getBond()))
 						{
-							dist = (cpd2BondToDistance.get(i1 + offset).getBondLength() - cpd1BondToDistance.get(i1).getBondLength());
+							dist = (cpd2BondToDistance.get(bondID).getBondLength() - cpd1BondToDistance.get(bondID).getBondLength());
 							
 							//now normalize the partial charge differences according to the partial charges
 							
@@ -293,15 +291,14 @@ public class BondPrediction {
 
 							double distRound = Math.round((dist * normalizedPartialChargeOfProtonizedAtom) * 1000.0)/1000.0;
 							//now save only the maximum bond length change...
-							bondToBondLength = saveMaximum(bondToBondLength, cpd1BondToDistance.get(i1).getBondID(), distRound);
+							bondToBondLength = saveMaximum(bondToBondLength, cpd1BondToDistance.get(bondID).getBondID(), distRound);
 //								tempResult += cpd1BondToDistance.get(i1).getBond() + " " + cpd1BondToDistance.get(i1).getBondLength() + " " + cpd2BondToDistance.get(i1 + offset).getBondLength() + ": " + distRound + "\n";
-							tempResult += cpd1BondToDistance.get(i1).getBond() +  "\t" + distRound + "\n";
+							tempResult += cpd1BondToDistance.get(bondID).getBond() +  "\t" + distRound + "\n";
 							
 						}
 						else
 						{
-							notMatched.add(cpd2BondToDistance.get(i1 + offset).getBond());
-							offset++;
+							System.err.println("No bond pair found!");
 //							dist = (cpd2BondToDistance.get(i1 + offset).getBondLength() - cpd1BondToDistance.get(i1).getBondLength());
 						}				
 					}
