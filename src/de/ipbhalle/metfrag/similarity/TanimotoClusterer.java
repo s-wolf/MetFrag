@@ -281,10 +281,19 @@ public class TanimotoClusterer {
 			List<SimilarityGroup> clusteredCpdsCleaned = tanimoto.getCleanedClusters(clusteredCpds);
 			
 			for (SimilarityGroup similarityGroup : clusteredCpdsCleaned) {
-
-				for (int i = 0; i < similarityGroup.getSimilarCompounds().size(); i++) {
-					System.out.print(similarityGroup.getSimilarCompounds().get(i).getCompoundID() + " ");
+				//cluster
+				if(similarityGroup.getSimilarCompounds().size() > 1)
+				{
+					for (int i = 0; i < similarityGroup.getSimilarCompounds().size(); i++) {
+						System.out.print(similarityGroup.getSimilarCompounds().get(i).getCompoundID() + " ");
+					}
 				}
+				//single
+				else
+				{
+					System.out.print("Single: " + similarityGroup.getSimilarCompounds().get(0).getCompoundID());
+				}
+				
 				System.out.println("");
 
 			}

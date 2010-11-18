@@ -33,6 +33,7 @@ import org.openscience.cdk.charges.GasteigerMarsiliPartialCharges;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IBond;
+import org.openscience.cdk.nonotify.NoNotificationChemObjectBuilder;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 
 import de.ipbhalle.metfrag.moldynamics.Distance;
@@ -98,8 +99,8 @@ public class BondPrediction {
 	    		
 	        	GasteigerMarsiliPartialCharges peoe = new GasteigerMarsiliPartialCharges();
 //	        	GasteigerPEPEPartialCharges pepe = new GasteigerPEPEPartialCharges();
+	        	AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(this.mol);
 	            AtomContainerManipulator.convertImplicitToExplicitHydrogens(this.mol);
-	            AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(this.mol);
 	            this.mol = MoleculeTools.moleculeNumbering(this.mol);
 	    		peoe.calculateCharges(this.mol);
 //		    	pepe.calculateCharges(this.mol);
@@ -159,14 +160,17 @@ public class BondPrediction {
 				{				
 					//now add hydrogen atom
 					protonatedMol = (IAtomContainer) this.mol.clone();
-					IAtom hydrogenAtom = new Atom("H");
+					
 					if(verbose)
 						System.out.println("Protonation of atom: " + chargesArray[i].getAtom().getSymbol()  + (Integer.parseInt(chargesArray[i].getAtom().getID()) + 1));
+					
+					IAtom hydrogenAtom = new Atom("H");
 					IBond hydrogenBond = new Bond(AtomContainerManipulator.getAtomById(protonatedMol, chargesArray[i].getAtom().getID()), hydrogenAtom);
 					protonatedMol.addAtom(hydrogenAtom);
 					protonatedMol.addBond(hydrogenBond);
 					AtomContainerManipulator.getAtomById(protonatedMol, chargesArray[i].getAtom().getID()).setFormalCharge(1);
 //					AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(protonatedMol);
+//		            AtomContainerManipulator.convertImplicitToExplicitHydrogens(protonatedMol);
 					
 //					//now set the charge of the atom...separate atom container
 					IAtomContainer outputStructure = (IAtomContainer) protonatedMol.clone();
@@ -176,9 +180,9 @@ public class BondPrediction {
 					AtomContainerManipulator.convertImplicitToExplicitHydrogens(outputStructure);
 					
 					
-					IBond hydrogenBondAll = new Bond(AtomContainerManipulator.getAtomById(this.molWithAllProtonationSites, chargesArray[i].getAtom().getID()), hydrogenAtom);
-					this.molWithAllProtonationSites.addAtom(hydrogenAtom);
-					this.molWithAllProtonationSites.addBond(hydrogenBondAll);
+//					IBond hydrogenBondAll = new Bond(AtomContainerManipulator.getAtomById(this.molWithAllProtonationSites, chargesArray[i].getAtom().getID()), hydrogenAtom);
+//					this.molWithAllProtonationSites.addAtom(hydrogenAtom);
+//					this.molWithAllProtonationSites.addBond(hydrogenBondAll);
 					
 					
 		            
@@ -271,16 +275,19 @@ public class BondPrediction {
 //					        		cpd2BondToDistance.add(new Distance(atom1.getSymbol() + "-" + atom2.getSymbol(), atom1.getPoint2d().distance(atom2.getPoint2d())));
 						}
 					}
-					
-					
-					List<String> notMatched = new ArrayList<String>();
+
 					
 					//now compare the results
 					String tempResult = "";
 					for (String bondID : cpd1BondToDistance.keySet()) {
 //					for (int i1 = 0; i1 < cpd1BondToDistance.size(); i1++) {
 						Double dist = -999.9;
-						if(cpd1BondToDistance.get(bondID).getBond().equals(cpd2BondToDistance.get(bondID).getBond()))
+						
+						if(cpd1BondToDistance.get(bondID) == null)
+							System.err.println("Bond ID (" + bondID + ") is null in cpd1");
+						else if(cpd2BondToDistance.get(bondID) == null)
+							System.err.println("Bond ID (" + bondID + ") is null in cpd2");
+						else if(cpd1BondToDistance.get(bondID).getBond().equals(cpd2BondToDistance.get(bondID).getBond()))
 						{
 							dist = (cpd2BondToDistance.get(bondID).getBondLength() - cpd1BondToDistance.get(bondID).getBondLength());
 							

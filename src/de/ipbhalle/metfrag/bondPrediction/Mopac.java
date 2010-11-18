@@ -16,12 +16,16 @@ import org.openscience.cdk.Molecule;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IMolecule;
+import org.openscience.cdk.io.MDLV2000Writer;
 import org.openscience.cdk.io.Mol2Reader;
 import org.openscience.cdk.io.Mol2Writer;
+import org.openscience.cdk.io.formats.MOPAC2002Format;
 import org.openscience.cdk.modeling.builder3d.ForceFieldConfigurator;
 import org.openscience.cdk.tools.manipulator.ChemFileManipulator;
 
 import de.ipbhalle.metfrag.tools.StreamGobbler;
+import de.ipbhalle.mopac.converter.CoordinatesTransfer;
+import de.ipbhalle.mopac.converter.MOPACInputFormatWriter;
 
 public class Mopac {	
 	
@@ -31,13 +35,18 @@ public class Mopac {
 	 * @param molToOptimize the mol to optimize
 	 * @param ffSteps the ff steps
 	 * @return the i atom container
-	 * @throws IOException Signals that an I/O exception has occurred.
-	 * @throws InterruptedException the interrupted exception
-	 * @throws CDKException the cDK exception
+	 * @throws Exception 
 	 */
-	public IAtomContainer runOptimization(IAtomContainer molToOptimize, int ffSteps, boolean verbose) throws IOException, InterruptedException, CDKException
+	public IAtomContainer runOptimization(IAtomContainer molToOptimize, int ffSteps, boolean verbose) throws Exception
 	{
 		//write out the molecule
+//		File tempFile = File.createTempFile("mol",".mol");
+//		FileWriter fw = new FileWriter(tempFile);
+//		MDLV2000Writer m2w = new MDLV2000Writer(fw);
+//		IMolecule molecule = new Molecule(molToOptimize);
+//		m2w.writeMolecule(molecule);
+//		m2w.close();
+		
 		File tempFile = File.createTempFile("mol",".mol2");
 		FileWriter fw = new FileWriter(tempFile);
 		Mol2Writer m2w = new Mol2Writer(fw);
@@ -49,7 +58,9 @@ public class Mopac {
 		Runtime rt = Runtime.getRuntime();
 		//thats the ff optimized file
 		File tempFileFF = File.createTempFile("molFF",".pdb");
-		String command = "obminimize -n " + ffSteps + " -sd -ff MMFF94 " + tempFile.getPath();
+//		String command = "obminimize -n " + ffSteps + " -sd -ff MMFF94 " + tempFile.getPath();
+//		String command = "obminimize -c 1e-3 -sd -ff UFF " + tempFile.getPath();
+		String command = "obminimize -n 300 -sd -ff UFF " + tempFile.getPath(); 
 		String[] psCmd =
 		{
 		    "sh",
@@ -80,29 +91,52 @@ public class Mopac {
         out.close();
         System.out.println("FF error code " + exitVal);
 
-		//then optimize it using mopac
-        //generate mopin from mol2
-        File tempFileMOPIn = File.createTempFile("molMopIN",".dat");
-        command = "babel " + tempFileFF.getPath() + " -o mopin " + tempFileMOPIn.getPath() + " -xk \"PREC AM1 T=3600 GEO-OK, GNORM=0.1, MMOK, SCFCRT=1D-9\"";
-        String[] psCmdMOPIn =
+        //convert it back to mol2
+        File tempFileFFOptimized = File.createTempFile("molFF",".mol2");
+        command = "babel " + tempFileFF.getPath() + " " + tempFileFFOptimized.getPath();
+        String[] psCmdFFMol2 =
 		{
 		    "sh",
 		    "-c", 
 		    command
 		};
-        
         if(verbose)
-        	System.out.println("MOPIN command: " + command);
+        	System.out.println("PDB to mol2 command: " + command);
         
-        Process prMopin = rt.exec(psCmdMOPIn);
-        exitVal = prMopin.waitFor();
-        System.out.println("MOP in error code " + exitVal);
+        Process prPDBToMol2 = rt.exec(psCmdFFMol2);
+        exitVal = prPDBToMol2.waitFor();
+        System.out.println("PDB to mol2 error code " + exitVal);
+                
+		//then optimize it using mopac
+        //generate mopin from mol2
+        
+        //replace babel mopin generation with own mopin writer
+        MOPACInputFormatWriter mopIn = new MOPACInputFormatWriter("AM1 T=600 GEO-OK, ECHO, SCFCRT=1.D-6, GNORM=0.1, XYZ");
+        File tempFileMOPIn = File.createTempFile("molMopIN",".dat");
+        mopIn.write(tempFileFFOptimized, tempFileMOPIn);
+        System.out.println("MOL2 to MOPAC INPUT: " + tempFileFFOptimized.getPath() + " --> " + tempFileMOPIn.getPath());
+        
+//        File tempFileMOPIn = File.createTempFile("molMopIN",".dat");
+//        command = "babel " + tempFileFFOptimized.getPath() + " -o mopin " + tempFileMOPIn.getPath() + " -xk \"AM1 T=3600 GEO-OK, GNORM=0.1, MMOK, SCFCRT=1D-9\"";
+////        command = "babel " + tempFileFFOptimized.getPath() + " -o mopin " + tempFileMOPIn.getPath() + " -xk \"PREC AM1 T=3600\"";
+//        String[] psCmdMOPIn =
+//		{
+//		    "sh",
+//		    "-c", 
+//		    command
+//		};
+//        
+//        if(verbose)
+//        	System.out.println("MOPIN command: " + command);
+//        
+//        Process prMopin = rt.exec(psCmdMOPIn);
+//        exitVal = prMopin.waitFor();
+//        System.out.println("MOP in error code " + exitVal);
         
         
         
         //now run mopac on mopin
         String tempStringMopacOut = tempFileMOPIn.getParent() + System.getProperty("file.separator") + tempFileMOPIn.getName().split("\\.")[0];
-        File tempFileMOPOut = new File(tempStringMopacOut);
         command = "run_mopac7 " + tempStringMopacOut;
         String[] psCmdMOPAC =
 		{
@@ -140,6 +174,7 @@ public class Mopac {
         ChemFile chemFile = (ChemFile)mr.read((ChemObject)new ChemFile());
         List<IAtomContainer> containersList = ChemFileManipulator.getAllAtomContainers(chemFile);
         
-        return containersList.get(0);
+//        return containersList.get(0);
+        return CoordinatesTransfer.transferCoordinates(containersList.get(0), molToOptimize);
 	}
 }
