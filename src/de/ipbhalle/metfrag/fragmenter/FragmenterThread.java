@@ -66,9 +66,11 @@ public class FragmenterThread implements Runnable{
 	private Config c = null;
 	private boolean generateFragmentsInMemory = true;
 	private String jdbc, username, password = "";
+	private boolean SDFDatabase = false;
+	private IAtomContainer mol;
 	
 	/**
-	 * Instantiates a new pubChem search thread.
+	 * Instantiates a new pubChem search thread. ONLINE
 	 * 
 	 * @param candidate the candidate
 	 * @param mzabs the mzabs
@@ -112,7 +114,7 @@ public class FragmenterThread implements Runnable{
 	
 	
 	/**
-	 * Instantiates a new pubChem search thread.
+	 * Instantiates a new pubChem search thread. LOCALLY
 	 * 
 	 * @param candidate the candidate
 	 * @param mzabs the mzabs
@@ -156,6 +158,48 @@ public class FragmenterThread implements Runnable{
 		this.jdbc = jdbc;
 	}
 	
+	/**
+	 * Instantiates a new pubChem search thread. SDF database given!
+	 * 
+	 * @param candidate the candidate
+	 * @param mzabs the mzabs
+	 * @param mzppm the mzppm
+	 * @param sumFormulaRedundancyCheck the sum formula redundancy check
+	 * @param breakAromaticRings the break aromatic rings
+	 * @param treeDepth the tree depth
+	 * @param showDiagrams the show diagrams
+	 * @param spectrum the spectrum
+	 * @param hydrogenTest the hydrogen test
+	 * @param database the database
+	 * @param pw the pw
+	 * @param neutralLossAdd the neutral loss add
+	 * @param bondEnergyScoring the bond energy scoring
+	 * @param isOnlyBreakSelectedBonds the is only break selected bonds
+	 * @param c the c
+	 * @param generateFragmentsInMemory the generate fragments in memory
+	 */
+	public FragmenterThread(String candidate, String database, WrapperSpectrum spectrum, double mzabs, double mzppm, boolean sumFormulaRedundancyCheck,
+			boolean breakAromaticRings, int treeDepth, boolean showDiagrams, boolean hydrogenTest,
+			boolean neutralLossAdd, boolean bondEnergyScoring, boolean isOnlyBreakSelectedBonds, Config c,
+			boolean generateFragmentsInMemory, boolean SDFDatabase, IAtomContainer mol)
+	{
+		this.candidate = candidate;
+		this.database = database;
+		this.mzabs = mzabs;
+		this.mzppm = mzppm;
+		this.sumFormulaRedundancyCheck = sumFormulaRedundancyCheck;
+		this.breakAromaticRings = breakAromaticRings;
+		this.spectrum = spectrum;
+		this.hydrogenTest = hydrogenTest;
+		this.neutralLossAdd = neutralLossAdd;
+		this.bondEnergyScoring = bondEnergyScoring;
+		this.isOnlyBreakSelectedBonds = isOnlyBreakSelectedBonds;
+		this.treeDepth = treeDepth;
+		this.generateFragmentsInMemory = generateFragmentsInMemory;
+		this.SDFDatabase = SDFDatabase;
+		this.mol = mol;
+	}
+	
 	
 	@Override public void run()
 	{		
@@ -163,9 +207,13 @@ public class FragmenterThread implements Runnable{
 		
 		try
 		{	    
-			
+			//local SDF database was given
+			if(isSDFDatabase())
+			{
+				molecule = mol;
+			}
 			//retrieve the candidate from the database
-			if(pw == null && c == null)
+			else if(pw == null && c == null)
 				molecule = Candidates.getCompoundLocally(this.database, candidate, jdbc, username, password, false);
 			else if(pw == null)
 				molecule = Candidates.getCompoundLocally(this.database, candidate, c.getJdbc(), c.getUsername(), c.getPassword(), false);
@@ -372,6 +420,16 @@ public class FragmenterThread implements Runnable{
 			System.gc();
 			MetFrag.results.addToCompleteLog("Out of memory! "+ e.getMessage() + "File: " + candidate);
 		}
+	}
+
+
+	public void setSDFDatabase(boolean sDFDatabase) {
+		SDFDatabase = sDFDatabase;
+	}
+
+
+	public boolean isSDFDatabase() {
+		return SDFDatabase;
 	}
 
 }

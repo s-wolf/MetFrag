@@ -25,7 +25,7 @@ import de.ipbhalle.metfrag.spectrum.WrapperSpectrum;
  * The Class BatchFileProcessing. This is able to process MetFrag batch files contained in 
  * a folder and writes out SDF files containing the ranked structures.
  */
-public class BatchFileProcessingLocal {
+public class BatchFileProcessingSDF {
 
 	/**
 	 * @param args
@@ -50,12 +50,14 @@ public class BatchFileProcessingLocal {
 			mzabs = Double.parseDouble(args[2]);
 			mzppm = Double.parseDouble(args[3]);
 			database = args[4];
-			if(args.length > 5)
-				treeDepth = Integer.parseInt(args[5]);
+			pathToSDFDatabase = args[5];
+			if(args.length > 6)
+				treeDepth = Integer.parseInt(args[6]);
+
 		}
 		else
 		{
-			System.err.println("Please enter CL values!\n1. value: Complete Path to input batch file \n2. Folder where to store the SDF output\n3. value: mzabs\n4. value: mzppm\n5. value: Database\nExample: /home/frasche/MM48_MSMSpos_MH3_20_1-A,1_01_13435-15.mb /home/swolf/ 0.01 10 kegg\n\n also the files neutralLossRules.csv and bondenergies.txt are needed: -Xms1500m -Xmx4048m -Dproperty.file.path=/home/swolf/src/MetFragCommandLine/MetFragPaper/");
+			System.err.println("Please enter command line arguments!\n1. Argument: Complete Path to input batch file \n2. Argument: Folder where to save the SDF output\n3. Argument: mzabs\n4. Argument: mzppm\n5. Argument: Database \n6. Argument: Local SDF file containing structures\nExample: /home/frasche/MM48_MSMSpos_MH3_20_1-A,1_01_13435-15.mb /home/swolf/ 0.01 10 kegg /home/swolf/SDFDatabase.sdf\n\n also the files neutralLossRules.csv and bondenergies.txt are needed: -Xms1500m -Xmx4048m -Dproperty.file.path=/home/swolf/src/MetFragCommandLine/MetFragPaper/");
 			System.exit(1);
 		}
 		
@@ -66,9 +68,6 @@ public class BatchFileProcessingLocal {
 	    Double exactMass = 0.0;
 	    String sample = "";
 	    Integer mode = 1;
-	    String jdbc = "jdbc:mysql://rdbms/MetFrag";
-	    String username = "swolf";
-	    String password = "populusromanus";
 	    
 	    try
 	    {
@@ -104,7 +103,8 @@ public class BatchFileProcessingLocal {
 		    
 		    
 		    //Fragment the structures!
-		    List<MetFragResult> results = MetFrag.startConvenienceMetFusion(database, "", "", exactMass, new WrapperSpectrum(peaks, mode, exactMass), false, mzabs, mzppm, 10, true, true, treeDepth, true, false, true, false, Integer.MAX_VALUE, jdbc, username, password);
+		    List<MetFragResult> results = MetFrag.startConvenienceSDF(new WrapperSpectrum(peaks, mode, exactMass), false, mzabs, mzppm, 10, true, true, treeDepth, true, false, true, false, Integer.MAX_VALUE, false, pathToSDFDatabase);
+		    													  
 		    MoleculeSet setOfMolecules = new MoleculeSet();
 			for (MetFragResult result : results) {
 				//get corresponding structure
