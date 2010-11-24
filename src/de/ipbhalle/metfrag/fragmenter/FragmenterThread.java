@@ -70,7 +70,7 @@ public class FragmenterThread implements Runnable{
 	private int neutralLossCombination;
 	
 	/**
-	 * Instantiates a new pubChem search thread.
+	 * Instantiates a new pubChem search thread. ONLINE
 	 * 
 	 * @param candidate the candidate
 	 * @param mzabs the mzabs
@@ -141,7 +141,7 @@ public class FragmenterThread implements Runnable{
 	
 	
 	/**
-	 * Instantiates a new pubChem search thread.
+	 * Instantiates a new pubChem search thread. LOCALLY
 	 * 
 	 * @param candidate the candidate
 	 * @param mzabs the mzabs

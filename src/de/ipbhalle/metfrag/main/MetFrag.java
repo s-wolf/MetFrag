@@ -53,6 +53,7 @@ import de.ipbhalle.metfrag.fragmenter.FragmenterResult;
 import de.ipbhalle.metfrag.fragmenter.FragmenterThread;
 import de.ipbhalle.metfrag.massbankParser.Peak;
 import de.ipbhalle.metfrag.pubchem.PubChemWebService;
+import de.ipbhalle.metfrag.read.SDFFile;
 import de.ipbhalle.metfrag.scoring.OptimizationMatrixEntry;
 import de.ipbhalle.metfrag.scoring.Scoring;
 import de.ipbhalle.metfrag.similarity.Similarity;
@@ -387,6 +388,100 @@ public class MetFrag {
 		//now collect the result
 		Map<String, IAtomContainer> candidateToStructure = results.getMapCandidateToStructure();
 		Map<String, Vector<MatchedFragment>> candidateToFragments = results.getMapCandidateToFragments();
+
+		List<MetFragResult> results = new ArrayList<MetFragResult>();
+		for (int i = scores.length -1; i >=0 ; i--) {
+			Vector<String> list = scoresNormalized.get(scores[i]);
+			for (String string : list) {
+				//get corresponding structure
+				IAtomContainer tmp = candidateToStructure.get(string);
+				tmp = AtomContainerManipulator.removeHydrogens(tmp);
+				
+				if(isStoreFragments)
+					results.add(new MetFragResult(string, tmp, scores[i], candidateToFragments.get(string).size(), candidateToFragments.get(string)));
+				else
+					results.add(new MetFragResult(string, tmp, scores[i], candidateToFragments.get(string).size()));
+			}
+		}		
+		
+		return results;
+	}
+	
+	
+	
+	/**
+	 * MetFrag. Start the fragmenter thread. Afterwards score the results.
+	 * 
+	 * @param database the database
+	 * @param searchPPM the search ppm
+	 * @param databaseID the database id
+	 * @param molecularFormula the molecular formula
+	 * @param exactMass the exact mass
+	 * @param spectrum the spectrum
+	 * @param useProxy the use proxy
+	 * @param mzabs the mzabs
+	 * @param mzppm the mzppm
+	 * @param molecularFormulaRedundancyCheck the molecular formula redundancy check
+	 * @param breakAromaticRings the break aromatic rings
+	 * @param treeDepth the tree depth
+	 * @param hydrogenTest the hydrogen test
+	 * @param neutralLossInEveryLayer the neutral loss in every layer
+	 * @param bondEnergyScoring the bond energy scoring
+	 * @param breakOnlySelectedBonds the break only selected bonds
+	 * @param limit the limit
+	 * @param isStoreFragments the is store fragments
+	 * 
+	 * @return the string
+	 * 
+	 * @throws Exception the exception
+	 */
+	public static List<MetFragResult> startConvenienceSDF(WrapperSpectrum spectrum, boolean useProxy, 
+			double mzabs, double mzppm, double searchPPM, boolean molecularFormulaRedundancyCheck, boolean breakAromaticRings, int treeDepth,
+			boolean hydrogenTest, boolean neutralLossInEveryLayer, boolean bondEnergyScoring, boolean breakOnlySelectedBonds, int limit, boolean isStoreFragments, String SDFDatabase) throws Exception
+	{
+		results = new FragmenterResult();
+		
+		List<IAtomContainer> candidates = SDFFile.ReadSDFFile(SDFDatabase);
+
+
+		//now fill executor!!!
+		//number of threads depending on the available processors
+	    int threads = Runtime.getRuntime().availableProcessors();
+	    //thread executor
+	    ExecutorService threadExecutor = null;
+	    System.out.println("Used Threads: " + threads);
+	    threadExecutor = Executors.newFixedThreadPool(threads);
+			
+		for (int c = 0; c < candidates.size(); c++) {
+			
+			if(c > limit)
+				break;
+			
+			threadExecutor.execute(new FragmenterThread(Integer.toString(c), "SDF", spectrum, mzabs, mzppm, 
+					molecularFormulaRedundancyCheck, breakAromaticRings, treeDepth, false, hydrogenTest, neutralLossInEveryLayer, 
+					bondEnergyScoring, breakOnlySelectedBonds, null, false, true, candidates.get(c)));		
+		}
+		
+		threadExecutor.shutdown();
+		
+		//wait until all threads are finished
+		while(!threadExecutor.isTerminated())
+		{
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}//sleep for 1000 ms
+		}
+
+		Map<Double, Vector<String>> scoresNormalized = Scoring.getCombinedScore(results.getRealScoreMap(), results.getMapCandidateToEnergy(), results.getMapCandidateToHydrogenPenalty());
+		Double[] scores = new Double[scoresNormalized.size()];
+		scores = scoresNormalized.keySet().toArray(scores);
+		Arrays.sort(scores);
+
+		//now collect the result
+		Map<String, IAtomContainer> candidateToStructure = results.getMapCandidateToStructure();
+		Map<String, Vector<PeakMolPair>> candidateToFragments = results.getMapCandidateToFragments();
 
 		List<MetFragResult> results = new ArrayList<MetFragResult>();
 		for (int i = scores.length -1; i >=0 ; i--) {

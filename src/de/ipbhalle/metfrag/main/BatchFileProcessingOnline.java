@@ -39,8 +39,6 @@ public class BatchFileProcessingOnline {
 		Integer treeDepth = 2;
 		Integer allFragments = 0;
 		String database = "kegg";
-		//TODO
-		String pathToSDFDatabase = "";
 		
 		//get command line arguments
 		if(args != null && args.length >= 3)
@@ -52,12 +50,11 @@ public class BatchFileProcessingOnline {
 			database = args[4];
 			if(args.length > 5)
 				treeDepth = Integer.parseInt(args[5]);
-			if(args.length > 6)
-				treeDepth = Integer.parseInt(args[5]);
+
 		}
 		else
 		{
-			System.err.println("Please enter CL values!\n1. value: Complete Path to input batch file \n2. Folder where to store the SDF output\n3. value: mzabs\n4. value: mzppm\n5. value: Database\nExample: /home/frasche/MM48_MSMSpos_MH3_20_1-A,1_01_13435-15.mb /home/swolf/ 0.01 10 kegg\n\n also the files neutralLossRules.csv and bondenergies.txt are needed: -Xms1500m -Xmx4048m -Dproperty.file.path=/home/swolf/src/MetFragCommandLine/MetFragPaper/");
+			System.err.println("Please enter command line arguments!\n1. Argument: Complete Path to input batch file \n2. Argument: Folder where to save the SDF output\n3. Argument: mzabs\n4. Argument: mzppm\n5. Argument: Database\nExample: /home/frasche/MM48_MSMSpos_MH3_20_1-A,1_01_13435-15.mb /home/swolf/ 0.01 10 kegg\n\n also the files neutralLossRules.csv and bondenergies.txt are needed: -Xms1500m -Xmx4048m -Dproperty.file.path=/home/swolf/src/MetFragCommandLine/MetFragPaper/");
 			System.exit(1);
 		}
 		
