@@ -457,9 +457,9 @@ public class MetFrag {
 			if(c > limit)
 				break;
 			
-			threadExecutor.execute(new FragmenterThread(Integer.toString(c), "SDF", spectrum, mzabs, mzppm, 
-					molecularFormulaRedundancyCheck, breakAromaticRings, treeDepth, false, hydrogenTest, neutralLossInEveryLayer, 
-					bondEnergyScoring, breakOnlySelectedBonds, null, false, true, candidates.get(c)));		
+			threadExecutor.execute(new FragmenterThread(candidates.get(c), Integer.toString(c), "SDF", new PubChemWebService(),spectrum, mzabs, mzppm, 
+					molecularFormulaRedundancyCheck, breakAromaticRings, treeDepth, false, hydrogenTest, neutralLossInEveryLayer,
+					bondEnergyScoring, breakOnlySelectedBonds, null, false, 3));		
 		}
 		
 		threadExecutor.shutdown();
@@ -481,7 +481,7 @@ public class MetFrag {
 
 		//now collect the result
 		Map<String, IAtomContainer> candidateToStructure = results.getMapCandidateToStructure();
-		Map<String, Vector<PeakMolPair>> candidateToFragments = results.getMapCandidateToFragments();
+		Map<String, Vector<MatchedFragment>> candidateToFragments = results.getMapCandidateToFragments();
 
 		List<MetFragResult> results = new ArrayList<MetFragResult>();
 		for (int i = scores.length -1; i >=0 ; i--) {

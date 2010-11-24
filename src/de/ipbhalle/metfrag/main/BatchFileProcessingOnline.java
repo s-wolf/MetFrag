@@ -100,7 +100,7 @@ public class BatchFileProcessingOnline {
 		    
 		    
 		    //Fragment the structures!
-		    List<MetFragResult> results = MetFrag.startConvenience(database, "", "", exactMass, new WrapperSpectrum(peaks, mode, exactMass), false, mzabs, mzppm, 10, true, true, treeDepth, true, false, true, false, Integer.MAX_VALUE, false);
+		    List<MetFragResult> results = MetFrag.startConvenience(database, "", "", exactMass, new WrapperSpectrum(peaks, mode, exactMass), false, mzabs, mzppm, 10, true, true, treeDepth, true, false, true, false, Integer.MAX_VALUE, false, 3);
 		    													  
 		    MoleculeSet setOfMolecules = new MoleculeSet();
 			for (MetFragResult result : results) {
