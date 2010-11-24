@@ -57,7 +57,7 @@ public class BatchFileProcessingSDF {
 		}
 		else
 		{
-			System.err.println("Please enter command line arguments!\n1. Argument: Complete Path to input batch file \n2. Argument: Folder where to save the SDF output\n3. Argument: mzabs\n4. Argument: mzppm\n5. Argument: Database \n6. Argument: Local SDF file containing structures\nExample: /home/frasche/MM48_MSMSpos_MH3_20_1-A,1_01_13435-15.mb /home/swolf/ 0.01 10 kegg /home/swolf/SDFDatabase.sdf\n\n also the files neutralLossRules.csv and bondenergies.txt are needed: -Xms1500m -Xmx4048m -Dproperty.file.path=/home/swolf/src/MetFragCommandLine/MetFragPaper/");
+			System.err.println("Please enter command line arguments!\n1. Argument: Complete Path to input batch file \n2. Argument: Folder where to save the SDF output\n3. Argument: mzabs\n4. Argument: mzppm\n5. Argument: Database \n6. Argument: Local SDF file containing structures\nExample: /home/frasche/MM48_MSMSpos_MH3_20_1-A,1_01_13435-15.mb /home/swolf/ 0.01 10 SDF /home/swolf/SDFDatabase.sdf\n\n also the files neutralLossRules.csv and bondenergies.txt are needed: -Xms1500m -Xmx4048m -Dproperty.file.path=/home/swolf/src/MetFragCommandLine/MetFragPaper/");
 			System.exit(1);
 		}
 		
