@@ -344,6 +344,15 @@ public class BondPrediction {
 			String combinedResults = "";
 			for (IBond bond : this.mol.bonds()) {
 				combinedResults += bond.getAtom(0).getSymbol() + (Integer.parseInt(bond.getAtom(0).getID()) + 1) + "-" + bond.getAtom(1).getSymbol() + (Integer.parseInt(bond.getAtom(1).getID()) + 1) + "\t" + bondToBondLength.get(bond.getID()) + "\n";
+				if(bondToBondLength.get(bond.getID()) == null)
+				{
+					bond.setProperty("bondLengthChange", 0);
+				}
+				else
+				{
+					bond.setProperty("bondLengthChange", bondToBondLength.get(bond.getID()));
+				}
+				
 			}
 //			for (String bond : bondToBondLength.keySet()) {
 //				combinedResults += AtomContainerManipulator.g(this.mol, bond) bond + " " + bondToBondLength.get(bond);

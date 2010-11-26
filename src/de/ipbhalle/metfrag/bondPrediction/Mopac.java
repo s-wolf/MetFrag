@@ -75,11 +75,11 @@ public class Mopac {
         Process pr = rt.exec(psCmd, null);
         
         // any error message?
-        StreamGobbler errorGobbler = new StreamGobbler(pr.getErrorStream(), "ERROR", false);            
+//        StreamGobbler errorGobbler = new StreamGobbler(pr.getErrorStream(), "ERROR", false);            
         // any output?
         StreamGobbler outputGobbler = new StreamGobbler(pr.getInputStream(), "OUTPUT", false);
         // start
-        errorGobbler.start();
+//        errorGobbler.start();
         outputGobbler.start();  
 
         int exitVal = pr.waitFor();
@@ -111,7 +111,7 @@ public class Mopac {
         //generate mopin from mol2
         
         //replace babel mopin generation with own mopin writer
-        MOPACInputFormatWriter mopIn = new MOPACInputFormatWriter("AM1 T=600 GEO-OK, ECHO, SCFCRT=1.D-6, GNORM=0.1, XYZ");
+        MOPACInputFormatWriter mopIn = new MOPACInputFormatWriter("AM1 T=600 GEO-OK, ECHO, SCFCRT=1.D-6, GNORM=0.1");
         File tempFileMOPIn = File.createTempFile("molMopIN",".dat");
         mopIn.write(tempFileFFOptimized, tempFileMOPIn);
         System.out.println("MOL2 to MOPAC INPUT: " + tempFileFFOptimized.getPath() + " --> " + tempFileMOPIn.getPath());
