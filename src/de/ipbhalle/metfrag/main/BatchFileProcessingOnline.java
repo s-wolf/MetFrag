@@ -79,7 +79,7 @@ public class BatchFileProcessingOnline {
 		    	
 		    	//sample
 		    	if(strLine.startsWith("# Sample:"))
-		    		sample = strLine.substring(10).replace('/', '_');
+		    		sample = strLine.substring(10).replace('/', '_').trim();
 		    	
 		    	//pubchem id
 		    	if(strLine.startsWith("# PubChem ID:"))
