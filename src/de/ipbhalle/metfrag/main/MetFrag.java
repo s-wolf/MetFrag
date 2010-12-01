@@ -360,7 +360,7 @@ public class MetFrag {
 		results = new FragmenterResult();
 		
 		List<IAtomContainer> candidates = SDFFile.ReadSDFFile(SDFDatabase);
-
+		System.out.println(candidates);
 
 		//now fill executor!!!
 		//number of threads depending on the available processors
