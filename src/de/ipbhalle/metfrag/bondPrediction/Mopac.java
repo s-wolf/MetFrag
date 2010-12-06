@@ -111,7 +111,7 @@ public class Mopac {
         //generate mopin from mol2
         
         //replace babel mopin generation with own mopin writer
-        MOPACInputFormatWriter mopIn = new MOPACInputFormatWriter("AM1 T=600 GEO-OK, ECHO, SCFCRT=1.D-6, GNORM=0.1");
+        MOPACInputFormatWriter mopIn = new MOPACInputFormatWriter("AM1 T=600 GEO-OK, ECHO, SCFCRT=1.D-4, GNORM=0.1, XYZ");
         File tempFileMOPIn = File.createTempFile("molMopIN",".dat");
         mopIn.write(tempFileFFOptimized, tempFileMOPIn);
         System.out.println("MOL2 to MOPAC INPUT: " + tempFileFFOptimized.getPath() + " --> " + tempFileMOPIn.getPath());
