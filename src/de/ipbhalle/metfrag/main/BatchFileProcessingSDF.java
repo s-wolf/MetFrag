@@ -65,7 +65,7 @@ public class BatchFileProcessingSDF {
 	    String strLine;
 	    String pubchemID = "";
 	    String peaks = "";
-	    Double exactMass = 0.0;
+	    Double exactMass = Double.MAX_VALUE;
 	    String sample = "";
 	    Integer mode = 1;
 	    
@@ -100,7 +100,6 @@ public class BatchFileProcessingSDF {
 		    	if(!strLine.startsWith("#"))
 		    		peaks += strLine + "\n";
 		    }
-		    
 		    
 		    //Fragment the structures!
 		    List<MetFragResult> results = MetFrag.startConvenienceSDF(new WrapperSpectrum(peaks, mode, exactMass), false, mzabs, mzppm, 10, true, true, treeDepth, true, false, true, false, Integer.MAX_VALUE, false, pathToSDFDatabase);
