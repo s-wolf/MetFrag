@@ -18,6 +18,7 @@ import org.openscience.cdk.interfaces.IBond.Stereo;
 import org.openscience.cdk.io.SDFWriter;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 
+import de.ipbhalle.metfrag.spectrum.MatchedFragment;
 import de.ipbhalle.metfrag.spectrum.WrapperSpectrum;
 
 
@@ -103,7 +104,7 @@ public class BatchFileProcessingSDF {
 		    
 		    
 		    //Fragment the structures!
-		    List<MetFragResult> results = MetFrag.startConvenienceSDF(new WrapperSpectrum(peaks, mode, exactMass), false, mzabs, mzppm, 10, true, true, treeDepth, true, false, true, false, Integer.MAX_VALUE, false, pathToSDFDatabase);
+		    List<MetFragResult> results = MetFrag.startConvenienceSDF(new WrapperSpectrum(peaks, mode, exactMass), false, mzabs, mzppm, 10, true, true, treeDepth, true, false, true, false, Integer.MAX_VALUE, true, pathToSDFDatabase);
 		    													  
 		    MoleculeSet setOfMolecules = new MoleculeSet();
 			for (MetFragResult result : results) {
@@ -112,13 +113,28 @@ public class BatchFileProcessingSDF {
 				tmp = AtomContainerManipulator.removeHydrogens(tmp);
 				tmp.setProperty("DatabaseID", result.getCandidateID());
 				tmp.setProperty("Score", result.getScore());
-				tmp.setProperty("PeaksExplained", result.getPeaksExplained());
+				tmp.setProperty("NoPeaksExplained", result.getPeaksExplained());
 				
 				//fix for bug in mdl reader setting where it happens that bond.stereo is null when the bond was read in as UP/DOWN (4)
 				for (IBond bond : tmp.bonds()) {
 					if(bond.getStereo() == null)
 						bond.setStereo(Stereo.UP_OR_DOWN);		
 				} 
+				
+				
+				String matchedPeaksString = "";
+				int count = 0;
+				for (MatchedFragment fragment : result.getFragments()) {
+					count++;
+					if(count == result.getFragments().size())
+						matchedPeaksString += fragment.getPeak().getMass() + " " + fragment.getPeak().getRelIntensity();
+					else
+						matchedPeaksString += fragment.getPeak().getMass() + " " + fragment.getPeak().getRelIntensity() + " ";
+				}
+				
+				if(!matchedPeaksString.equals(""))
+					tmp.setProperty("PeaksExplained", matchedPeaksString);
+				
 				setOfMolecules.addAtomContainer(tmp);
 			}	
 
