@@ -301,7 +301,7 @@ public class Charges {
 				
 				if(verbose)
 					System.out.println(tempResult);
-				this.results.add(new ChargeResult(this.mol, protonatedMol, outputStructure, tempResult));
+				this.results.add(new ChargeResult(this.mol, protonatedMol, outputStructure, tempResult, chargesArray[i].getAtom().getSymbol()  + (Integer.parseInt(chargesArray[i].getAtom().getID()) + 1)));
 
 //				for (String string : notMatched) {
 //					System.out.println(string);
@@ -341,7 +341,7 @@ public class Charges {
 		AtomContainerManipulator.convertImplicitToExplicitHydrogens(this.molWithAllProtonationSites);
         AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(this.molWithAllProtonationSites);
         this.molWithAllProtonationSites = MoleculeTools.moleculeNumbering(this.molWithAllProtonationSites);
-		this.results.add(0, new ChargeResult(this.mol, this.molWithAllProtonationSites, this.molWithAllProtonationSites, combinedResults));
+		this.results.add(0, new ChargeResult(this.mol, this.molWithAllProtonationSites, this.molWithAllProtonationSites, combinedResults, "combined"));
 		
 		
 		return bondsToBreak;

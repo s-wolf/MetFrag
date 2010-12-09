@@ -34,10 +34,12 @@ public class Mopac {
 	 *
 	 * @param molToOptimize the mol to optimize
 	 * @param ffSteps the ff steps
+	 * @param verbose the verbose
+	 * @param mopac method: possible Strings are: "AM1", "PM3" and "PM6"
 	 * @return the i atom container
-	 * @throws Exception 
+	 * @throws Exception the exception
 	 */
-	public IAtomContainer runOptimization(IAtomContainer molToOptimize, int ffSteps, boolean verbose) throws Exception
+	public IAtomContainer runOptimization(IAtomContainer molToOptimize, int ffSteps, boolean verbose, String mopacMethod) throws Exception
 	{
 		//write out the molecule
 //		File tempFile = File.createTempFile("mol",".mol");
@@ -60,7 +62,7 @@ public class Mopac {
 		File tempFileFF = File.createTempFile("molFF",".pdb");
 //		String command = "obminimize -n " + ffSteps + " -sd -ff MMFF94 " + tempFile.getPath();
 //		String command = "obminimize -c 1e-3 -sd -ff UFF " + tempFile.getPath();
-		String command = "obminimize -n 300 -sd -ff UFF " + tempFile.getPath(); 
+		String command = "obminimize -n " + ffSteps + " -sd -ff UFF " + tempFile.getPath(); 
 		String[] psCmd =
 		{
 		    "sh",
@@ -111,7 +113,7 @@ public class Mopac {
         //generate mopin from mol2
         
         //replace babel mopin generation with own mopin writer
-        MOPACInputFormatWriter mopIn = new MOPACInputFormatWriter("AM1 T=600 GEO-OK, ECHO, SCFCRT=1.D-4, GNORM=0.1, XYZ");
+        MOPACInputFormatWriter mopIn = new MOPACInputFormatWriter(mopacMethod + " T=600 GEO-OK, ECHO, SCFCRT=1.D-4, GNORM=0.1, XYZ");
         File tempFileMOPIn = File.createTempFile("molMopIN",".dat");
         mopIn.write(tempFileFFOptimized, tempFileMOPIn);
         System.out.println("MOL2 to MOPAC INPUT: " + tempFileFFOptimized.getPath() + " --> " + tempFileMOPIn.getPath());
@@ -169,7 +171,7 @@ public class Mopac {
         
         System.out.println("MOPAC Mol2 error code " + exitVal);
                 
-		//the read in the molecule again with the new coordinates
+		//read in the molecule again with the new coordinates
         Mol2Reader mr = new Mol2Reader(new FileReader(tempFileMOPACMol2));
         ChemFile chemFile = (ChemFile)mr.read((ChemObject)new ChemFile());
         List<IAtomContainer> containersList = ChemFileManipulator.getAllAtomContainers(chemFile);
