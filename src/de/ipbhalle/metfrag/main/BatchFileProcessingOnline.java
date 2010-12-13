@@ -98,6 +98,8 @@ public class BatchFileProcessingOnline {
 		    		peaks += strLine + "\n";
 		    }
 		    
+		    //now calculate the correct mass
+		    exactMass = exactMass - ((double)mode * 1.0072765);
 		    
 		    //Fragment the structures!
 		    List<MetFragResult> results = MetFrag.startConvenience(database, "", "", exactMass, new WrapperSpectrum(peaks, mode, exactMass), false, mzabs, mzppm, 10, true, true, treeDepth, true, false, true, false, Integer.MAX_VALUE, false);
