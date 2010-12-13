@@ -19,6 +19,7 @@ import org.openscience.cdk.io.SDFWriter;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 
 import de.ipbhalle.metfrag.spectrum.WrapperSpectrum;
+import de.ipbhalle.metfrag.tools.Constants;
 
 
 /**
@@ -98,6 +99,8 @@ public class BatchFileProcessingOnline {
 		    		peaks += strLine + "\n";
 		    }
 		    
+		    //now calculate the correct mass
+		    exactMass = exactMass - ((double)mode * Constants.PROTON_MASS);
 		    
 		    //Fragment the structures!
 		    List<MetFragResult> results = MetFrag.startConvenience(database, "", "", exactMass, new WrapperSpectrum(peaks, mode, exactMass), false, mzabs, mzppm, 10, true, true, treeDepth, true, false, true, false, Integer.MAX_VALUE, false, 3);
