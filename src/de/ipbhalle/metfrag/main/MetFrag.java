@@ -22,6 +22,7 @@
 package de.ipbhalle.metfrag.main;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -358,9 +359,19 @@ public class MetFrag {
 			boolean hydrogenTest, boolean neutralLossInEveryLayer, boolean bondEnergyScoring, boolean breakOnlySelectedBonds, int limit, boolean isStoreFragments, String SDFDatabase) throws Exception
 	{
 		results = new FragmenterResult();
+		List<IAtomContainer> candidates = null;
+		try
+		{
+			candidates = SDFFile.ReadSDFFile(SDFDatabase);
+			System.out.println(candidates.size());
+		}
+		catch(FileNotFoundException e)
+		{
+			System.err.println("SDF file not found!");
+			e.printStackTrace();
+			return null;
+		}
 		
-		List<IAtomContainer> candidates = SDFFile.ReadSDFFile(SDFDatabase);
-		System.out.println(candidates.size());
 
 		//now fill executor!!!
 		//number of threads depending on the available processors
@@ -401,7 +412,8 @@ public class MetFrag {
 		Map<String, IAtomContainer> candidateToStructure = results.getMapCandidateToStructure();
 		Map<String, Vector<PeakMolPair>> candidateToFragments = results.getMapCandidateToFragments();
 
-		List<MetFragResult> results = new ArrayList<MetFragResult>();
+		
+		List<MetFragResult> resultsToReturn = new ArrayList<MetFragResult>();
 		for (int i = scores.length -1; i >=0 ; i--) {
 			Vector<String> list = scoresNormalized.get(scores[i]);
 			for (String string : list) {
@@ -410,13 +422,22 @@ public class MetFrag {
 				tmp = AtomContainerManipulator.removeHydrogens(tmp);
 				
 				if(isStoreFragments)
-					results.add(new MetFragResult(string, tmp, scores[i], candidateToFragments.get(string).size(), candidateToFragments.get(string)));
+					resultsToReturn.add(new MetFragResult(string, tmp, scores[i], candidateToFragments.get(string).size(), candidateToFragments.get(string)));
 				else
-					results.add(new MetFragResult(string, tmp, scores[i], candidateToFragments.get(string).size()));
+					resultsToReturn.add(new MetFragResult(string, tmp, scores[i], candidateToFragments.get(string).size()));
 			}
 		}		
 		
-		return results;
+		//Output error messages!
+		if(resultsToReturn.size() == 0)
+		{
+			System.err.println("No results found.");
+			System.err.println(results.getCompleteLog().toString());
+		}
+		else
+			System.err.println(results.getCompleteLog().toString());
+		
+		return resultsToReturn;
 	}
 	
 	

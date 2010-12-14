@@ -63,6 +63,12 @@ public class SDFFile {
 			}
 	        
 		}
+		else
+		{
+			System.err.println("Did not find SDF file: " + path);
+			//throw error
+			reader = new MDLV2000Reader(new FileReader(f));
+		}
 		
         return ret;
 	}
