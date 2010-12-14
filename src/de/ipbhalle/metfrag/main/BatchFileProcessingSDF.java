@@ -156,7 +156,8 @@ public class BatchFileProcessingSDF {
 		    
 	    }
 	    catch(FileNotFoundException e){
-	    	System.err.println("File not found!");
+	    	System.err.println("MetFrag query file not found!");
+	    	e.printStackTrace();
 	    } catch (NumberFormatException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
