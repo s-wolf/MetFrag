@@ -194,7 +194,7 @@ public class BondPrediction {
 		            
 		            
 		            //optimize the geometry of the protonated molecule
-		            protonatedMol = mopac.runOptimization(protonatedMol, 1, true, mopacParameter);
+		            protonatedMol = mopac.runOptimization(protonatedMol, FFSteps, true, mopacParameter);
 		            
 		            
 //		            GasteigerPEPEPartialCharges pepe = new GasteigerPEPEPartialCharges();
