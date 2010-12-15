@@ -31,7 +31,11 @@ import org.openscience.cdk.ChemObject;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.io.MDLV2000Reader;
+import org.openscience.cdk.tools.CDKHydrogenAdder;
+import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 import org.openscience.cdk.tools.manipulator.ChemFileManipulator;
+
+import de.ipbhalle.metfrag.main.MetFrag;
 
 public class SDFFile {
 	
@@ -67,10 +71,40 @@ public class SDFFile {
 		{
 			System.err.println("Did not find SDF file: " + path);
 			//throw error
-			reader = new MDLV2000Reader(new FileReader(f));
+//			reader = new MDLV2000Reader(new FileReader(f));
 		}
 		
         return ret;
+	}
+	
+	public static void main(String[] args) {
+		try {
+			List<IAtomContainer> list = ReadSDFFile("/vol/data_extern/emma.schymanski@ufz.de/ufzleipzig/100spec/001_61627_C9H16_struct_wM_END.sdf");
+			for (IAtomContainer molecule : list) {
+				try
+		        {
+			        //add hydrogens
+			        AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(molecule);
+			        CDKHydrogenAdder hAdder = CDKHydrogenAdder.getInstance(molecule.getBuilder());
+			        hAdder.addImplicitHydrogens(molecule);
+			        AtomContainerManipulator.convertImplicitToExplicitHydrogens(molecule);
+		        }
+		        //there is a bug in cdk??
+		        catch(IllegalArgumentException e)
+	            {
+		        	System.err.println(e.getMessage());
+		        	e.printStackTrace();
+	            }
+			}
+			
+			System.out.println(list.size());
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (CDKException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 }

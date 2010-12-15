@@ -138,7 +138,9 @@ public class BatchFileProcessingSDF {
 				
 				setOfMolecules.addAtomContainer(tmp);
 			}	
-
+			
+			System.out.println("Write out " + setOfMolecules.getAtomContainerCount() + " molecules");
+			
 			try {
 				SDFWriter writer = new SDFWriter(new FileWriter(new File(outputFolder + sample + ".sdf")));
 				writer.write(setOfMolecules);
