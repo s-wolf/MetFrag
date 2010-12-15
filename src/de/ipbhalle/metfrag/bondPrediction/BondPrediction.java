@@ -107,7 +107,8 @@ public class BondPrediction {
 	    		peoe.calculateCharges(this.mol);
 //		    	pepe.calculateCharges(this.mol);
 	    		
-	    		new StructureRenderer(this.mol, "Neutral");
+	    		if(verbose)
+	    			new StructureRenderer(this.mol, "Neutral");
 	    		
 	    		
 			} catch (Exception e) {
