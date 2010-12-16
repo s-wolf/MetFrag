@@ -236,8 +236,10 @@ public class FragmenterThread implements Runnable{
 	         
 	        try
 	        {
-		        //add hydrogens
-		        AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(molecule);
+	        	//percieve atom types
+	        	synchronized (molecule) {
+	        		AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(molecule);
+				}      
 		        CDKHydrogenAdder hAdder = CDKHydrogenAdder.getInstance(molecule.getBuilder());
 		        hAdder.addImplicitHydrogens(molecule);
 		        AtomContainerManipulator.convertImplicitToExplicitHydrogens(molecule);
