@@ -83,11 +83,13 @@ public class BondPrediction {
 		/**
 		 * Calculate bonds which will most likely break.
 		 * It returns a list with bonds.
-		 * 
+		 *
+		 * @param mol the mol
+		 * @param mopac method: possible Strings are: "AM1", "PM3" and "PM6"
 		 * @return the list< i bond>
-		 * @throws Exception 
+		 * @throws Exception the exception
 		 */
-		public List<String> calculateBondsToBreak(IAtomContainer mol) throws Exception
+		public List<String> calculateBondsToBreak(IAtomContainer mol, int FFSteps, String mopacParameter) throws Exception
 		{		
 			List<String> bondsToBreak = new ArrayList<String>();
 			
@@ -95,7 +97,7 @@ public class BondPrediction {
 			Mopac mopac = new Mopac();
 			try {				
 				//now optimize the structure of the neutral molecue
-	    		this.mol = mopac.runOptimization(mol, 2000, true);
+	    		this.mol = mopac.runOptimization(mol, FFSteps, true, mopacParameter);
 	    		
 	        	GasteigerMarsiliPartialCharges peoe = new GasteigerMarsiliPartialCharges();
 //	        	GasteigerPEPEPartialCharges pepe = new GasteigerPEPEPartialCharges();
@@ -105,7 +107,8 @@ public class BondPrediction {
 	    		peoe.calculateCharges(this.mol);
 //		    	pepe.calculateCharges(this.mol);
 	    		
-	    		new StructureRenderer(this.mol, "Neutral");
+	    		if(verbose)
+	    			new StructureRenderer(this.mol, "Neutral");
 	    		
 	    		
 			} catch (Exception e) {
@@ -192,7 +195,7 @@ public class BondPrediction {
 		            
 		            
 		            //optimize the geometry of the protonated molecule
-		            protonatedMol = mopac.runOptimization(protonatedMol, 1, true);
+		            protonatedMol = mopac.runOptimization(protonatedMol, FFSteps, true, mopacParameter);
 		            
 		            
 //		            GasteigerPEPEPartialCharges pepe = new GasteigerPEPEPartialCharges();
@@ -312,7 +315,7 @@ public class BondPrediction {
 					
 					if(verbose)
 						System.out.println(tempResult);
-					this.results.add(new ChargeResult(this.mol, protonatedMol, outputStructure, tempResult));
+					this.results.add(new ChargeResult(this.mol, protonatedMol, outputStructure, tempResult, chargesArray[i].getAtom().getSymbol()  + (Integer.parseInt(chargesArray[i].getAtom().getID()) + 1)));
 
 //					for (String string : notMatched) {
 //						System.out.println(string);
@@ -361,7 +364,7 @@ public class BondPrediction {
 			AtomContainerManipulator.convertImplicitToExplicitHydrogens(this.molWithAllProtonationSites);
 	        AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(this.molWithAllProtonationSites);
 	        this.molWithAllProtonationSites = MoleculeTools.moleculeNumbering(this.molWithAllProtonationSites);
-			this.results.add(0, new ChargeResult(this.mol, this.molWithAllProtonationSites, this.molWithAllProtonationSites, combinedResults));
+			this.results.add(0, new ChargeResult(this.mol, this.molWithAllProtonationSites, this.molWithAllProtonationSites, combinedResults, "Combined"));
 			
 			
 			return bondsToBreak;

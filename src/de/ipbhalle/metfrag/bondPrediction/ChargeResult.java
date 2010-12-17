@@ -11,11 +11,13 @@ public class ChargeResult {
 	
 	/**
 	 * Instantiates a new charge result.
-	 * 
-	 * @param mol the mol
+	 *
+	 * @param originalMol the original mol
+	 * @param molWithProton the mol with proton
+	 * @param molWithCharge the mol with charge
 	 * @param chargeString the charge string
 	 */
-	public ChargeResult(IAtomContainer originalMol, IAtomContainer molWithProton, IAtomContainer molWithCharge, String chargeString)
+	public ChargeResult(IAtomContainer originalMol, IAtomContainer molWithProton, IAtomContainer molWithCharge, String chargeString, String protonatedAtom)
 	{
 		this.setOriginalMol(originalMol);
 		this.setMol(molWithProton);
@@ -27,6 +29,11 @@ public class ChargeResult {
 		this.molWithProton = molWithProton;
 	}
 
+	/**
+	 * Gets the mol used as input for the bond length change calculation. (Protonated and with charge changed)
+	 *
+	 * @return the mol with proton
+	 */
 	public IAtomContainer getMolWithProton() {
 		return molWithProton;
 	}
@@ -51,6 +58,11 @@ public class ChargeResult {
 		this.molWithCharge = molWithCharge;
 	}
 
+	/**
+	 * Gets the mol only with the charge changed on one atom.
+	 *
+	 * @return the mol with charge
+	 */
 	public IAtomContainer getMolWithCharge() {
 		return molWithCharge;
 	}

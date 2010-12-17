@@ -132,23 +132,40 @@ public class KEGGToDatabase {
 			SmilesGenerator generatorSmiles = new SmilesGenerator();
 		    IAtomContainer molecule = AtomContainerManipulator.removeHydrogens(molRead);
 		    String smiles = generatorSmiles.createSMILES(new Molecule(molecule));
-	        
-			ResultSet rs = stmt.executeQuery("SELECT nextval('compound_compound_id_seq')");
-		    rs.next();
-		    Integer compoundID = rs.getInt(1);
 		    
-		    PreparedStatement pstmtCompound = con.prepareStatement("INSERT INTO compound (compound_id, mol_structure, exact_mass, formula, smiles, inchi, inchi_key_1, inchi_key_2, inchi_key_3) VALUES (?,cast(? as molecule),?,?,?,?,?,?,?)");
-		    pstmtCompound.setInt(1, compoundID);
-	        pstmtCompound.setString(2, inchi);
-	        pstmtCompound.setDouble(3, mass);
-	        pstmtCompound.setString(4, formulaStringOrig);
-	        pstmtCompound.setString(5, smiles);
-	        pstmtCompound.setString(6, inchi);
-	        pstmtCompound.setString(7, inchiKeyArray[0]);
-	        pstmtCompound.setString(8, inchiKeyArray[1]);
-	        pstmtCompound.setString(9, "");
-	        pstmtCompound.executeUpdate();
-			
+		    //first check if the compound already exists (do not insert the same compound from different databases in the compound table)
+		    PreparedStatement pstmtCheck = con.prepareStatement("SELECT compound_id from compound where inchi_key_1 = ? and inchi_key_2 = ?");
+	        pstmtCheck.setString(1, inchiKeyArray[0]);
+	        pstmtCheck.setString(2, inchiKeyArray[1]);
+	        ResultSet res = pstmtCheck.executeQuery();
+	        Integer compoundID = null;
+	        while(res.next()){
+	        	compoundID = res.getInt(1);
+	        }
+	        
+	        ResultSet rs = null;
+	        //no previously inserted compound matches
+	        if(compoundID == null)
+	        {
+	        	rs = stmt.executeQuery("SELECT nextval('compound_compound_id_seq')");
+			    rs.next();
+			    compoundID = rs.getInt(1);
+			    
+			    PreparedStatement pstmtCompound = con.prepareStatement("INSERT INTO compound (compound_id, mol_structure, exact_mass, formula, smiles, inchi, inchi_key_1, inchi_key_2, inchi_key_3) VALUES (?,cast(? as molecule),?,?,?,?,?,?,?)");
+			    pstmtCompound.setInt(1, compoundID);
+		        pstmtCompound.setString(2, inchi);
+		        pstmtCompound.setDouble(3, mass);
+		        pstmtCompound.setString(4, formulaStringOrig);
+		        pstmtCompound.setString(5, smiles);
+		        pstmtCompound.setString(6, inchi);
+		        pstmtCompound.setString(7, inchiKeyArray[0]);
+		        pstmtCompound.setString(8, inchiKeyArray[1]);
+		        pstmtCompound.setString(9, "");
+		        pstmtCompound.executeUpdate();
+	        }else
+	        {
+	        	System.out.println("Duplicate found!");
+	        }
 	        
 	        
 	        //now get the next substance_id
@@ -200,10 +217,17 @@ public class KEGGToDatabase {
 	
 	public static void main(String[] args) {
 		String[] files = null;
+		String folder = "";
+		boolean isFolderRead = false;
 		
-		if(args[0] != null)
+		if(args[0] != null && args.length == 1)
 		{
 			files = args[0].split("-");
+		}
+		else if(args[1] != null && args.length == 2)
+		{
+			isFolderRead = true;
+			folder = args[1];
 		}
 		else
 		{
@@ -231,10 +255,29 @@ public class KEGGToDatabase {
 	        
 	        KEGGToDatabase k = new KEGGToDatabase(path);
 			
-			for (int i = 0; i < files.length; i++) {
-				File file = new File(path + files[i]);
-				k.run(file);
-			}
+	        if(isFolderRead)
+	        {
+	        	//loop over all files in folder
+	    		File f = new File(folder);
+	    		File filesArray[] = f.listFiles();
+	    		Arrays.sort(filesArray);
+	    		
+
+	            for(int i=0;i<filesArray.length;i++)
+	    		{
+	    			if(filesArray[i].isFile())
+	    			{
+	    				k.run(filesArray[i]);
+	    			}
+	    		}
+	        }
+	        else
+	        {
+				for (int i = 0; i < files.length; i++) {
+					File file = new File(path + files[i]);
+					k.run(file);
+				}
+	        }
 			
 				
 		} catch (ClassNotFoundException e) {
