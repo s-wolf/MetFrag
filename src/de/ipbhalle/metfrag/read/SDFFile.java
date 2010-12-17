@@ -66,5 +66,18 @@ public class SDFFile {
 		
         return ret;
 	}
+	
+	public static void main(String[] args) {
+		try {
+			List<IAtomContainer> test = ReadSDFFile("158384_C7H14_structwM_END.sdf");
+			System.out.println(test.size());
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (CDKException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 
 }
