@@ -17,9 +17,11 @@ import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IChemObjectBuilder;
 import org.openscience.cdk.interfaces.IMolecule;
 import org.openscience.cdk.layout.StructureDiagramGenerator;
-import org.openscience.cdk.renderer.Renderer;
+import org.openscience.cdk.renderer.AtomContainerRenderer;
+import org.openscience.cdk.renderer.RendererModel;
 import org.openscience.cdk.renderer.font.AWTFontManager;
 import org.openscience.cdk.renderer.font.IFontManager;
+import org.openscience.cdk.renderer.generators.AtomNumberGenerator;
 import org.openscience.cdk.renderer.generators.BasicAtomGenerator;
 import org.openscience.cdk.renderer.generators.BasicBondGenerator;
 import org.openscience.cdk.renderer.generators.BasicSceneGenerator;
@@ -27,6 +29,7 @@ import org.openscience.cdk.renderer.generators.ExtendedAtomGenerator;
 import org.openscience.cdk.renderer.generators.IGenerator;
 import org.openscience.cdk.renderer.generators.IGeneratorParameter;
 import org.openscience.cdk.renderer.generators.RingGenerator;
+import org.openscience.cdk.renderer.generators.BasicAtomGenerator.KekuleStructure;
 import org.openscience.cdk.renderer.visitor.AWTDrawVisitor;
 import org.openscience.cdk.smiles.SmilesParser;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
@@ -124,56 +127,59 @@ public class WritePDFTable extends MoleculeCell {
         return tempFile;
     }
     
-    private RenderedImage getImage4MOL(IAtomContainer molAC) throws Exception {
-    	    	
+    private RenderedImage getImage4MOL(IAtomContainer mol) throws Exception {
+    	
+//    	protonatedMol = AtomContainerManipulator.removeHydrogens(protonatedMol);
         // creates CDK Molecule object and get the renderer
-    	IMolecule molSource = new Molecule(molAC);
+    	IMolecule molSource = new Molecule(mol);
     	
-    	Rectangle drawArea = new Rectangle(this.width, this.height);
-		Image image = new BufferedImage(this.width, this.height, BufferedImage.TYPE_INT_RGB);
-    	
-    	
-		StructureDiagramGenerator sdg = new StructureDiagramGenerator();
+    	StructureDiagramGenerator sdg = new StructureDiagramGenerator();
 		sdg.setMolecule(molSource);
 		try {
 	       sdg.generateCoordinates();
 		} catch (Exception e) { }
 		molSource = sdg.getMolecule();
-    	
-    	
-		List<IGenerator<IAtomContainer>> generators = new ArrayList<IGenerator<IAtomContainer>>();
-        generators.add(new BasicSceneGenerator());
-        generators.add(new RingGenerator());
-        generators.add(new ExtendedAtomGenerator());
-
-        IFontManager fm = new AWTFontManager();
-
-        // the renderer needs to have a toolkit-specific font manager 
-		Renderer renderer = new Renderer(generators, new AWTFontManager());
-//        for (IGenerator generator : renderer.getGenerators()) {
-//        	for (IGeneratorParameter parameter : generator.getParameters()) {
-//        		if(parameter.getClass().getName().substring(40).equals("BasicAtomGenerator$KekuleStructure"))
-//        			parameter.setValue(true);
-//        	}
-//        }
-//
-//		renderer.getRenderer2DModel().setDrawNumbers(true);
-
 		
-		// the call to 'setup' only needs to be done on the first paint
+		List<IGenerator<IAtomContainer>> generators = new ArrayList<IGenerator<IAtomContainer>>();
+		generators.add(new BasicSceneGenerator());
+        generators.add(new BasicBondGenerator());
+        generators.add(new BasicAtomGenerator());
+        generators.add(new RingGenerator());
+        generators.add(new AtomNumberGenerator());
+//        generators.add(new RadicalGenerator());
+        
+        IFontManager fm = new AWTFontManager();
+        AtomContainerRenderer renderer = new AtomContainerRenderer(generators, fm);
+        RendererModel rm = renderer.getRenderer2DModel();
+        rm.set(KekuleStructure.class, true); 
+        rm.set(AtomNumberGenerator.Offset.class, new javax.vecmath.Vector2d(10,0));
+        
+        			
+        this.setPreferredSize(new Dimension(this.width, this.height));
+        this.setBackground(Color.WHITE);
+        
+		Image image = new BufferedImage(this.width, this.height, BufferedImage.TYPE_INT_RGB);
+		Rectangle drawArea = new Rectangle(0, 0, this.width, this.height);
+		
 		renderer.setup(molSource, drawArea);
-		   
-		// paint the background
+		
+		Rectangle diagramRectangle = renderer.calculateDiagramBounds(molSource);
+        
+        Rectangle result = renderer.shift(drawArea, diagramRectangle);
+        this.setPreferredSize(new Dimension(result.width, result.height));
+        this.revalidate();
+        
+        
+        // paint the background
 		Graphics2D g2 = (Graphics2D)image.getGraphics();
 	   	g2.setColor(Color.WHITE);
 	   	g2.fillRect(0, 0, this.width, this.height);
-	   	
-	   	// the paint method also needs a toolkit-specific renderer
-	   	renderer.paintMolecule(molSource, new AWTDrawVisitor(g2), drawArea, true);
+        renderer.paint(molSource, new AWTDrawVisitor((Graphics2D) g2), drawArea, true);
 
 	   	return (RenderedImage) image;       
 
     }
+
     
     
     public static void main(String[] args) {

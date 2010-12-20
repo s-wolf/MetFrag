@@ -25,7 +25,6 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.GridBagLayout;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,17 +36,14 @@ import javax.swing.border.EtchedBorder;
 
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IMolecularFormula;
-import org.openscience.cdk.renderer.Renderer;
+import org.openscience.cdk.renderer.AtomContainerRenderer;
 import org.openscience.cdk.renderer.RendererModel;
 import org.openscience.cdk.renderer.font.AWTFontManager;
 import org.openscience.cdk.renderer.generators.BasicAtomGenerator;
 import org.openscience.cdk.renderer.generators.BasicBondGenerator;
 import org.openscience.cdk.renderer.generators.BasicSceneGenerator;
-import org.openscience.cdk.renderer.generators.ExtendedAtomGenerator;
 import org.openscience.cdk.renderer.generators.IGenerator;
-import org.openscience.cdk.renderer.generators.LonePairGenerator;
 import org.openscience.cdk.renderer.generators.RadicalGenerator;
-import org.openscience.cdk.renderer.generators.RingGenerator;
 import org.openscience.cdk.renderer.generators.BasicAtomGenerator.AtomRadius;
 import org.openscience.cdk.renderer.visitor.AWTDrawVisitor;
 import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
@@ -60,7 +56,7 @@ public class MoleculeCell extends JPanel{
 	private int preferredWidth;
     private int preferredHeight;
     private IAtomContainer atomContainer;
-    private Renderer renderer;
+    private AtomContainerRenderer renderer;
     private String title;
     
     private boolean isNew;
@@ -88,7 +84,7 @@ public class MoleculeCell extends JPanel{
         generators.add(new RadicalGenerator());
                
         
-        this.renderer = new Renderer(generators, new AWTFontManager());
+        this.renderer = new AtomContainerRenderer(generators, new AWTFontManager());
         RendererModel rm = renderer.getRenderer2DModel();
         rm.set(AtomRadius.class, 0.4);
         
@@ -104,7 +100,8 @@ public class MoleculeCell extends JPanel{
             this.renderer.setup(atomContainer, drawArea);
             this.isNew = false;
         }
-        this.renderer.paintMolecule(this.atomContainer, new AWTDrawVisitor((Graphics2D) g), drawArea, true);
+
+        this.renderer.paint(this.atomContainer, new AWTDrawVisitor((Graphics2D) g), drawArea, true);
         
         //draw title
         int fontSize = 12;
