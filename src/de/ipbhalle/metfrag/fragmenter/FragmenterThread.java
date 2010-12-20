@@ -29,11 +29,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import org.openscience.cdk.atomtype.CDKAtomTypeMatcher;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.graph.ConnectivityChecker;
+import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
+import org.openscience.cdk.interfaces.IAtomType;
+import org.openscience.cdk.interfaces.IPseudoAtom;
 import org.openscience.cdk.tools.CDKHydrogenAdder;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
+import org.openscience.cdk.tools.manipulator.AtomTypeManipulator;
 
 import de.ipbhalle.metfrag.fragmenter.Fragmenter;
 import de.ipbhalle.metfrag.main.Config;
@@ -238,7 +243,19 @@ public class FragmenterThread implements Runnable{
 	        {
 	        	//percieve atom types
 	        	synchronized (molecule) {
-	        		AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(molecule);
+	        		CDKAtomTypeMatcher matcher = CDKAtomTypeMatcher.getInstance(molecule.getBuilder());
+	        		while(matcher == null)
+	        		{
+	        			matcher = CDKAtomTypeMatcher.getInstance(molecule.getBuilder());
+	        			System.err.println("BUG: percieve and cofigure atoms");
+	        		}
+	        		
+	                for (IAtom atom : molecule.atoms()) {
+	                    if (!(atom instanceof IPseudoAtom)) {
+	                        IAtomType matched = matcher.findMatchingAtomType(molecule, atom);
+	                        if (matched != null) AtomTypeManipulator.configure(atom, matched);
+	                    }
+	                }
 				}      
 		        CDKHydrogenAdder hAdder = CDKHydrogenAdder.getInstance(molecule.getBuilder());
 		        hAdder.addImplicitHydrogens(molecule);
