@@ -39,7 +39,7 @@ public class Mopac {
 	 * @return the i atom container
 	 * @throws Exception the exception
 	 */
-	public IAtomContainer runOptimization(IAtomContainer molToOptimize, int ffSteps, boolean verbose, String mopacMethod) throws Exception
+	public IAtomContainer runOptimization(IAtomContainer molToOptimize, int ffSteps, boolean verbose, String mopacMethod, boolean firstRun) throws Exception
 	{
 		//write out the molecule
 //		File tempFile = File.createTempFile("mol",".mol");
@@ -56,13 +56,37 @@ public class Mopac {
 		m2w.writeMolecule(molecule);
 		m2w.close();
 		
-		//first of all do a force field optimization using open babel for a first optimization
 		Runtime rt = Runtime.getRuntime();
+		File tempFileFFInput3D = null;
+		
+		if(firstRun)
+		{
+			//convert it back to mol2
+	        tempFileFFInput3D = File.createTempFile("molFFInput",".mol2");
+	        String command = "babel --gen3d -i mol2 " + tempFile.getPath() + " -o mol2 " + tempFileFFInput3D.getPath();
+	        String[] psCmdFFInput =
+			{
+			    "sh",
+			    "-c", 
+			    command
+			};
+	        if(verbose)
+	        	System.out.println("mol2 to mol2 (3D coordinates generation) command: " + command);
+	        
+	        Process prFFInput = rt.exec(psCmdFFInput, null);
+	        int exitValFFInput = prFFInput.waitFor();
+	        System.out.println("mol2 to mol2 (3D coordinates generation) error code " + exitValFFInput);
+		}
+		else
+			tempFileFFInput3D = tempFile;
+		
+		
+		//first of all do a force field optimization using open babel for a first optimization
 		//thats the ff optimized file
 		File tempFileFF = File.createTempFile("molFF",".pdb");
 //		String command = "obminimize -n " + ffSteps + " -sd -ff MMFF94 " + tempFile.getPath();
 //		String command = "obminimize -c 1e-3 -sd -ff UFF " + tempFile.getPath();
-		String command = "obminimize -n " + ffSteps + " -sd -ff UFF " + tempFile.getPath(); 
+		String command = "obminimize -n " + ffSteps + " -sd -ff UFF " + tempFileFFInput3D.getPath(); 
 		String[] psCmd =
 		{
 		    "sh",
@@ -92,7 +116,8 @@ public class Mopac {
         //Close the output stream
         out.close();
         System.out.println("FF error code " + exitVal);
-
+		
+		
         //convert it back to mol2
         File tempFileFFOptimized = File.createTempFile("molFF",".mol2");
         command = "babel " + tempFileFF.getPath() + " " + tempFileFFOptimized.getPath();

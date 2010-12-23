@@ -50,6 +50,7 @@ public class BondPrediction {
 		private boolean verbose = false;
 		private List<ChargeResult> results= null;
 		private List<IBond> aromaticBonds = null;
+		private boolean render = false;
 		
 		/**
 		 * Instantiates a new charges class.
@@ -63,9 +64,10 @@ public class BondPrediction {
 		}
 		
 		
-		public void debug()
+		public void debug(boolean render)
 		{
 			verbose = true;
+			this.render = render;
 		}
 		
 		
@@ -97,7 +99,7 @@ public class BondPrediction {
 			Mopac mopac = new Mopac();
 			try {				
 				//now optimize the structure of the neutral molecue
-	    		this.mol = mopac.runOptimization(mol, FFSteps, true, mopacParameter);
+	    		this.mol = mopac.runOptimization(mol, FFSteps, true, mopacParameter, true);
 	    		
 	        	GasteigerMarsiliPartialCharges peoe = new GasteigerMarsiliPartialCharges();
 //	        	GasteigerPEPEPartialCharges pepe = new GasteigerPEPEPartialCharges();
@@ -107,7 +109,7 @@ public class BondPrediction {
 	    		peoe.calculateCharges(this.mol);
 //		    	pepe.calculateCharges(this.mol);
 	    		
-	    		if(verbose)
+	    		if(render)
 	    			new StructureRenderer(this.mol, "Neutral");
 	    		
 	    		
@@ -190,94 +192,104 @@ public class BondPrediction {
 					
 		            
 //		            Render.Draw(this.mol, "original");
-		            if(verbose)
+		            if(render)
 		            	new StructureRenderer(protonatedMol, "protonated");
 		            
 		            
 		            //optimize the geometry of the protonated molecule
-		            protonatedMol = mopac.runOptimization(protonatedMol, FFSteps, true, mopacParameter);
 		            
-		            
-//		            GasteigerPEPEPartialCharges pepe = new GasteigerPEPEPartialCharges();
-//		            pepe.calculateCharges(protonatedMol);
-		            GasteigerMarsiliPartialCharges peoe = new GasteigerMarsiliPartialCharges();
-		            peoe.calculateCharges(protonatedMol);
-		            protonatedMol = MoleculeTools.moleculeNumbering(protonatedMol);
-					molArray[1] = protonatedMol;
-					
-					for (int j = 0; j < 2; j++) {
+		            try
+		            {
+		            	protonatedMol = mopac.runOptimization(protonatedMol, FFSteps, true, mopacParameter, false);
+		            	
+//			            GasteigerPEPEPartialCharges pepe = new GasteigerPEPEPartialCharges();
+//			            pepe.calculateCharges(protonatedMol);
+			            GasteigerMarsiliPartialCharges peoe = new GasteigerMarsiliPartialCharges();
+			            peoe.calculateCharges(protonatedMol);
+			            protonatedMol = MoleculeTools.moleculeNumbering(protonatedMol);
+						molArray[1] = protonatedMol;
 						
-						if(!cpd1BondToDistance.isEmpty() && j == 0)
-							continue;					
-						
-
-						//now compare to the original one
-						for (IBond bond : molArray[j].bonds()) {
-				        	IAtom atom1 = null;
-				        	IAtom atom2 = null;
-				        	for (IAtom atom : bond.atoms()) {
-				        		if(atom1 == null)
-				        			atom1 = atom;
-				        		else
-				        			atom2 = atom;
-				        		
-							}
-
-				        	double distance = atom1.getPoint3d().distance(atom2.getPoint3d());
-				        	
-				        	
-				        	if(verbose)
-				        	{
-				        		if(j == 0)
-				        			System.out.println("Neutral: " + atom1.getSymbol() + (Integer.parseInt(atom1.getID()) + 1) + "(" + atom1.getCharge()  + ") -"  +	atom2.getSymbol() + (Integer.parseInt(atom2.getID()) + 1) + "(" + atom2.getCharge()  + ") -" + "\t:" + distance);
-				        		else
-				        			System.out.println("Protonated: " + atom1.getSymbol() + (Integer.parseInt(atom1.getID()) + 1) + "(" + atom1.getCharge()  + ") -"  +	atom2.getSymbol() + (Integer.parseInt(atom2.getID()) + 1) + "(" + atom2.getCharge()  + ") -" + "\t:" + distance);
-				        	}
-				        	
-				        	Distance dist = null;
-				        	
-
-				        	//if the protonated atoms was a terminal one with a oxygen double bond the diff. of the partial charges is set to 0			        	
-				        	List<IBond> bondsTemp = molArray[j].getConnectedBondsList(atom1);
-							boolean doubleBond = false;
-							for (IBond iBond : bondsTemp) {
-								if(iBond.getOrder().equals(IBond.Order.DOUBLE))
-									doubleBond = true;
-							}
-				        	
+						for (int j = 0; j < 2; j++) {
 							
-							if(atom1.getSymbol().equals("H") || atom2.getSymbol().equals("H"))
-								continue;
+							if(!cpd1BondToDistance.isEmpty() && j == 0)
+								continue;					
 							
-							//give penalty for aromatic rings...they usually don't split...also assume the aromatic rings for the protonated molecule
-							if(this.aromaticBonds.contains(bond) || this.aromaticBonds.contains(molArray[0].getBond(AtomContainerManipulator.getAtomById(molArray[0], atom1.getID()), AtomContainerManipulator.getAtomById(molArray[0], atom2.getID()))))
-							{
-								dist = new Distance(atom1.getSymbol() + (Integer.parseInt(atom1.getID()) + 1) + "-" + atom2.getSymbol() + (Integer.parseInt(atom2.getID()) + 1), 0.0, bond.getID());
+
+							//now compare to the original one
+							for (IBond bond : molArray[j].bonds()) {
+					        	IAtom atom1 = null;
+					        	IAtom atom2 = null;
+					        	for (IAtom atom : bond.atoms()) {
+					        		if(atom1 == null)
+					        			atom1 = atom;
+					        		else
+					        			atom2 = atom;
+					        		
+								}
+
+					        	double distance = atom1.getPoint3d().distance(atom2.getPoint3d());
+					        	
+					        	
+					        	if(verbose)
+					        	{
+					        		if(j == 0)
+					        			System.out.println("Neutral: " + atom1.getSymbol() + (Integer.parseInt(atom1.getID()) + 1) + "(" + atom1.getCharge()  + ") -"  +	atom2.getSymbol() + (Integer.parseInt(atom2.getID()) + 1) + "(" + atom2.getCharge()  + ") -" + "\t:" + distance);
+					        		else
+					        			System.out.println("Protonated: " + atom1.getSymbol() + (Integer.parseInt(atom1.getID()) + 1) + "(" + atom1.getCharge()  + ") -"  +	atom2.getSymbol() + (Integer.parseInt(atom2.getID()) + 1) + "(" + atom2.getCharge()  + ") -" + "\t:" + distance);
+					        	}
+					        	
+					        	Distance dist = null;
+					        	
+
+					        	//if the protonated atoms was a terminal one with a oxygen double bond the diff. of the partial charges is set to 0			        	
+					        	List<IBond> bondsTemp = molArray[j].getConnectedBondsList(atom1);
+								boolean doubleBond = false;
+								for (IBond iBond : bondsTemp) {
+									if(iBond.getOrder().equals(IBond.Order.DOUBLE))
+										doubleBond = true;
+								}
+					        	
+								
+								if(atom1.getSymbol().equals("H") || atom2.getSymbol().equals("H"))
+									continue;
+								
+								//give penalty for aromatic rings...they usually don't split...also assume the aromatic rings for the protonated molecule
+								if(this.aromaticBonds.contains(bond) || this.aromaticBonds.contains(molArray[0].getBond(AtomContainerManipulator.getAtomById(molArray[0], atom1.getID()), AtomContainerManipulator.getAtomById(molArray[0], atom2.getID()))))
+								{
+									dist = new Distance(atom1.getSymbol() + (Integer.parseInt(atom1.getID()) + 1) + "-" + atom2.getSymbol() + (Integer.parseInt(atom2.getID()) + 1), 0.0, bond.getID());
+								}
+								//penalty for double bond to terminal oxygen
+								else if(atom1.getSymbol().equals("O") && chargesArray[i].getAtom().getID().equals(atom1.getID()) && doubleBond)
+								{
+									dist = new Distance(atom1.getSymbol() + (Integer.parseInt(atom1.getID()) + 1) + "-" + atom2.getSymbol() + (Integer.parseInt(atom2.getID()) + 1), 0.0, bond.getID());
+								}
+								//penalty for double bond to terminal oxygen
+								else if(atom2.getSymbol().equals("O") && chargesArray[i].getAtom().getID().equals(atom2.getID()) && doubleBond)
+								{
+									dist = new Distance(atom1.getSymbol() + (Integer.parseInt(atom1.getID()) + 1) + "-" + atom2.getSymbol() + (Integer.parseInt(atom2.getID()) + 1), 0.0, bond.getID());
+								}
+								else 
+								{
+									dist = new Distance(atom1.getSymbol() + (Integer.parseInt(atom1.getID()) + 1) + "-" + atom2.getSymbol() + (Integer.parseInt(atom2.getID()) + 1), distance, bond.getID());
+								}
+								String key = atom1.getSymbol() + (Integer.parseInt(atom1.getID()) + 1) + "-"  +	atom2.getSymbol() + (Integer.parseInt(atom2.getID()) + 1);
+					        	//original molecule
+					        	if(j == 0 && !cpd1BondToDistance.containsKey(dist))
+					        		cpd1BondToDistance.put(key, dist);
+//						        		cpd1BondToDistance.add(new Distance(atom1.getSymbol() + "-" + atom2.getSymbol(), atom1.getPoint2d().distance(atom2.getPoint2d())));
+					        	else if(!cpd2BondToDistance.containsKey(dist))
+					        		cpd2BondToDistance.put(key, dist);
+//						        		cpd2BondToDistance.add(new Distance(atom1.getSymbol() + "-" + atom2.getSymbol(), atom1.getPoint2d().distance(atom2.getPoint2d())));
 							}
-							//penalty for double bond to terminal oxygen
-							else if(atom1.getSymbol().equals("O") && chargesArray[i].getAtom().getID().equals(atom1.getID()) && doubleBond)
-							{
-								dist = new Distance(atom1.getSymbol() + (Integer.parseInt(atom1.getID()) + 1) + "-" + atom2.getSymbol() + (Integer.parseInt(atom2.getID()) + 1), 0.0, bond.getID());
-							}
-							//penalty for double bond to terminal oxygen
-							else if(atom2.getSymbol().equals("O") && chargesArray[i].getAtom().getID().equals(atom2.getID()) && doubleBond)
-							{
-								dist = new Distance(atom1.getSymbol() + (Integer.parseInt(atom1.getID()) + 1) + "-" + atom2.getSymbol() + (Integer.parseInt(atom2.getID()) + 1), 0.0, bond.getID());
-							}
-							else 
-							{
-								dist = new Distance(atom1.getSymbol() + (Integer.parseInt(atom1.getID()) + 1) + "-" + atom2.getSymbol() + (Integer.parseInt(atom2.getID()) + 1), distance, bond.getID());
-							}
-							String key = atom1.getSymbol() + (Integer.parseInt(atom1.getID()) + 1) + "-"  +	atom2.getSymbol() + (Integer.parseInt(atom2.getID()) + 1);
-				        	//original molecule
-				        	if(j == 0 && !cpd1BondToDistance.containsKey(dist))
-				        		cpd1BondToDistance.put(key, dist);
-//					        		cpd1BondToDistance.add(new Distance(atom1.getSymbol() + "-" + atom2.getSymbol(), atom1.getPoint2d().distance(atom2.getPoint2d())));
-				        	else if(!cpd2BondToDistance.containsKey(dist))
-				        		cpd2BondToDistance.put(key, dist);
-//					        		cpd2BondToDistance.add(new Distance(atom1.getSymbol() + "-" + atom2.getSymbol(), atom1.getPoint2d().distance(atom2.getPoint2d())));
 						}
-					}
+		            }
+		            catch(Exception e)
+		            {
+		            	System.out.println("Error in protonized molecule optimization! Skipped it");
+		            	e.printStackTrace();
+		            }
+		            
+		            
 
 					
 					//now compare the results
