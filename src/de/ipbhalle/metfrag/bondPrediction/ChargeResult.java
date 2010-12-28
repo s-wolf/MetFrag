@@ -8,6 +8,7 @@ public class ChargeResult {
 	private IAtomContainer molWithProton = null;
 	private IAtomContainer molWithCharge = null;
 	private String chargeString = "";
+	private String protonatedAtom = "";
 	
 	/**
 	 * Instantiates a new charge result.
@@ -23,6 +24,7 @@ public class ChargeResult {
 		this.setMol(molWithProton);
 		this.setChargeString(chargeString);
 		this.setMolWithCharge(molWithCharge);
+		this.setProtonatedAtom(protonatedAtom);
 	}
 
 	public void setMol(IAtomContainer molWithProton) {
@@ -65,6 +67,14 @@ public class ChargeResult {
 	 */
 	public IAtomContainer getMolWithCharge() {
 		return molWithCharge;
+	}
+
+	public void setProtonatedAtom(String protonatedAtom) {
+		this.protonatedAtom = protonatedAtom;
+	}
+
+	public String getProtonatedAtom() {
+		return protonatedAtom;
 	}
 
 }
