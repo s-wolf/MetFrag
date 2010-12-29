@@ -8,6 +8,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.lang.reflect.Field;
 import java.util.List;
 
 import org.openscience.cdk.ChemFile;
@@ -39,7 +40,7 @@ public class Mopac {
 	 * @return the i atom container
 	 * @throws Exception the exception
 	 */
-	public IAtomContainer runOptimization(IAtomContainer molToOptimize, int ffSteps, boolean verbose, String mopacMethod, boolean firstRun) throws Exception
+	public IAtomContainer runOptimization(IAtomContainer molToOptimize, int ffSteps, boolean verbose, String mopacMethod, boolean firstRun, String atomProtonized) throws Exception
 	{
 		//write out the molecule
 //		File tempFile = File.createTempFile("mol",".mol");
@@ -171,11 +172,68 @@ public class Mopac {
 		    "-c", 
 		    command
 		};
-        Process prMopOut = rt.exec(psCmdMOPAC);
-        exitVal = prMopOut.waitFor();
         
         if(verbose)
         	System.out.println("MOPAC command: " + command);
+        
+        Process prMopOut = rt.exec(psCmdMOPAC);
+//        exitVal = prMopOut.waitFor();
+        int count = 0;
+        //let the process calculate for 10 minutes
+        boolean done = false;
+        while(count < 100)
+        {
+        	Thread.sleep(6000);    
+        	
+        	//now check if mopac calculation is finished
+        	try
+        	{
+        		int exitMopac = -1;
+        		exitMopac = prMopOut.exitValue();
+	    		if(exitMopac >= 0)
+	    		{
+	    			done = true;
+	    			break;
+	    		}
+        	}
+        	catch(IllegalThreadStateException e)
+        	{
+        		System.err.println("Mopac not finished yet");
+        	}
+        	
+        	count++;
+        }
+        //now destroy the process if not finished yet
+        if(done)
+        	exitVal = prMopOut.waitFor();
+        else
+        {
+        	System.out.println("MOPAC optimization canceled! Atom protonized: " + atomProtonized);
+        	
+        	prMopOut.destroy();
+        	
+        	//now try to kill the MOPAC process        	
+        	Field f = prMopOut.getClass().getDeclaredField("pid");
+        	f.setAccessible(true);
+        	Integer processID = (Integer) f.get(prMopOut);
+        	System.out.println("Process id of MOPAC: " + processID );
+        	
+            command = "kill -9 " + processID;
+            String[] psMOPACKill =
+    		{
+    		    "sh",
+    		    "-c", 
+    		    command
+    		};
+            
+            if(verbose)
+            	System.out.println("MOPAC kill command: " + command);
+            Process prMOPACKill = rt.exec(psMOPACKill);
+            exitVal = prMOPACKill.waitFor();
+        	
+        }
+        
+        
         
         System.out.println("MOPAC error code " + exitVal);
        

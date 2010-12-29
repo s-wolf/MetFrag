@@ -99,7 +99,7 @@ public class BondPrediction {
 			Mopac mopac = new Mopac();
 			try {				
 				//now optimize the structure of the neutral molecue
-	    		this.mol = mopac.runOptimization(mol, FFSteps, true, mopacParameter, true);
+	    		this.mol = mopac.runOptimization(mol, FFSteps, true, mopacParameter, true, "Neutral");
 	    		
 	        	GasteigerMarsiliPartialCharges peoe = new GasteigerMarsiliPartialCharges();
 //	        	GasteigerPEPEPartialCharges pepe = new GasteigerPEPEPartialCharges();
@@ -200,7 +200,7 @@ public class BondPrediction {
 		            
 		            try
 		            {
-		            	protonatedMol = mopac.runOptimization(protonatedMol, FFSteps, true, mopacParameter, false);
+		            	protonatedMol = mopac.runOptimization(protonatedMol, FFSteps, true, mopacParameter, false, chargesArray[i].getAtom().getSymbol()  + (Integer.parseInt(chargesArray[i].getAtom().getID()) + 1));
 		            	
 //			            GasteigerPEPEPartialCharges pepe = new GasteigerPEPEPartialCharges();
 //			            pepe.calculateCharges(protonatedMol);
