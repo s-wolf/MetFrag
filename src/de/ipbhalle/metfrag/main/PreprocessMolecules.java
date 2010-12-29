@@ -46,8 +46,8 @@ public class PreprocessMolecules {
 		if(file.isFile())
 		{
 			try {
-//					MDLReader reader = new MDLReader(new FileReader(filesArray[i]));
-				MDLReader reader = new MDLReader(new FileReader(new File("/vol/mirrors/kegg/mol/C00509.mol")));
+				MDLReader reader = new MDLReader(new FileReader(file));
+//				MDLReader reader = new MDLReader(new FileReader(new File("/vol/mirrors/kegg/mol/C00509.mol")));
 				ChemFile chemFile = (ChemFile)reader.read((ChemObject)new ChemFile());
 		        List<IAtomContainer> molList = ChemFileManipulator.getAllAtomContainers(chemFile);
 		        IAtomContainer molecule = molList.get(0);
