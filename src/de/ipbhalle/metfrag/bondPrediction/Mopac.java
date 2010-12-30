@@ -230,7 +230,16 @@ public class Mopac {
             	System.out.println("MOPAC kill command: " + command);
             Process prMOPACKill = rt.exec(psMOPACKill);
             exitVal = prMOPACKill.waitFor();
-        	
+            
+            // any error message?
+	        StreamGobbler errorGobblerKill = new StreamGobbler(prMOPACKill.getErrorStream(), "ERROR", true);            
+	        // any output?
+	        StreamGobbler outputGobblerKill = new StreamGobbler(prMOPACKill.getInputStream(), "OUTPUT", true);
+	        // start
+	        errorGobblerKill.start();
+	        outputGobblerKill.start();  
+	            
+	        return null;
         }
         
         
