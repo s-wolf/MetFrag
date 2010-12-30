@@ -168,9 +168,9 @@ public class Mopac {
         command = "run_mopac7 " + tempStringMopacOut;
         String[] psCmdMOPAC =
 		{
-		    "sh",
-		    "-c", 
-		    command
+        	"sh",
+        	"-c",
+        	command      	
 		};
         
         if(verbose)
@@ -183,6 +183,12 @@ public class Mopac {
         boolean done = false;
         while(count < 100)
         {
+//        	Thread.sleep(12000);
+//        	//test START
+//        	done = false;
+//        	break;
+//        	//test END
+        	
         	Thread.sleep(6000);    
         	
         	//now check if mopac calculation is finished
@@ -200,7 +206,6 @@ public class Mopac {
         	{
         		System.err.println("Mopac not finished yet");
         	}
-        	
         	count++;
         }
         //now destroy the process if not finished yet
@@ -210,15 +215,50 @@ public class Mopac {
         {
         	System.out.println("MOPAC optimization canceled! Atom protonized: " + atomProtonized);
         	
-        	prMopOut.destroy();
-        	
         	//now try to kill the MOPAC process        	
         	Field f = prMopOut.getClass().getDeclaredField("pid");
         	f.setAccessible(true);
         	Integer processID = (Integer) f.get(prMopOut);
-        	System.out.println("Process id of MOPAC: " + processID );
+        	System.out.println("Process id of parent MOPAC process: " + processID );
         	
-            command = "kill -9 " + processID;
+        	//now find out the pid of child process
+        	String[] psCmdMOPACSubprocess =
+    		{
+        		"sh",
+        		"-c",
+            	"ps -ef | grep mopac"
+    		};
+        	
+        	String mopacProcessID = "0";
+        	
+        	Process prMOPACSubprocess = rt.exec(psCmdMOPACSubprocess);
+            
+            StreamGobbler sgMOPACSubprocess = new StreamGobbler(prMOPACSubprocess.getInputStream(), "OUTPUT", false);
+            sgMOPACSubprocess.start();
+//            StreamGobbler sgMOPACSubprocessError = new StreamGobbler(prMOPACSubprocess.getErrorStream(), "ERROR", true);
+//            sgMOPACSubprocessError.start();
+            
+            prMOPACSubprocess.waitFor();
+            
+            String psOutput = sgMOPACSubprocess.getOutput();
+//            System.out.println("Output of ps to parse: \n\n\n" + psOutput + "\n\n\n");
+            String cleaned = psOutput.replaceAll("[\\t\\v\\f\\r ]+", ";");
+            String[] cleanedLine = cleaned.split("\\n");
+            for (int i = 0; i < cleanedLine.length; i++) {
+				String[] col = cleanedLine[i].split(";");
+				if(col[2].equals(Integer.toString(processID)))
+				{
+					System.out.println("Found process!! Process id: " + col[1]);
+					mopacProcessID = col[1];
+				}
+			}
+            //now find out the process id !!! compare the parent id
+        	
+        	prMopOut.destroy();
+
+
+        	
+            command = "kill -9 " + mopacProcessID;
             String[] psMOPACKill =
     		{
     		    "sh",

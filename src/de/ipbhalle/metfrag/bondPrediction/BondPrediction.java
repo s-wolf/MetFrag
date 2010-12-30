@@ -97,9 +97,15 @@ public class BondPrediction {
 			
 			//now optimize the geometry of the neutral molecule
 			Mopac mopac = new Mopac();
-			try {				
+			try {	
 				//now optimize the structure of the neutral molecue
 	    		this.mol = mopac.runOptimization(mol, FFSteps, true, mopacParameter, true, "Neutral");
+	    		if(this.mol == null)
+	    		{
+	    			System.err.println("Was not able to optimize neutral molecule!");
+	    			throw new Exception("Error optimizing molecule!");
+	    		}
+	    		
 	    		
 	        	GasteigerMarsiliPartialCharges peoe = new GasteigerMarsiliPartialCharges();
 //	        	GasteigerPEPEPartialCharges pepe = new GasteigerPEPEPartialCharges();
@@ -116,6 +122,8 @@ public class BondPrediction {
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
+				//stop optimization
+				return null;
 			}	
 	        
 
