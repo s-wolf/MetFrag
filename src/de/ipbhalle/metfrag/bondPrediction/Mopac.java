@@ -166,17 +166,17 @@ public class Mopac {
         //now run mopac on mopin
         String tempStringMopacOut = tempFileMOPIn.getParent() + System.getProperty("file.separator") + tempFileMOPIn.getName().split("\\.")[0];
         command = "run_mopac7 " + tempStringMopacOut;
-        String[] psCmdMOPAC =
-		{
-        	"sh",
-        	"-c",
-        	command      	
-		};
+//        String[] psCmdMOPAC =
+//		{
+//        	"sh",
+//        	"-c",
+//        	command      	
+//		};
         
         if(verbose)
         	System.out.println("MOPAC command: " + command);
         
-        Process prMopOut = rt.exec(psCmdMOPAC);
+        Process prMopOut = rt.exec(command);
 //        exitVal = prMopOut.waitFor();
         int count = 0;
         //let the process calculate for 10 minutes
