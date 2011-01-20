@@ -93,7 +93,12 @@ public class PreprocessMolecules {
 				for (int i1 = 0; i1 < results.size(); i1++) {
 					try {
 						CMLWriter writerCML = new CMLWriter(new FileOutputStream(new File("/home/swolf/MOPAC/KEGG/" + file.getName() + "_" + results.get(i1).getProtonatedAtom() + ".cml")));
-						writerCML.write(results.get(i1).getOriginalMol());
+						//thats the molecule containing the all the bond length changes from all protonation sites
+						if(i1 == 0)
+							writerCML.write(results.get(i1).getMolWithProton());
+						//thats the mol containing the individual changes from one protonation site
+						else
+							writerCML.write(results.get(i1).getMolWithProton());
 						writerCML.close();
 						
 					} catch (CDKException e) {

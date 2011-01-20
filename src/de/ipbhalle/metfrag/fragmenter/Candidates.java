@@ -61,7 +61,7 @@ public class Candidates {
 	 * 
 	 * @throws Exception the exception
 	 */
-	public static Vector<String> getOnline(String database, String databaseID, String molecularFormula, double exactMass, double searchPPM, boolean useIPBProxy, PubChemWebService pubchem) throws Exception
+	public static Vector<String> queryOnline(String database, String databaseID, String molecularFormula, double exactMass, double searchPPM, boolean useIPBProxy, PubChemWebService pubchem) throws Exception
 	{
 		Vector<String> candidates = new Vector<String>();
 		
@@ -112,7 +112,7 @@ public class Candidates {
 	 * @throws ClassNotFoundException the class not found exception
 	 * @throws RemoteException the remote exception
 	 */
-	public static List<String> getLocally(String database, double exactMass, double searchPPM, String databaseUrl, String username, String password) throws SQLException, ClassNotFoundException, RemoteException
+	public static List<String> queryLocally(String database, double exactMass, double searchPPM, String databaseUrl, String username, String password) throws SQLException, ClassNotFoundException, RemoteException
 	{
 		List<String> candidates = new ArrayList<String>();
 		

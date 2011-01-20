@@ -111,7 +111,7 @@ public class MetFrag {
 		//get configuration
 		Config config = new Config();
 		PubChemWebService pubchem = new PubChemWebService();
-		Vector<String> candidates = Candidates.getOnline(database, databaseID, molecularFormula, exactMass, config.getSearchPPM(), useProxy, pubchem);
+		Vector<String> candidates = Candidates.queryOnline(database, databaseID, molecularFormula, exactMass, config.getSearchPPM(), useProxy, pubchem);
 
 		//now fill executor!!!
 		//number of threads depending on the available processors
@@ -264,7 +264,7 @@ public class MetFrag {
 	{
 		results = new FragmenterResult();
 		PubChemWebService pubchem = new PubChemWebService();
-		Vector<String> candidates = Candidates.getOnline(database, databaseID, molecularFormula, exactMass, searchPPM, useProxy, pubchem);
+		Vector<String> candidates = Candidates.queryOnline(database, databaseID, molecularFormula, exactMass, searchPPM, useProxy, pubchem);
 
 
 		//now fill executor!!!
@@ -557,7 +557,7 @@ public class MetFrag {
 	{
 		
 		results = new FragmenterResult();
-		List<String> candidates = Candidates.getLocally(database, exactMass, searchPPM, jdbc, username, password);
+		List<String> candidates = Candidates.queryLocally(database, exactMass, searchPPM, jdbc, username, password);
 
 		System.out.println("Hits in database: " + candidates.size());
 		
@@ -708,7 +708,7 @@ public class MetFrag {
 			database = "pubchem";
 		
 		PubChemWebService pubchem = null;
-		List<String> candidates = Candidates.getLocally(database, spectrum.getExactMass(), config.getSearchPPM(), config.getJdbc(), config.getUsername(), config.getPassword());
+		List<String> candidates = Candidates.queryLocally(database, spectrum.getExactMass(), config.getSearchPPM(), config.getJdbc(), config.getUsername(), config.getPassword());
 		
 //		this.candidateCount = candidates.size();
 		results.addToCompleteLog("\n*****************************************************\n\n");

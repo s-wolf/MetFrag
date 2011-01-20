@@ -25,6 +25,8 @@ public class Distance {
 	private String bond;
 	private Double bondLength;
 	private String bondID = "";
+	private String atom1ID;
+	private String atom2ID;
 	
 	/**
 	 * Instantiates a new distance.
@@ -45,11 +47,13 @@ public class Distance {
 	 * @param bondLength the bond length
 	 * @param bondID the bond id
 	 */
-	public Distance(String bond, Double bondLength, String bondID)
+	public Distance(String bond, Double bondLength, String bondID, String atom1ID, String atom2ID)
 	{
 		setBond(bond);
 		setBondLength(bondLength);
 		setBondID(bondID);
+		setAtom1ID(atom1ID);
+		setAtom2ID(atom2ID);
 	}
 
 	/**
@@ -94,6 +98,22 @@ public class Distance {
 
 	public String getBondID() {
 		return bondID;
+	}
+
+	public void setAtom1ID(String atom1ID) {
+		this.atom1ID = atom1ID;
+	}
+
+	public String getAtom1ID() {
+		return atom1ID;
+	}
+
+	public void setAtom2ID(String atom2ID) {
+		this.atom2ID = atom2ID;
+	}
+
+	public String getAtom2ID() {
+		return atom2ID;
 	}
 
 }

@@ -33,6 +33,7 @@ import org.openscience.cdk.charges.GasteigerMarsiliPartialCharges;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IBond;
+import org.openscience.cdk.interfaces.IChemObjectBuilder;
 import org.openscience.cdk.nonotify.NoNotificationChemObjectBuilder;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 
@@ -182,6 +183,14 @@ public class BondPrediction {
 					protonatedMol.addAtom(hydrogenAtom);
 					protonatedMol.addBond(hydrogenBond);
 					AtomContainerManipulator.getAtomById(protonatedMol, chargesArray[i].getAtom().getID()).setFormalCharge(1);
+					
+					
+					IAtom hydrogenAtom1 = new Atom("H");
+					IBond hydrogenBond1 = new Bond(AtomContainerManipulator.getAtomById(protonatedMol, chargesArray[i].getAtom().getID()), hydrogenAtom);
+					this.molWithAllProtonationSites.addAtom(hydrogenAtom1);
+					this.molWithAllProtonationSites.addBond(hydrogenBond1);
+					AtomContainerManipulator.getAtomById(molWithAllProtonationSites, chargesArray[i].getAtom().getID()).setFormalCharge(1);
+					
 //					AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(protonatedMol);
 //		            AtomContainerManipulator.convertImplicitToExplicitHydrogens(protonatedMol);
 					
@@ -271,21 +280,21 @@ public class BondPrediction {
 								//give penalty for aromatic rings...they usually don't split...also assume the aromatic rings for the protonated molecule
 								if(this.aromaticBonds.contains(bond) || this.aromaticBonds.contains(molArray[0].getBond(AtomContainerManipulator.getAtomById(molArray[0], atom1.getID()), AtomContainerManipulator.getAtomById(molArray[0], atom2.getID()))))
 								{
-									dist = new Distance(atom1.getSymbol() + (Integer.parseInt(atom1.getID()) + 1) + "-" + atom2.getSymbol() + (Integer.parseInt(atom2.getID()) + 1), 0.0, bond.getID());
+									dist = new Distance(atom1.getSymbol() + (Integer.parseInt(atom1.getID()) + 1) + "-" + atom2.getSymbol() + (Integer.parseInt(atom2.getID()) + 1), 0.0, bond.getID(), atom1.getID(), atom2.getID());
 								}
 								//penalty for double bond to terminal oxygen
 								else if(atom1.getSymbol().equals("O") && chargesArray[i].getAtom().getID().equals(atom1.getID()) && doubleBond)
 								{
-									dist = new Distance(atom1.getSymbol() + (Integer.parseInt(atom1.getID()) + 1) + "-" + atom2.getSymbol() + (Integer.parseInt(atom2.getID()) + 1), 0.0, bond.getID());
+									dist = new Distance(atom1.getSymbol() + (Integer.parseInt(atom1.getID()) + 1) + "-" + atom2.getSymbol() + (Integer.parseInt(atom2.getID()) + 1), 0.0, bond.getID(), atom1.getID(), atom2.getID());
 								}
 								//penalty for double bond to terminal oxygen
 								else if(atom2.getSymbol().equals("O") && chargesArray[i].getAtom().getID().equals(atom2.getID()) && doubleBond)
 								{
-									dist = new Distance(atom1.getSymbol() + (Integer.parseInt(atom1.getID()) + 1) + "-" + atom2.getSymbol() + (Integer.parseInt(atom2.getID()) + 1), 0.0, bond.getID());
+									dist = new Distance(atom1.getSymbol() + (Integer.parseInt(atom1.getID()) + 1) + "-" + atom2.getSymbol() + (Integer.parseInt(atom2.getID()) + 1), 0.0, bond.getID(), atom1.getID(), atom2.getID());
 								}
 								else 
 								{
-									dist = new Distance(atom1.getSymbol() + (Integer.parseInt(atom1.getID()) + 1) + "-" + atom2.getSymbol() + (Integer.parseInt(atom2.getID()) + 1), distance, bond.getID());
+									dist = new Distance(atom1.getSymbol() + (Integer.parseInt(atom1.getID()) + 1) + "-" + atom2.getSymbol() + (Integer.parseInt(atom2.getID()) + 1), distance, bond.getID(), atom1.getID(), atom2.getID());
 								}
 								String key = atom1.getSymbol() + (Integer.parseInt(atom1.getID()) + 1) + "-"  +	atom2.getSymbol() + (Integer.parseInt(atom2.getID()) + 1);
 					        	//original molecule
@@ -297,57 +306,59 @@ public class BondPrediction {
 //						        		cpd2BondToDistance.add(new Distance(atom1.getSymbol() + "-" + atom2.getSymbol(), atom1.getPoint2d().distance(atom2.getPoint2d())));
 							}
 						}
+		       				
+						//now compare the results
+						String tempResult = "";
+						for (String bondID : cpd1BondToDistance.keySet()) {
+	//					for (int i1 = 0; i1 < cpd1BondToDistance.size(); i1++) {
+							Double dist = -999.9;
+							
+							if(cpd1BondToDistance.get(bondID) == null)
+								System.err.println("Bond ID (" + bondID + ") is null in cpd1");
+							else if(cpd2BondToDistance.get(bondID) == null)
+								System.err.println("Bond ID (" + bondID + ") is null in cpd2");
+							else if(cpd1BondToDistance.get(bondID).getBond().equals(cpd2BondToDistance.get(bondID).getBond()))
+							{
+								dist = (cpd2BondToDistance.get(bondID).getBondLength() - cpd1BondToDistance.get(bondID).getBondLength());
+																								
+								//now normalize the partial charge differences according to the partial charges
+								
+								//now normalize the current charge
+								Double normalizedPartialChargeOfProtonizedAtom = (chargesArray[i].getCharge() / minCharge);
+	
+								double distRound = Math.round((dist * normalizedPartialChargeOfProtonizedAtom) * 1000.0)/1000.0;
+								
+								//set the bond length change
+								protonatedMol.getBond(AtomContainerManipulator.getAtomById(protonatedMol, cpd2BondToDistance.get(bondID).getAtom1ID()), AtomContainerManipulator.getAtomById(protonatedMol, cpd2BondToDistance.get(bondID).getAtom2ID())).setProperty("bondLengthChange", distRound);
+								
+								//now save only the maximum bond length change...
+								bondToBondLength = saveMaximum(bondToBondLength, cpd1BondToDistance.get(bondID).getBondID(), distRound);
+								
+	//								tempResult += cpd1BondToDistance.get(i1).getBond() + " " + cpd1BondToDistance.get(i1).getBondLength() + " " + cpd2BondToDistance.get(i1 + offset).getBondLength() + ": " + distRound + "\n";
+								tempResult += cpd1BondToDistance.get(bondID).getBond() +  "\t" + distRound + "\n";
+								
+							}
+							else
+							{
+								System.err.println("No bond pair found!");
+	//							dist = (cpd2BondToDistance.get(i1 + offset).getBondLength() - cpd1BondToDistance.get(i1).getBondLength());
+							}				
+						}
+						
+						if(verbose)
+							System.out.println(tempResult);
+						this.results.add(new ChargeResult(this.mol, protonatedMol, outputStructure, tempResult, chargesArray[i].getAtom().getSymbol()  + (Integer.parseInt(chargesArray[i].getAtom().getID()) + 1)));
+
+//						for (String string : notMatched) {
+//							System.out.println(string);
+//						}
+					
 		            }
 		            catch(Exception e)
 		            {
 		            	System.out.println("Error in protonized molecule optimization! Skipped it");
 		            	e.printStackTrace();
-		            }
-		            
-		            
-
-					
-					//now compare the results
-					String tempResult = "";
-					for (String bondID : cpd1BondToDistance.keySet()) {
-//					for (int i1 = 0; i1 < cpd1BondToDistance.size(); i1++) {
-						Double dist = -999.9;
-						
-						if(cpd1BondToDistance.get(bondID) == null)
-							System.err.println("Bond ID (" + bondID + ") is null in cpd1");
-						else if(cpd2BondToDistance.get(bondID) == null)
-							System.err.println("Bond ID (" + bondID + ") is null in cpd2");
-						else if(cpd1BondToDistance.get(bondID).getBond().equals(cpd2BondToDistance.get(bondID).getBond()))
-						{
-							dist = (cpd2BondToDistance.get(bondID).getBondLength() - cpd1BondToDistance.get(bondID).getBondLength());
-							
-							//now normalize the partial charge differences according to the partial charges
-							
-							//now normalize the current charge
-							Double normalizedPartialChargeOfProtonizedAtom = (chargesArray[i].getCharge() / minCharge);
-
-							double distRound = Math.round((dist * normalizedPartialChargeOfProtonizedAtom) * 1000.0)/1000.0;
-							//now save only the maximum bond length change...
-							bondToBondLength = saveMaximum(bondToBondLength, cpd1BondToDistance.get(bondID).getBondID(), distRound);
-//								tempResult += cpd1BondToDistance.get(i1).getBond() + " " + cpd1BondToDistance.get(i1).getBondLength() + " " + cpd2BondToDistance.get(i1 + offset).getBondLength() + ": " + distRound + "\n";
-							tempResult += cpd1BondToDistance.get(bondID).getBond() +  "\t" + distRound + "\n";
-							
-						}
-						else
-						{
-							System.err.println("No bond pair found!");
-//							dist = (cpd2BondToDistance.get(i1 + offset).getBondLength() - cpd1BondToDistance.get(i1).getBondLength());
-						}				
-					}
-					
-					if(verbose)
-						System.out.println(tempResult);
-					this.results.add(new ChargeResult(this.mol, protonatedMol, outputStructure, tempResult, chargesArray[i].getAtom().getSymbol()  + (Integer.parseInt(chargesArray[i].getAtom().getID()) + 1)));
-
-//					for (String string : notMatched) {
-//						System.out.println(string);
-//					}
-					
+		            }					
 				}
 			}
 			
@@ -371,8 +382,12 @@ public class BondPrediction {
 
 			
 			//now add the complete combined result in front of the list
+			
+			IAtomContainer molOriginal = (IAtomContainer)this.mol.clone();
+			
 			String combinedResults = "";
 			for (IBond bond : this.mol.bonds()) {
+				
 				combinedResults += bond.getAtom(0).getSymbol() + (Integer.parseInt(bond.getAtom(0).getID()) + 1) + "-" + bond.getAtom(1).getSymbol() + (Integer.parseInt(bond.getAtom(1).getID()) + 1) + "\t" + bondToBondLength.get(bond.getID()) + "\n";
 				if(bondToBondLength.get(bond.getID()) == null)
 				{
@@ -388,10 +403,11 @@ public class BondPrediction {
 //				combinedResults += AtomContainerManipulator.g(this.mol, bond) bond + " " + bondToBondLength.get(bond);
 //			}
 			
-			AtomContainerManipulator.convertImplicitToExplicitHydrogens(this.molWithAllProtonationSites);
-	        AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(this.molWithAllProtonationSites);
-	        this.molWithAllProtonationSites = MoleculeTools.moleculeNumbering(this.molWithAllProtonationSites);
-			this.results.add(0, new ChargeResult(this.mol, this.molWithAllProtonationSites, this.molWithAllProtonationSites, combinedResults, "Combined"));
+//			AtomContainerManipulator.convertImplicitToExplicitHydrogens(this.molWithAllProtonationSites);
+//	        AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(this.molWithAllProtonationSites);
+//	        this.molWithAllProtonationSites = MoleculeTools.moleculeNumbering(this.molWithAllProtonationSites);
+			
+			this.results.add(0, new ChargeResult(molOriginal, this.mol, this.molWithAllProtonationSites, combinedResults, "Combined"));
 			
 			
 			return bondsToBreak;
