@@ -51,6 +51,7 @@ public class AssignFragmentPeak {
 	private boolean html = false;
 	private int hydrogenPenalty = 0;
 	private String partialChargeDiff;
+	private double adduct;
 	
 	
 	public AssignFragmentPeak()
@@ -60,19 +61,18 @@ public class AssignFragmentPeak {
 	
 	/**
 	 * Match fragment with peak. Assigns peaks to the fragments.
-	 * 
+	 *
 	 * @param acs the acs
 	 * @param peakList the peak list
 	 * @param mzabs the mzabs
 	 * @param mzppm the mzppm
-	 * @param mode the mode
-	 * @param hydrogenTest the hydrogen test
+	 * @param mode the mode (positive or negative)
 	 * @param html the html
-	 * 
+	 * @param adduct the adduct weight
 	 * @throws CDKException the CDK exception
-	 * @throws IOException 
+	 * @throws IOException Signals that an I/O exception has occurred.
 	 */
-	public void assignFragmentPeak(List<IAtomContainer> acs, Vector<Peak> peakList, double mzabs, double mzppm, int mode, boolean html) throws CDKException, IOException
+	public void assignFragmentPeak(List<IAtomContainer> acs, Vector<Peak> peakList, double mzabs, double mzppm, int mode, boolean html, double adduct) throws CDKException, IOException
 	{
 		this.acs = acs;
 		this.peakList = peakList;
@@ -82,6 +82,7 @@ public class AssignFragmentPeak {
 		this.hitsAll = new Vector<PeakMolPair>();
 		this.hitsPeaks = new Vector<Double>();
 		this.html = html;
+		this.adduct = adduct;
 //		//initialize neutral losses
 //		getNeutralLosses();
 		
@@ -92,7 +93,7 @@ public class AssignFragmentPeak {
 			boolean test = true;
 			for (int j = 0; j < this.acs.size(); j++) {
 				//matched peak
-				if(matchByMass(this.acs.get(j), this.peakList.get(i).getMass(), mode))
+				if(matchByMass(this.acs.get(j), this.peakList.get(i).getMass(), mode, adduct))
 				{
 					//add hits to list...only 1...check if this found hydrogen penalty is less than the previous found one
 					if(test || hits.lastElement().getHydrogenPenalty() > this.hydrogenPenalty)
@@ -122,7 +123,7 @@ public class AssignFragmentPeak {
 	 * @throws CDKException the CDK exception
 	 * @throws IOException 
 	 */
-	private boolean matchByMass(IAtomContainer ac, double peak, int mode) throws CDKException, IOException
+	private boolean matchByMass(IAtomContainer ac, double peak, int mode, double adduct) throws CDKException, IOException
 	{
 		boolean found = false;
 		
