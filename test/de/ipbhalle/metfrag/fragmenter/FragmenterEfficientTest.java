@@ -78,7 +78,7 @@ public class FragmenterEfficientTest {
 		   "189.058 176.358 16\n";
 		int mode = 1;
 
-		spectrum = new WrapperSpectrum(peaks, mode, exactMass);		
+		spectrum = new WrapperSpectrum(peaks, mode, exactMass, true);		
 			
         //get mol file from kegg....remove "cpd:"
 		String candidateMol = "";
@@ -153,7 +153,7 @@ public class FragmenterEfficientTest {
 		//now find corresponding fragments to the mass
 		AssignFragmentPeak afp = new AssignFragmentPeak(3);
 		try {
-			afp.assignFragmentPeak(l, cleanedPeakList, mzabs, mzppm, spectrum.getMode(), false);
+			afp.assignFragmentPeak(l, cleanedPeakList, mzabs, mzppm, spectrum.getMode(), false, spectrum.isPositive());
 		} catch (CDKException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -195,7 +195,7 @@ public class FragmenterEfficientTest {
 		//now find corresponding fragments to the mass
 		AssignFragmentPeak afp = new AssignFragmentPeak(3);
 		try {
-			afp.assignFragmentPeak(l, cleanedPeakList, mzabs, mzppm, spectrum.getMode(), false);
+			afp.assignFragmentPeak(l, cleanedPeakList, mzabs, mzppm, spectrum.getMode(), false, spectrum.isPositive());
 		} catch (CDKException e) {
 			e.printStackTrace();
 		} catch (IOException e) {

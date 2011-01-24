@@ -52,6 +52,7 @@ public class WrapperSpectrum {
 	private String filename;
 	private String formula;
 	private String precursorType;
+	private boolean isPositive;
 	
 	
 	/**
@@ -73,6 +74,7 @@ public class WrapperSpectrum {
 		String[] fileTemp = filename.split("\\/");
 		this.filename = fileTemp[fileTemp.length - 1];
 		this.setFormula(spectra.get(0).getFormula());
+		this.isPositive = spectra.get(0).isPositive();
 	}
 	
 	
@@ -369,6 +371,15 @@ public class WrapperSpectrum {
 	 */
 	public String getPrecursorType() {
 		return precursorType;
+	}
+
+	public void setPositive(boolean isPositive) {
+		this.isPositive = isPositive;
+	}
+
+
+	public boolean isPositive() {
+		return isPositive;
 	}
 	
 }

@@ -41,7 +41,7 @@ public class WrapperSpectrumTest {
 				"189.058 176.358 16\n";
 		int mode = 1;
 
-		spectrum = new WrapperSpectrum(peaks, mode, exactMass);	
+		spectrum = new WrapperSpectrum(peaks, mode, exactMass, true);	
 	}
 	
 	
@@ -67,7 +67,7 @@ public class WrapperSpectrumTest {
 				"143,019 10000,0    999\n";
 		int mode = 1;
 
-		spectrum = new WrapperSpectrum(peaks, mode, exactMass);	
+		spectrum = new WrapperSpectrum(peaks, mode, exactMass, true);	
 		Assert.assertEquals(2, spectrum.getPeakList().size());
 	}
 	
@@ -78,7 +78,7 @@ public class WrapperSpectrumTest {
 		String peaks = "153,019    10000,0    999\n";
 		int mode = 1;
 
-		spectrum = new WrapperSpectrum(peaks, mode, exactMass);
+		spectrum = new WrapperSpectrum(peaks, mode, exactMass, true);
 		Assert.assertEquals(153.019, spectrum.getPeakList().firstElement().getMass());
 	}
 	
@@ -89,7 +89,7 @@ public class WrapperSpectrumTest {
 		String peaks = "153,019    10000,0    999\n";
 		int mode = 1;
 
-		spectrum = new WrapperSpectrum(peaks, mode, exactMass);
+		spectrum = new WrapperSpectrum(peaks, mode, exactMass, true);
 		Assert.assertEquals(10000.0, spectrum.getPeakList().firstElement().getIntensity());
 	}
 	
@@ -101,7 +101,7 @@ public class WrapperSpectrumTest {
 		String peaks = "153,019    10000,0    999\n";
 		int mode = 1;
 
-		spectrum = new WrapperSpectrum(peaks, mode, exactMass);
+		spectrum = new WrapperSpectrum(peaks, mode, exactMass, true);
 		Assert.assertEquals(999.0, spectrum.getPeakList().firstElement().getRelIntensity());
 	}
 	

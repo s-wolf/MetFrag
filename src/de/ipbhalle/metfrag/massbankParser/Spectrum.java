@@ -38,9 +38,10 @@ public class Spectrum  implements java.io.Serializable, Comparable<Spectrum> {
 	private String KEGG;
 	private String nameTrivial;
 	private String formula;
+	private boolean isPositive;
 	private String precursorType;
 	
-	public Spectrum(int collisionEnergy, double tic, Vector<Peak> peaks, double exactMass, int mode, String InchI, int CID, String KEGG, String nameTrivial, String formula, String precursorType){
+	public Spectrum(int collisionEnergy, double tic, Vector<Peak> peaks, double exactMass, int mode, String InchI, int CID, String KEGG, String nameTrivial, String formula, String precursorType, boolean isPositive){
 		this.collisionEnergy = collisionEnergy;
 		this.tic = tic;
 		this.peaks = peaks;
@@ -52,10 +53,11 @@ public class Spectrum  implements java.io.Serializable, Comparable<Spectrum> {
 		this.nameTrivial = nameTrivial;
 		this.precursorType = precursorType;
 		this.setFormula(formula);
+		this.isPositive = isPositive;
 	}
 	
-	public Spectrum(int collisionEnergy, Vector<Peak> peaks, double exactMass, int mode, String InchI, int CID, String KEGG, String nameTrivial, String formula, String precursorType){
-		this(collisionEnergy, 0.0, peaks, exactMass, mode, InchI, CID, KEGG, nameTrivial, formula, precursorType);
+	public Spectrum(int collisionEnergy, Vector<Peak> peaks, double exactMass, int mode, String InchI, int CID, String KEGG, String nameTrivial, String formula, String precursorType, boolean isPositive){
+		this(collisionEnergy, 0.0, peaks, exactMass, mode, InchI, CID, KEGG, nameTrivial, formula, precursorType, isPositive);
 	}	
 	
 	public int getCollisionEnergy(){
@@ -170,5 +172,18 @@ public class Spectrum  implements java.io.Serializable, Comparable<Spectrum> {
 
 	public String getPrecursorType() {
 		return precursorType;
+	}
+
+	public void setPositive(boolean isPositive) {
+		this.isPositive = isPositive;
+	}
+
+	/**
+	 * Checks if the mode is positive. (Needed if mode = 0)
+	 *
+	 * @return true, if is positive
+	 */
+	public boolean isPositive() {
+		return isPositive;
 	}
 }
