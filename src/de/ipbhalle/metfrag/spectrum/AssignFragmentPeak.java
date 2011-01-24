@@ -27,7 +27,6 @@ import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 
 import de.ipbhalle.metfrag.massbankParser.Peak;
-import de.ipbhalle.metfrag.tools.Constants;
 import de.ipbhalle.metfrag.tools.MolecularFormulaTools;
 import de.ipbhalle.metfrag.tools.PPMTool;
 
@@ -52,8 +51,6 @@ public class AssignFragmentPeak {
 	private boolean html = false;
 	private int hydrogenPenalty = 0;
 	private String partialChargeDiff;
-	private double adductMass;
-	private String adduct;
 	
 	
 	public AssignFragmentPeak()
@@ -63,19 +60,19 @@ public class AssignFragmentPeak {
 	
 	/**
 	 * Match fragment with peak. Assigns peaks to the fragments.
-	 *
+	 * 
 	 * @param acs the acs
 	 * @param peakList the peak list
 	 * @param mzabs the mzabs
 	 * @param mzppm the mzppm
-	 * @param mode the mode (positive or negative) ... charge
+	 * @param mode the mode
+	 * @param hydrogenTest the hydrogen test
 	 * @param html the html
-	 * @param adductMass the adduct mass
-	 * @param adduct the adduct string
+	 * 
 	 * @throws CDKException the CDK exception
-	 * @throws IOException Signals that an I/O exception has occurred.
+	 * @throws IOException 
 	 */
-	public void assignFragmentPeak(List<IAtomContainer> acs, Vector<Peak> peakList, double mzabs, double mzppm, int mode, boolean html, double adductMass, String adduct) throws CDKException, IOException
+	public void assignFragmentPeak(List<IAtomContainer> acs, Vector<Peak> peakList, double mzabs, double mzppm, int mode, boolean html) throws CDKException, IOException
 	{
 		this.acs = acs;
 		this.peakList = peakList;
@@ -85,8 +82,6 @@ public class AssignFragmentPeak {
 		this.hitsAll = new Vector<PeakMolPair>();
 		this.hitsPeaks = new Vector<Double>();
 		this.html = html;
-		setAdductMass(adductMass);
-		setAdduct(adduct);
 //		//initialize neutral losses
 //		getNeutralLosses();
 		
@@ -97,7 +92,7 @@ public class AssignFragmentPeak {
 			boolean test = true;
 			for (int j = 0; j < this.acs.size(); j++) {
 				//matched peak
-				if(matchByMass(this.acs.get(j), this.peakList.get(i).getMass(), mode, adductMass))
+				if(matchByMass(this.acs.get(j), this.peakList.get(i).getMass(), mode))
 				{
 					//add hits to list...only 1...check if this found hydrogen penalty is less than the previous found one
 					if(test || hits.lastElement().getHydrogenPenalty() > this.hydrogenPenalty)
@@ -105,11 +100,11 @@ public class AssignFragmentPeak {
 						//exchange the last element...this is the one with the current peak
 						if(!test && hits.size() > 0 && hits.lastElement().getHydrogenPenalty() > this.hydrogenPenalty)
 							hits.remove(hits.size() - 1);
-						hits.add(new PeakMolPair(acs.get(j),this.peakList.get(i), this.matchedMass, this.molecularFormula, this.hydrogenPenalty, this.partialChargeDiff, this.adduct, this.adductMass));
+						hits.add(new PeakMolPair(acs.get(j),this.peakList.get(i), this.matchedMass, this.molecularFormula, this.hydrogenPenalty, this.partialChargeDiff));
 						hitsPeaks.add(this.peakList.get(i).getMass());
 						test = false;
 					}
-					hitsAll.add(new PeakMolPair(acs.get(j),this.peakList.get(i), this.matchedMass, this.molecularFormula, this.hydrogenPenalty, this.partialChargeDiff, this.adduct, this.adductMass));
+					hitsAll.add(new PeakMolPair(acs.get(j),this.peakList.get(i), this.matchedMass, this.molecularFormula, this.hydrogenPenalty, this.partialChargeDiff));
 				}
 			}
 		}
@@ -127,7 +122,7 @@ public class AssignFragmentPeak {
 	 * @throws CDKException the CDK exception
 	 * @throws IOException 
 	 */
-	private boolean matchByMass(IAtomContainer ac, double peak, int mode, double adductMass, String adduct) throws CDKException, IOException
+	private boolean matchByMass(IAtomContainer ac, double peak, int mode) throws CDKException, IOException
 	{
 		boolean found = false;
 		
@@ -146,9 +141,8 @@ public class AssignFragmentPeak {
         
         double peakLow = peak - this.mzabs - PPMTool.getPPMDeviation(peak, this.mzppm);
         double peakHigh = peak + this.mzabs + PPMTool.getPPMDeviation(peak, this.mzppm);
-//        double protonMass = hydrogenMass * (double)mode;
-        //thats the mass of the peak + adductMass +/- electronMass
-        double massToCompare = mass + adductMass + ((double)mode * Constants.ELECTRON_MASS);
+        double protonMass = hydrogenMass * (double)mode;
+        double massToCompare = mass+protonMass;
         
         String neutralLoss = "";
     	if(ac.getProperty("NlElementalComposition") != null && ac.getProperty("NlElementalComposition") != "")
@@ -164,7 +158,7 @@ public class AssignFragmentPeak {
         	this.hydrogenPenalty = 0;
         	
         	if(this.html)
-        		this.molecularFormula = MolecularFormulaManipulator.getHTML(molecularFormula) + "+" + adduct + modeString + " [" + neutralLoss + "]";
+        		this.molecularFormula = MolecularFormulaManipulator.getHTML(molecularFormula) + modeString + "H" + neutralLoss;
         	else
         		this.molecularFormula = MolecularFormulaManipulator.getString(molecularFormula) + modeString + "H" + neutralLoss;
         	
@@ -285,22 +279,6 @@ public class AssignFragmentPeak {
 	public void setHydrogenTest(boolean set)
 	{
 		this.hydrogenTest = set;
-	}
-
-	public void setAdduct(String adduct) {
-		this.adduct = adduct;
-	}
-
-	public String getAdduct() {
-		return adduct;
-	}
-
-	public void setAdductMass(double adductMass) {
-		this.adductMass = adductMass;
-	}
-
-	public double getAdductMass() {
-		return adductMass;
 	}
 
 }

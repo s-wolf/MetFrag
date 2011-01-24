@@ -37,8 +37,6 @@ public class PeakMolPair {
 	private String molecularFormula;
 	private int hydrogenPenalty = 0;
 	private String partialChargeDiff;
-	private String adduct;
-	private double adductMass;
 	
 	
 	/**
@@ -47,7 +45,7 @@ public class PeakMolPair {
 	 * @param ac the ac
 	 * @param peak the peak
 	 */
-	public PeakMolPair(IAtomContainer ac, Peak peak, double matchedMass, String molecularFormula, int score, String partialChargeDiff, String adduct, double adductMass)
+	public PeakMolPair(IAtomContainer ac, Peak peak, double matchedMass, String molecularFormula, int score, String partialChargeDiff)
 	{
 		this.ac = ac;
 		this.peak = peak;
@@ -55,8 +53,6 @@ public class PeakMolPair {
 		this.setMolecularFormula(molecularFormula);
 		this.hydrogenPenalty = score;
 		this.setPartialChargeDiff(partialChargeDiff);
-		this.adductMass = adductMass;
-		this.adduct = adduct;
 	}
 	
 	/**
@@ -149,42 +145,6 @@ public class PeakMolPair {
 	 */
 	public String getPartialChargeDiff() {
 		return partialChargeDiff;
-	}
-
-	/**
-	 * Sets the adduct.
-	 *
-	 * @param adduct the new adduct
-	 */
-	public void setAdduct(String adduct) {
-		this.adduct = adduct;
-	}
-
-	/**
-	 * Gets the adduct.
-	 *
-	 * @return the adduct
-	 */
-	public String getAdduct() {
-		return adduct;
-	}
-
-	/**
-	 * Sets the adduct mass.
-	 *
-	 * @param adductMass the new adduct mass
-	 */
-	public void setAdductMass(double adductMass) {
-		this.adductMass = adductMass;
-	}
-
-	/**
-	 * Gets the adduct mass.
-	 *
-	 * @return the adduct mass
-	 */
-	public double getAdductMass() {
-		return adductMass;
 	}
 
 }
