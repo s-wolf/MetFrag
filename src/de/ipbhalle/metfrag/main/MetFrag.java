@@ -503,22 +503,19 @@ public class MetFrag {
 	/**
 	 * MetFrag. Start the fragmenter thread. Afterwards score the results. This method is used in the
 	 * webinterface to generate all the fragments for one structure.
-	 * 
-	 * @param database the database
-	 * @param databaseID the database id
-	 * @param mzabs the mzabs
-	 * @param mzppm the mzppm
-	 * @param treeDepth the tree depth
+	 *
 	 * @param peakList the peak list
 	 * @param smiles the smiles
 	 * @param mode the mode
 	 * @param molFormulaRedundancyCheck the mol formula redundancy check
-	 * 
+	 * @param mzabs the mzabs
+	 * @param mzppm the mzppm
+	 * @param treeDepth the tree depth
+	 * @param isPositive the is positive
 	 * @return the string
-	 * 
 	 * @throws Exception the exception
 	 */
-	public static Vector<PeakMolPair> startConvenienceWeb(String peakList, String smiles, int mode, boolean molFormulaRedundancyCheck, double mzabs, double mzppm, int treeDepth) throws Exception
+	public static Vector<PeakMolPair> startConvenienceWeb(String peakList, String smiles, int mode, boolean molFormulaRedundancyCheck, double mzabs, double mzppm, int treeDepth, boolean isPositive) throws Exception
 	{
 		SmilesParser sp = new SmilesParser(DefaultChemObjectBuilder.getInstance());
 		//parse smiles
@@ -533,7 +530,7 @@ public class MetFrag {
         Double molMass = MolecularFormulaTools.getMonoisotopicMass(MolecularFormulaManipulator.getMolecularFormula(molecule));
 		molMass = (double)Math.round((molMass)*10000)/10000;
         
-		WrapperSpectrum spectrum = new WrapperSpectrum(peakList, mode, molMass);		
+		WrapperSpectrum spectrum = new WrapperSpectrum(peakList, mode, molMass, isPositive);		
 		
 		//constructor for fragmenter
 		Fragmenter fragmenter = new Fragmenter((Vector<Peak>)spectrum.getPeakList().clone(), mzabs, mzppm, spectrum.getMode(), true, molFormulaRedundancyCheck, false, false);
@@ -547,7 +544,7 @@ public class MetFrag {
 		//now find corresponding fragments to the mass
 		AssignFragmentPeak afp = new AssignFragmentPeak();
 		afp.setHydrogenTest(true);
-		afp.assignFragmentPeak(listOfFrags, cleanedPeakList, mzabs, mzppm, spectrum.getMode(), false);
+		afp.assignFragmentPeak(listOfFrags, cleanedPeakList, mzabs, mzppm, spectrum.getMode(), false, isPositive);
 		Vector<PeakMolPair> hits = afp.getAllHits();
 
 		return sortBackwards(hits);

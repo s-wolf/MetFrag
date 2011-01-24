@@ -54,6 +54,7 @@ public class MassbankParser{
 		//Vector<Compound> compounds = new Vector<Compound>(); not used....
 		TreeMap<String, Integer> map = new TreeMap<String, Integer>();
 		boolean errorFlag = true; // starts with true, so no compound is added in the first loop.
+		boolean isPositive = true;
 		
 		for (int i= 1; i < 2; ++i){ //disabled loop ... read only 1 spectra
 			try {
@@ -135,12 +136,28 @@ public class MassbankParser{
 			  		line = reader.readLine();
 			  	}	
 		  		// PRECURSOR_TYPE: POSITIVE (1) or NEGATIVE (-1)
-				if (line.contains("AC$ANALYTICAL_CONDITION: PRECURSOR_TYPE") && line.substring(line.indexOf("AC$ANALYTICAL_CONDITION: PRECURSOR_TYPE")+40).contains("[M+H]+")) mode = 1;
-				else mode = -1;
-				//RIKEN Spektren
-				if (line.contains("AC$ANALYTICAL_CONDITION: MODE") && line.substring(line.indexOf("AC$ANALYTICAL_CONDITION: MODE")+30).contains("POSITIVE")) mode = 1;
-				else mode = -1;
+				if (line.contains("AC$ANALYTICAL_CONDITION: PRECURSOR_TYPE") && line.substring(line.indexOf("AC$ANALYTICAL_CONDITION: PRECURSOR_TYPE")+40).contains("[M+H]+"))
+				{
+					mode = 1;
+					isPositive = true;
 				}
+				else
+				{
+					mode = -1;
+					isPositive = false;
+				}
+				//RIKEN Spektren
+				if (line.contains("AC$ANALYTICAL_CONDITION: MODE") && line.substring(line.indexOf("AC$ANALYTICAL_CONDITION: MODE")+30).contains("POSITIVE"))
+				{
+					mode = 1;
+					isPositive = true;
+				}
+				else
+				{
+					mode = -1;
+					isPositive = false;
+				}
+			}
 		  	
 		  		//skipped PRECURSER SELECTION, FRAGMENTATION_EQUIPMENT, SPECTRUM_TYPE.....
 			  	while (line != null && !line.contains("AC$ANALYTICAL_CONDITION: COLLISION_ENERGY")){
@@ -164,19 +181,19 @@ public class MassbankParser{
 					precursorType = line.substring(31);
 		  	
 		  	
-				while (line != null && !line.contains("PK$PEAK")){
-			  	  line = reader.readLine();
-			  	}
+			while (line != null && !line.contains("PK$PEAK")){
+		  	  line = reader.readLine();
+		  	}
+				line = reader.readLine();
+				peaks = new Vector<Peak>();
+				while (line != null && !line.contains("//")){
+					array = line.split(" ");
+					// array[2] is mass, array[3] abs. intensity, array[4] rel. intensity.
+					// spectra.size shows how many spectra had a lower energy than the spectrum this peak belongs to.
+					peaks.add(new Peak(Double.parseDouble(array[2]), Double.parseDouble(array[3]), Double.parseDouble(array[4]), collisionEnergy));
 					line = reader.readLine();
-					peaks = new Vector<Peak>();
-					while (line != null && !line.contains("//")){
-						array = line.split(" ");
-						// array[2] is mass, array[3] abs. intensity, array[4] rel. intensity.
-						// spectra.size shows how many spectra had a lower energy than the spectrum this peak belongs to.
-						peaks.add(new Peak(Double.parseDouble(array[2]), Double.parseDouble(array[3]), Double.parseDouble(array[4]), collisionEnergy));
-						line = reader.readLine();
-					}
-					spectra.add(new Spectrum(collisionEnergy, peaks, mass, mode, IUPAC, linkPubChem, linkKEGG, nameTrivial, formula, precursorType));
+				}
+				spectra.add(new Spectrum(collisionEnergy, peaks, mass, mode, IUPAC, linkPubChem, linkKEGG, nameTrivial, formula, isPositive));
 				
 					
 				}
