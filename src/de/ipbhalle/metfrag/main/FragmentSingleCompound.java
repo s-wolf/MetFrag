@@ -101,7 +101,7 @@ public class FragmentSingleCompound {
 		//this creates a pseudo peak list --> only fragments heavier than this peak will be generated
 		//just a dirty hack...
 		String peakString = minMass.toString() + " 10000 999\n"; 
-		WrapperSpectrum spectrum = new WrapperSpectrum(peakString, 1, molMass);		
+		WrapperSpectrum spectrum = new WrapperSpectrum(peakString, 1, molMass, true);		
 		
 		//constructor for fragmenter
 		Fragmenter fragmenter = new Fragmenter((Vector<Peak>)spectrum.getPeakList().clone(), minMass,  true, sumFormulaRedundancyCheck, false);

@@ -110,17 +110,6 @@ public class AssignFragmentPeak {
 	}
 	
 	
-	/**
-	 * Match by mass.
-	 * 
-	 * @param ac the ac
-	 * @param peak the peak
-	 * 
-	 * @return true, if successful
-	 * 
-	 * @throws CDKException the CDK exception
-	 * @throws IOException 
-	 */
 	private boolean matchByMass(IAtomContainer ac, double peak, int mode, boolean isPositive) throws CDKException, IOException
 	{
 		boolean found = false;
@@ -213,26 +202,9 @@ public class AssignFragmentPeak {
         	        		this.molecularFormula = MolecularFormulaManipulator.getHTML(molecularFormula) + neutralLoss;
         	        	else
         	        		this.molecularFormula = MolecularFormulaManipulator.getString(molecularFormula) + neutralLoss;
-        				
-        				break;
-        			}
-        		}
-        		else
-        		{
-        			double hMass = i * Constants.HYDROGEN_MASS;
-        			
-        			//found
-        			if(((massToCompare - hMass) >= peakLow && (massToCompare - hMass) <= peakHigh))
-        			{
-        				found = true;
-        				matchedMass = Math.round((massToCompare-hMass)*10000.0)/10000.0;
-        				
-        				//now add a bond energy equivalent to a H-C bond
-        				if(mode == -1)
-        					this.hydrogenPenalty = (i);
-        				else
-        					this.hydrogenPenalty = (i + 1);
-        				
+    				}
+    				else
+    				{
         				if(this.html)
         	        		this.molecularFormula = MolecularFormulaManipulator.getHTML(molecularFormula) + "-" + hydrogenCountString + "H" + neutralLoss;
         	        	else

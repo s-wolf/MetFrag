@@ -371,7 +371,7 @@ public class WrapperSpectrum {
 	 */
 	public String getPrecursorType() {
 		return precursorType;
-
+	}
 
 	public void setPositive(boolean isPositive) {
 		this.isPositive = isPositive;

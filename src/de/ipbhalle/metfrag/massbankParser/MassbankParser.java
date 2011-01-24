@@ -159,48 +159,48 @@ public class MassbankParser{
 				}
 			}
 		  	
-		  		//skipped PRECURSER SELECTION, FRAGMENTATION_EQUIPMENT, SPECTRUM_TYPE.....
-			  	while (line != null && !line.contains("AC$ANALYTICAL_CONDITION: COLLISION_ENERGY")){
+	  		//skipped PRECURSER SELECTION, FRAGMENTATION_EQUIPMENT, SPECTRUM_TYPE.....
+		  	while (line != null && !line.contains("AC$ANALYTICAL_CONDITION: COLLISION_ENERGY")){
+		  	  line = reader.readLine();
+		  	}
+			try
+			{
+				collisionEnergy = Integer.parseInt(line.substring(line.indexOf("AC$ANALYTICAL_CONDITION: COLLISION_ENERGY")+42, line.length()-3));
+			}
+			catch(NumberFormatException e)
+			{
+				//error in source file
+				collisionEnergy = 0;
+			}
+			
+			
+			while (!line.contains("PK$PEAK") && line != null && !line.contains("MS$FOCUSED_ION: PRECURSOR_TYPE")){
 			  	  line = reader.readLine();
-			  	}
-				try
-				{
-					collisionEnergy = Integer.parseInt(line.substring(line.indexOf("AC$ANALYTICAL_CONDITION: COLLISION_ENERGY")+42, line.length()-3));
-				}
-				catch(NumberFormatException e)
-				{
-					//error in source file
-					collisionEnergy = 0;
-				}
-				
-				
-				while (!line.contains("PK$PEAK") && line != null && !line.contains("MS$FOCUSED_ION: PRECURSOR_TYPE")){
-				  	  line = reader.readLine();
-				}
-				if(!line.contains("PK$PEAK"))
-					precursorType = line.substring(31);
-		  	
-		  	
+			}
+			if(!line.contains("PK$PEAK"))
+				precursorType = line.substring(31);
+	  	
+	  	
 			while (line != null && !line.contains("PK$PEAK")){
 		  	  line = reader.readLine();
 		  	}
+			line = reader.readLine();
+			peaks = new Vector<Peak>();
+			while (line != null && !line.contains("//")){
+				array = line.split(" ");
+				// array[2] is mass, array[3] abs. intensity, array[4] rel. intensity.
+				// spectra.size shows how many spectra had a lower energy than the spectrum this peak belongs to.
+				peaks.add(new Peak(Double.parseDouble(array[2]), Double.parseDouble(array[3]), Double.parseDouble(array[4]), collisionEnergy));
 				line = reader.readLine();
-				peaks = new Vector<Peak>();
-				while (line != null && !line.contains("//")){
-					array = line.split(" ");
-					// array[2] is mass, array[3] abs. intensity, array[4] rel. intensity.
-					// spectra.size shows how many spectra had a lower energy than the spectrum this peak belongs to.
-					peaks.add(new Peak(Double.parseDouble(array[2]), Double.parseDouble(array[3]), Double.parseDouble(array[4]), collisionEnergy));
-					line = reader.readLine();
-				}
-				spectra.add(new Spectrum(collisionEnergy, peaks, mass, mode, IUPAC, linkPubChem, linkKEGG, nameTrivial, formula, isPositive));
+			}
+			spectra.add(new Spectrum(collisionEnergy, peaks, mass, mode, IUPAC, linkPubChem, linkKEGG, nameTrivial, formula, precursorType, isPositive));
+			
 				
-					
-				}
-				catch (IOException e) {
-					System.out.println("File not found!!! Error: " +e.getMessage());
-					errorFlag = true;
-				}
+			}
+			catch (IOException e) {
+				System.out.println("File not found!!! Error: " +e.getMessage());
+				errorFlag = true;
+			}
 		}
 		return spectra;
 	}

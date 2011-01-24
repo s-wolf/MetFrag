@@ -57,7 +57,7 @@ public class Spectrum  implements java.io.Serializable, Comparable<Spectrum> {
 	}
 	
 	public Spectrum(int collisionEnergy, Vector<Peak> peaks, double exactMass, int mode, String InchI, int CID, String KEGG, String nameTrivial, String formula, String precursorType, boolean isPositive){
-		this(collisionEnergy, 0.0, peaks, exactMass, mode, InchI, CID, KEGG, nameTrivial, formula, precursorType);
+		this(collisionEnergy, 0.0, peaks, exactMass, mode, InchI, CID, KEGG, nameTrivial, formula, precursorType, isPositive);
 	}	
 	
 	public int getCollisionEnergy(){
@@ -172,7 +172,7 @@ public class Spectrum  implements java.io.Serializable, Comparable<Spectrum> {
 
 	public String getPrecursorType() {
 		return precursorType;
-
+	}
 
 	public void setPositive(boolean isPositive) {
 		this.isPositive = isPositive;
