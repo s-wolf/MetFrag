@@ -54,6 +54,7 @@ public class MassbankParser{
 		//Vector<Compound> compounds = new Vector<Compound>(); not used....
 		TreeMap<String, Integer> map = new TreeMap<String, Integer>();
 		boolean errorFlag = true; // starts with true, so no compound is added in the first loop.
+		boolean isPositive = true;
 		
 		for (int i= 1; i < 2; ++i){ //disabled loop ... read only 1 spectra
 			try {
@@ -132,12 +133,28 @@ public class MassbankParser{
 			  		line = reader.readLine();
 			  	}	
 		  		// PRECURSOR_TYPE: POSITIVE (1) or NEGATIVE (-1)
-				if (line.contains("AC$ANALYTICAL_CONDITION: PRECURSOR_TYPE") && line.substring(line.indexOf("AC$ANALYTICAL_CONDITION: PRECURSOR_TYPE")+40).contains("[M+H]+")) mode = 1;
-				else mode = -1;
-				//RIKEN Spektren
-				if (line.contains("AC$ANALYTICAL_CONDITION: MODE") && line.substring(line.indexOf("AC$ANALYTICAL_CONDITION: MODE")+30).contains("POSITIVE")) mode = 1;
-				else mode = -1;
+				if (line.contains("AC$ANALYTICAL_CONDITION: PRECURSOR_TYPE") && line.substring(line.indexOf("AC$ANALYTICAL_CONDITION: PRECURSOR_TYPE")+40).contains("[M+H]+"))
+				{
+					mode = 1;
+					isPositive = true;
 				}
+				else
+				{
+					mode = -1;
+					isPositive = false;
+				}
+				//RIKEN Spektren
+				if (line.contains("AC$ANALYTICAL_CONDITION: MODE") && line.substring(line.indexOf("AC$ANALYTICAL_CONDITION: MODE")+30).contains("POSITIVE"))
+				{
+					mode = 1;
+					isPositive = true;
+				}
+				else
+				{
+					mode = -1;
+					isPositive = false;
+				}
+			}
 		  	
 		  		//skipped PRECURSER SELECTION, FRAGMENTATION_EQUIPMENT, SPECTRUM_TYPE.....
 		  	while (line != null && !line.contains("AC$ANALYTICAL_CONDITION: COLLISION_ENERGY")){
@@ -166,7 +183,7 @@ public class MassbankParser{
 					peaks.add(new Peak(Double.parseDouble(array[2]), Double.parseDouble(array[3]), Double.parseDouble(array[4]), collisionEnergy));
 					line = reader.readLine();
 				}
-				spectra.add(new Spectrum(collisionEnergy, peaks, mass, mode, IUPAC, linkPubChem, linkKEGG, nameTrivial, formula));
+				spectra.add(new Spectrum(collisionEnergy, peaks, mass, mode, IUPAC, linkPubChem, linkKEGG, nameTrivial, formula, isPositive));
 			
 				
 			}

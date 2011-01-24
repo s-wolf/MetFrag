@@ -51,6 +51,7 @@ public class WrapperSpectrum {
 	private String nameTrivial;
 	private String filename;
 	private String formula;
+	private boolean isPositive;
 	
 	
 	/**
@@ -71,6 +72,7 @@ public class WrapperSpectrum {
 		String[] fileTemp = filename.split("\\/");
 		this.filename = fileTemp[fileTemp.length - 1];
 		this.setFormula(spectra.get(0).getFormula());
+		this.isPositive = spectra.get(0).isPositive();
 	}
 	
 	
@@ -82,10 +84,11 @@ public class WrapperSpectrum {
 	 * @param mode the mode
 	 * @param exactMass the exact mass
 	 */
-	public WrapperSpectrum(String peakString, int mode, double exactMass){
+	public WrapperSpectrum(String peakString, int mode, double exactMass, boolean isPositive){
 		this.spectra = new Vector<Spectrum>();
 		this.collisionEnergy = -1;
-		spectra.add(new Spectrum(-1, parsePeaks(peakString), exactMass, mode, "none", -1, "none", "none",""));
+		
+		spectra.add(new Spectrum(-1, parsePeaks(peakString), exactMass, mode, "none", -1, "none", "none", "", isPositive));
 		
 		this.peaks = spectra.get(0).getPeaks(); //just one spectra for now
 		this.exactMass = spectra.get(0).getExactMass();
@@ -337,6 +340,16 @@ public class WrapperSpectrum {
 
 	public String getFormula() {
 		return formula;
+	}
+
+
+	public void setPositive(boolean isPositive) {
+		this.isPositive = isPositive;
+	}
+
+
+	public boolean isPositive() {
+		return isPositive;
 	}
 	
 }

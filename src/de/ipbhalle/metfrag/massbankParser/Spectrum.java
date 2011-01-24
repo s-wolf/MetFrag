@@ -38,8 +38,9 @@ public class Spectrum  implements java.io.Serializable, Comparable<Spectrum> {
 	private String KEGG;
 	private String nameTrivial;
 	private String formula;
+	private boolean isPositive;
 	
-	public Spectrum(int collisionEnergy, double tic, Vector<Peak> peaks, double exactMass, int mode, String InchI, int CID, String KEGG, String nameTrivial, String formula){
+	public Spectrum(int collisionEnergy, double tic, Vector<Peak> peaks, double exactMass, int mode, String InchI, int CID, String KEGG, String nameTrivial, String formula, boolean isPositive){
 		this.collisionEnergy = collisionEnergy;
 		this.tic = tic;
 		this.peaks = peaks;
@@ -50,10 +51,11 @@ public class Spectrum  implements java.io.Serializable, Comparable<Spectrum> {
 		this.KEGG = KEGG;
 		this.nameTrivial = nameTrivial;
 		this.setFormula(formula);
+		this.isPositive = isPositive;
 	}
 	
-	public Spectrum(int collisionEnergy, Vector<Peak> peaks, double exactMass, int mode, String InchI, int CID, String KEGG, String nameTrivial, String formula){
-		this(collisionEnergy, 0.0, peaks, exactMass, mode, InchI, CID, KEGG, nameTrivial, formula);
+	public Spectrum(int collisionEnergy, Vector<Peak> peaks, double exactMass, int mode, String InchI, int CID, String KEGG, String nameTrivial, String formula, boolean isPositive){
+		this(collisionEnergy, 0.0, peaks, exactMass, mode, InchI, CID, KEGG, nameTrivial, formula, isPositive);
 	}	
 	
 	public int getCollisionEnergy(){
@@ -160,5 +162,18 @@ public class Spectrum  implements java.io.Serializable, Comparable<Spectrum> {
 
 	public String getFormula() {
 		return formula;
+	}
+
+	public void setPositive(boolean isPositive) {
+		this.isPositive = isPositive;
+	}
+
+	/**
+	 * Checks if the mode is positive. (Needed if mode = 0)
+	 *
+	 * @return true, if is positive
+	 */
+	public boolean isPositive() {
+		return isPositive;
 	}
 }

@@ -27,6 +27,7 @@ import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 
 import de.ipbhalle.metfrag.massbankParser.Peak;
+import de.ipbhalle.metfrag.tools.Constants;
 import de.ipbhalle.metfrag.tools.MolecularFormulaTools;
 import de.ipbhalle.metfrag.tools.PPMTool;
 
@@ -60,19 +61,18 @@ public class AssignFragmentPeak {
 	
 	/**
 	 * Match fragment with peak. Assigns peaks to the fragments.
-	 * 
+	 *
 	 * @param acs the acs
 	 * @param peakList the peak list
 	 * @param mzabs the mzabs
 	 * @param mzppm the mzppm
 	 * @param mode the mode
-	 * @param hydrogenTest the hydrogen test
 	 * @param html the html
-	 * 
+	 * @param isPositive is positive mode (is used for [M+]+ or [M-]-)
 	 * @throws CDKException the CDK exception
-	 * @throws IOException 
+	 * @throws IOException Signals that an I/O exception has occurred.
 	 */
-	public void assignFragmentPeak(List<IAtomContainer> acs, Vector<Peak> peakList, double mzabs, double mzppm, int mode, boolean html) throws CDKException, IOException
+	public void assignFragmentPeak(List<IAtomContainer> acs, Vector<Peak> peakList, double mzabs, double mzppm, int mode, boolean html, boolean isPositive) throws CDKException, IOException
 	{
 		this.acs = acs;
 		this.peakList = peakList;
@@ -92,7 +92,7 @@ public class AssignFragmentPeak {
 			boolean test = true;
 			for (int j = 0; j < this.acs.size(); j++) {
 				//matched peak
-				if(matchByMass(this.acs.get(j), this.peakList.get(i).getMass(), mode))
+				if(matchByMass(this.acs.get(j), this.peakList.get(i).getMass(), mode, isPositive))
 				{
 					//add hits to list...only 1...check if this found hydrogen penalty is less than the previous found one
 					if(test || hits.lastElement().getHydrogenPenalty() > this.hydrogenPenalty)
@@ -122,7 +122,7 @@ public class AssignFragmentPeak {
 	 * @throws CDKException the CDK exception
 	 * @throws IOException 
 	 */
-	private boolean matchByMass(IAtomContainer ac, double peak, int mode) throws CDKException, IOException
+	private boolean matchByMass(IAtomContainer ac, double peak, int mode, boolean isPositive) throws CDKException, IOException
 	{
 		boolean found = false;
 		
@@ -138,18 +138,36 @@ public class AssignFragmentPeak {
         
         this.partialChargeDiff = (String)ac.getProperty("PartialChargeDiff");
         
+        String modeString = "";
+        double massForMode = 0.0;
+        if(mode == 1)
+        {
+            modeString = " +";
+            massForMode = Constants.HYDROGEN_MASS - Constants.PROTON_MASS;
+        }
+        else if(mode == -1)
+        {
+        	modeString = " -";
+        	massForMode = (-1.0 * (Constants.HYDROGEN_MASS)) + Constants.PROTON_MASS;
+        }
+        else if(mode == 0)
+        {
+        	modeString = " ";
+        	if(isPositive)
+        		massForMode = Constants.ELECTRON_MASS;
+        	else
+        		massForMode = -1.0 * (Constants.ELECTRON_MASS);
+        }
+        
         
         double peakLow = peak - this.mzabs - PPMTool.getPPMDeviation(peak, this.mzppm);
         double peakHigh = peak + this.mzabs + PPMTool.getPPMDeviation(peak, this.mzppm);
-        double protonMass = hydrogenMass * (double)mode;
-        double massToCompare = mass+protonMass;
+        double massToCompare = mass + massForMode;
         
         String neutralLoss = "";
     	if(ac.getProperty("NlElementalComposition") != null && ac.getProperty("NlElementalComposition") != "")
     		neutralLoss = " -" + ac.getProperty("NlElementalComposition");
     
-        
-        String modeString = (mode > 0) ? " +" : " -";
         
         if((massToCompare >= peakLow && massToCompare <= peakHigh))
         {
@@ -168,72 +186,79 @@ public class AssignFragmentPeak {
         if(hydrogenTest && !found)
         {
         	int treeDepth = Integer.parseInt((String)ac.getProperty("TreeDepth"));
-        	for(int i= 0; i <= treeDepth; i++)
+        	for(int i= 1; i <= treeDepth; i++)
         	{
-        		if(i==0)
-        		{
-        			//found
-        			if(((mass) >= peakLow && (mass) <= peakHigh))
-        			{
-        				
-        				//now add a bond energy equivalent to a H-C bond
-        				this.hydrogenPenalty = 1;
-        				
-        				
-        				found = true;
-        				matchedMass = Math.round((mass)*10000.0)/10000.0;
-        				
+    			double hMass = i * Constants.HYDROGEN_MASS;
+    			
+    			//found
+    			if(((massToCompare - hMass) >= peakLow && (massToCompare - hMass) <= peakHigh))
+    			{
+    				found = true;
+    				matchedMass = Math.round((massToCompare-hMass)*10000.0)/10000.0;
+    				
+    				//now add a bond energy equivalent to a H-C bond
+    				this.hydrogenPenalty = i;
+    				
+    				String hydrogenCountString = Integer.toString(i);
+    				//i+1 because the other hydrogen is from the mode!
+    				if(mode == -1)
+    					hydrogenCountString = Integer.toString(i + 1);
+    				else if(mode == 1)
+    					hydrogenCountString = Integer.toString(i - 1);
+    				
+    				//positive mode...no hydrogen added for i == 1
+    				else if(mode == 1 && i == 1)
+    				{
+    					//reduce the hydrogen
         				if(this.html)
         	        		this.molecularFormula = MolecularFormulaManipulator.getHTML(molecularFormula) + neutralLoss;
         	        	else
         	        		this.molecularFormula = MolecularFormulaManipulator.getString(molecularFormula) + neutralLoss;
-        				
-        				break;
-        			}
-        		}
-        		else
-        		{
-        			double hMass = i * protonMass;
-        			
-        			//found
-        			if(((massToCompare - hMass) >= peakLow && (massToCompare - hMass) <= peakHigh))
-        			{
-        				found = true;
-        				matchedMass = Math.round((massToCompare-hMass)*10000.0)/10000.0;
-        				
-        				//now add a bond energy equivalent to a H-C bond
-        				if(mode == -1)
-        					this.hydrogenPenalty = (i);
-        				else
-        					this.hydrogenPenalty = (i + 1);
-        				
+    				}
+    				else
+    				{
         				if(this.html)
-        	        		this.molecularFormula = MolecularFormulaManipulator.getHTML(molecularFormula) + "-" + (i + 1) + "H" + neutralLoss;
+        	        		this.molecularFormula = MolecularFormulaManipulator.getHTML(molecularFormula) + "-" + hydrogenCountString + "H" + neutralLoss;
         	        	else
-        	        		this.molecularFormula = MolecularFormulaManipulator.getString(molecularFormula) + "-" + (i + 1) + "H" + neutralLoss;
-        				
-        				
-        				break;
-        			}
-        			else if(((massToCompare + hMass) >= peakLow && (massToCompare + hMass) <= peakHigh))
-        			{
-        				found = true;
-        				matchedMass = Math.round((massToCompare+hMass)*10000.0)/10000.0;
-        				//now add a bond energy equivalent to a H-C bond
-        				if(mode == 1)
-        					this.hydrogenPenalty = (i);
-        				else
-        					this.hydrogenPenalty = (i + 1);
-        				
-        				
+        	        		this.molecularFormula = MolecularFormulaManipulator.getString(molecularFormula) + "-" + hydrogenCountString + "H" + neutralLoss;
+    				}
+    				
+    				
+    				
+    				
+    				break;
+    			}
+    			else if(((massToCompare + hMass) >= peakLow && (massToCompare + hMass) <= peakHigh))
+    			{
+    				found = true;
+    				matchedMass = Math.round((massToCompare+hMass)*10000.0)/10000.0;
+    				
+    				String hydrogenCountString = Integer.toString(i);
+    				//i+1 because the other hydrogen is from the mode!
+    				if(mode == 1)
+    					hydrogenCountString = Integer.toString(i + 1);
+    				else if(mode == -1)
+    					hydrogenCountString = Integer.toString(i - 1);
+    					
+    				//negative mode...no hydrogen added for i == 1
+    				else if(mode == -1 && i == 1)
+    				{
+    					//reduce the hydrogen
         				if(this.html)
-        	        		this.molecularFormula = MolecularFormulaManipulator.getHTML(molecularFormula) + "+" + (i + 1) + "H" + neutralLoss;
+        	        		this.molecularFormula = MolecularFormulaManipulator.getHTML(molecularFormula) + neutralLoss;
         	        	else
-        	        		this.molecularFormula = MolecularFormulaManipulator.getString(molecularFormula) + "+" + (i + 1) + "H" + neutralLoss;
-        				
-        				break;
-        			}
-        		}	
+        	        		this.molecularFormula = MolecularFormulaManipulator.getString(molecularFormula) + neutralLoss;
+    				}
+    				else
+    				{
+        				if(this.html)
+        	        		this.molecularFormula = MolecularFormulaManipulator.getHTML(molecularFormula) + "+" + hydrogenCountString + "H" + neutralLoss;
+        	        	else
+        	        		this.molecularFormula = MolecularFormulaManipulator.getString(molecularFormula) + "+" + hydrogenCountString + "H" + neutralLoss;
+    				}
+    				
+    				break;
+    			}
         	}
         }
         		
