@@ -66,6 +66,7 @@ public class BatchFileProcessingLocal {
 	    Double exactMass = 0.0;
 	    String sample = "";
 	    Integer mode = 1;
+	    boolean isPositive = false;
 	    String jdbc = "jdbc:mysql://rdbms/MetFrag";
 	    String username = "swolf";
 	    String password = "populusromanus";
@@ -95,7 +96,14 @@ public class BatchFileProcessingLocal {
 		    	
 		    	//mode
 		    	if(strLine.startsWith("# Mode:"))
+		    	{
 		    		mode = Integer.parseInt(strLine.substring(8));
+		    		if(mode == 0)
+		    		{
+		    			if(strLine.contains("\\+"))
+		    				isPositive = true;
+		    		}
+		    	}
 		    	
 		    	//peaks
 		    	if(!strLine.startsWith("#"))
@@ -106,7 +114,7 @@ public class BatchFileProcessingLocal {
 		    exactMass = exactMass - ((double)mode * 1.0072765);
 		    
 		    //Fragment the structures!
-		    List<MetFragResult> results = MetFrag.startConvenienceMetFusion(database, "", "", exactMass, new WrapperSpectrum(peaks, mode, exactMass), false, mzabs, mzppm, 10, true, true, treeDepth, true, false, true, false, Integer.MAX_VALUE, jdbc, username, password);
+		    List<MetFragResult> results = MetFrag.startConvenienceMetFusion(database, "", "", exactMass, new WrapperSpectrum(peaks, mode, exactMass, isPositive), false, mzabs, mzppm, 10, true, true, treeDepth, true, false, true, false, Integer.MAX_VALUE, jdbc, username, password);
 		    MoleculeSet setOfMolecules = new MoleculeSet();
 			for (MetFragResult result : results) {
 				//get corresponding structure

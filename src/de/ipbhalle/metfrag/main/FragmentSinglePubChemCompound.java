@@ -98,6 +98,8 @@ public class FragmentSinglePubChemCompound {
 	    String pubchemID = "";
 	    String peaks = "";
 	    Double parentMass = 0.0;
+	    boolean isPositive = false;
+	    int mode = 1;
 	    
 	    //Read File Line By Line
 	    while ((strLine = br.readLine()) != null)   {
@@ -117,6 +119,17 @@ public class FragmentSinglePubChemCompound {
 	    	//peaks
 	    	if(!strLine.startsWith("#"))
 	    		peaks += strLine + "\n";
+	    	
+	    	//mode
+	    	if(strLine.startsWith("# Mode:"))
+	    	{
+	    		mode = Integer.parseInt(strLine.substring(8));
+	    		if(mode == 0)
+	    		{
+	    			if(strLine.contains("\\+"))
+	    				isPositive = true;
+	    		}
+	    	}
 	    }
 	      
 	    PubChemWebService pubchemService = new PubChemWebService();
@@ -141,7 +154,7 @@ public class FragmentSinglePubChemCompound {
 	    	System.out.println("Error: Something wrong with molecule");
         }
 	        
-	    WrapperSpectrum spectrum = new WrapperSpectrum(peaks, 1, parentMass);
+	    WrapperSpectrum spectrum = new WrapperSpectrum(peaks, 1, parentMass, isPositive);
 	    //get the original peak list again
 		Vector<Peak> peakListParsed = spectrum.getPeakList();
 		//clean up peak list
@@ -164,7 +177,7 @@ public class FragmentSinglePubChemCompound {
 		//now find corresponding fragments to the mass
 		AssignFragmentPeak afp = new AssignFragmentPeak();
 		afp.setHydrogenTest(true);
-		afp.assignFragmentPeak(fragments, cleanedPeakList, mzabs, mzppm, spectrum.getMode(), true);
+		afp.assignFragmentPeak(fragments, cleanedPeakList, mzabs, mzppm, spectrum.getMode(), true, spectrum.isPositive());
 		Vector<PeakMolPair> hits = afp.getHits();
 		
 		if(isAllFragments())
