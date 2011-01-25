@@ -253,7 +253,7 @@ public class MergePeakList {
 				    	peaks += "\n";
 				    }
 				    in.close();
-				    WrapperSpectrum spectrum = new WrapperSpectrum(peaks, 1, 1000.0);
+				    WrapperSpectrum spectrum = new WrapperSpectrum(peaks, 1, 1000.0, true);
 				    spectra.add(spectrum);
 				}
 		    	

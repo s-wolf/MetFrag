@@ -70,6 +70,7 @@ public class BatchFileProcessingSDF {
 	    Double exactMass = 0.0;
 	    String sample = "";
 	    Integer mode = 1;
+	    boolean isPositive = false;
 	    
 	    try
 	    {
@@ -96,7 +97,16 @@ public class BatchFileProcessingSDF {
 		    	
 		    	//mode
 		    	if(strLine.startsWith("# Mode:"))
+		    	{
 		    		mode = Integer.parseInt(strLine.substring(8));
+		    	}
+		    	
+		    	//charge
+		    	if(strLine.startsWith("# Charge:"))
+		    	{
+		    		if(strLine.contains("+"))
+		    			isPositive = true;
+		    	}
 		    	
 		    	//peaks
 		    	if(!strLine.startsWith("#"))
@@ -107,7 +117,7 @@ public class BatchFileProcessingSDF {
 		    exactMass = exactMass - ((double)mode * Constants.PROTON_MASS);
 		    
 		    //Fragment the structures!
-		    List<MetFragResult> results = MetFrag.startConvenienceSDF(new WrapperSpectrum(peaks, mode, exactMass), false, mzabs, mzppm, 10, true, true, treeDepth, true, false, true, false, Integer.MAX_VALUE, true, pathToSDFDatabase);
+		    List<MetFragResult> results = MetFrag.startConvenienceSDF(new WrapperSpectrum(peaks, mode, exactMass, isPositive), false, mzabs, mzppm, 10, true, true, treeDepth, true, false, true, false, Integer.MAX_VALUE, true, pathToSDFDatabase);
 		    													  
 		    MoleculeSet setOfMolecules = new MoleculeSet();
 			for (MetFragResult result : results) {

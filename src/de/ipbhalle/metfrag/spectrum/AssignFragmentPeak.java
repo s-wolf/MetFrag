@@ -169,13 +169,13 @@ public class AssignFragmentPeak {
         double massForMode = 0.0;
         if(mode == 1)
         {
-            modeString = " +";
-            massForMode = Constants.HYDROGEN_MASS - Constants.PROTON_MASS;
+            modeString = " +H";
+            massForMode = Constants.HYDROGEN_MASS - Constants.ELECTRON_MASS;
         }
         else if(mode == -1)
         {
-        	modeString = " -";
-        	massForMode = (-1.0 * (Constants.HYDROGEN_MASS)) + Constants.PROTON_MASS;
+        	modeString = " -H";
+        	massForMode = (-1.0 * (Constants.HYDROGEN_MASS)) + Constants.ELECTRON_MASS;
         }
         else if(mode == 0)
         {
@@ -203,9 +203,9 @@ public class AssignFragmentPeak {
         	
 
         	if(this.html)
-        		molecularFormulaString = MolecularFormulaManipulator.getHTML(molecularFormula) + modeString + "H";
+        		molecularFormulaString = MolecularFormulaManipulator.getHTML(molecularFormula) + modeString;
         	else
-        		molecularFormulaString = MolecularFormulaManipulator.getString(molecularFormula) + modeString + "H";
+        		molecularFormulaString = MolecularFormulaManipulator.getString(molecularFormula) + modeString;
      
         	matchedFragments.add(new MatchedFragment(peak, fragmentMass, matchedMass, fragmentStructure, null, hydrogenPenalty, MoleculeTools.getCombinedEnergy(partialChargeDiffString), molecularFormulaString));
         }
@@ -222,6 +222,9 @@ public class AssignFragmentPeak {
         for (List<NeutralLoss[]> layers : neutralLossCombinations) {
         	//each layer has 1 to many neutral loss rule combinations 
 			for (NeutralLoss[] neutralLossRulesToApply : layers) {
+				
+				
+				
 				int countNL = 0;
 				//save the mass of the fragment with all modifications
 				double massToCompareTemp = massToCompare;
@@ -280,6 +283,11 @@ public class AssignFragmentPeak {
 					}
 				}
 				
+				if(this.html)
+	        		molecularFormulaString = MolecularFormulaManipulator.getHTML(molecularFormula) + modeString;
+	        	else
+	        		molecularFormulaString = MolecularFormulaManipulator.getString(molecularFormula) + modeString;
+				
 				if(countNL == neutralLossRulesToApply.length)
 					matchedFragments.add(new MatchedFragment(peak, fragmentMass, (matchedMass + (this.hydrogenPenalty * Constants.HYDROGEN_MASS)), fragmentStructure, neutralLossRulesToApply , hydrogenPenalty, MoleculeTools.getCombinedEnergy(partialChargeDiffString), molecularFormulaString, matchedAtomsSMARTS));
 			}
@@ -311,6 +319,7 @@ public class AssignFragmentPeak {
 		double matchedMass;
 		String molecularFormulaString = "";
 		boolean found = false;
+		hydrogenPenalty = 0;
 		
 		for(int i= 1; i <= treeDepth; i++)
     	{
@@ -323,7 +332,7 @@ public class AssignFragmentPeak {
 				matchedMass = Math.round((massToCompare-hMass)*10000.0)/10000.0;
 				
 				//now add a bond energy equivalent to a H-C bond
-				this.hydrogenPenalty = i;
+				hydrogenPenalty = i;
 				
 				String hydrogenCountString = Integer.toString(i);
 				//i+1 because the other hydrogen is from the mode!
@@ -333,20 +342,20 @@ public class AssignFragmentPeak {
 					hydrogenCountString = Integer.toString(i - 1);
 				
 				//positive mode...no hydrogen added for i == 1
-				else if(mode == 1 && i == 1)
+				if(mode == 1 && i == 1)
 				{
 					//reduce the hydrogen
     				if(this.html)
-    	        		molecularFormulaString = MolecularFormulaManipulator.getHTML(molecularFormula) + neutralLoss;
+    	        		molecularFormulaString = MolecularFormulaManipulator.getHTML(molecularFormula);
     	        	else
-    	        		molecularFormulaString = MolecularFormulaManipulator.getString(molecularFormula) + neutralLoss;
+    	        		molecularFormulaString = MolecularFormulaManipulator.getString(molecularFormula);
 				}
 				else
 				{
     				if(this.html)
-    					molecularFormulaString = MolecularFormulaManipulator.getHTML(molecularFormula) + "-" + hydrogenCountString + "H" + neutralLoss;
+    					molecularFormulaString = MolecularFormulaManipulator.getHTML(molecularFormula) + "-" + hydrogenCountString + "H";
     	        	else
-    	        		molecularFormulaString = MolecularFormulaManipulator.getString(molecularFormula) + "-" + hydrogenCountString + "H" + neutralLoss;
+    	        		molecularFormulaString = MolecularFormulaManipulator.getString(molecularFormula) + "-" + hydrogenCountString + "H";
 				}
 				
 				
@@ -373,16 +382,16 @@ public class AssignFragmentPeak {
 				{
 					//reduce the hydrogen
     				if(this.html)
-    	        		molecularFormulaString = MolecularFormulaManipulator.getHTML(molecularFormula) + neutralLoss;
+    	        		molecularFormulaString = MolecularFormulaManipulator.getHTML(molecularFormula);
     	        	else
-    	        		molecularFormulaString = MolecularFormulaManipulator.getString(molecularFormula) + neutralLoss;
+    	        		molecularFormulaString = MolecularFormulaManipulator.getString(molecularFormula);
 				}
 				else
 				{
     				if(this.html)
-    					molecularFormulaString = MolecularFormulaManipulator.getHTML(molecularFormula) + "+" + hydrogenCountString + "H" + neutralLoss;
+    					molecularFormulaString = MolecularFormulaManipulator.getHTML(molecularFormula) + "+" + hydrogenCountString + "H";
     	        	else
-    	        		molecularFormulaString = MolecularFormulaManipulator.getString(molecularFormula) + "+" + hydrogenCountString + "H" + neutralLoss;
+    	        		molecularFormulaString = MolecularFormulaManipulator.getString(molecularFormula) + "+" + hydrogenCountString + "H";
 				}
 				
 				
@@ -408,7 +417,8 @@ public class AssignFragmentPeak {
 	 */
 	private double calculateFragmentMassNeutralLoss(NeutralLoss nl, Double fragmentMass)
 	{
-		double ret = fragmentMass + (nl.getHydrogenDifference() * Constants.HYDROGEN_MASS) - nl.getMass();
+//		double ret = fragmentMass + (nl.getHydrogenDifference() * Constants.HYDROGEN_MASS) - nl.getMass();
+		double ret = fragmentMass - nl.getMass();
 		return ret;
 	}
 	

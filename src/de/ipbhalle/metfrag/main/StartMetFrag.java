@@ -41,7 +41,7 @@ public class StartMetFrag {
 		   "274.083 318.003\n";
 		
 		//create spectrum
-		WrapperSpectrum spectrum = new WrapperSpectrum(peaks, 1, exactMass);
+		WrapperSpectrum spectrum = new WrapperSpectrum(peaks, 1, exactMass, true);
 		
 		
 		String output = "";

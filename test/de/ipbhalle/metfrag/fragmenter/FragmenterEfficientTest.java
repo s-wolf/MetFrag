@@ -165,6 +165,7 @@ public class FragmenterEfficientTest {
 		//get all the identified peaks
 		for (int i = 0; i < hits.size(); i++) {
 			peaksFound.add(hits.get(i).getPeak().getMass());
+			System.out.println(hits.get(i).getPeak().getMass());
 		}
 		
 		Assert.assertEquals(5, peaksFound.size());

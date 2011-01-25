@@ -135,6 +135,7 @@ public class MoleculeCellHits extends JPanel{
         
         
         g.drawString(formulaString, 5, 12);
+        g.drawString(matchedFragment.getMolecularFormulaString(), 5, 22);
         if(matchedFragment.getPeak().getMass() != 0.0)
         {
 	        g.drawString("P:" + matchedFragment.getPeak().getMass() + " MM:" + matchedFragment.getMatchedMass(), (preferredWidth + 10), 12);

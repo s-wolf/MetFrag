@@ -86,10 +86,10 @@ public class WrapperSpectrum {
 	 * @param mode the mode
 	 * @param exactMass the exact mass
 	 */
-	public WrapperSpectrum(String peakString, int mode, double exactMass){
+	public WrapperSpectrum(String peakString, int mode, double exactMass, boolean isPositive){
 		this.spectra = new Vector<Spectrum>();
 		this.collisionEnergy = -1;
-		spectra.add(new Spectrum(-1, parsePeaks(peakString), exactMass, mode, "none", -1, "none", "none","", ""));
+		spectra.add(new Spectrum(-1, parsePeaks(peakString), exactMass, mode, "none", -1, "none", "none","", "", isPositive));
 		
 		this.peaks = spectra.get(0).getPeaks(); //just one spectra for now
 		this.exactMass = spectra.get(0).getExactMass();

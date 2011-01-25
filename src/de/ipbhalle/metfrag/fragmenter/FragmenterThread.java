@@ -273,7 +273,7 @@ public class FragmenterThread implements Runnable{
 				
 				//now find corresponding fragments to the mass
 				AssignFragmentPeak afp = new AssignFragmentPeak(neutralLossCombination);
-				afp.assignFragmentPeak(l, cleanedPeakList, mzabs, mzppm, spectrum.getMode(), false);
+				afp.assignFragmentPeak(l, cleanedPeakList, mzabs, mzppm, spectrum.getMode(), false, spectrum.isPositive());
 				Vector<MatchedFragment> hits = afp.getHits();
 				
 				

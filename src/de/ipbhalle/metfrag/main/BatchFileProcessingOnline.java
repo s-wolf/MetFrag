@@ -66,6 +66,8 @@ public class BatchFileProcessingOnline {
 	    Double exactMass = 0.0;
 	    String sample = "";
 	    Integer mode = 1;
+	    boolean isPositive = false;
+	    Integer searchPPM = 10;
 	    
 	    try
 	    {
@@ -74,6 +76,8 @@ public class BatchFileProcessingOnline {
 		    // Get the object of DataInputStream
 		    DataInputStream in = new DataInputStream(fstream);
 		    BufferedReader br = new BufferedReader(new InputStreamReader(in));
+		    
+		    
 		    
 		    //Read File Line By Line
 		    while ((strLine = br.readLine()) != null)   {
@@ -97,13 +101,26 @@ public class BatchFileProcessingOnline {
 		    	//peaks
 		    	if(!strLine.startsWith("#"))
 		    		peaks += strLine + "\n";
+		    	
+		    	//charge
+		    	if(strLine.startsWith("# Charge:"))
+		    	{
+		    		if(strLine.contains("+"))
+		    			isPositive = true;
+		    	}
+		    	
+		    	//search ppm
+		    	if(strLine.startsWith("# Search PPM:"))
+		    	{
+		    		searchPPM = Integer.parseInt(strLine.substring(14));
+		    	}
 		    }
 		    
 		    //now calculate the correct mass
 		    exactMass = exactMass - ((double)mode * Constants.PROTON_MASS);
 		    
 		    //Fragment the structures!
-		    List<MetFragResult> results = MetFrag.startConvenience(database, "", "", exactMass, new WrapperSpectrum(peaks, mode, exactMass), false, mzabs, mzppm, 10, true, true, treeDepth, true, false, true, false, Integer.MAX_VALUE, false, 3);
+		    List<MetFragResult> results = MetFrag.startConvenience(database, "", "", exactMass, new WrapperSpectrum(peaks, mode, exactMass, isPositive), false, mzabs, mzppm, searchPPM, true, true, treeDepth, true, false, true, false, Integer.MAX_VALUE, false, 3);
 		    													  
 		    MoleculeSet setOfMolecules = new MoleculeSet();
 			for (MetFragResult result : results) {
