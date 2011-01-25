@@ -99,6 +99,7 @@ public class WrapperSpectrum {
 		this.KEGG = spectra.get(0).getKEGG();
 		this.nameTrivial = spectra.get(0).getTrivialName();
 		this.setFormula(spectra.get(0).getFormula());
+		this.setPositive(isPositive);
 	}
 	
 	
