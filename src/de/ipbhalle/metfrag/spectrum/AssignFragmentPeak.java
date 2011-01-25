@@ -229,7 +229,7 @@ public class AssignFragmentPeak {
     					hydrogenCountString = Integer.toString(i - 1);
     					
     				//negative mode...no hydrogen added for i == 1
-    				else if(mode == -1 && i == 1)
+    				if(mode == -1 && i == 1)
     				{
     					//reduce the hydrogen
         				if(this.html)
