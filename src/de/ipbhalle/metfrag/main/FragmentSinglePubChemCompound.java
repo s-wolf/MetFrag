@@ -100,6 +100,7 @@ public class FragmentSinglePubChemCompound {
 	    Double parentMass = 0.0;
 	    boolean isPositive = false;
 	    int mode = 1;
+	    Integer searchPPM = 10;
 	    
 	    //Read File Line By Line
 	    while ((strLine = br.readLine()) != null)   {
@@ -120,15 +121,17 @@ public class FragmentSinglePubChemCompound {
 	    	if(!strLine.startsWith("#"))
 	    		peaks += strLine + "\n";
 	    	
-	    	//mode
-	    	if(strLine.startsWith("# Mode:"))
+	    	//charge
+	    	if(strLine.startsWith("# Charge:"))
 	    	{
-	    		mode = Integer.parseInt(strLine.substring(8));
-	    		if(mode == 0)
-	    		{
-	    			if(strLine.contains("\\+"))
-	    				isPositive = true;
-	    		}
+	    		if(strLine.contains("+"))
+	    			isPositive = true;
+	    	}
+	    	
+	    	//search ppm
+	    	if(strLine.startsWith("# Search PPM:"))
+	    	{
+	    		searchPPM = Integer.parseInt(strLine.substring(14));
 	    	}
 	    }
 	      
