@@ -108,6 +108,12 @@ public class BatchFileProcessingLocal {
 		    		searchPPM = Integer.parseInt(strLine.substring(14));
 		    	}
 		    	
+		    	//mode
+		    	if(strLine.startsWith("# Mode:"))
+		    	{
+		    		mode = Integer.parseInt(strLine.substring(8));
+		    	}
+		    	
 		    	//peaks
 		    	if(!strLine.startsWith("#"))
 		    		peaks += strLine + "\n";

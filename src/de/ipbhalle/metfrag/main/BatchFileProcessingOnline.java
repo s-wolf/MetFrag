@@ -98,6 +98,12 @@ public class BatchFileProcessingOnline {
 		    			isPositive = true;
 		    	}
 		    	
+		    	//mode
+		    	if(strLine.startsWith("# Mode:"))
+		    	{
+		    		mode = Integer.parseInt(strLine.substring(8));
+		    	}
+		    	
 		    	//search ppm
 		    	if(strLine.startsWith("# Search PPM:"))
 		    	{
