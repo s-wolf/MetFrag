@@ -131,12 +131,12 @@ public class AssignFragmentPeak {
         if(mode == 1)
         {
             modeString = " +";
-            massForMode = Constants.HYDROGEN_MASS - Constants.PROTON_MASS;
+            massForMode = Constants.HYDROGEN_MASS - Constants.ELECTRON_MASS;
         }
         else if(mode == -1)
         {
         	modeString = " -";
-        	massForMode = (-1.0 * (Constants.HYDROGEN_MASS)) + Constants.PROTON_MASS;
+        	massForMode = (-1.0 * (Constants.HYDROGEN_MASS)) + Constants.ELECTRON_MASS;
         }
         else if(mode == 0)
         {
