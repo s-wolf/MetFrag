@@ -66,6 +66,7 @@ public class BatchFileProcessingOnline {
 	    String sample = "";
 	    Integer mode = 1;
 	    boolean isPositive = false;
+	    Integer searchPPM = 10;
 	    
 	    try
 	    {
@@ -90,15 +91,17 @@ public class BatchFileProcessingOnline {
 		    	if(strLine.startsWith("# Parent Mass:"))
 		    		exactMass = Double.parseDouble(strLine.substring(15));
 		    	
-		    	//mode
-		    	if(strLine.startsWith("# Mode:"))
+		    	//charge
+		    	if(strLine.startsWith("# Charge:"))
 		    	{
-		    		mode = Integer.parseInt(strLine.substring(8));
-		    		if(mode == 0)
-		    		{
-		    			if(strLine.contains("\\+"))
-		    				isPositive = true;
-		    		}
+		    		if(strLine.contains("+"))
+		    			isPositive = true;
+		    	}
+		    	
+		    	//search ppm
+		    	if(strLine.startsWith("# Search PPM:"))
+		    	{
+		    		searchPPM = Integer.parseInt(strLine.substring(14));
 		    	}
 		    	
 		    	//peaks
@@ -110,7 +113,7 @@ public class BatchFileProcessingOnline {
 		    exactMass = exactMass - ((double)mode * 1.0072765);
 		    
 		    //Fragment the structures!
-		    List<MetFragResult> results = MetFrag.startConvenience(database, "", "", exactMass, new WrapperSpectrum(peaks, mode, exactMass, isPositive), false, mzabs, mzppm, 10, true, true, treeDepth, true, false, true, false, Integer.MAX_VALUE, false);
+		    List<MetFragResult> results = MetFrag.startConvenience(database, "", "", exactMass, new WrapperSpectrum(peaks, mode, exactMass, isPositive), false, mzabs, mzppm, searchPPM, true, true, treeDepth, true, false, true, false, Integer.MAX_VALUE, false);
 		    													  
 		    MoleculeSet setOfMolecules = new MoleculeSet();
 			for (MetFragResult result : results) {
