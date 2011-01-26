@@ -80,6 +80,7 @@ public class StartMetFrag {
 		
 		//create spectrum
 		WrapperSpectrum spectrum = new WrapperSpectrum(peaks, 1, exactMass, true);
+		spectrum.setFilename("result");
 		
 		
 		String output = "";
