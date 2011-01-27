@@ -51,7 +51,7 @@ public class PPMTool {
 	{
 		double ret = 0.0;
 		//calculate the allowed error for the given peak m/z in Th
-		ret = Math.round((((peak-measuredPeak)/measuredPeak) * 1000000.0) * 10.0)/10.0;
+		ret = Math.round((((measuredPeak-peak)/peak) * 1000000.0) * 10.0)/10.0;
 		return ret;
 	}
 
