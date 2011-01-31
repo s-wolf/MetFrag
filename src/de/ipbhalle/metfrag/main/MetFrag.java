@@ -556,8 +556,16 @@ public class MetFrag {
 			boolean hydrogenTest, boolean neutralLossInEveryLayer, boolean bondEnergyScoring, boolean breakOnlySelectedBonds, int limit, String jdbc, String username, String password, int maxNeutralLossCombination) throws Exception
 	{
 		
+		PubChemWebService pw = null;
 		results = new FragmenterResult();
-		List<String> candidates = Candidates.queryLocally(database, exactMass, searchPPM, jdbc, username, password);
+		List<String> candidates = null;
+		if(molecularFormula != null && !molecularFormula.equals(""))
+		{
+			pw = new PubChemWebService();
+			candidates = Candidates.queryOnline(database, databaseID, molecularFormula, exactMass, searchPPM, false, pw);
+		}
+		else
+			candidates = Candidates.queryLocally(database, exactMass, searchPPM, jdbc, username, password);
 
 		System.out.println("Hits in database: " + candidates.size());
 		
@@ -574,7 +582,7 @@ public class MetFrag {
 			if(c > limit)
 				break;
 			
-			threadExecutor.execute(new FragmenterThread(candidates.get(c), database, null, spectrum, mzabs, mzppm, 
+			threadExecutor.execute(new FragmenterThread(candidates.get(c), database, pw, spectrum, mzabs, mzppm, 
 					molecularFormulaRedundancyCheck, breakAromaticRings, treeDepth, false, hydrogenTest, neutralLossInEveryLayer, 
 					bondEnergyScoring, breakOnlySelectedBonds, null, true, jdbc, username, password, maxNeutralLossCombination));		
 		}
