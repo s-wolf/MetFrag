@@ -1,4 +1,4 @@
-package de.ipbhalle.metfrag.main;
+package de.ipbhalle.metfrag.mainTools;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -87,7 +87,7 @@ public class PreprocessMolecules {
 		    	
 		    	BondPrediction bp = new BondPrediction(aromaticBonds);
 			    bp.debug(false);
-				bp.calculateBondsToBreak(molecule, 600, "AM1");
+				bp.calculateBondsToBreak(molecule, 600, "AM1", 600);
 				
 				List<ChargeResult> results = bp.getResults();
 				for (int i1 = 0; i1 < results.size(); i1++) {

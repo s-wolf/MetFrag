@@ -92,7 +92,7 @@ public class BondPrediction {
 		 * @return the list< i bond>
 		 * @throws Exception the exception
 		 */
-		public List<String> calculateBondsToBreak(IAtomContainer mol, int FFSteps, String mopacParameter) throws Exception
+		public List<String> calculateBondsToBreak(IAtomContainer mol, int FFSteps, String mopacMethod, Integer mopacRuntime) throws Exception
 		{		
 			List<String> bondsToBreak = new ArrayList<String>();
 			
@@ -100,7 +100,7 @@ public class BondPrediction {
 			Mopac mopac = new Mopac();
 			try {	
 				//now optimize the structure of the neutral molecue
-	    		this.mol = mopac.runOptimization(mol, FFSteps, true, mopacParameter, true, "Neutral");
+	    		this.mol = mopac.runOptimization(mol, FFSteps, true, mopacMethod, mopacRuntime, true, "Neutral");
 	    		if(this.mol == null)
 	    		{
 	    			System.err.println("Was not able to optimize neutral molecule!");
@@ -217,7 +217,7 @@ public class BondPrediction {
 		            
 		            try
 		            {
-		            	protonatedMol = mopac.runOptimization(protonatedMol, FFSteps, true, mopacParameter, false, chargesArray[i].getAtom().getSymbol()  + (Integer.parseInt(chargesArray[i].getAtom().getID()) + 1));
+		            	protonatedMol = mopac.runOptimization(protonatedMol, FFSteps, true, mopacMethod, mopacRuntime, false, chargesArray[i].getAtom().getSymbol()  + (Integer.parseInt(chargesArray[i].getAtom().getID()) + 1));
 		            	//something went wrong during optimization
 		            	if(protonatedMol == null)
 		            	{

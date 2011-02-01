@@ -40,7 +40,7 @@ public class Test
       gv.addln(gv.end_graph());
       System.out.println(gv.getDotSource());
       
-      File out = new File("/home/basti/out.gif");
+      File out = new File("/home/swolf/out.gif");
       gv.writeGraphToFile(gv.getGraph(gv.getDotSource()), out);
       
 //      digraph structs {
@@ -60,7 +60,7 @@ public class Test
       		);
       gv1.addln(gv.end_graph());
       System.out.println(gv1.getDotSource());
-      File out1 = new File("/home/basti/out1.ps");
+      File out1 = new File("/home/swolf/out1.ps");
       gv.writeGraphToFile(gv.getGraph(gv1.getDotSource()), out1);
    }
 }
