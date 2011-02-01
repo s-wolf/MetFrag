@@ -443,7 +443,7 @@ public class MetFrag {
 		PubChemWebService pw = null;
 		results = new FragmenterResult();
 		List<String> candidates = null;
-		if(molecularFormula != null && !molecularFormula.equals(""))
+		if(molecularFormula != null && !molecularFormula.equals("") || (databaseID != null && !databaseID.equals("")))
 		{
 			pw = new PubChemWebService();
 			candidates = Candidates.getOnline(database, databaseID, molecularFormula, exactMass, searchPPM, false, pw);
