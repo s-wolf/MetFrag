@@ -18,7 +18,8 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *
 */
-package de.ipbhalle.metfrag.main;
+
+package de.ipbhalle.metfrag.mainTools;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -42,13 +43,14 @@ import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 
 import de.ipbhalle.metfrag.fragmenter.Fragmenter;
 import de.ipbhalle.metfrag.massbankParser.Peak;
+import de.ipbhalle.metfrag.read.CMLTools;
 import de.ipbhalle.metfrag.read.Molfile;
 import de.ipbhalle.metfrag.spectrum.WrapperSpectrum;
 import de.ipbhalle.metfrag.tools.MolecularFormulaTools;
 import de.ipbhalle.metfrag.tools.renderer.StructureRenderer;
 import de.ipbhalle.metfrag.tools.renderer.StructureRendererTable;
 
-public class FragmentSingleCompound {
+public class FragmentSingleCompoundPreCalculated {
 	
 	private int treeDepth;
 	private boolean sumFormulaRedundancyCheck;
@@ -63,7 +65,7 @@ public class FragmentSingleCompound {
 	 *  <li> brak aromatic rings = true
 	 * </ul>
 	 */
-	public FragmentSingleCompound()
+	public FragmentSingleCompoundPreCalculated()
 	{
 		setTreeDepth(2);
 		setSumFormulaRedundancyCheck(true);
@@ -73,21 +75,17 @@ public class FragmentSingleCompound {
 	
 	/**
 	 * Gets the fragments.
-	 * 
-	 * @param smilesToFragment the smiles to fragment
+	 *
+	 * @param mol the mol
 	 * @param minMass the min mass
-	 * @param treeDepth the tree depth
-	 * @param Render the render
-	 * 
+	 * @param render the render
 	 * @return the fragments
-	 * @throws Exception 
+	 * @throws Exception the exception
 	 */
-	public List<String> getFragments(String smilesToFragment, Double minMass, boolean render) throws Exception
+	public List<String> getFragments(IAtomContainer molecule, Double minMass, boolean render) throws Exception
 	{
 		List<String> resultingSmiles = new ArrayList<String>();
-		SmilesParser sp = new SmilesParser(DefaultChemObjectBuilder.getInstance());
-		//parse smiles
-		IAtomContainer molecule = sp.parseSmiles(smilesToFragment);
+
 		//configure atoms
 		AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(molecule);
 		//add all hydrogens explicitly
@@ -105,7 +103,7 @@ public class FragmentSingleCompound {
 		
 		//constructor for fragmenter
 		Fragmenter fragmenter = new Fragmenter((Vector<Peak>)spectrum.getPeakList().clone(), minMass,  true, sumFormulaRedundancyCheck, false);
-		List<IAtomContainer> listOfFrags = fragmenter.generateFragmentsInMemory(molecule, false, this.treeDepth, false);
+		List<IAtomContainer> listOfFrags = fragmenter.generateFragmentsInMemory(molecule, false, this.treeDepth, true);
 		
 		List<String> results = new ArrayList<String>();
 		
@@ -192,7 +190,7 @@ public class FragmentSingleCompound {
 	
 	public static void main(String[] args) {
 		//example values
-		String smiles = "C1=CC(=C(C=C1F)F)C(CN2C=NC=N2)(CN3C=NC=N3)O";
+		String file = "/home/swolf/MOPAC/ProofOfConcept/pubchem/CID_3365_spectrum/mopac/3365.sdf_Combined.cml";
 		Double minMass = 50.0;
 		Boolean render = true;
 		Boolean writeToFile = false;
@@ -200,7 +198,7 @@ public class FragmentSingleCompound {
 		//get command line arguments
 		if(args != null && args.length == 5)
 		{
-//			smiles = args[0];
+//			file = args[0];
 			minMass = Double.parseDouble(args[1]);
 			if(args[2].equals("1"))
 				render = true;
@@ -219,13 +217,14 @@ public class FragmentSingleCompound {
 			System.exit(1);
 		}
 		
-		FragmentSingleCompound test = new FragmentSingleCompound();
+		FragmentSingleCompoundPreCalculated test = new FragmentSingleCompoundPreCalculated();
 		//those are the default values...no need to set them like this
 		test.setSumFormulaRedundancyCheck(true);
 		test.setTreeDepth(Integer.parseInt(args[3]));
 		
 		try {
-			List<String> resultingFragments = test.getFragments(smiles, minMass, render);
+			IAtomContainer mol = CMLTools.read(new File(file));
+			List<String> resultingFragments = test.getFragments(mol, minMass, render);
 			List<String> resultingEnergies = test.getEnergies();
 			List<String> resultingNeutralLosses = test.getNeutralLosses();
 			
@@ -269,3 +268,4 @@ public class FragmentSingleCompound {
 	}
 
 }
+

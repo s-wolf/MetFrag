@@ -26,6 +26,10 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
+
+import org.apache.commons.io.FileUtils;
 
 
 public class PreprocessKEGGSHGeneration {
@@ -39,37 +43,28 @@ public class PreprocessKEGGSHGeneration {
 		
 		String writePath = "/home/swolf/MOPAC/BATCH/sh/";
 		
-		String path = "/vol/mirrors/kegg/mol/";
+		String path = "/home/swolf/MOPAC/ProofOfConcept/pubchem/";
 		//loop over all files in folder
-		File f = new File(path);
-		File files[] = f.listFiles();
-		Arrays.sort(files);
+		FileUtils.deleteDirectory(new File(writePath));
+		new File(writePath).mkdirs();
 		
-
-		int count = 0;
-		int globalCount = 0;
-		String fileNames = "";
-		for (int i = 0; i < files.length; i++) {
-			
-			String fileName = files[i].getName();
+		String[] ext = {"sdf"};
+		Collection<File> filesRecursively = (Collection<File>)FileUtils.listFiles(new File(path), ext, true);
+		for (File file : filesRecursively) {
+			String fileName = file.getName();
 			int dotPos = fileName.indexOf(".");
 			String extension = "";
 			if(dotPos >= 0)
 				extension = fileName.substring(dotPos);
 
-			if(files[i].isFile() && extension.equals(".mol"))
-			{
-				File f2 = new File(writePath + files[i].getName() + ".sh"); 
-				
-				BufferedWriter out = new BufferedWriter(new FileWriter(f2));
-				out.write("#!/bin/bash");
-				out.newLine();
-		  		out.write("java -jar /home/swolf/MOPAC/BATCH/jar/PreprocessMolecules.jar \"" + files[i].getPath() + "\"");
-			  	out.close();
-			  	
-			  	fileNames = "";
-			  	globalCount++;
-			}
+			File f2 = new File(writePath + "sge_" + file.getName() + ".sh"); 
+			
+			BufferedWriter out = new BufferedWriter(new FileWriter(f2));
+			out.write("#!/bin/bash");
+			out.newLine();
+	  		out.write("java -jar /home/swolf/MOPAC/BATCH/jar/PreprocessMolecules.jar \"" + file.getPath() + "\"" + " \"" + file.getParent() + "/mopac/\"");
+		  	out.close();
+
 		}
 
 	}

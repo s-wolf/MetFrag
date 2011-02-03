@@ -128,7 +128,7 @@ public class RunningTimeEvaluation {
 							List<IAtomContainer> results = new ArrayList<IAtomContainer>();
 							long start = System.currentTimeMillis(); // start timing
 					        try {
-								results = fragmenter.generateFragmentsInMemory(mol, false, 3);
+								results = fragmenter.generateFragmentsInMemory(mol, false, 3, false);
 							} catch (CDKException e) {
 								// TODO Auto-generated catch block
 								e.printStackTrace();

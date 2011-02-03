@@ -367,7 +367,7 @@ public class MetFrag {
 			
 		threadExecutor.execute(new FragmenterThread(candidateStructure, candidate, database, pubchem, spectrum, mzabs, mzppm, 
 				molecularFormulaRedundancyCheck, breakAromaticRings, treeDepth, false, hydrogenTest, neutralLossInEveryLayer, 
-				bondEnergyScoring, breakOnlySelectedBonds, null, false, maxNeutralLosscombination));		
+				bondEnergyScoring, breakOnlySelectedBonds, null, false, maxNeutralLosscombination, false));		
 		
 		threadExecutor.shutdown();
 		
@@ -470,7 +470,7 @@ public class MetFrag {
 			
 			threadExecutor.execute(new FragmenterThread(candidates.get(c), Integer.toString(c), "SDF", new PubChemWebService(),spectrum, mzabs, mzppm, 
 					molecularFormulaRedundancyCheck, breakAromaticRings, treeDepth, false, hydrogenTest, neutralLossInEveryLayer,
-					bondEnergyScoring, breakOnlySelectedBonds, null, false, 3));		
+					bondEnergyScoring, breakOnlySelectedBonds, null, false, 3, false));		
 		}
 		
 		threadExecutor.shutdown();
@@ -659,7 +659,7 @@ public class MetFrag {
 		
 		//constructor for fragmenter
 		Fragmenter fragmenter = new Fragmenter((Vector<Peak>)spectrum.getPeakList().clone(), mzabs, mzppm, spectrum.getMode(), true, molFormulaRedundancyCheck, false);
-		List<IAtomContainer> listOfFrags = fragmenter.generateFragmentsInMemory(molecule, false, treeDepth);
+		List<IAtomContainer> listOfFrags = fragmenter.generateFragmentsInMemory(molecule, false, treeDepth, false);
 			
 		//clean up peak list
 		CleanUpPeakList cList = new CleanUpPeakList(spectrum.getPeakList());

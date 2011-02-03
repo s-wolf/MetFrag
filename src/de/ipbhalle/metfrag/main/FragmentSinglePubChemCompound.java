@@ -164,7 +164,7 @@ public class FragmentSinglePubChemCompound {
 	    List<IAtomContainer> l = null;
 	    try
 	    {
-	    	l = fragmenter.generateFragmentsInMemory(molecule, true, 2);
+	    	l = fragmenter.generateFragmentsInMemory(molecule, true, 2, false);
 	    }
 	    catch(OutOfMemoryError e)
 	    {

@@ -204,7 +204,7 @@ public class Mopac {
         	}
         	catch(IllegalThreadStateException e)
         	{
-        		System.err.println("Mopac not finished yet");
+        		System.out.print(".");
         	}
         	count++;
         }

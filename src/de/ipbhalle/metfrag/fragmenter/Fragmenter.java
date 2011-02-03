@@ -67,6 +67,7 @@ import org.openscience.cdk.ringsearch.AllRingsFinder;
 import org.openscience.cdk.smiles.SmilesGenerator;
 import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 
+import de.ipbhalle.metfrag.bondPrediction.BondPrediction;
 import de.ipbhalle.metfrag.bondPrediction.Charges;
 import de.ipbhalle.metfrag.graphviz.GraphViz;
 import de.ipbhalle.metfrag.massbankParser.Peak;
@@ -116,7 +117,7 @@ public class Fragmenter {
     private PostProcess pp = null;
     private List<String> bondsToBreak = null;
     private boolean isOnlyBreakSelectedBonds = false;
-    private Charges bondPrediction = null;
+    private BondPrediction bondPrediction = null;
     private boolean partialChargesPreferred = true;
       
     
@@ -293,7 +294,7 @@ public class Fragmenter {
     	return original;
     }
     
-    private void preprocessMolecule(IAtomContainer original) throws Exception 
+    private void preprocessMolecule(IAtomContainer original, boolean isPreCalculated) throws Exception 
     {    	
     	//read in bondenergies.txt
     	bondEnergies = new HashMap<String, Double>();
@@ -370,10 +371,23 @@ public class Fragmenter {
         }
     	
 
-		//now find all bonds which are worth splitting
-		bondPrediction = new Charges(this.aromaticBonds);
-		this.bondsToBreak = bondPrediction.calculateBondsToBreak(this.originalMolecule);
-    	
+    	if(isPreCalculated)
+    	{
+    		//now find all bonds which are worth splitting
+    		bondPrediction = new BondPrediction(this.aromaticBonds);
+    		Map<String, Double> bondToBondLength = new HashMap<String, Double>();
+    		for(IBond bond : this.originalMolecule.bonds())
+    		{
+    			bondToBondLength.put(bond.getID(), Double.parseDouble((String)bond.getProperty("bondLengthChange")));
+    		}
+    		bondPrediction.setBondLength(bondToBondLength);
+    	}
+    	else
+    	{
+    		//now find all bonds which are worth splitting
+    		bondPrediction = new BondPrediction(this.aromaticBonds);
+    		this.bondsToBreak = bondPrediction.calculateBondsToBreak(this.originalMolecule, 600, "AM1", 600);
+    	}
     } 
     
     
@@ -391,19 +405,17 @@ public class Fragmenter {
      * 
      * Fragments are stored in the temporary folder. More memory efficient especially when using pubchem or chemspider
      * as compound database.
-     * 
+     *
      * @param atomContainer The molecule to split
      * @param verbose the verbose
      * @param treeDepthMax the tree depth max
      * @param identifier the identifier
-     * 
+     * @param isPrecalculated if the mol contains already the bond length change
      * @return a list of fragments
-     * 
-     * @throws org.openscience.cdk.exception.CDKException      * @throws CDKException the CDK exception
-     * @throws Exception the exception
      * @throws CDKException the CDK exception
+     * @throws Exception the exception
      */
-    public List<File> generateFragmentsEfficient(IAtomContainer atomContainer, boolean verbose, int treeDepthMax, String identifier) throws CDKException, Exception 
+    public List<File> generateFragmentsEfficient(IAtomContainer atomContainer, boolean verbose, int treeDepthMax, String identifier, boolean isPrecalculated) throws CDKException, Exception 
     {
     	List<File> fragmentsReturn = new ArrayList<File>();
     	int tempLevelCount = 0;
@@ -422,7 +434,7 @@ public class Fragmenter {
 		globalCount++;
         
 		//do preprocess: find all rings and aromatic rings...mark all bonds
-		preprocessMolecule(atomContainer);
+		preprocessMolecule(atomContainer, isPrecalculated);
 
     	
 		//add original molecule to it
@@ -520,18 +532,16 @@ public class Fragmenter {
      * 
      * Fragments are stored in the temporary folder. More memory efficient especially when using pubchem or chemspider
      * as compound database.
-     * 
+     *
      * @param atomContainer The molecule to split
      * @param verbose the verbose
      * @param treeDepthMax the tree depth max
-     * 
+     * @param isPrecalculated if the mol contains already the bond length change
      * @return a list of fragments
-     * 
-     * @throws org.openscience.cdk.exception.CDKException      * @throws CDKException the CDK exception
-     * @throws Exception the exception
      * @throws CDKException the CDK exception
+     * @throws Exception the exception
      */
-    public List<IAtomContainer> generateFragmentsInMemory(IAtomContainer atomContainer, boolean verbose, int treeDepthMax) throws CDKException, Exception 
+    public List<IAtomContainer> generateFragmentsInMemory(IAtomContainer atomContainer, boolean verbose, int treeDepthMax, boolean isPrecalculated) throws CDKException, Exception 
     {
     	List<IAtomContainer> fragmentsReturn = new ArrayList<IAtomContainer>();
     	int tempLevelCount = 0;
@@ -548,7 +558,7 @@ public class Fragmenter {
 		globalCount++;
         
 		//do preprocess: find all rings and aromatic rings...mark all bonds
-		preprocessMolecule(atomContainer);
+		preprocessMolecule(atomContainer, isPrecalculated);
 
     	
 		//add original molecule to it

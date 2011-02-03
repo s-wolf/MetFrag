@@ -126,7 +126,7 @@ public class KeggPreprocess {
 			Vector<Peak> peakList = new Vector<Peak>();
 			peakList.add(new Peak(smallestPeak, smallestPeak, 0));
 			Fragmenter frags = new Fragmenter(peakList, 0.01, 10.0, 1, true, false, true, false);
-			List<IAtomContainer> fragsGenerated = frags.generateFragmentsInMemory(molRead, false, 1);
+			List<IAtomContainer> fragsGenerated = frags.generateFragmentsInMemory(molRead, false, 1, false);
 			
 			
 			List<HashMap<Double, String>> posNegMode = new ArrayList<HashMap<Double,String>>();

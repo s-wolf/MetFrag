@@ -34,14 +34,18 @@ public class PreprocessMolecules {
 	public static void main(String[] args) {
 		
 		File file = null;
+		String outputFolder = "";
 		
-		if(args.length < 1)
+		if(args.length < 2)
 		{
-			System.err.println("No parameter given!");
+			System.err.println("Not all parameters given!");
 			System.exit(1);
 		}
 		else
+		{
 			file = new File(args[0]);
+			outputFolder = args[1];
+		}
 		
 		if(file.isFile())
 		{
@@ -92,7 +96,8 @@ public class PreprocessMolecules {
 				List<ChargeResult> results = bp.getResults();
 				for (int i1 = 0; i1 < results.size(); i1++) {
 					try {
-						CMLWriter writerCML = new CMLWriter(new FileOutputStream(new File("/home/swolf/MOPAC/KEGG/" + file.getName() + "_" + results.get(i1).getProtonatedAtom() + ".cml")));
+						new File(outputFolder).mkdirs();
+						CMLWriter writerCML = new CMLWriter(new FileOutputStream(new File(outputFolder + file.getName() + "_" + results.get(i1).getProtonatedAtom() + ".cml")));
 						//thats the molecule containing the all the bond length changes from all protonation sites
 						if(i1 == 0)
 							writerCML.write(results.get(i1).getMolWithProton());

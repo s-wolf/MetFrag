@@ -38,6 +38,7 @@ import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 import de.ipbhalle.metfrag.fragmenter.Fragmenter;
 import de.ipbhalle.metfrag.main.Config;
 import de.ipbhalle.metfrag.main.MetFrag;
+import de.ipbhalle.metfrag.main.MetFragPreCalculated;
 import de.ipbhalle.metfrag.massbankParser.Peak;
 import de.ipbhalle.metfrag.pubchem.PubChemWebService;
 import de.ipbhalle.metfrag.read.Molfile;
@@ -68,6 +69,7 @@ public class FragmenterThread implements Runnable{
 	private String jdbc, username, password = "";
 	private IAtomContainer candidateStructure = null;
 	private int neutralLossCombination;
+	private boolean isPreCalculated = false;
 	
 	/**
 	 * Instantiates a new pubChem search thread. ONLINE
@@ -118,7 +120,7 @@ public class FragmenterThread implements Runnable{
 			WrapperSpectrum spectrum, double mzabs, double mzppm, boolean sumFormulaRedundancyCheck,
 			boolean breakAromaticRings, int treeDepth, boolean showDiagrams, boolean hydrogenTest,
 			boolean neutralLossAdd, boolean bondEnergyScoring, boolean isOnlyBreakSelectedBonds, Config c,
-			boolean generateFragmentsInMemory, int neutralLossCombination)
+			boolean generateFragmentsInMemory, int neutralLossCombination, boolean isPreCalculated)
 	{
 		this.candidate = candidate;
 		this.pw = pw;
@@ -137,6 +139,7 @@ public class FragmenterThread implements Runnable{
 		this.generateFragmentsInMemory = generateFragmentsInMemory;
 		this.candidateStructure = candidateStructure;
 		this.neutralLossCombination = neutralLossCombination;
+		this.isPreCalculated = isPreCalculated;
 	}
 	
 	
@@ -229,7 +232,10 @@ public class FragmenterThread implements Runnable{
 	        //there is a bug in cdk??
 	        catch(IllegalArgumentException e)
             {
-	        	MetFrag.results.addToCompleteLog("Error: " + candidate + " Message: " + e.getMessage());
+	        	if(isPreCalculated)
+	        		MetFragPreCalculated.results.addToCompleteLog("Error: " + candidate + " Message: " + e.getMessage());
+	        	else
+	        		MetFrag.results.addToCompleteLog("Error: " + candidate + " Message: " + e.getMessage());
             	//skip it
             	return;
             }
@@ -244,17 +250,21 @@ public class FragmenterThread implements Runnable{
 	        try
 	        {
 	        	if(generateFragmentsInMemory)
-	        		generatedFrags = fragmenter.generateFragmentsInMemory(molecule, true, treeDepth);
+	        		generatedFrags = fragmenter.generateFragmentsInMemory(molecule, true, treeDepth, true);
 	        	else
 	        	{
-	        		List<File> fragsFiles = fragmenter.generateFragmentsEfficient(molecule, false, treeDepth, candidate);
+	        		List<File> fragsFiles = fragmenter.generateFragmentsEfficient(molecule, false, treeDepth, candidate, true);
 	        		generatedFrags = Molfile.ReadfolderTemp(fragsFiles);
 	        	}
 	        }
 	        catch(OutOfMemoryError e)
 	        {
 	        	System.out.println("OUT OF MEMORY ERROR! " + treeDepth);
-	        	MetFrag.results.addToCompleteLog("Error: " + candidate + " Message: " + e.getMessage());
+	        	if(isPreCalculated)
+	        		MetFragPreCalculated.results.addToCompleteLog("Error: " + candidate + " Message: " + e.getMessage());
+	        	else
+	        		MetFrag.results.addToCompleteLog("Error: " + candidate + " Message: " + e.getMessage());
+	        	
 	        	return;
 	        }
 	        long time = System.currentTimeMillis() - start;
@@ -291,21 +301,39 @@ public class FragmenterThread implements Runnable{
 				if(currentBondEnergy > 0)
 					currentBondEnergy = currentBondEnergy / afp.getHits().size();
 				
-				//set the added up energy of every fragment
-				MetFrag.results.getMapCandidateToEnergy().put(candidate, currentBondEnergy);
-				MetFrag.results.getMapCandidateToHydrogenPenalty().put(candidate, score.getPenalty());
-				MetFrag.results.getMapCandidateToPartialChargesDiff().put(candidate, score.getPartialChargesDiff());
-				
-				//also output the optimization matrix if needed
-				MetFrag.results.getCandidateToOptimizationMatrixEntries().put(candidate, score.getOptimizationMatrixEntries());	
-				
-				//also add the structure to results file
-				MetFrag.results.getMapCandidateToStructure().put(candidate, molecule);
-				MetFrag.results.getMapCandidateToFragments().put(candidate, afp.getHits());
-				
-				
-				
-				Map<Double, Vector<String>> realScoreMap = MetFrag.results.getRealScoreMap();
+				Map<Double, Vector<String>> realScoreMap = null;
+				if(isPreCalculated)
+				{
+					//set the added up energy of every fragment
+					MetFragPreCalculated.results.getMapCandidateToEnergy().put(candidate, currentBondEnergy);
+					MetFragPreCalculated.results.getMapCandidateToHydrogenPenalty().put(candidate, score.getPenalty());
+					MetFragPreCalculated.results.getMapCandidateToPartialChargesDiff().put(candidate, score.getPartialChargesDiff());
+					
+					//also output the optimization matrix if needed
+					MetFragPreCalculated.results.getCandidateToOptimizationMatrixEntries().put(candidate, score.getOptimizationMatrixEntries());	
+					
+					//also add the structure to results file
+					MetFragPreCalculated.results.getMapCandidateToStructure().put(candidate, molecule);
+					MetFragPreCalculated.results.getMapCandidateToFragments().put(candidate, afp.getHits());
+					
+					realScoreMap = MetFragPreCalculated.results.getRealScoreMap();
+				}
+				else
+				{
+					//set the added up energy of every fragment
+					MetFrag.results.getMapCandidateToEnergy().put(candidate, currentBondEnergy);
+					MetFrag.results.getMapCandidateToHydrogenPenalty().put(candidate, score.getPenalty());
+					MetFrag.results.getMapCandidateToPartialChargesDiff().put(candidate, score.getPartialChargesDiff());
+					
+					//also output the optimization matrix if needed
+					MetFrag.results.getCandidateToOptimizationMatrixEntries().put(candidate, score.getOptimizationMatrixEntries());	
+					
+					//also add the structure to results file
+					MetFrag.results.getMapCandidateToStructure().put(candidate, molecule);
+					MetFrag.results.getMapCandidateToFragments().put(candidate, afp.getHits());
+					
+					realScoreMap = MetFrag.results.getRealScoreMap();
+				}
 				//save score in hashmap...if there are several hits with the same score --> vector of strings
 				if(realScoreMap.containsKey(currentScore))
 		        {
@@ -320,7 +348,12 @@ public class FragmenterThread implements Runnable{
 		        	realScoreMap.put(currentScore, temp);
 		        }
 				
-				Map<Integer, List<String>> scoreMap = MetFrag.results.getScoreMap();
+				Map<Integer, List<String>> scoreMap = null;
+				if(isPreCalculated)
+					scoreMap = MetFragPreCalculated.results.getScoreMap();
+				else
+					scoreMap = MetFrag.results.getScoreMap();
+				
 				if(scoreMap.containsKey(hits.size()))
 		        {
 		        	List<String> tempList = scoreMap.get(hits.size());
@@ -345,8 +378,16 @@ public class FragmenterThread implements Runnable{
 				
 
 				//write things to log file
-				MetFrag.results.addToCompleteLog("\nCandidate: " + candidate + "\t #Peaks: " + spectrum.getPeakList().size() + "\t #Found: " + hits.size());
-				MetFrag.results.addToCompleteLog("\tPeaks: " + peaks);
+				if(isPreCalculated)
+				{
+					MetFragPreCalculated.results.addToCompleteLog("\nCandidate: " + candidate + "\t #Peaks: " + spectrum.getPeakList().size() + "\t #Found: " + hits.size());
+					MetFragPreCalculated.results.addToCompleteLog("\tPeaks: " + peaks);
+				}
+				else
+				{
+					MetFrag.results.addToCompleteLog("\nCandidate: " + candidate + "\t #Peaks: " + spectrum.getPeakList().size() + "\t #Found: " + hits.size());
+					MetFrag.results.addToCompleteLog("\tPeaks: " + peaks);
+				}
 				
 				List<IAtomContainer> hitsListTest = new ArrayList<IAtomContainer>();
 				for (int i = 0; i < hits.size(); i++) {
@@ -359,19 +400,28 @@ public class FragmenterThread implements Runnable{
 			catch(CDKException e)
 			{
 				System.out.println("CDK error!" + e.getMessage());
-				MetFrag.results.addToCompleteLog("CDK Error! " + e.getMessage() + " File: " + candidate);
+				if(isPreCalculated)
+					MetFragPreCalculated.results.addToCompleteLog("CDK Error! " + e.getMessage() + " File: " + candidate);
+				else
+					MetFrag.results.addToCompleteLog("CDK Error! " + e.getMessage() + " File: " + candidate);
 			}
 			catch(Exception e)
 			{
 				System.out.println("Error: " + e.getMessage());
 				e.printStackTrace();
-				MetFrag.results.addToCompleteLog("Error! "+ e.getMessage() + " File: " + candidate);
+				if(isPreCalculated)
+					MetFragPreCalculated.results.addToCompleteLog("Error! "+ e.getMessage() + " File: " + candidate);
+				else
+					MetFrag.results.addToCompleteLog("Error! "+ e.getMessage() + " File: " + candidate);
 			}
 			catch(OutOfMemoryError e)
 			{
 				System.out.println("Out of memory: " + e.getMessage() + "\n" + e.getStackTrace());
 				System.gc();
-				MetFrag.results.addToCompleteLog("Out of memory! "+ e.getMessage() + " File: " + candidate);
+				if(isPreCalculated)
+					MetFrag.results.addToCompleteLog("Out of memory! "+ e.getMessage() + " File: " + candidate);
+				else
+					MetFragPreCalculated.results.addToCompleteLog("Out of memory! "+ e.getMessage() + " File: " + candidate);
 			}
 
 	        
@@ -379,29 +429,44 @@ public class FragmenterThread implements Runnable{
 		catch(CDKException e)
 		{
 			System.out.println("CDK error!" + e.getMessage());
-			MetFrag.results.addToCompleteLog("CDK Error! " + e.getMessage() + "File: " + candidate);
+			if(isPreCalculated)
+				MetFragPreCalculated.results.addToCompleteLog("CDK Error! " + e.getMessage() + "File: " + candidate);
+			else
+				MetFrag.results.addToCompleteLog("CDK Error! " + e.getMessage() + "File: " + candidate);
 		}
 		catch(FileNotFoundException e)
 		{
 			System.out.println("File not found" + e.getMessage());
-			MetFrag.results.addToCompleteLog("File not found error! "+ e.getMessage() + "File: " + candidate);
+			if(isPreCalculated)
+				MetFragPreCalculated.results.addToCompleteLog("File not found error! "+ e.getMessage() + "File: " + candidate);
+			else
+				MetFrag.results.addToCompleteLog("File not found error! "+ e.getMessage() + "File: " + candidate);
 		}
 		catch(IOException e)
 		{
 			System.out.println("IO error: " + e.getMessage());
-			MetFrag.results.addToCompleteLog("IO Error! "+ e.getMessage() + "File: " + candidate);
+			if(isPreCalculated)
+				MetFragPreCalculated.results.addToCompleteLog("IO Error! "+ e.getMessage() + "File: " + candidate);
+			else
+				MetFrag.results.addToCompleteLog("IO Error! "+ e.getMessage() + "File: " + candidate);
 		}
 		catch(Exception e)
 		{
 			System.out.println("Error: " + e.getMessage());
 			e.printStackTrace();
-			MetFrag.results.addToCompleteLog("Error! "+ e.getMessage() + "File: " + candidate);
+			if(isPreCalculated)
+				MetFragPreCalculated.results.addToCompleteLog("Error! "+ e.getMessage() + "File: " + candidate);
+			else
+				MetFrag.results.addToCompleteLog("Error! "+ e.getMessage() + "File: " + candidate);
 		}
 		catch(OutOfMemoryError e)
 		{
 			System.out.println("Out of memory: " + e.getMessage() + "\n" + e.getStackTrace());
 			System.gc();
-			MetFrag.results.addToCompleteLog("Out of memory! "+ e.getMessage() + "File: " + candidate);
+			if(isPreCalculated)
+				MetFragPreCalculated.results.addToCompleteLog("Out of memory! "+ e.getMessage() + "File: " + candidate);
+			else
+				MetFrag.results.addToCompleteLog("Out of memory! "+ e.getMessage() + "File: " + candidate);
 		}
 	}
 

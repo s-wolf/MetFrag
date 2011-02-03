@@ -397,6 +397,17 @@ public class Charges {
 		return this.bondToBondLength.get(bondID);
 	}
 	
+	
+	/**
+	 * Sets the bond lengths.
+	 *
+	 * @param bondToBondLength the bond to bond length
+	 */
+	public void setBondLength(Map<String, Double> bondToBondLength)
+	{
+		this.bondToBondLength = bondToBondLength;
+	}
+	
 	public void setResults(List<ChargeResult> results) {
 		this.results = results;
 	}

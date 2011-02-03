@@ -174,7 +174,7 @@ public class MM48ReverseLookup {
 		      List<IAtomContainer> l = null;
 		      try
 		      {
-		    	  l = fragmenter.generateFragmentsInMemory(molecule, true, 2);
+		    	  l = fragmenter.generateFragmentsInMemory(molecule, true, 2, false);
 		      }
 		      catch(OutOfMemoryError e)
 		      {

@@ -1,3 +1,5 @@
+package de.ipbhalle.metfrag.mainTools;
+
 /*
 *
 * Copyright (C) 2009-2010 IPB Halle, Sebastian Wolf
@@ -18,8 +20,6 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *
 */
-
-package de.ipbhalle.metfrag.main;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -47,6 +47,7 @@ import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 import de.ipbhalle.metfrag.fragmenter.Fragmenter;
 import de.ipbhalle.metfrag.keggWebservice.KeggWebservice;
 import de.ipbhalle.metfrag.massbankParser.Peak;
+import de.ipbhalle.metfrag.read.CMLTools;
 import de.ipbhalle.metfrag.read.Molfile;
 import de.ipbhalle.metfrag.spectrum.AssignFragmentPeak;
 import de.ipbhalle.metfrag.spectrum.CleanUpPeakList;
@@ -56,25 +57,23 @@ import de.ipbhalle.metfrag.tools.MolecularFormulaTools;
 import de.ipbhalle.metfrag.tools.renderer.StructureRendererTable;
 
 
-public class FragmentSingleCompoundWithPeaks {
+public class FragmentSingleCompoundWithPeaksPreCalculated {
 	
 	private List<File> l1 = null;
 	WrapperSpectrum spectrum = null;
 	double mzabs = 0.01;
 	double mzppm = 10.0;
-	IAtomContainer molecule = null;
+	IAtomContainer molecule;
 	
 
-	public FragmentSingleCompoundWithPeaks() {
+	public FragmentSingleCompoundWithPeaksPreCalculated(IAtomContainer mol) throws CDKException {
 		
-		String candidate = "C00509";
-		double exactMass = 272.06847;
-		String peaks = "119.051 467.616 45\n" +
-		   "123.044 370.662 36\n" +
-		   "147.044 6078.145 606\n" +
-		   "153.019 10000.0 999\n" +
-		   "179.036 141.192 13\n" +
-		   "189.058 176.358 16\n";
+		this.molecule = mol;
+		
+		String peaks = "220.07 300 30\n" +
+				"238.08 500 50\n" +
+				"289.10 200 20\n";
+		
 //		double exactMass = 504.252332;
 //		String peaks = "279.1745 250\n" + 
 //		   "301.1592 250\n" +
@@ -86,58 +85,16 @@ public class FragmentSingleCompoundWithPeaks {
 //		   "485.2534 400 16\n";
 		int mode = 1;
 
-		spectrum = new WrapperSpectrum(peaks, mode, exactMass, true);		
-			
-        //get mol file from kegg....remove "cpd:"
-		String candidateMol = "";
-				
-		candidateMol = KeggWebservice.KEGGgetMol("C00509", "/vol/data/pathways/kegg/mol/");
-		MDLReader reader;
-		List<IAtomContainer> containersList;
-		
-        reader = new MDLReader(new StringReader(candidateMol));
-        ChemFile chemFile = null;
-		try {
-			chemFile = (ChemFile)reader.read((ChemObject)new ChemFile());
-		} catch (CDKException e2) {
-			// TODO Auto-generated catch block
-			e2.printStackTrace();
-		}
-        containersList = ChemFileManipulator.getAllAtomContainers(chemFile);
-        molecule = containersList.get(0);
-		
-//		SmilesParser sp = new SmilesParser(DefaultChemObjectBuilder.getInstance());
-//		try {
-//			this.molecule = sp.parseSmiles("CCC(=O)OCC(=O)C1(C(CC2C1(CC(C3(C2CCC4=CC(=O)C=CC43C)F)O)C)C)OC(=O)CC");
-//		} catch (InvalidSmilesException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}				
-//		
-        //add hydrogens
-        try {
-			AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(molecule);
-		} catch (CDKException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-        CDKHydrogenAdder hAdder = CDKHydrogenAdder.getInstance(molecule.getBuilder());
-        try {
-			hAdder.addImplicitHydrogens(molecule);
-		} catch (CDKException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-        AtomContainerManipulator.convertImplicitToExplicitHydrogens(molecule);
-
+		AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(molecule);
 		Double massDoubleOrig = MolecularFormulaTools.getMonoisotopicMass(MolecularFormulaManipulator.getMolecularFormula(molecule));
 		massDoubleOrig = (double)Math.round((massDoubleOrig)*10000)/10000;
 		String massOrig = massDoubleOrig.toString();
-		
+		spectrum = new WrapperSpectrum(peaks, mode, massDoubleOrig, true);		
+
 		        
         Fragmenter fragmenter = new Fragmenter((Vector<Peak>)spectrum.getPeakList().clone(), mzabs, mzppm, mode, true, true, true, false);
         try {
-			l1 = fragmenter.generateFragmentsEfficient(molecule, true, 2, "C00509", false);
+			l1 = fragmenter.generateFragmentsEfficient(molecule, true, 2, "C00509", true);
 		} catch (CDKException e1) {
 			e1.printStackTrace();
 		} catch (Exception e1) {
@@ -165,6 +122,9 @@ public class FragmentSingleCompoundWithPeaks {
 		//now find corresponding fragments to the mass
 		AssignFragmentPeak afp = new AssignFragmentPeak(3);
 		try {
+			molecule.setProperty("PartialChargeDiff", "2");
+		    molecule.setProperty("TreeDepth", "0");
+			l.add(0, molecule);
 			afp.assignFragmentPeak(l, cleanedPeakList, mzabs, mzppm, spectrum.getMode(), false, spectrum.isPositive());
 		} catch (CDKException e) {
 			e.printStackTrace();
@@ -185,7 +145,19 @@ public class FragmentSingleCompoundWithPeaks {
 	
 	public static void main(String[] args) {
 		long startTime = System.currentTimeMillis();
-		FragmentSingleCompoundWithPeaks test = new FragmentSingleCompoundWithPeaks();
+		String file = "/home/swolf/MOPAC/ProofOfConcept/pubchem/CID_3365_spectrum/mopac/3365.sdf_Combined.cml";
+		
+		FragmentSingleCompoundWithPeaksPreCalculated test = null;
+		try {
+			IAtomContainer mol = CMLTools.read(new File(file));
+			test = new FragmentSingleCompoundWithPeaksPreCalculated(mol);
+		} catch (CDKException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		long endTime = System.currentTimeMillis();
 		System.out.println("Fragmenter :"+ (endTime-startTime));
 		try {
@@ -202,3 +174,4 @@ public class FragmentSingleCompoundWithPeaks {
 		}
 	}
 }
+
