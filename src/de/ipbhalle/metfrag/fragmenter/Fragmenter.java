@@ -63,6 +63,10 @@ import org.openscience.cdk.io.SDFWriter;
 import org.openscience.cdk.isomorphism.IsomorphismTester;
 import org.openscience.cdk.isomorphism.UniversalIsomorphismTester;
 import org.openscience.cdk.nonotify.NoNotificationChemObjectBuilder;
+import org.openscience.cdk.qsar.DescriptorValue;
+import org.openscience.cdk.qsar.descriptors.molecular.ALOGPDescriptor;
+import org.openscience.cdk.qsar.descriptors.molecular.MannholdLogPDescriptor;
+import org.openscience.cdk.qsar.descriptors.molecular.XLogPDescriptor;
 import org.openscience.cdk.ringsearch.AllRingsFinder;
 import org.openscience.cdk.smiles.SmilesGenerator;
 import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
@@ -119,6 +123,8 @@ public class Fragmenter {
     private boolean isOnlyBreakSelectedBonds = false;
     private BondPrediction bondPrediction = null;
     private boolean partialChargesPreferred = true;
+    
+    private Map<String, Object> moleculeDescriptors;
       
     
     /**
@@ -369,6 +375,20 @@ public class Fragmenter {
             	}
 			}
         }
+    	
+    	//calculate molecules descriptors: XlogP, AlogP and MannholdLogP
+        this.moleculeDescriptors = new HashMap<String, Object>();
+        XLogPDescriptor logP = new XLogPDescriptor();
+        DescriptorValue logPValue = logP.calculate(this.originalMolecule);
+		this.moleculeDescriptors.put("XLogP", logPValue);
+		MannholdLogPDescriptor mLogP = new MannholdLogPDescriptor();
+		DescriptorValue mlogPValue = mLogP.calculate(this.originalMolecule);
+		this.moleculeDescriptors.put("MannholdLogP", mlogPValue);
+		ALOGPDescriptor aLogP = new ALOGPDescriptor();
+		DescriptorValue alogPValue = aLogP.calculate(this.originalMolecule);
+		this.moleculeDescriptors.put("ALogP", alogPValue);
+
+
     	
 
     	if(isPreCalculated)
@@ -1738,5 +1758,19 @@ public class Fragmenter {
 		}    	
     	return mol;
     }  
+    
+    public void setMoleculeDescriptors(Map<String, Object> moleculeDescriptors) {
+    	this.moleculeDescriptors = moleculeDescriptors;
+    }
+
+    /**
+    * Gets the molecule descriptors.
+    * Implemented are 3 different logP values: XlogP, AlogP and MannholdLogP
+    *
+    * @return the molecule descriptors
+    */
+    public Map<String, Object> getMoleculeDescriptors() {
+    	return moleculeDescriptors;
+    }
 
 }
