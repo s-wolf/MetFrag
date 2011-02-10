@@ -456,6 +456,8 @@ public class Fragmenter {
 		//do preprocess: find all rings and aromatic rings...mark all bonds
 		preprocessMolecule(atomContainer, isPrecalculated);
 
+		//add the original molecule
+		fragmentsReturn.add(writeMoleculeToTemp(this.originalMolecule, identifier, globalCount, "0.0", 0, "0.0")); 
     	
 		//add original molecule to it
         fragmentQueue.offer(new Node(0, 0, this.originalMolecule, 0));       
@@ -579,7 +581,11 @@ public class Fragmenter {
         
 		//do preprocess: find all rings and aromatic rings...mark all bonds
 		preprocessMolecule(atomContainer, isPrecalculated);
-
+		
+		this.originalMolecule.setProperty("PartialChargeDiff", "0.0");
+		this.originalMolecule.setProperty("TreeDepth", "0");
+		this.originalMolecule.setProperty("BondEnergy", "0");
+		fragmentsReturn.add(this.originalMolecule);
     	
 		//add original molecule to it
         fragmentQueue.offer(new Node(0, 0, this.originalMolecule, 0));       

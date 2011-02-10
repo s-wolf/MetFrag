@@ -60,6 +60,7 @@ import de.ipbhalle.metfrag.tools.renderer.StructureRendererTable;
 public class FragmentSingleCompoundWithPeaksPreCalculated {
 	
 	private List<File> l1 = null;
+	private List<IAtomContainer> l2 = null;
 	WrapperSpectrum spectrum = null;
 	double mzabs = 0.01;
 	double mzppm = 10.0;
@@ -94,7 +95,8 @@ public class FragmentSingleCompoundWithPeaksPreCalculated {
 		        
         Fragmenter fragmenter = new Fragmenter((Vector<Peak>)spectrum.getPeakList().clone(), mzabs, mzppm, mode, true, true, true, false);
         try {
-			l1 = fragmenter.generateFragmentsEfficient(molecule, true, 2, "C00509", true);
+//        	l1 = fragmenter.generateFragmentsEfficient(molecule, true, 2, "C00509", true);
+			l2 = fragmenter.generateFragmentsInMemory(molecule, true, 2, true);
 		} catch (CDKException e1) {
 			e1.printStackTrace();
 		} catch (Exception e1) {
@@ -115,16 +117,14 @@ public class FragmentSingleCompoundWithPeaksPreCalculated {
 		
 		
 		List<IAtomContainer> l = new ArrayList<IAtomContainer>();
-		l = Molfile.ReadfolderTemp(l1);
+//		l = Molfile.ReadfolderTemp(l1);
+		l = l2;
 		
 		StructureRendererTable.Draw(molecule, l, "");
 		
 		//now find corresponding fragments to the mass
 		AssignFragmentPeak afp = new AssignFragmentPeak(3);
 		try {
-			molecule.setProperty("PartialChargeDiff", "2");
-		    molecule.setProperty("TreeDepth", "0");
-			l.add(0, molecule);
 			afp.assignFragmentPeak(l, cleanedPeakList, mzabs, mzppm, spectrum.getMode(), false, spectrum.isPositive());
 		} catch (CDKException e) {
 			e.printStackTrace();

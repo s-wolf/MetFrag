@@ -25,6 +25,7 @@ import java.util.List;
 
 import org.openscience.cdk.DefaultChemObjectBuilder;
 import org.openscience.cdk.exception.CDKException;
+import org.openscience.cdk.formula.MolecularFormula;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IMolecule;
@@ -34,6 +35,7 @@ import org.openscience.cdk.smiles.SmilesParser;
 import org.openscience.cdk.smiles.smarts.SMARTSQueryTool;
 import org.openscience.cdk.tools.CDKHydrogenAdder;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
+import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 
 import de.ipbhalle.metfrag.tools.renderer.StructureRenderer;
 
@@ -48,12 +50,12 @@ public class Test {
 		System.out.println(181.049 - 0.002 - PPMTool.getPPMDeviation(181.049, 10));
 		
 		// TODO Auto-generated method stub
-		double mass = MolecularFormulaTools.getMonoisotopicMass("C17H4O14");
+		double mass = MolecularFormulaManipulator.getTotalExactMass(MolecularFormulaManipulator.getMolecularFormula("Si", new MolecularFormula()));
 		System.out.println(mass);
 		
 		System.out.println(PPMTool.getPPMDeviation(200.0, 10));
 		System.out.println(PPMTool.getPPMDeviation(200.0, 20));
-		System.out.println(PPMTool.getPPMWeb(200.0, 200.004));
+		System.out.println(PPMTool.getPPMWeb(144.0845 - Constants.ELECTRON_MASS, 144.0833));
 		
 		try {
 			SmilesParser sp = new SmilesParser(DefaultChemObjectBuilder.getInstance());

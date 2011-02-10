@@ -271,8 +271,7 @@ public class FragmenterThread implements Runnable{
 //	        System.out.println("Benötigte Zeit: " + time + " Got " + generatedFrags.size() + " fragments");
 
 	        //read temp files in again
-	        List<IAtomContainer> l = generatedFrags;
-	                
+	        List<IAtomContainer> l = generatedFrags;	                
 
 	        try
 			{					

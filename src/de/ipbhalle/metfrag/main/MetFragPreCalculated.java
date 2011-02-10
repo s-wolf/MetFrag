@@ -93,9 +93,13 @@ public class MetFragPreCalculated {
 	    //thread executor
 	    ExecutorService threadExecutor = null;
 	    System.out.println("Used Threads: " + threads);
-	    threadExecutor = Executors.newFixedThreadPool(threads);
+	    threadExecutor = Executors.newFixedThreadPool(1);
 
-		for (int c = 0; c < candidates.size(); c++) {				
+		for (int c = 0; c < candidates.size(); c++) {
+			
+			if(!candidates.get(c).getFileName().contains("3365"))
+				continue;
+			
 			threadExecutor.execute(new FragmenterThread(candidates.get(c).getMol(), candidates.get(c).getFileName(), database, new PubChemWebService(), spectrum, config.getMzabs(), config.getMzppm(), 
 					config.isSumFormulaRedundancyCheck(), config.isBreakAromaticRings(), config.getTreeDepth(), false, config.isHydrogenTest(), config.isNeutralLossAdd(), 
 					config.isBondEnergyScoring(), config.isOnlyBreakSelectedBonds(), config, true, config.getMaximumNeutralLossCombination(), true));		
@@ -129,7 +133,7 @@ public class MetFragPreCalculated {
 	{
 		String candidate = "";
 		if(config.isPubChem())
-			candidate = Integer.toString(spectrum.getCID());
+			candidate = Integer.toString(spectrum.getCID()) + ".sdf_Combined.cml";
 		else if(config.isKEGG())
 			candidate = spectrum.getKEGG();
 		return candidate;
@@ -142,7 +146,7 @@ public class MetFragPreCalculated {
 	 * @param keysScore the keys score
 	 * @param folder the folder
 	 */
-	private void writeSDF(Double[] keysScore, String folder)
+	private void writeSDF(Double[] keysScore, String folder, String correctCandidateID)
 	{
 		Map<String, Vector<MatchedFragment>> candidateToFragments = results.getMapCandidateToFragments();
 		Map<Double, Vector<String>> realScoreMap = results.getRealScoreMap();
@@ -169,7 +173,7 @@ public class MetFragPreCalculated {
 		}
 		//write results file
 		try {
-			SDFWriter writer = new SDFWriter(new FileWriter(new File(folder + "logs/" + date + "_Structures.sdf")));
+			SDFWriter writer = new SDFWriter(new FileWriter(new File(folder + "logs/" + correctCandidateID + "_" + date + "_Structures.sdf")));
 			writer.write(setOfMolecules);
 			writer.close();
 		} catch (CDKException e) {
@@ -219,7 +223,7 @@ public class MetFragPreCalculated {
 		//write out SDF with all the structures
 		if(writeSDF)
 		{
-			writeSDF(keysScore, folder);
+			writeSDF(keysScore, folder, correctCandidateID);
 		}
 		
 		
@@ -415,9 +419,11 @@ public class MetFragPreCalculated {
 		boolean writeSDF = false;
 		String CMLFiles = "";
 		
+		//test parameters: CID_3365_spectrum.txt 2011-02-02_16-00-00 /home/swolf/MOPAC/ProofOfConcept/pubchem/CID_3365_spectrum/mopac/ 1
+		
 		try
 		{
-			//thats the current file
+			//thats the current file 
 			if(args[0] != null)
 			{
 				currentFile = args[0];
