@@ -54,6 +54,7 @@ import de.ipbhalle.metfrag.spectrum.CleanUpPeakList;
 import de.ipbhalle.metfrag.spectrum.MatchedFragment;
 import de.ipbhalle.metfrag.spectrum.WrapperSpectrum;
 import de.ipbhalle.metfrag.tools.MolecularFormulaTools;
+import de.ipbhalle.metfrag.tools.MoleculeTools;
 import de.ipbhalle.metfrag.tools.renderer.StructureRendererTable;
 
 
@@ -65,6 +66,7 @@ public class FragmentSingleCompoundWithPeaksPreCalculated {
 	double mzabs = 0.01;
 	double mzppm = 10.0;
 	IAtomContainer molecule;
+	IAtomContainer originalMolecule;
 	
 
 	public FragmentSingleCompoundWithPeaksPreCalculated(IAtomContainer mol) throws CDKException {
@@ -95,8 +97,11 @@ public class FragmentSingleCompoundWithPeaksPreCalculated {
 		        
         Fragmenter fragmenter = new Fragmenter((Vector<Peak>)spectrum.getPeakList().clone(), mzabs, mzppm, mode, true, true, true, false);
         try {
-//        	l1 = fragmenter.generateFragmentsEfficient(molecule, true, 2, "C00509", true);
-			l2 = fragmenter.generateFragmentsInMemory(molecule, true, 2, true);
+        	l1 = fragmenter.generateFragmentsEfficient(molecule, true, 2, "C00509", true);
+        	//remove the candidate molecule...does not contain the Atom ID's
+//        	l1.remove(0);
+//        	originalMolecule = fragmenter.getOriginalMolecule();
+//			l2 = fragmenter.generateFragmentsInMemory(molecule, true, 2, true);
 		} catch (CDKException e1) {
 			e1.printStackTrace();
 		} catch (Exception e1) {
@@ -117,8 +122,9 @@ public class FragmentSingleCompoundWithPeaksPreCalculated {
 		
 		
 		List<IAtomContainer> l = new ArrayList<IAtomContainer>();
-//		l = Molfile.ReadfolderTemp(l1);
-		l = l2;
+		l = CMLTools.ReadfolderTemp(l1);
+//		l.add(0, originalMolecule);
+//		l = l2;
 		
 		StructureRendererTable.Draw(molecule, l, "");
 		
@@ -145,7 +151,7 @@ public class FragmentSingleCompoundWithPeaksPreCalculated {
 	
 	public static void main(String[] args) {
 		long startTime = System.currentTimeMillis();
-		String file = "/home/swolf/MOPAC/ProofOfConcept/pubchem/CID_3365_spectrum/mopac/3365.sdf_Combined.cml";
+		String file = "3365.sdf_Combined.cml";
 		
 		FragmentSingleCompoundWithPeaksPreCalculated test = null;
 		try {

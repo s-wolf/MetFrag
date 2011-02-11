@@ -24,6 +24,7 @@ package de.ipbhalle.metfrag.read;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,6 +33,7 @@ import org.openscience.cdk.ChemObject;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.io.CMLReader;
+import org.openscience.cdk.io.MDLV2000Reader;
 import org.openscience.cdk.tools.manipulator.ChemFileManipulator;
 
 public class CMLTools {
@@ -83,6 +85,34 @@ public class CMLTools {
 		ChemFile chemFile = (ChemFile)reader.read((ChemObject)new ChemFile());
 		List<IAtomContainer> containersList = ChemFileManipulator.getAllAtomContainers(chemFile);
 		return containersList.get(0);
+	}
+	
+	
+	/**
+	 * Read files from temp folder.
+	 * 
+	 * @param fragments the fragments
+	 * 
+	 * @return the i atom container set
+	 * 
+	 * @throws CDKException the CDK exception
+	 * @throws FileNotFoundException the file not found exception
+	 */
+	public static List<IAtomContainer> ReadfolderTemp (List<File> fragments) throws CDKException, FileNotFoundException
+	{
+		CMLReader reader;
+		List<IAtomContainer> containersList;
+		List<IAtomContainer> ret = new ArrayList<IAtomContainer>();
+		
+
+		for(int i = 0; i < fragments.size(); i++)
+		{
+			reader = new CMLReader(new FileInputStream(fragments.get(i)));
+	        ChemFile chemFile = (ChemFile)reader.read((ChemObject)new ChemFile());
+	        containersList = ChemFileManipulator.getAllAtomContainers(chemFile);
+	        ret.add(containersList.get(0)); //one container per file
+		}
+        return ret;    
 	}
 
 }

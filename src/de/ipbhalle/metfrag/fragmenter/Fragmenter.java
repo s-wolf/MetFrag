@@ -21,10 +21,12 @@
 package de.ipbhalle.metfrag.fragmenter;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -59,6 +61,7 @@ import org.openscience.cdk.interfaces.IRing;
 import org.openscience.cdk.interfaces.IRingSet;
 import org.openscience.cdk.interfaces.ISingleElectron;
 import org.openscience.cdk.interfaces.IBond.Stereo;
+import org.openscience.cdk.io.CMLWriter;
 import org.openscience.cdk.io.SDFWriter;
 import org.openscience.cdk.isomorphism.IsomorphismTester;
 import org.openscience.cdk.isomorphism.UniversalIsomorphismTester;
@@ -457,6 +460,9 @@ public class Fragmenter {
 		preprocessMolecule(atomContainer, isPrecalculated);
 
 		//add the original molecule
+    	this.originalMolecule.setProperty("PartialChargeDiff", "0.0");
+		this.originalMolecule.setProperty("TreeDepth", "0");
+		this.originalMolecule.setProperty("BondEnergy", "0");
 		fragmentsReturn.add(writeMoleculeToTemp(this.originalMolecule, identifier, globalCount, "0.0", 0, "0.0")); 
     	
 		//add original molecule to it
@@ -1727,14 +1733,17 @@ public class Fragmenter {
      */
     private File writeMoleculeToTemp(IAtomContainer mol, String identifier, int globalCount, String bondEnergy, Integer treeDepth, String partialChargeDiff) throws IOException, CDKException
     {
-    	File temp = File.createTempFile(identifier + "_" + globalCount, ".sdf");
+    	File temp = File.createTempFile(identifier + "_" + globalCount, ".cml");
         // Delete temp file when program exits.
         temp.deleteOnExit();
         
         mol = noStereochemistry(mol);
         
         FileWriter out = new FileWriter(temp);
-        SDFWriter mw = new SDFWriter(out);
+        FileOutputStream fout = new FileOutputStream(temp);
+
+//        SDFWriter mw = new SDFWriter(out);
+        CMLWriter cw = new CMLWriter(fout);
         IAtomContainer tmp = mol;
         Map<Object, Object> props = mol.getProperties();
         IMolecule test = new Molecule(tmp);
@@ -1742,8 +1751,8 @@ public class Fragmenter {
         test.setProperty("BondEnergy", bondEnergy);
         test.setProperty("TreeDepth", treeDepth.toString());
         test.setProperty("PartialChargeDiff", partialChargeDiff);
-        mw.write(test);
-        mw.close();
+        cw.write(test);
+        cw.close();
         
         return temp;
     }
@@ -1777,6 +1786,16 @@ public class Fragmenter {
     */
     public Map<String, Object> getMoleculeDescriptors() {
     	return moleculeDescriptors;
+    }
+    
+    /**
+     * 
+     * Returns the original molecule
+     * @return
+     */
+    public IAtomContainer getOriginalMolecule()
+    {
+    	return this.originalMolecule;
     }
 
 }
