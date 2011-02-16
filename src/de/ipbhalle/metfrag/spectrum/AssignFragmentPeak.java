@@ -327,7 +327,7 @@ public class AssignFragmentPeak {
 			    			{
 			    				//acs position 0 is the original candidate molecule
 			    				atomsMatched.add(fragmentStructure.getAtom(integer));
-			    				System.out.println(fragmentStructure.getAtom(integer).getSymbol());
+//			    				System.out.println(fragmentStructure.getAtom(integer).getSymbol());
 			    			}
 			    			catch(IndexOutOfBoundsException e)
 			    			{

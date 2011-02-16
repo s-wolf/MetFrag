@@ -372,7 +372,7 @@ public class BondPrediction {
 				if(!isCandidateBond(bond))
 					continue;
 				
-				if(bondToBondLength.get(bond.getID()) > 0.02)
+				if(bondToBondLength.get(bond.getID()) > 0)
 					bondsToBreak.add(bond.getID());				
 			}
 			

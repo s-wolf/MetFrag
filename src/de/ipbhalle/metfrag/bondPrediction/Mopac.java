@@ -64,7 +64,9 @@ public class Mopac {
 		{
 			//convert it back to mol2
 	        tempFileFFInput3D = File.createTempFile("molFFInput",".mol2");
-	        String command = "babel --gen3d -i mol2 " + tempFile.getPath() + " -o mol2 " + tempFileFFInput3D.getPath();
+//	        String command = "babel --gen3d -i mol2 " + tempFile.getPath() + " -o mol2 " + tempFileFFInput3D.getPath();
+	        String command = "babel --gen2D -i mol2 " + tempFile.getPath() + " -o mol2 " + tempFileFFInput3D.getPath();
+//	        String command = "babel -i mol2 " + tempFile.getPath() + " -o mol2 " + tempFileFFInput3D.getPath();
 	        String[] psCmdFFInput =
 			{
 			    "sh",

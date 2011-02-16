@@ -31,6 +31,7 @@ import de.ipbhalle.metfrag.tools.MoleculeTools;
 
 public class PreprocessMolecules {
 	
+	// /home/swolf/MOPAC/ProofOfConcept/pubchem/CID_20097272_spectrum/20097272.sdf /home/swolf/MOPAC/ProofOfConcept/pubchem/CID_20097272_spectrum/mopac/
 	public static void main(String[] args) {
 		
 		File file = null;

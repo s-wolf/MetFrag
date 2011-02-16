@@ -47,6 +47,8 @@ public class Test {
 	 */
 	public static void main(String[] args) {
 		
+		System.out.println(PPMTool.getPPMDeviation(295.0763, 10.0) + 0.01);
+		
 		System.out.println(181.049 - 0.002 - PPMTool.getPPMDeviation(181.049, 10));
 		
 		// TODO Auto-generated method stub

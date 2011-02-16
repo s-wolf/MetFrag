@@ -31,6 +31,7 @@ import de.ipbhalle.metfrag.similarity.SimilarityGroup;
 import de.ipbhalle.metfrag.similarity.TanimotoClusterer;
 import de.ipbhalle.metfrag.spectrum.MatchedFragment;
 import de.ipbhalle.metfrag.spectrum.WrapperSpectrum;
+import de.ipbhalle.metfrag.tools.MoleculeTools;
 import de.ipbhalle.metfrag.tools.Writer;
 
 public class MetFragPreCalculated {
@@ -93,12 +94,9 @@ public class MetFragPreCalculated {
 	    //thread executor
 	    ExecutorService threadExecutor = null;
 	    System.out.println("Used Threads: " + threads);
-	    threadExecutor = Executors.newFixedThreadPool(1);
+	    threadExecutor = Executors.newFixedThreadPool(threads);
 
 		for (int c = 0; c < candidates.size(); c++) {
-			
-			if(!candidates.get(c).getFileName().contains("3365"))
-				continue;
 			
 			threadExecutor.execute(new FragmenterThread(candidates.get(c).getMol(), candidates.get(c).getFileName(), database, new PubChemWebService(), spectrum, config.getMzabs(), config.getMzppm(), 
 					config.isSumFormulaRedundancyCheck(), config.isBreakAromaticRings(), config.getTreeDepth(), false, config.isHydrogenTest(), config.isNeutralLossAdd(), 
@@ -204,10 +202,14 @@ public class MetFragPreCalculated {
 		
 		//generate the parameter optimization matrix
 		String parameterOptimization = "";
+		String parameterOptimizationCombined = "";
 		if(generateOptimizationMatrix)
 		{
 			String header = prepareParameterOptimizationMatrix(correctCandidateID, spectrum.getExactMass());
 			parameterOptimization = generateOptimizationMatrix(results.getCandidateToOptimizationMatrixEntries(), header);
+			
+			String headerCombined = prepareParameterOptimizationMatrixCombined(correctCandidateID, spectrum.getExactMass());
+			parameterOptimizationCombined = generateOptimizationMatrixCombined(results.getCandidateToOptimizationMatrixEntries(), headerCombined);
 		}
 		
 					
@@ -307,7 +309,7 @@ public class MetFragPreCalculated {
 				boolean check = false;
 				int temp = 0;
 				for (int j = 0; j < realScoreMap.get(keysScore[i]).size(); j++) {
-					scoreListReal.append("\n" + keysScore[i] + " - " + realScoreMap.get(keysScore[i]).get(j) + "[" + candidateToEnergy.get(realScoreMap.get(keysScore[i]).get(j)) + "]");
+					scoreListReal.append("\n" + keysScore[i] + " - " + realScoreMap.get(keysScore[i]).get(j) + "\t[" + candidateToEnergy.get(realScoreMap.get(keysScore[i]).get(j)) + "]" + "\t");
 					if(correctCandidateID.compareTo(realScoreMap.get(keysScore[i]).get(j)) == 0)
 					{
 						check = true;
@@ -335,9 +337,12 @@ public class MetFragPreCalculated {
 		
 		
 		completeLog.append("\n\n*****************Scoring(Real)*****************************");
-		completeLog.append("Correct candidate ID: " + correctCandidateID);
+		completeLog.append("\nCorrect candidate ID: " + correctCandidateID);
 		completeLog.append("\nTime: " + timeEnd);
 		completeLog.append(scoreListReal);
+		
+		
+		
 		
 		//write all tanimoto distances in one file
 		//similarityValues += sim.getAllSimilarityValues();
@@ -358,6 +363,7 @@ public class MetFragPreCalculated {
 			Writer.writeToFile(folder + "logs/" + date + "_results.txt", resultsTable);
 			new File(folder + "logs/" + date + "/").mkdirs();
 			Writer.writeToFile(folder + "logs/" + date + "/" + this.file, parameterOptimization);
+			Writer.writeToFile(folder + "logs/" + date + "/" + this.file + "_Combined", parameterOptimizationCombined);
 		}
 		catch (InterruptedException e) {
 			// TODO Auto-generated catch block
@@ -397,6 +403,66 @@ public class MetFragPreCalculated {
 			for (OptimizationMatrixEntry entry : candidateToOptimizationMatrixEntries.get(candidate)) {
 				parameterOptimizationMatrix.append(candidate + "\t" + entry.getPeakMass() + "\t" + entry.getPeakInt() + "\t" + entry.getBondEnergyString() + "\t" + entry.getHydrogenPenalty() + "\t" + entry.getChargesDiffString() + "\t" + entry.getNeutralLossRules() + "\n");
 			}
+		}
+		
+		return parameterOptimizationMatrix.toString();
+	}
+	
+	/**
+	 * Prepare parameter optimization matrix ... one entry foreach candidate
+	 * 
+	 * @param realScoreMap the real score map
+	 * 
+	 * @return the string
+	 */
+	private String prepareParameterOptimizationMatrixCombined(String pubChemIdentifier, Double exactMass)
+	{
+		String ret = "";
+		
+		ret += pubChemIdentifier + "\n";
+		ret += exactMass.toString() + "\n\n";
+		ret += "candidate\tbondEnergy\thydrogenPenalty\tBondLengthChange\tNormBondLengthChange\tNeutralLossRules\n";
+		
+		return ret;
+	}
+	
+	
+	/**
+	 * Generate optimization matrix...entries combined
+	 * 
+	 * @param candidateToOptimizationMatrixEntries the candidate to optimization matrix entries
+	 */
+	private String generateOptimizationMatrixCombined(Map<String, List<OptimizationMatrixEntry>> candidateToOptimizationMatrixEntries, String header)
+	{
+		StringBuilder parameterOptimizationMatrix = new StringBuilder();
+		parameterOptimizationMatrix.append(header);
+		
+		Map<String, Double> candToMaxBondLEngthChange = new HashMap<String, Double>(); 
+		//find maximum
+		for (String candidate : candidateToOptimizationMatrixEntries.keySet()) {
+			double maxBondLengthChange = 0.0;
+			for (OptimizationMatrixEntry entry : candidateToOptimizationMatrixEntries.get(candidate)) {
+				double temp = MoleculeTools.getCombinedEnergy(entry.getChargesDiffString());
+				if(temp > maxBondLengthChange)
+					maxBondLengthChange = temp;
+			}
+			candToMaxBondLEngthChange.put(candidate, maxBondLengthChange);
+		}
+		
+		for (String candidate : candidateToOptimizationMatrixEntries.keySet()) {
+			double bondEnergy = 0.0;
+			int hydrogenPenalty = 0;
+			double bondLengthChange = 0.0;
+			double bondLengthChangeNorm = 0.0;
+			String neutralLossRules = "";
+			for (OptimizationMatrixEntry entry : candidateToOptimizationMatrixEntries.get(candidate)) {
+				bondEnergy += MoleculeTools.getCombinedEnergy(entry.getBondEnergyString());
+				hydrogenPenalty += entry.getHydrogenPenalty();
+				bondLengthChange += MoleculeTools.getCombinedEnergy(entry.getChargesDiffString());
+				bondLengthChangeNorm += MoleculeTools.getCombinedEnergy(entry.getChargesDiffString()) / candToMaxBondLEngthChange.get(candidate);
+				neutralLossRules += entry.getNeutralLossRules() + "  ";
+			}
+			parameterOptimizationMatrix.append(candidate + "\t" + bondEnergy + "\t" + hydrogenPenalty + "\t" + bondLengthChange + "\t" + bondLengthChangeNorm + "\t" + neutralLossRules + "\n");
 		}
 		
 		return parameterOptimizationMatrix.toString();
