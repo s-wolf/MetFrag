@@ -760,7 +760,8 @@ public class MetFrag {
 		}
 		//write results file
 		try {
-			SDFWriter writer = new SDFWriter(new FileWriter(new File(folder + "logs/" + file + "_" + date + "_Structures.sdf")));
+			new File(folder + "logs/" + date + "_structures/").mkdirs();
+			SDFWriter writer = new SDFWriter(new FileWriter(new File(folder + "logs/" + date + "_structures/" + file + ".sdf")));
 			writer.write(setOfMolecules);
 			writer.close();
 		} catch (CDKException e) {
