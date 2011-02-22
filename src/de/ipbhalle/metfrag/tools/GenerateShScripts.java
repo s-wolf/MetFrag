@@ -32,7 +32,7 @@ import java.util.Vector;
 
 public class GenerateShScripts {
 	
-	public GenerateShScripts(String folder, String outputFolder, String writePath) throws IOException
+	public GenerateShScripts(String folder, String outputFolder, String writePath, boolean isWriteSDF) throws IOException
 	{
 		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
 	    java.util.Date date = new java.util.Date();
@@ -61,7 +61,10 @@ public class GenerateShScripts {
 //			out.newLine();
 //			out.write("RamTest=$RamTest'm';");
 //			out.newLine();
-	  		out.write("java -Dproperty.file.path=" + outputFolder + " -Xms1500m -Xmx5500m -jar " + outputFolder + "MetFragScript.jar " + onlyFiles.get(i).getName() + " " + dateString);
+			if(isWriteSDF)
+				out.write("java -Dproperty.file.path=" + outputFolder + " -Xms1500m -Xmx5500m -jar " + outputFolder + "MetFragScript.jar " + onlyFiles.get(i).getName() + " " + dateString + " 1");
+			else
+				out.write("java -Dproperty.file.path=" + outputFolder + " -Xms1500m -Xmx5500m -jar " + outputFolder + "MetFragScript.jar " + onlyFiles.get(i).getName() + " " + dateString);
 		  	out.close();
 		}
 	}
@@ -96,8 +99,12 @@ public class GenerateShScripts {
 			System.exit(1);
 		}
 		
+		boolean isWriteSDF = false;
+		if(args.length > 3)
+			isWriteSDF = true;
+		
 		try {
-			GenerateShScripts g = new GenerateShScripts(folder, outputFolder, writePath);
+			GenerateShScripts g = new GenerateShScripts(folder, outputFolder, writePath, isWriteSDF);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

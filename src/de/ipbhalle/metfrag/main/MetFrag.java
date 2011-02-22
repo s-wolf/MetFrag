@@ -729,6 +729,51 @@ public class MetFrag {
 	
 	
 	/**
+	 * Write sdf file with all processed structures used in MetFrag scriptable.
+	 * 
+	 * @param keysScore the keys score
+	 * @param folder the folder
+	 */
+	private void writeSDF(Double[] keysScore, String folder, String file, Map<Double, Vector<String>> realScoreMap)
+	{
+		Map<String, Vector<PeakMolPair>> candidateToFragments = results.getMapCandidateToFragments();
+		Map<String, IAtomContainer> candidateToStructure = results.getMapCandidateToStructure();
+		
+		MoleculeSet setOfMolecules = new MoleculeSet();
+		for (int i = keysScore.length -1; i >=0 ; i--) {
+			Vector<String> list = realScoreMap.get(keysScore[i]);
+			for (String string : list) {
+				//get corresponding structure
+				IAtomContainer tmp = candidateToStructure.get(string);
+				tmp = AtomContainerManipulator.removeHydrogens(tmp);
+				tmp.setProperty("DatabaseID", string);
+				tmp.setProperty("Score", keysScore[i]);
+				tmp.setProperty("PeaksExplained", candidateToFragments.get(string).size());
+				
+				//fix for bug in mdl reader setting where it happens that bond.stereo is null when the bond was read in as UP/DOWN (4)
+				for (IBond bond : tmp.bonds()) {
+					if(bond.getStereo() == null)
+						bond.setStereo(Stereo.UP_OR_DOWN);		
+				} 
+				setOfMolecules.addAtomContainer(tmp);
+			}
+		}
+		//write results file
+		try {
+			SDFWriter writer = new SDFWriter(new FileWriter(new File(folder + "logs/" + file + "_" + date + "_Structures.sdf")));
+			writer.write(setOfMolecules);
+			writer.close();
+		} catch (CDKException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	
+	/**
 	 * Evaluate results and write them to the log files
 	 * @throws InterruptedException 
 	 */
@@ -764,7 +809,7 @@ public class MetFrag {
 		//write out SDF with all the structures
 		if(writeSDF)
 		{
-			writeSDF(keysScore, folder);
+			writeSDF(keysScore, folder, spectrum.getFilename() + "_" + correctCandidateID , realScoreMap);
 		}
 		
 		
