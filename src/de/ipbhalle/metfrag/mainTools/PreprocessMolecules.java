@@ -31,14 +31,16 @@ import de.ipbhalle.metfrag.tools.MoleculeTools;
 
 public class PreprocessMolecules {
 	
-	// /home/swolf/MOPAC/ProofOfConcept/pubchem/CID_20097272_spectrum/20097272.sdf /home/swolf/MOPAC/ProofOfConcept/pubchem/CID_20097272_spectrum/mopac/
-	// LARGE BUG: /home/swolf/MOPAC/ProofOfConcept/pubchem/CID_3002977_spectrum/3002977.sdf /home/swolf/MOPAC/ProofOfConcept/pubchem/CID_3002977_spectrum/mopac/
+	// /home/swolf/MOPAC/ProofOfConcept/pubchem/CID_20097272_spectrum/20097272.sdf /home/swolf/MOPAC/ProofOfConcept/pubchem/CID_20097272_spectrum/mopac/ 600 600
+	// LARGE BUG: /home/swolf/MOPAC/ProofOfConcept/pubchem/CID_3002977_spectrum/3002977.sdf /home/swolf/MOPAC/ProofOfConcept/pubchem/CID_3002977_spectrum/mopac/ 600 600
 	public static void main(String[] args) {
 		
 		File file = null;
 		String outputFolder = "";
+		int mopacRuntime = 0;
+		int ffSteps = 600;
 		
-		if(args.length < 2)
+		if(args.length < 3)
 		{
 			System.err.println("Not all parameters given!");
 			System.exit(1);
@@ -47,6 +49,9 @@ public class PreprocessMolecules {
 		{
 			file = new File(args[0]);
 			outputFolder = args[1];
+			mopacRuntime = Integer.parseInt(args[2]);
+			if(args.length > 3)
+				ffSteps = Integer.parseInt(args[3]);
 		}
 		
 		if(file.isFile())
@@ -93,7 +98,7 @@ public class PreprocessMolecules {
 		    	
 		    	BondPrediction bp = new BondPrediction(aromaticBonds);
 			    bp.debug(false);
-				bp.calculateBondsToBreak(molecule, 600, "AM1", 600);
+				bp.calculateBondsToBreak(molecule, ffSteps, "AM1", mopacRuntime);
 				
 				List<ChargeResult> results = bp.getResults();
 				for (int i1 = 0; i1 < results.size(); i1++) {

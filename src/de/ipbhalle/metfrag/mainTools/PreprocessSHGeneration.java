@@ -32,7 +32,7 @@ import java.util.Iterator;
 import org.apache.commons.io.FileUtils;
 
 
-public class PreprocessKEGGSHGeneration {
+public class PreprocessSHGeneration {
 	
 
 	/**
@@ -62,7 +62,7 @@ public class PreprocessKEGGSHGeneration {
 			BufferedWriter out = new BufferedWriter(new FileWriter(f2));
 			out.write("#!/bin/bash");
 			out.newLine();
-	  		out.write("java -jar /home/swolf/MOPAC/BATCH/jar/PreprocessMolecules.jar \"" + file.getPath() + "\"" + " \"" + file.getParent() + "/mopac/\"");
+	  		out.write("java -jar /home/swolf/MOPAC/BATCH/jar/PreprocessMolecules.jar \"" + file.getPath() + "\"" + " \"" + file.getParent() + "/mopac/\"" + " 600 600");
 		  	out.close();
 
 		}
