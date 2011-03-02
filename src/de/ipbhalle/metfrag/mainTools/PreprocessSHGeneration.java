@@ -41,15 +41,41 @@ public class PreprocessSHGeneration {
 	 */
 	public static void main(String[] args) throws IOException {
 		
-		String writePath = "/home/swolf/MOPAC/BATCH/sh/";
+		//"/home/swolf/MOPAC/BATCH/jar/PreprocessMolecules.jar" "/home/swolf/MOPAC/ProofOfConcept/pubchem/" "/home/swolf/MOPAC/BATCH/sh/" 600 600
 		
-		String path = "/home/swolf/MOPAC/ProofOfConcept/pubchem/";
+		String writePath = "/home/swolf/MOPAC/BATCH/sh/";
+		String pathToSDF = "/home/swolf/MOPAC/ProofOfConcept/pubchem/";
+		String pathToJar = "/home/swolf/MOPAC/BATCH/jar/PreprocessMolecules.jar";
+		String mopacRuntime = "600";
+		String ffSteps = "600";
+		
+		if(args.length < 5)
+		{
+			System.err.println("Not all arguments given");
+			System.exit(1);
+		}
+		else
+		{
+			pathToJar = args[0];
+			pathToSDF = args[1];
+			writePath = args[2];
+			mopacRuntime = args[3];
+			ffSteps = args[4];
+				
+		}
+		
+		if(!writePath.contains("sh/"))
+		{
+			System.err.println("Please use a folder structure that uses /.../.../sh/ at the end");
+			System.exit(1);
+		}
+		
 		//loop over all files in folder
 		FileUtils.deleteDirectory(new File(writePath));
 		new File(writePath).mkdirs();
 		
 		String[] ext = {"sdf"};
-		Collection<File> filesRecursively = (Collection<File>)FileUtils.listFiles(new File(path), ext, true);
+		Collection<File> filesRecursively = (Collection<File>)FileUtils.listFiles(new File(pathToSDF), ext, true);
 		for (File file : filesRecursively) {
 			String fileName = file.getName();
 			int dotPos = fileName.indexOf(".");
@@ -62,7 +88,8 @@ public class PreprocessSHGeneration {
 			BufferedWriter out = new BufferedWriter(new FileWriter(f2));
 			out.write("#!/bin/bash");
 			out.newLine();
-	  		out.write("java -jar /home/swolf/MOPAC/BATCH/jar/PreprocessMolecules.jar \"" + file.getPath() + "\"" + " \"" + file.getParent() + "/mopac_1200/\"" + " 1200 600");
+			out.write("java -jar " + pathToJar + " \"" + file.getPath() + "\"" + " \"" + file.getParent() + "/mopac_" + mopacRuntime + "/\" " + mopacRuntime + " " + ffSteps);
+//	  		out.write("java -jar /home/swolf/MOPAC/BATCH/jar/PreprocessMolecules.jar \"" + file.getPath() + "\"" + " \"" + file.getParent() + "/mopac_1200/\"" + " 1200 600");
 		  	out.close();
 
 		}

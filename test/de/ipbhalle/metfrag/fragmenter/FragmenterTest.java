@@ -124,7 +124,7 @@ public class FragmenterTest {
 		        
         Fragmenter fragmenter = new Fragmenter((Vector<Peak>)spectrum.getPeakList().clone(), mzabs, mzppm, mode, true, true, true, false);
         try {
-			l = fragmenter.generateFragmentsInMemory(molecule, true, 2);
+			l = fragmenter.generateFragmentsInMemory(molecule, true, 2, false);
 		} catch (CDKException e1) {
 			e1.printStackTrace();
 		} catch (Exception e1) {

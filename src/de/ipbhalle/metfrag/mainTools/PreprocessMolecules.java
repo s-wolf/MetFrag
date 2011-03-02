@@ -98,7 +98,9 @@ public class PreprocessMolecules {
 		    	
 		    	BondPrediction bp = new BondPrediction(aromaticBonds);
 			    bp.debug(false);
-				bp.calculateBondsToBreak(molecule, ffSteps, "AM1", mopacRuntime);
+			    System.out.println("MOPAC runtime: " + mopacRuntime + " FFSteps:");
+			    //use babel version 2.3.0
+				bp.calculateBondsToBreak("/vol/local/bin/", molecule, ffSteps, "AM1", mopacRuntime);
 				
 				List<ChargeResult> results = bp.getResults();
 				for (int i1 = 0; i1 < results.size(); i1++) {

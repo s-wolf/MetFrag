@@ -33,14 +33,18 @@ public class Mopac {
 	/**
 	 * Run MOPAC to optimize the geometry of the molecule.
 	 *
+	 * @param pathToBabel if a different openbael is to be used! e.g. "/vol/local/bin/"
 	 * @param molToOptimize the mol to optimize
 	 * @param ffSteps the ff steps
 	 * @param verbose the verbose
-	 * @param mopac method: possible Strings are: "AM1", "PM3" and "PM6"
+	 * @param mopacMethod the mopac method
+	 * @param mopacRuntime the mopac runtime
+	 * @param firstRun the first run
+	 * @param atomProtonized the atom protonized
 	 * @return the i atom container
 	 * @throws Exception the exception
 	 */
-	public IAtomContainer runOptimization(IAtomContainer molToOptimize, int ffSteps, boolean verbose, String mopacMethod, Integer mopacRuntime, boolean firstRun, String atomProtonized) throws Exception
+	public IAtomContainer runOptimization(String pathToBabel, IAtomContainer molToOptimize, int ffSteps, boolean verbose, String mopacMethod, Integer mopacRuntime, boolean firstRun, String atomProtonized) throws Exception
 	{
 		//write out the molecule
 //		File tempFile = File.createTempFile("mol",".mol");
@@ -65,7 +69,7 @@ public class Mopac {
 			//convert it back to mol2
 	        tempFileFFInput3D = File.createTempFile("molFFInput",".mol2");
 //	        String command = "babel --gen3d -i mol2 " + tempFile.getPath() + " -o mol2 " + tempFileFFInput3D.getPath();
-	        String command = "babel --gen2D -i mol2 " + tempFile.getPath() + " -o mol2 " + tempFileFFInput3D.getPath();
+	        String command = pathToBabel + "babel --gen2D -i mol2 " + tempFile.getPath() + " -o mol2 " + tempFileFFInput3D.getPath();
 //	        String command = "babel -i mol2 " + tempFile.getPath() + " -o mol2 " + tempFileFFInput3D.getPath();
 	        String[] psCmdFFInput =
 			{
@@ -89,7 +93,7 @@ public class Mopac {
 		File tempFileFF = File.createTempFile("molFF",".pdb");
 //		String command = "obminimize -n " + ffSteps + " -sd -ff MMFF94 " + tempFile.getPath();
 //		String command = "obminimize -c 1e-3 -sd -ff UFF " + tempFile.getPath();
-		String command = "obminimize -n " + ffSteps + " -sd -ff UFF " + tempFileFFInput3D.getPath() + " > " + tempFileFF.getPath(); 
+		String command = pathToBabel + "obminimize -n " + ffSteps + " -sd -ff UFF " + tempFileFFInput3D.getPath() + " > " + tempFileFF.getPath(); 
 		String[] psCmd =
 		{
 		    "sh",
@@ -122,7 +126,7 @@ public class Mopac {
 		
         //convert it back to mol2
         File tempFileFFOptimized = File.createTempFile("molFF",".mol2");
-        command = "babel " + tempFileFF.getPath() + " " + tempFileFFOptimized.getPath();
+        command = pathToBabel + "babel " + tempFileFF.getPath() + " " + tempFileFFOptimized.getPath();
         String[] psCmdFFMol2 =
 		{
 		    "sh",
@@ -289,7 +293,7 @@ public class Mopac {
        
         //now convert the result back to mol2
         File tempFileMOPACMol2 = File.createTempFile("molMopac",".mol2");
-        command = "babel -i mopout " + tempStringMopacOut + ".OUT" + " -o mol2 " + tempFileMOPACMol2;
+        command = pathToBabel + "babel -i mopout " + tempStringMopacOut + ".OUT" + " -o mol2 " + tempFileMOPACMol2;
         String[] psCmdMOPACMol2 =
 		{
 		    "sh",

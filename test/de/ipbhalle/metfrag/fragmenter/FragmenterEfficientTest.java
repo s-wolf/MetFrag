@@ -122,7 +122,7 @@ public class FragmenterEfficientTest {
 		        
         Fragmenter fragmenter = new Fragmenter((Vector<Peak>)spectrum.getPeakList().clone(), mzabs, mzppm, mode, true, true, true, false);
         try {
-			l1 = fragmenter.generateFragmentsEfficient(molecule, true, 2, "C00509");
+			l1 = fragmenter.generateFragmentsEfficient(molecule, true, 2, "C00509", false);
 		} catch (CDKException e1) {
 			e1.printStackTrace();
 		} catch (Exception e1) {
