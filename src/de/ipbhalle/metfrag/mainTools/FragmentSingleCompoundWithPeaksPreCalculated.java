@@ -151,7 +151,7 @@ public class FragmentSingleCompoundWithPeaksPreCalculated {
 	
 	public static void main(String[] args) {
 		long startTime = System.currentTimeMillis();
-		String file = "3365.sdf_Combined.cml";
+		String file = "/home/swolf/MOPAC/ProofOfConcept/pubchem/CID_3365_spectrum/mopac_600/3365.sdf_Combined.cml";
 		
 		FragmentSingleCompoundWithPeaksPreCalculated test = null;
 		try {

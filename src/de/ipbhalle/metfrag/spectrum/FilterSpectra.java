@@ -9,7 +9,7 @@ public class FilterSpectra {
 	
 	public static void main(String[] args) {
 		
-		String folder = "/home/swolf/MassBankData/MetFragSunGrid/RikenDataMergedCorrect/";
+		String folder = "/home/swolf/MassBankData/MetFragSunGrid/Hill-Riken-MM48_POSITIVE/";
 		//loop over all files in folder
 		File f = new File(folder);
 		File files[] = f.listFiles();

@@ -20,6 +20,7 @@ import org.openscience.cdk.interfaces.IRing;
 import org.openscience.cdk.interfaces.IRingSet;
 import org.openscience.cdk.io.CMLWriter;
 import org.openscience.cdk.io.MDLReader;
+import org.openscience.cdk.io.MDLV2000Reader;
 import org.openscience.cdk.ringsearch.AllRingsFinder;
 import org.openscience.cdk.tools.CDKHydrogenAdder;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
@@ -57,7 +58,7 @@ public class PreprocessMolecules {
 		if(file.isFile())
 		{
 			try {
-				MDLReader reader = new MDLReader(new FileReader(file));
+				MDLV2000Reader reader = new MDLV2000Reader(new FileReader(file));
 //				MDLReader reader = new MDLReader(new FileReader(new File("/vol/mirrors/kegg/mol/C00509.mol")));
 				ChemFile chemFile = (ChemFile)reader.read((ChemObject)new ChemFile());
 		        List<IAtomContainer> molList = ChemFileManipulator.getAllAtomContainers(chemFile);
@@ -98,31 +99,65 @@ public class PreprocessMolecules {
 		    	
 		    	BondPrediction bp = new BondPrediction(aromaticBonds);
 			    bp.debug(false);
-			    System.out.println("MOPAC runtime: " + mopacRuntime + " FFSteps:");
+			    System.out.println("MOPAC runtime: " + mopacRuntime + " FFSteps: " + ffSteps);
 			    //use babel version 2.3.0
 				bp.calculateBondsToBreak("/vol/local/bin/", molecule, ffSteps, "AM1", mopacRuntime);
 				
 				List<ChargeResult> results = bp.getResults();
-				for (int i1 = 0; i1 < results.size(); i1++) {
-					try {
-						new File(outputFolder).mkdirs();
-						CMLWriter writerCML = new CMLWriter(new FileOutputStream(new File(outputFolder + file.getName() + "_" + results.get(i1).getProtonatedAtom() + ".cml")));
-						//thats the molecule containing the all the bond length changes from all protonation sites
-						if(i1 == 0)
-							writerCML.write(results.get(i1).getMolWithProton());
-						//thats the mol containing the individual changes from one protonation site
-						else
-							writerCML.write(results.get(i1).getMolWithProton());
-						writerCML.close();
-						
-					} catch (CDKException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+				
+				if(molecule.getProperty("candidatesClustered") != null)
+				{
+					String temp = (String)molecule.getProperty("candidatesClustered");
+					String[] clusteredCompounds = temp.split("_");
+					
+					for (int c = 0; c < clusteredCompounds.length; c++) {
+						for (int i1 = 0; i1 < results.size(); i1++) {
+							try {
+								new File(outputFolder).mkdirs();
+								CMLWriter writerCML = new CMLWriter(new FileOutputStream(new File(outputFolder + clusteredCompounds[c] + "_" + results.get(i1).getProtonatedAtom() + ".cml")));
+								//thats the molecule containing the all the bond length changes from all protonation sites
+								if(i1 == 0)
+									writerCML.write(results.get(i1).getMolWithProton());
+								//thats the mol containing the individual changes from one protonation site
+								else
+									writerCML.write(results.get(i1).getMolWithProton());
+								writerCML.close();
+								
+							} catch (CDKException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							} catch (IOException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+						}
 					}
 				}
+				else
+				{
+					for (int i1 = 0; i1 < results.size(); i1++) {
+						try {
+							new File(outputFolder).mkdirs();
+							CMLWriter writerCML = new CMLWriter(new FileOutputStream(new File(outputFolder + file.getName() + "_" + results.get(i1).getProtonatedAtom() + ".cml")));
+							//thats the molecule containing the all the bond length changes from all protonation sites
+							if(i1 == 0)
+								writerCML.write(results.get(i1).getMolWithProton());
+							//thats the mol containing the individual changes from one protonation site
+							else
+								writerCML.write(results.get(i1).getMolWithProton());
+							writerCML.close();
+							
+						} catch (CDKException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+				}
+				
+				
 			} catch (FileNotFoundException e) {
 				System.out.println(e.getMessage());
 				e.printStackTrace();

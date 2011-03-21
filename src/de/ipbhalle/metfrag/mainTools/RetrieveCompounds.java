@@ -32,7 +32,7 @@ public class RetrieveCompounds {
 		boolean isOnline = true;
 		
 		
-		File f = new File("/home/swolf/MOPAC/ProofOfConcept/");
+		File f = new File("/home/swolf/MOPAC/Hill-Riken-MM48_POSITIVE_PubChem_Formula/");
 		File files[] = f.listFiles();
 		Config config = null;
 		try {
@@ -48,6 +48,12 @@ public class RetrieveCompounds {
 			{
 				WrapperSpectrum spectrum = new WrapperSpectrum(files[i].toString());
 				List<String> candidates = null;
+				
+				String filePath = files[i].getParent();
+				String fileName = files[i].getName().split("\\.")[0];
+				if(new File(filePath + "/" + database + "/" + fileName).isDirectory())
+					continue;
+				
 				if(isOnline)
 				{
 					PubChemWebService pubchem = new PubChemWebService();
@@ -63,8 +69,6 @@ public class RetrieveCompounds {
 						continue;
 						
 					try {
-						String filePath = files[i].getParent();
-						String fileName = files[i].getName().split("\\.")[0];
 						new File(filePath + "/" + database + "/" + fileName).mkdirs();
 						
 						SDFWriter writer = new SDFWriter(new FileWriter(new File(filePath + "/" + database + "/" + fileName + "/" + candString + ".sdf")));

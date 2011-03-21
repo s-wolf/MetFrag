@@ -190,37 +190,38 @@ public class FragmentSingleCompoundPreCalculated {
 	
 	public static void main(String[] args) {
 		//example values
-		String file = "/home/swolf/MOPAC/ProofOfConcept/pubchem/CID_3365_spectrum/mopac/3365.sdf_Combined.cml";
+		String file = "/home/swolf/MOPAC/ProofOfConcept/pubchem/CID_3365_spectrum/mopac_600/3365.sdf_Combined.cml";
 		Double minMass = 50.0;
 		Boolean render = true;
 		Boolean writeToFile = false;
 		
 		//get command line arguments
-		if(args != null && args.length == 5)
-		{
-//			file = args[0];
-			minMass = Double.parseDouble(args[1]);
-			if(args[2].equals("1"))
-				render = true;
-			writeToFile = true;
-		}
-		else if(args != null && args.length == 4)
-		{
-//			smiles = args[0];
-			minMass = Double.parseDouble(args[1]);
-			if(args[2].equals("1"))
-				render = true;
-		}
-		else
-		{
-			System.err.println("Please enter CL values!\n1. value: Smiles to fragment\n2. value: Minimum mass\n3. value: Render fragments? (1 --> true, 0 --> false)\n4. value: Tree depth\nExample: C1C(OC2=CC(=CC(=C2C1=O)O)O)C3=CC=C(C=C3)O 42.1 1 2\n");
-			System.exit(1);
-		}
+//		if(args != null && args.length == 5)
+//		{
+////			file = args[0];
+//			minMass = Double.parseDouble(args[1]);
+//			if(args[2].equals("1"))
+//				render = true;
+//			writeToFile = true;
+//		}
+//		else if(args != null && args.length == 4)
+//		{
+////			smiles = args[0];
+//			minMass = Double.parseDouble(args[1]);
+//			if(args[2].equals("1"))
+//				render = true;
+//		}
+//		else
+//		{
+//			System.err.println("Please enter CL values!\n1. value: Smiles to fragment\n2. value: Minimum mass\n3. value: Render fragments? (1 --> true, 0 --> false)\n4. value: Tree depth\nExample: C1C(OC2=CC(=CC(=C2C1=O)O)O)C3=CC=C(C=C3)O 42.1 1 2\n");
+//			System.exit(1);
+//		}
 		
 		FragmentSingleCompoundPreCalculated test = new FragmentSingleCompoundPreCalculated();
 		//those are the default values...no need to set them like this
 		test.setSumFormulaRedundancyCheck(true);
-		test.setTreeDepth(Integer.parseInt(args[3]));
+//		test.setTreeDepth(Integer.parseInt(args[3]));
+		test.setTreeDepth(2);
 		
 		try {
 			IAtomContainer mol = CMLTools.read(new File(file));

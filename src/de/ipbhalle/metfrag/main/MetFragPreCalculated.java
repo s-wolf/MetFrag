@@ -421,7 +421,7 @@ public class MetFragPreCalculated {
 		
 		ret += pubChemIdentifier + "\n";
 		ret += exactMass.toString() + "\n\n";
-		ret += "candidate\tbondEnergy\thydrogenPenalty\tBondLengthChange\tNormBondLengthChange\tNeutralLossRules\n";
+		ret += "Candidate\t#Peaks\tBondEnergy\tHydrogenPenalty\tBondLengthChange\tNormBondLengthChange\tNeutralLossRules\n";
 		
 		return ret;
 	}
@@ -460,9 +460,9 @@ public class MetFragPreCalculated {
 				hydrogenPenalty += entry.getHydrogenPenalty();
 				bondLengthChange += MoleculeTools.getCombinedEnergy(entry.getChargesDiffString());
 				bondLengthChangeNorm += MoleculeTools.getCombinedEnergy(entry.getChargesDiffString()) / candToMaxBondLEngthChange.get(candidate);
-				neutralLossRules += entry.getNeutralLossRules() + "  ";
+				neutralLossRules += entry.getNeutralLossRules() + " ";
 			}
-			parameterOptimizationMatrix.append(candidate + "\t" + bondEnergy + "\t" + hydrogenPenalty + "\t" + bondLengthChange + "\t" + bondLengthChangeNorm + "\t" + neutralLossRules + "\n");
+			parameterOptimizationMatrix.append(candidate + "\t" + candidateToOptimizationMatrixEntries.get(candidate).size() + "\t" + bondEnergy + "\t" + hydrogenPenalty + "\t" + bondLengthChange + "\t" + bondLengthChangeNorm + "\t" + neutralLossRules + "\n");
 		}
 		
 		return parameterOptimizationMatrix.toString();
