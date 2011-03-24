@@ -25,6 +25,7 @@ import org.openscience.cdk.ringsearch.AllRingsFinder;
 import org.openscience.cdk.tools.CDKHydrogenAdder;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 import org.openscience.cdk.tools.manipulator.ChemFileManipulator;
+import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 
 import de.ipbhalle.metfrag.bondPrediction.BondPrediction;
 import de.ipbhalle.metfrag.bondPrediction.ChargeResult;
@@ -69,6 +70,8 @@ public class PreprocessMolecules {
 		        CDKHydrogenAdder hAdder = CDKHydrogenAdder.getInstance(molecule.getBuilder());
 		        hAdder.addImplicitHydrogens(molecule);
 		        AtomContainerManipulator.convertImplicitToExplicitHydrogens(molecule);
+		        
+		        outputFolder += MolecularFormulaManipulator.getString(MolecularFormulaManipulator.getMolecularFormula(molecule)) + "/";
 		        
 		        //mark all the bonds and atoms with numbers --> identify them later on        
 		        molecule = MoleculeTools.moleculeNumbering(molecule);
