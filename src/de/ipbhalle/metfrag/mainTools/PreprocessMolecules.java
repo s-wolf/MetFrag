@@ -73,6 +73,11 @@ public class PreprocessMolecules {
 		        
 		        outputFolder += MolecularFormulaManipulator.getString(MolecularFormulaManipulator.getMolecularFormula(molecule)) + "/";
 		        
+		        //Skip already calculated files!
+		        if(new File(outputFolder + file.getName().split("\\.")[0] + "_Combined.cml").exists())
+		        	System.exit(0);
+		        
+		        
 		        //mark all the bonds and atoms with numbers --> identify them later on        
 		        molecule = MoleculeTools.moleculeNumbering(molecule);
 		        
@@ -104,7 +109,7 @@ public class PreprocessMolecules {
 			    bp.debug(false);
 			    System.out.println("MOPAC runtime: " + mopacRuntime + " FFSteps: " + ffSteps);
 			    //use babel version 2.3.0
-				bp.calculateBondsToBreak("/vol/local/bin/", molecule, ffSteps, "AM1", mopacRuntime);
+				bp.calculateBondsToBreak("/vol/local/bin/", molecule, ffSteps, "AM1", mopacRuntime, true);
 				
 				List<ChargeResult> results = bp.getResults();
 				
