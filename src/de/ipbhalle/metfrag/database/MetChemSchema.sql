@@ -35,6 +35,8 @@ CREATE TABLE LIBRARY
 (
 	LIBRARY_ID SERIAL NOT NULL,
 	LIBRARY_NAME VARCHAR,
+	LIBRARY_LINK VARCHAR,
+	LAST_UPDATED DATE,
 	PRIMARY KEY (LIBRARY_ID)
 ) WITHOUT OIDS;
 
@@ -93,8 +95,14 @@ COMMENT ON COLUMN COMPOUND.INCHI_KEY_3 IS 'The last part of the InChI key.';
 
 
 /* Insert standard database which are imported */
-insert into library(library_name) values ('kegg');
-insert into library(library_name) values ('pubchem');
+insert into library(library_name, library_link) values ('kegg', 'http://www.genome.jp/dbget-bin/www_bget?cpd:%s');
+insert into library(library_name, library_link) values ('pubchem', 'http://pubchem.ncbi.nlm.nih.gov/summary/summary.cgi?cid=%s');
+insert into library(library_name, library_link) values ('chebi', 'http://www.ebi.ac.uk/chebi/searchId.do?chebiId=%s');
+
+
+
+
+
 
 
 
