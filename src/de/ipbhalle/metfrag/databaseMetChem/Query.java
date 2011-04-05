@@ -1,4 +1,4 @@
-package databaseMetChem;
+package de.ipbhalle.metfrag.databaseMetChem;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -178,28 +178,6 @@ public class Query {
         con.close();
         
         return ret;
-	}
-	
-	
-	public static void main(String[] args) {
-
-		try {
-			Config c = new Config("outside");
-			Query test = new Query(c.getUsernamePostgres(),c.getPasswordPostgres(),c.getJdbcPostgres());
-			System.out.println(test.queryByFormula("C15H12O5", "pubchem").size());
-//			System.out.println(test.queryByMass(272.02, 272.03, "pubchem").size());
-			System.out.println(test.getCompound(12337526));
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (CDKException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
 	}
 
 }
