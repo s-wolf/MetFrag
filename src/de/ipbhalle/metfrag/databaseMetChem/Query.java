@@ -1,4 +1,4 @@
-package databaseMetChem;
+package de.ipbhalle.metfrag.databaseMetChem;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

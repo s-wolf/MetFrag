@@ -8,7 +8,7 @@ import java.util.List;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.interfaces.IAtomContainer;
 
-import databaseMetChem.Query;
+import de.ipbhalle.metfrag.databaseMetChem.Query;
 import de.ipbhalle.metfrag.tools.PPMTool;
 
 public class CandidatesMetChem {	
