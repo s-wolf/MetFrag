@@ -98,7 +98,7 @@ public class MetFragPreCalculated {
 
 		for (int c = 0; c < candidates.size(); c++) {
 			
-			threadExecutor.execute(new FragmenterThread(candidates.get(c).getMol(), candidates.get(c).getFileName(), database, new PubChemWebService(), spectrum, config.getMzabs(), config.getMzppm(), 
+			threadExecutor.execute(new FragmenterThread(candidates.get(c).getMolStructure(), candidates.get(c).getFileName(), database, new PubChemWebService(), spectrum, config.getMzabs(), config.getMzppm(), 
 					config.isSumFormulaRedundancyCheck(), config.isBreakAromaticRings(), config.getTreeDepth(), false, config.isHydrogenTest(), config.isNeutralLossAdd(), 
 					config.isBondEnergyScoring(), config.isOnlyBreakSelectedBonds(), config, true, config.getMaximumNeutralLossCombination(), true));		
 		}
@@ -131,7 +131,7 @@ public class MetFragPreCalculated {
 	{
 		String candidate = "";
 		if(config.isPubChem())
-			candidate = Integer.toString(spectrum.getCID()) + ".sdf_Combined.cml";
+			candidate = Integer.toString(spectrum.getCID()) + "_Combined.cml";
 		else if(config.isKEGG())
 			candidate = spectrum.getKEGG();
 		return candidate;

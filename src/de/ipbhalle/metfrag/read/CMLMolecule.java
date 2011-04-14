@@ -21,23 +21,34 @@
 
 package de.ipbhalle.metfrag.read;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.openscience.cdk.ChemFile;
+import org.openscience.cdk.ChemObject;
+import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.interfaces.IAtomContainer;
+import org.openscience.cdk.io.CMLReader;
+import org.openscience.cdk.tools.manipulator.ChemFileManipulator;
 
 public class CMLMolecule {
 	
-	private IAtomContainer mol;
 	private String fileName;
+	private File molFile;
 	
 	/**
 	 * Instantiates a new VML molecule.
 	 *
-	 * @param mol the mol
+	 * @param molFile the mol file
 	 * @param fileName the file name
 	 */
-	public CMLMolecule(IAtomContainer mol, String fileName)
+	public CMLMolecule(File molFile, String fileName)
 	{
 		setFileName(fileName);
-		setMol(mol);
+		setMolFile(molFile);
 	}
 
 	/**
@@ -62,18 +73,24 @@ public class CMLMolecule {
 	 * Gets the mol.
 	 *
 	 * @return the mol
+	 * @throws FileNotFoundException 
+	 * @throws CDKException 
 	 */
-	public IAtomContainer getMol() {
-		return mol;
+	public IAtomContainer getMolStructure() throws FileNotFoundException, CDKException {
+		CMLReader reader = new CMLReader(new FileInputStream(this.molFile));
+        ChemFile chemFile = (ChemFile)reader.read((ChemObject)new ChemFile());
+        List<IAtomContainer> containersList;
+		List<CMLMolecule> ret = new ArrayList<CMLMolecule>();
+        containersList = ChemFileManipulator.getAllAtomContainers(chemFile);
+        return containersList.get(0);
 	}
 
-	/**
-	 * Sets the mol.
-	 *
-	 * @param mol the new mol
-	 */
-	public void setMol(IAtomContainer mol) {
-		this.mol = mol;
+	public void setMolFile(File molFile) {
+		this.molFile = molFile;
+	}
+
+	public File getMolFile() {
+		return molFile;
 	}
 
 }

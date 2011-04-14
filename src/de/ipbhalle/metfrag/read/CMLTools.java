@@ -61,10 +61,7 @@ public class CMLTools {
 		    String extension = files[i].getName().substring(dotPos);
 			if(files[i].isFile() && extension.equals(".cml") && files[i].getName().contains("Combined"))
 			{
-				reader = new CMLReader(new FileInputStream(files[i]));
-		        ChemFile chemFile = (ChemFile)reader.read((ChemObject)new ChemFile());
-		        containersList = ChemFileManipulator.getAllAtomContainers(chemFile);
-		        ret.add(new CMLMolecule(containersList.get(0), files[i].getName())); //one container per file
+		        ret.add(new CMLMolecule(files[i], files[i].getName())); //one container per file
 			}
 		}
         return ret;  
