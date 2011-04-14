@@ -44,6 +44,7 @@ public class MassbankParser{
 		String line, name = "", instrument = "", precursorType = "";
 		String nameTrivial = "";
 		int linkPubChem = 0;
+		String linkCHEBI = "";
 		String linkKEGG = "none";
 		String[] array;
 		String IUPAC = "";
@@ -117,6 +118,8 @@ public class MassbankParser{
 			  			linkPubChem = Integer.parseInt(line.substring(line.indexOf("CH$LINK: PUBCHEM CID:")+21).split("\\ ")[0]);
 			  		else if(line.contains("KEGG"))
 			  			linkKEGG = line.substring(line.indexOf("CH$LINK: KEGG")+14);
+			  		else if(line.contains("CHEBI"))
+			  			linkCHEBI = "CHEBI:" + line.substring(line.indexOf("CH$LINK: CHEBI")+15);
 			  		
 			  		line = reader.readLine();
 	  			}
@@ -193,7 +196,7 @@ public class MassbankParser{
 				peaks.add(new Peak(Double.parseDouble(array[2]), Double.parseDouble(array[3]), Double.parseDouble(array[4]), collisionEnergy));
 				line = reader.readLine();
 			}
-			spectra.add(new Spectrum(collisionEnergy, peaks, mass, mode, IUPAC, linkPubChem, linkKEGG, nameTrivial, formula, precursorType, isPositive));
+			spectra.add(new Spectrum(collisionEnergy, peaks, mass, mode, IUPAC, linkPubChem, linkKEGG, linkCHEBI, nameTrivial, formula, precursorType, isPositive));
 			
 				
 			}
