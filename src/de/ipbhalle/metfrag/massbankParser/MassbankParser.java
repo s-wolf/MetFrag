@@ -48,7 +48,7 @@ public class MassbankParser{
 		String linkKEGG = "none";
 		String[] array;
 		String IUPAC = "";
-		int mode = 0, collisionEnergy;
+		int mode = 0, collisionEnergy = 0;
 		double mass = 0.0, focusedMass = 0.0;
 		Vector<Peak> peaks;
 		Vector<Spectrum> spectra = new Vector<Spectrum>();
@@ -115,7 +115,17 @@ public class MassbankParser{
 			  	while (line != null && line.contains("CH$LINK:") && !line.startsWith("AC"))
 	  			{
 			  		if(line.contains("PUBCHEM"))
-			  			linkPubChem = Integer.parseInt(line.substring(line.indexOf("CH$LINK: PUBCHEM CID:")+21).split("\\ ")[0]);
+			  		{
+			  			try
+			  			{
+			  				linkPubChem = Integer.parseInt(line.substring(line.indexOf("CH$LINK: PUBCHEM CID:")+21).split("\\ ")[0]);
+			  			}
+			  			catch(NumberFormatException e)
+			  			{
+			  				linkPubChem = Integer.parseInt(line.substring(line.indexOf("CID:")+4).trim());
+			  			}
+			  			
+			  		}
 			  		else if(line.contains("KEGG"))
 			  			linkKEGG = line.substring(line.indexOf("CH$LINK: KEGG")+14);
 			  		else if(line.contains("CHEBI"))
@@ -132,51 +142,51 @@ public class MassbankParser{
 			  	//Experimental condition
 			  	//Equipment
 				instrument = line.substring(line.indexOf("AC$INSTRUMENT")+15);
-			  	while (line != null){
+			  	while (line != null && !line.startsWith("PK")){
 			  		if(line.contains("AC$ANALYTICAL_CONDITION: PRECURSOR_TYPE") || line.contains("AC$ANALYTICAL_CONDITION: MODE"))
-			  			break;
+			  		{
+			  			// PRECURSOR_TYPE: POSITIVE (1) or NEGATIVE (-1)
+						if (line.contains("AC$ANALYTICAL_CONDITION: PRECURSOR_TYPE") && line.substring(line.indexOf("AC$ANALYTICAL_CONDITION: PRECURSOR_TYPE")+40).contains("[M+H]+"))
+						{
+							mode = 1;
+							isPositive = true;
+						}
+						else
+						{
+							mode = -1;
+							isPositive = false;
+						}
+						//RIKEN Spektren
+						if (line.contains("AC$ANALYTICAL_CONDITION: MODE") && line.substring(line.indexOf("AC$ANALYTICAL_CONDITION: MODE")+30).contains("POSITIVE"))
+						{
+							mode = 1;
+							isPositive = true;
+						}
+						else
+						{
+							mode = -1;
+							isPositive = false;
+						}
+			  		}
 			  		
+			  		//skipped PRECURSER SELECTION, FRAGMENTATION_EQUIPMENT, SPECTRUM_TYPE.....
+				  	if(line.contains("AC$ANALYTICAL_CONDITION: COLLISION_ENERGY"))
+				  	{
+				  		try
+						{
+							collisionEnergy = Integer.parseInt(line.substring(line.indexOf("AC$ANALYTICAL_CONDITION: COLLISION_ENERGY")+42, line.length()-3));
+						}
+						catch(NumberFormatException e)
+						{
+							//error in source file
+							collisionEnergy = 0;
+						}
+				  	}
+					
 			  		line = reader.readLine();
-			  	}	
-		  		// PRECURSOR_TYPE: POSITIVE (1) or NEGATIVE (-1)
-				if (line.contains("AC$ANALYTICAL_CONDITION: PRECURSOR_TYPE") && line.substring(line.indexOf("AC$ANALYTICAL_CONDITION: PRECURSOR_TYPE")+40).contains("[M+H]+"))
-				{
-					mode = 1;
-					isPositive = true;
-				}
-				else
-				{
-					mode = -1;
-					isPositive = false;
-				}
-				//RIKEN Spektren
-				if (line.contains("AC$ANALYTICAL_CONDITION: MODE") && line.substring(line.indexOf("AC$ANALYTICAL_CONDITION: MODE")+30).contains("POSITIVE"))
-				{
-					mode = 1;
-					isPositive = true;
-				}
-				else
-				{
-					mode = -1;
-					isPositive = false;
-				}
+			  	}		
 			}
-		  	
-	  		//skipped PRECURSER SELECTION, FRAGMENTATION_EQUIPMENT, SPECTRUM_TYPE.....
-		  	while (line != null && !line.contains("AC$ANALYTICAL_CONDITION: COLLISION_ENERGY")){
-		  	  line = reader.readLine();
-		  	}
-			try
-			{
-				collisionEnergy = Integer.parseInt(line.substring(line.indexOf("AC$ANALYTICAL_CONDITION: COLLISION_ENERGY")+42, line.length()-3));
-			}
-			catch(NumberFormatException e)
-			{
-				//error in source file
-				collisionEnergy = 0;
-			}
-			
-			
+		  				
 			while (!line.contains("PK$PEAK") && line != null && !line.contains("MS$FOCUSED_ION: PRECURSOR_TYPE")){
 			  	  line = reader.readLine();
 			}
@@ -209,7 +219,9 @@ public class MassbankParser{
 	}
 	
 	public static void main(String[] args) {
-		Vector<Spectrum> spectra = Read("/home/swolf/MassBankData/MetFragSunGrid/HillPaperDataMerged/4_Aminoantipyrine_104_Aminoantipyrine_204_Aminoantipyrine_304_Aminoantipyrine_404_Aminoantipyrine_50.txt");
-		
+		Vector<Spectrum> spectra = Read("/home/swolf/Downloads/PR020154.txt");
+		System.out.println(spectra.get(0).getCHEBI());
+		System.out.println(spectra.get(0).getKEGG());
+		System.out.println(spectra.get(0).getCID());
 	}
 }
