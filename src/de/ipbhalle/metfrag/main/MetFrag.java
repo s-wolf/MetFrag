@@ -48,6 +48,7 @@ import org.openscience.cdk.tools.CDKHydrogenAdder;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 
+import de.ipbhalle.metfrag.databaseMetChem.CandidateMetChem;
 import de.ipbhalle.metfrag.fragmenter.Candidates;
 import de.ipbhalle.metfrag.fragmenter.CandidatesMetChem;
 import de.ipbhalle.metfrag.fragmenter.Fragmenter;
@@ -476,7 +477,7 @@ public class MetFrag {
 		
 		PubChemWebService pw = null;
 		results = new FragmenterResult();
-		List<String> candidates = null;
+		List<CandidateMetChem> candidates = null;
 		if(molecularFormula != null && !molecularFormula.equals(""))
 			candidates = CandidatesMetChem.queryFormula(database, molecularFormula, jdbc, username, password);
 		else
@@ -496,8 +497,8 @@ public class MetFrag {
 			
 			if(c > limit)
 				break;
-			
-			threadExecutor.execute(new FragmenterThread(candidates.get(c), database, pw, spectrum, mzabs, mzppm, 
+			//TODO fix the candidate retrieval!!!
+			threadExecutor.execute(new FragmenterThread(candidates.get(c).getAccession(), database, pw, spectrum, mzabs, mzppm, 
 					molecularFormulaRedundancyCheck, breakAromaticRings, treeDepth, false, hydrogenTest, neutralLossInEveryLayer, 
 					bondEnergyScoring, breakOnlySelectedBonds, null, true, jdbc, username, password));		
 		}
@@ -792,7 +793,7 @@ public class MetFrag {
 		String database = config.getDatabase();
 		
 		PubChemWebService pubchem = null;
-		List<String> candidates = Candidates.getLocally(database, spectrum.getExactMass(), config.getSearchPPM(), config.getJdbc(), config.getUsername(), config.getPassword());
+		List<CandidateMetChem> candidates = CandidatesMetChem.queryMass(database, spectrum.getExactMass(), config.getSearchPPM(), config.getJdbcPostgres(), config.getUsernamePostgres(), config.getPasswordPostgres());
 		
 //		this.candidateCount = candidates.size();
 		results.addToCompleteLog("\n*****************************************************\n\n");
@@ -807,10 +808,12 @@ public class MetFrag {
 	    System.out.println("Used Threads: " + threads);
 	    threadExecutor = Executors.newFixedThreadPool(threads);
 
-		for (int c = 0; c < candidates.size(); c++) {				
-			threadExecutor.execute(new FragmenterThread(candidates.get(c), database, pubchem, spectrum, config.getMzabs(), config.getMzppm(), 
+		for (int c = 0; c < candidates.size(); c++) {
+			FragmenterThread thread = new FragmenterThread(candidates.get(c), database, pubchem, spectrum, config.getMzabs(), config.getMzppm(), 
 					config.isSumFormulaRedundancyCheck(), config.isBreakAromaticRings(), config.getTreeDepth(), false, config.isHydrogenTest(), config.isNeutralLossAdd(), 
-					config.isBondEnergyScoring(), config.isOnlyBreakSelectedBonds(), config, true));		
+					config.isBondEnergyScoring(), config.isOnlyBreakSelectedBonds(), config, true);
+			thread.setUseMetChem(true);
+			threadExecutor.execute(thread);		
 		}
 		
 		threadExecutor.shutdown();
@@ -1021,7 +1024,7 @@ public class MetFrag {
 				
 				for (SimilarityGroup similarityGroup : groupedCandidates) {			
 										
-					List<String> tempSimilar = similarityGroup.getSimilarCompoundsWithBaseAsArray();				
+					List<String> tempSimilar = similarityGroup.getSimilarCompoundsAsArray();				
 					
 					for (int k = 0; k < tempSimilar.size(); k++) {
 
@@ -1211,7 +1214,8 @@ public class MetFrag {
 		MetFrag metFrag = new MetFrag(currentFile, date);
 		try {
 //			String resultsTable = "Spectrum\tCorrectCpdID\tHits\trankWorstCase\trankTanimoto\trankIsomorph\texactMass\tRuntime";
-			metFrag.startScriptable(true, writeSDF);
+//			metFrag.startScriptable(true, writeSDF);
+			metFrag.startScriptableMetChem(true, writeSDF);
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(1);

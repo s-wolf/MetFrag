@@ -40,6 +40,7 @@ import org.openscience.cdk.tools.CDKHydrogenAdder;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 import org.openscience.cdk.tools.manipulator.AtomTypeManipulator;
 
+import de.ipbhalle.metfrag.databaseMetChem.CandidateMetChem;
 import de.ipbhalle.metfrag.fragmenter.Fragmenter;
 import de.ipbhalle.metfrag.main.Config;
 import de.ipbhalle.metfrag.main.MetFrag;
@@ -58,6 +59,7 @@ public class FragmenterThread implements Runnable{
 	private String database = null;
 	private PubChemWebService pw = null;
 	private String candidate = null;
+	private CandidateMetChem candidateMetChem;
 	private double mzabs;
 	private double mzppm;
 	private boolean sumFormulaRedundancyCheck = true;
@@ -73,6 +75,7 @@ public class FragmenterThread implements Runnable{
 	private String jdbc, username, password = "";
 	private boolean SDFDatabase = false;
 	private IAtomContainer mol;
+	private boolean useMetChem = false;
 	
 	/**
 	 * Instantiates a new pubChem search thread. ONLINE
@@ -115,6 +118,32 @@ public class FragmenterThread implements Runnable{
 		this.treeDepth = treeDepth;
 		this.c = c;
 		this.generateFragmentsInMemory = generateFragmentsInMemory;
+	}
+	
+	
+	public FragmenterThread(CandidateMetChem candidate, String database, PubChemWebService pw,
+			WrapperSpectrum spectrum, double mzabs, double mzppm, boolean sumFormulaRedundancyCheck,
+			boolean breakAromaticRings, int treeDepth, boolean showDiagrams, boolean hydrogenTest,
+			boolean neutralLossAdd, boolean bondEnergyScoring, boolean isOnlyBreakSelectedBonds, Config c,
+			boolean generateFragmentsInMemory)
+	{
+		this.candidateMetChem = candidate;
+		this.candidate = candidate.getAccession();
+		this.pw = pw;
+		this.database = database;
+		this.mzabs = mzabs;
+		this.mzppm = mzppm;
+		this.sumFormulaRedundancyCheck = sumFormulaRedundancyCheck;
+		this.breakAromaticRings = breakAromaticRings;
+		this.spectrum = spectrum;
+		this.hydrogenTest = hydrogenTest;
+		this.neutralLossAdd = neutralLossAdd;
+		this.bondEnergyScoring = bondEnergyScoring;
+		this.isOnlyBreakSelectedBonds = isOnlyBreakSelectedBonds;
+		this.treeDepth = treeDepth;
+		this.c = c;
+		this.generateFragmentsInMemory = generateFragmentsInMemory;
+		setUseMetChem(true);
 	}
 	
 	
@@ -216,6 +245,10 @@ public class FragmenterThread implements Runnable{
 			if(isSDFDatabase())
 			{
 				molecule = mol;
+			}
+			else if(useMetChem)
+			{
+				molecule = CandidatesMetChem.getCompound(candidateMetChem.getCompoundID(), c.getJdbcPostgres(), c.getUsernamePostgres(), c.getPasswordPostgres());
 			}
 			//retrieve the candidate from the database
 			else if(pw == null && c == null)
@@ -449,6 +482,26 @@ public class FragmenterThread implements Runnable{
 
 	public boolean isSDFDatabase() {
 		return SDFDatabase;
+	}
+
+
+	public void setUseMetChem(boolean useMetChem) {
+		this.useMetChem = useMetChem;
+	}
+
+
+	public boolean isUseMetChem() {
+		return useMetChem;
+	}
+
+
+	public void setCandidateMetChem(CandidateMetChem candidateMetChem) {
+		this.candidateMetChem = candidateMetChem;
+	}
+
+
+	public CandidateMetChem getCandidateMetChem() {
+		return candidateMetChem;
 	}
 
 }

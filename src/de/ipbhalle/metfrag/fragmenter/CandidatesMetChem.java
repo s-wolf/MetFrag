@@ -8,6 +8,7 @@ import java.util.List;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.interfaces.IAtomContainer;
 
+import de.ipbhalle.metfrag.databaseMetChem.CandidateMetChem;
 import de.ipbhalle.metfrag.databaseMetChem.Query;
 import de.ipbhalle.metfrag.tools.PPMTool;
 
@@ -29,9 +30,9 @@ public class CandidatesMetChem {
 	 * @throws ClassNotFoundException the class not found exception
 	 * @throws RemoteException the remote exception
 	 */
-	public static List<String> queryMass(String database, double exactMass, double searchPPM, String databaseUrl, String username, String password) throws SQLException, ClassNotFoundException, RemoteException
+	public static List<CandidateMetChem> queryMass(String database, double exactMass, double searchPPM, String databaseUrl, String username, String password) throws SQLException, ClassNotFoundException, RemoteException
 	{
-		List<String> candidates = new ArrayList<String>();
+		List<CandidateMetChem> candidates = new ArrayList<CandidateMetChem>();
 		double deviation =PPMTool.getPPMDeviation(exactMass, searchPPM);
 		double lowerBound = (exactMass - deviation);
 		double upperBound = (exactMass + deviation);
@@ -56,9 +57,9 @@ public class CandidatesMetChem {
 	 * @throws ClassNotFoundException the class not found exception
 	 * @throws RemoteException the remote exception
 	 */
-	public static List<String> queryFormula(String database, String formula, String databaseUrl, String username, String password) throws SQLException, ClassNotFoundException, RemoteException
+	public static List<CandidateMetChem> queryFormula(String database, String formula, String databaseUrl, String username, String password) throws SQLException, ClassNotFoundException, RemoteException
 	{
-		List<String> candidates = new ArrayList<String>();
+		List<CandidateMetChem> candidates = new ArrayList<CandidateMetChem>();
 		Query query = new Query(username, password, databaseUrl);
 		candidates = query.queryByFormula(formula, database);		
 		return candidates;

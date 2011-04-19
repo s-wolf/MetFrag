@@ -16,10 +16,14 @@ import java.util.concurrent.TimeUnit;
 
 import org.openscience.cdk.ChemFile;
 import org.openscience.cdk.ChemObject;
+import org.openscience.cdk.DefaultChemObjectBuilder;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.interfaces.IAtomContainer;
+import org.openscience.cdk.io.MDLReader;
 import org.openscience.cdk.io.MDLV2000Reader;
 import org.openscience.cdk.io.MDLV3000Reader;
+import org.openscience.cdk.nonotify.NNMolecule;
+import org.openscience.cdk.smiles.SmilesParser;
 import org.openscience.cdk.tools.manipulator.ChemFileManipulator;
 
 import de.ipbhalle.metfrag.main.Config;
@@ -86,7 +90,7 @@ public class Query {
 	 * @return the list
 	 * @throws SQLException 
 	 */
-	public List<String> queryByMass(double lowerBound, double upperBound, String database)
+	public List<CandidateMetChem> queryByMass(double lowerBound, double upperBound, String database)
 	{
 		if(this.databaseToID.get(database) == null)
 		{
@@ -98,7 +102,7 @@ public class Query {
 			return null;
 		}
 		
-		List<String> candidatesString = new ArrayList<String>(); 
+		List<CandidateMetChem> candidatesString = new ArrayList<CandidateMetChem>(); 
 		try
 		{
 			con = DriverManager.getConnection(url, username, password);
@@ -107,7 +111,7 @@ public class Query {
 			//SELECT c.compound_id from compound c inner join substance s on s.compound_id = c.compound_id 
 			//where exact_mass >= 272.071 and exact_mass <= 272.079 and s.library_id = 2;
 			
-		    PreparedStatement pstmt = con.prepareStatement("SELECT c.compound_id from compound c inner join substance s on s.compound_id = c.compound_id " +
+		    PreparedStatement pstmt = con.prepareStatement("SELECT c.compound_id, accession from compound c inner join substance s on s.compound_id = c.compound_id " +
 		    		"where exact_mass between ? and ? and s.library_id = ?;");
 
 		    pstmt.setDouble(1, lowerBound);
@@ -118,7 +122,7 @@ public class Query {
 		    ResultSet res = pstmt.executeQuery();
 	       
 	        while(res.next()){
-	        	candidatesString.add(Integer.toString(res.getInt(1)));
+	        	candidatesString.add(new CandidateMetChem(res.getInt(1), res.getString(2)));
 	        }
 		}
 		catch(SQLException e)
@@ -149,7 +153,7 @@ public class Query {
 	 * @return the list
 	 * @throws SQLException the sQL exception
 	 */
-	public List<String> queryByFormula(String formula, String database) throws SQLException
+	public List<CandidateMetChem> queryByFormula(String formula, String database) throws SQLException
 	{
 		if(this.databaseToID.get(database) == null)
 		{
@@ -161,19 +165,19 @@ public class Query {
 			return null;
 		}
 		
-		List<String> candidatesString = new ArrayList<String>(); 
+		List<CandidateMetChem> candidatesString = new ArrayList<CandidateMetChem>(); 
 		
 		try
 		{
 			con = DriverManager.getConnection(url, username, password);
-			PreparedStatement pstmt = con.prepareStatement("SELECT c.compound_id from compound c inner join substance s on s.compound_id = c.compound_id " +
+			PreparedStatement pstmt = con.prepareStatement("SELECT c.compound_id, accession from compound c inner join substance s on s.compound_id = c.compound_id " +
 			"where formula = ? and s.library_id = ?;");
 		    pstmt.setString(1, formula);
 		    pstmt.setInt(2, this.databaseToID.get(database));
 		    System.out.println(pstmt.toString());
 	        ResultSet res = pstmt.executeQuery();
 	        while(res.next()){
-	        	candidatesString.add(Integer.toString(res.getInt(1)));
+	        	candidatesString.add(new CandidateMetChem(res.getInt(1), res.getString(2)));
 	        }
 	        pstmt.close();
 		}
@@ -214,16 +218,12 @@ public class Query {
         ResultSet res = pstmt.executeQuery();
         while(res.next()){
         	String molString = res.getString(1);
-        	MDLV2000Reader reader = new MDLV2000Reader(new ByteArrayInputStream(molString.getBytes()));
-        	ChemFile chemFile = (ChemFile)reader.read((ChemObject)new ChemFile());
-	        List<IAtomContainer> containersList = ChemFileManipulator.getAllAtomContainers(chemFile);
-	        for (IAtomContainer container: containersList) {
-	        	ret = container;
-			}
+        	MDLV3000Reader reader = new MDLV3000Reader(new ByteArrayInputStream(molString.getBytes()));
+        	ret = (IAtomContainer)reader.read(new NNMolecule());
         }
         pstmt.close();
         con.close();
-        
+		
         return ret;
 	}
 	
