@@ -499,7 +499,7 @@ public class MetFrag {
 			
 			threadExecutor.execute(new FragmenterThread(candidates.get(c), database, pw, spectrum, mzabs, mzppm, 
 					molecularFormulaRedundancyCheck, breakAromaticRings, treeDepth, false, hydrogenTest, neutralLossInEveryLayer, 
-					bondEnergyScoring, breakOnlySelectedBonds, null, true, jdbc, username, password, maxNeutralLossCombination));		
+					bondEnergyScoring, breakOnlySelectedBonds, null, true, jdbc, username, password));		
 		}
 		
 		threadExecutor.shutdown();
@@ -521,7 +521,7 @@ public class MetFrag {
 
 		//now collect the result
 		Map<String, IAtomContainer> candidateToStructure = results.getMapCandidateToStructure();
-		Map<String, Vector<MatchedFragment>> candidateToFragments = results.getMapCandidateToFragments();
+		Map<String, Vector<PeakMolPair>> candidateToFragments = results.getMapCandidateToFragments();
 
 		List<MetFragResult> results = new ArrayList<MetFragResult>();
 		for (int i = scores.length -1; i >=0 ; i--) {
@@ -722,7 +722,7 @@ public class MetFrag {
 		String database = config.getDatabase();
 		
 		PubChemWebService pubchem = null;
-		List<String> candidates = Candidates.queryLocally(database, spectrum.getExactMass(), config.getSearchPPM(), config.getJdbc(), config.getUsername(), config.getPassword());
+		List<String> candidates = Candidates.getLocally(database, spectrum.getExactMass(), config.getSearchPPM(), config.getJdbc(), config.getUsername(), config.getPassword());
 		
 //		this.candidateCount = candidates.size();
 		results.addToCompleteLog("\n*****************************************************\n\n");
@@ -740,7 +740,7 @@ public class MetFrag {
 		for (int c = 0; c < candidates.size(); c++) {				
 			threadExecutor.execute(new FragmenterThread(candidates.get(c), database, pubchem, spectrum, config.getMzabs(), config.getMzppm(), 
 					config.isSumFormulaRedundancyCheck(), config.isBreakAromaticRings(), config.getTreeDepth(), false, config.isHydrogenTest(), config.isNeutralLossAdd(), 
-					config.isBondEnergyScoring(), config.isOnlyBreakSelectedBonds(), config, true, config.getMaximumNeutralLossCombination()));		
+					config.isBondEnergyScoring(), config.isOnlyBreakSelectedBonds(), config, true));		
 		}
 		
 		threadExecutor.shutdown();
