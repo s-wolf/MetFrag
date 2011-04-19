@@ -19,6 +19,7 @@ import org.openscience.cdk.io.SDFWriter;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 
 import de.ipbhalle.metfrag.spectrum.WrapperSpectrum;
+import de.ipbhalle.metfrag.tools.Constants;
 
 
 /**
@@ -59,18 +60,24 @@ public class BatchFileProcessingLocal {
 			System.exit(1);
 		}
 		
-
+		Config config = null;
+		try {
+			config = new Config("outside");
+		} catch (IOException e1) {
+			System.err.println("Config not found! Please set: e.g.: -Dproperty.file.path=/vol/local/lib/MetFrag/MetFragPaper/");
+			e1.printStackTrace();
+		}
+		
 	    String strLine;
-	    String pubchemID = "";
 	    String peaks = "";
 	    Double exactMass = 0.0;
 	    String sample = "";
 	    Integer mode = 1;
-	    boolean isPositive = false;
-	    String jdbc = "jdbc:mysql://rdbms/MetFrag";
-	    String username = "swolf";
-	    String password = "populusromanus";
+	    String jdbc =  config.getJdbcPostgres();
+	    String username = config.getUsernamePostgres();
+	    String password = config.getPasswordPostgres();
 	    Integer searchPPM = 10;
+	    boolean isPositive = false;
 	    
 	    try
 	    {
@@ -87,13 +94,18 @@ public class BatchFileProcessingLocal {
 		    	if(strLine.startsWith("# Sample:"))
 		    		sample = strLine.substring(10).replace('/', '_').trim();
 		    	
-		    	//pubchem id
-		    	if(strLine.startsWith("# PubChem ID:"))
-		    		pubchemID = strLine.substring(14);
 		    	
 		    	//parent mass
 		    	if(strLine.startsWith("# Parent Mass:"))
 		    		exactMass = Double.parseDouble(strLine.substring(15));
+		    	
+		    	//mode
+		    	if(strLine.startsWith("# Mode:"))
+		    		mode = Integer.parseInt(strLine.substring(8));
+		    	
+		    	//peaks
+		    	if(!strLine.startsWith("#"))
+		    		peaks += strLine + "\n";
 		    	
 		    	//charge
 		    	if(strLine.startsWith("# Charge:"))
@@ -107,23 +119,13 @@ public class BatchFileProcessingLocal {
 		    	{
 		    		searchPPM = Integer.parseInt(strLine.substring(14));
 		    	}
-		    	
-		    	//mode
-		    	if(strLine.startsWith("# Mode:"))
-		    	{
-		    		mode = Integer.parseInt(strLine.substring(8));
-		    	}
-		    	
-		    	//peaks
-		    	if(!strLine.startsWith("#"))
-		    		peaks += strLine + "\n";
 		    }
 		    
 		    //now calculate the correct mass
-		    exactMass = exactMass - ((double)mode * 1.0072765);
+		    exactMass = exactMass - ((double)mode * Constants.PROTON_MASS);
 		    
 		    //Fragment the structures!
-		    List<MetFragResult> results = MetFrag.startConvenienceMetFusion(database, "", "", exactMass, new WrapperSpectrum(peaks, mode, exactMass, isPositive), false, mzabs, mzppm, searchPPM, true, true, treeDepth, true, false, true, false, Integer.MAX_VALUE, jdbc, username, password);
+		    List<MetFragResult> results = MetFrag.startConvenienceLocal(database, "", "", exactMass, new WrapperSpectrum(peaks, mode, exactMass, isPositive), false, mzabs, mzppm, searchPPM, true, true, treeDepth, true, false, true, false, Integer.MAX_VALUE, jdbc, username, password, 3);
 		    MoleculeSet setOfMolecules = new MoleculeSet();
 			for (MetFragResult result : results) {
 				//get corresponding structure

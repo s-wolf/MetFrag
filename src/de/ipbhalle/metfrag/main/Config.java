@@ -34,6 +34,9 @@ public class Config {
 	private String jdbc = "";
     private String username = "";
     private String password = "";
+    private String jdbcPostgres = "";
+    private String usernamePostgres = "";
+    private String passwordPostgres = "";
     private String file = "";
     private String folder = "";
     private int treeDepth = 0;
@@ -42,22 +45,23 @@ public class Config {
     private boolean showDiagrams = false;
     private boolean folderRead = false;
     private boolean hierarchical = false;
-    private boolean KEGG = false;
     private boolean recreateFrags = false;
     private boolean createTree = false;
     private boolean breakAromaticRings = false;
     private boolean sumFormulaRedundancyCheck = false;
     private String comment = "";
+    private String database = "";
     private Properties properties = null;
     private double mzabs = 0.0;
     private double mzppm = 0.0;
-    private boolean pubChem = false;
     private int searchPPM = 10;
     private boolean hydrogenTest = false;
     private int threads = 1;
     private boolean neutralLossAdd = false;
     private boolean bondEnergyScoring = false;
     private boolean isOnlyBreakSelectedBonds = false;
+    private int maximumNeutralLossCombination = 3;
+    private String chemspiderToken = "";
 	
 	/**
 	 * Instantiates a new config.
@@ -133,6 +137,14 @@ public class Config {
 		//Password 
 		setPassword(properties.getProperty("password"));
 		
+		
+		//JDBC URL --> Postgres connection
+		setJdbcPostgres(properties.getProperty("jdbcPostgres"));
+		//Username
+		setUsernamePostgres(properties.getProperty("usernamePostgres"));
+		//Password 
+		setPasswordPostgres(properties.getProperty("passwordPostgres"));
+		
 		//Set folder and file to fragment...a new folder is created with the name of the file (in the folder given)
 		setFile(properties.getProperty("file"));
 		
@@ -164,9 +176,6 @@ public class Config {
 		if(properties.getProperty("folderRead") != null && properties.getProperty("folderRead").equals("true"))
 			setFolderRead(true);
 		
-		setKEGG(false); //if true run a full test with kegg, else run massbank proof of concept
-		if(properties.getProperty("KEGG") != null && properties.getProperty("KEGG").equals("true"))
-			setKEGG(true);
 		
 		setRecreateFrags(false);
 		if(properties.getProperty("recreateFrags") != null && properties.getProperty("recreateFrags").equals("true"))
@@ -184,9 +193,6 @@ public class Config {
 		if(properties.getProperty("sumFormulaRedundancyCheck") != null && properties.getProperty("sumFormulaRedundancyCheck").equals("true"))
 			setSumFormulaRedundancyCheck(true);
 		
-		setPubChem(false);
-		if(properties.getProperty("PubChem") != null && properties.getProperty("PubChem").equals("true"))
-			setPubChem(true);
 		
 		setHydrogenTest(false);
 		if(properties.getProperty("hydrogenTest") != null && properties.getProperty("hydrogenTest").equals("true"))
@@ -196,6 +202,7 @@ public class Config {
 		setKeggPath(properties.getProperty("keggPath"));
 		setComment(properties.getProperty("comment"));
 		setThreads(Integer.parseInt(properties.getProperty("threads")));
+		setDatabase(properties.getProperty("database"));
 		
 		if(properties.getProperty("neutralLossAdd") != null && properties.getProperty("neutralLossAdd").equals("true"))
 			setNeutralLossAdd(true);
@@ -205,6 +212,10 @@ public class Config {
 		
 		if(properties.getProperty("breakOnlySelectedBonds") != null && properties.getProperty("breakOnlySelectedBonds").equals("true"))
 			setOnlyBreakSelectedBonds(isOnlyBreakSelectedBonds);
+		
+		setChemspiderToken(properties.getProperty("chemspiderToken"));
+		
+		setMaximumNeutralLossCombination(Integer.parseInt(properties.getProperty("maximumNeutralLossCombination")));
 	}
 
 	/**
@@ -405,23 +416,6 @@ public class Config {
 		return hierarchical;
 	}
 
-	/**
-	 * Sets the kEGG.
-	 * 
-	 * @param kEGG the new kEGG
-	 */
-	public void setKEGG(boolean kEGG) {
-		KEGG = kEGG;
-	}
-
-	/**
-	 * Checks if is kEGG.
-	 * 
-	 * @return true, if is kEGG
-	 */
-	public boolean isKEGG() {
-		return KEGG;
-	}
 
 	/**
 	 * Sets the recreate frags.
@@ -539,14 +533,6 @@ public class Config {
 		return comment;
 	}
 
-	public void setPubChem(boolean pubChem) {
-		this.pubChem = pubChem;
-	}
-
-	public boolean isPubChem() {
-		return pubChem;
-	}
-
 	public void setSearchPPM(int searchPPM) {
 		this.searchPPM = searchPPM;
 	}
@@ -593,6 +579,60 @@ public class Config {
 
 	public boolean isOnlyBreakSelectedBonds() {
 		return isOnlyBreakSelectedBonds;
+	}
+
+	public void setPasswordPostgres(String passwordPostgres) {
+		this.passwordPostgres = passwordPostgres;
+	}
+
+	public String getPasswordPostgres() {
+		return passwordPostgres;
+	}
+
+	public void setUsernamePostgres(String usernamePostgres) {
+		this.usernamePostgres = usernamePostgres;
+	}
+
+	public String getUsernamePostgres() {
+		return usernamePostgres;
+	}
+
+	public void setJdbcPostgres(String jdbcPostgres) {
+		this.jdbcPostgres = jdbcPostgres;
+	}
+
+	public String getJdbcPostgres() {
+		return jdbcPostgres;
+	}
+
+	public void setMaximumNeutralLossCombination(
+			int maximumNeutralLossCombination) {
+		this.maximumNeutralLossCombination = maximumNeutralLossCombination;
+	}
+
+	public int getMaximumNeutralLossCombination() {
+		return maximumNeutralLossCombination;
+	}
+
+	public void setChemspiderToken(String chemspiderToken) {
+		this.chemspiderToken = chemspiderToken;
+	}
+
+	/**
+	 * Gets the chemspider token used for the webservice interface
+	 *
+	 * @return the chemspider token
+	 */
+	public String getChemspiderToken() {
+		return chemspiderToken;
+	}
+
+	public void setDatabase(String database) {
+		this.database = database;
+	}
+
+	public String getDatabase() {
+		return database;
 	}
 
 }

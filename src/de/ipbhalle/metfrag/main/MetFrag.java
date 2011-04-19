@@ -49,6 +49,7 @@ import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 
 import de.ipbhalle.metfrag.fragmenter.Candidates;
+import de.ipbhalle.metfrag.fragmenter.CandidatesMetChem;
 import de.ipbhalle.metfrag.fragmenter.Fragmenter;
 import de.ipbhalle.metfrag.fragmenter.FragmenterResult;
 import de.ipbhalle.metfrag.fragmenter.FragmenterThread;
@@ -442,6 +443,104 @@ public class MetFrag {
 	
 	
 	/**
+	 * MetFrag. Start the fragmenter thread. Afterwards score the results. A Postgres JDBC url is needed!
+	 *
+	 * @param database the database
+	 * @param databaseID the database id
+	 * @param molecularFormula the molecular formula
+	 * @param exactMass the exact mass
+	 * @param spectrum the spectrum
+	 * @param useProxy the use proxy
+	 * @param mzabs the mzabs
+	 * @param mzppm the mzppm
+	 * @param searchPPM the search ppm
+	 * @param molecularFormulaRedundancyCheck the molecular formula redundancy check
+	 * @param breakAromaticRings the break aromatic rings
+	 * @param treeDepth the tree depth
+	 * @param hydrogenTest the hydrogen test
+	 * @param neutralLossInEveryLayer the neutral loss in every layer
+	 * @param bondEnergyScoring the bond energy scoring
+	 * @param breakOnlySelectedBonds the break only selected bonds
+	 * @param limit the limit
+	 * @param jdbc the jdbc
+	 * @param username the username
+	 * @param password the password
+	 * @param maxNeutralLossCombination the max neutral loss combination
+	 * @return the string
+	 * @throws Exception the exception
+	 */
+	public static List<MetFragResult> startConvenienceLocal(String database, String databaseID, String molecularFormula, Double exactMass, WrapperSpectrum spectrum, boolean useProxy, 
+			double mzabs, double mzppm, double searchPPM, boolean molecularFormulaRedundancyCheck, boolean breakAromaticRings, int treeDepth,
+			boolean hydrogenTest, boolean neutralLossInEveryLayer, boolean bondEnergyScoring, boolean breakOnlySelectedBonds, int limit, String jdbc, String username, String password, int maxNeutralLossCombination) throws Exception
+	{
+		
+		PubChemWebService pw = null;
+		results = new FragmenterResult();
+		List<String> candidates = null;
+		if(molecularFormula != null && !molecularFormula.equals(""))
+			candidates = CandidatesMetChem.queryFormula(database, molecularFormula, jdbc, username, password);
+		else
+			candidates = CandidatesMetChem.queryMass(database, exactMass, searchPPM, jdbc, username, password);
+
+		System.out.println("Hits in database: " + candidates.size());
+		
+		//now fill executor!!!
+		//number of threads depending on the available processors
+	    int threads = Runtime.getRuntime().availableProcessors();
+	    //thread executor
+	    ExecutorService threadExecutor = null;
+	    System.out.println("Used Threads: " + threads);
+	    threadExecutor = Executors.newFixedThreadPool(threads);
+			
+		for (int c = 0; c < candidates.size(); c++) {
+			
+			if(c > limit)
+				break;
+			
+			threadExecutor.execute(new FragmenterThread(candidates.get(c), database, pw, spectrum, mzabs, mzppm, 
+					molecularFormulaRedundancyCheck, breakAromaticRings, treeDepth, false, hydrogenTest, neutralLossInEveryLayer, 
+					bondEnergyScoring, breakOnlySelectedBonds, null, true, jdbc, username, password, maxNeutralLossCombination));		
+		}
+		
+		threadExecutor.shutdown();
+		
+		//wait until all threads are finished
+		while(!threadExecutor.isTerminated())
+		{
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}//sleep for 1000 ms
+		}
+
+		Map<Double, Vector<String>> scoresNormalized = Scoring.getCombinedScore(results.getRealScoreMap(), results.getMapCandidateToEnergy(), results.getMapCandidateToHydrogenPenalty());
+		Double[] scores = new Double[scoresNormalized.size()];
+		scores = scoresNormalized.keySet().toArray(scores);
+		Arrays.sort(scores);
+
+		//now collect the result
+		Map<String, IAtomContainer> candidateToStructure = results.getMapCandidateToStructure();
+		Map<String, Vector<MatchedFragment>> candidateToFragments = results.getMapCandidateToFragments();
+
+		List<MetFragResult> results = new ArrayList<MetFragResult>();
+		for (int i = scores.length -1; i >=0 ; i--) {
+			Vector<String> list = scoresNormalized.get(scores[i]);
+			for (String string : list) {
+				//get corresponding structure
+				IAtomContainer tmp = candidateToStructure.get(string);
+				tmp = AtomContainerManipulator.removeHydrogens(tmp);
+				
+				results.add(new MetFragResult(string, tmp, scores[i], candidateToFragments.get(string).size()));
+			}
+		}		
+		
+		return results;
+	}
+	
+	
+	
+	/**
 	 * MetFrag. Start the fragmenter thread. Afterwards score the results.
 	 * 
 	 * @param database the database
@@ -536,6 +635,7 @@ public class MetFrag {
 	}
 	
 	
+	
 	/**
 	 * MetFrag. Start the fragmenter thread. Afterwards score the results. This method is used in the
 	 * webinterface to generate all the fragments for one structure.
@@ -619,18 +719,84 @@ public class MetFrag {
 		Config config = new Config("outside");
 		WrapperSpectrum spectrum = new WrapperSpectrum(config.getFolder() + file);
 		
-		String database = "";
-		if(config.isKEGG())
-			database = "kegg";
-		else if(config.isPubChem())
-			database = "pubchem";
+		String database = config.getDatabase();
+		
+		PubChemWebService pubchem = null;
+		List<String> candidates = Candidates.queryLocally(database, spectrum.getExactMass(), config.getSearchPPM(), config.getJdbc(), config.getUsername(), config.getPassword());
+		
+//		this.candidateCount = candidates.size();
+		results.addToCompleteLog("\n*****************************************************\n\n");
+		results.addToCompleteLog("\nFile: " + file + " ====> " + getCorrectCandidateID(spectrum, database));
+		
+		
+		//now fill executor!!!
+		//number of threads depending on the available processors
+	    int threads = Runtime.getRuntime().availableProcessors();
+	    //thread executor
+	    ExecutorService threadExecutor = null;
+	    System.out.println("Used Threads: " + threads);
+	    threadExecutor = Executors.newFixedThreadPool(threads);
+
+		for (int c = 0; c < candidates.size(); c++) {				
+			threadExecutor.execute(new FragmenterThread(candidates.get(c), database, pubchem, spectrum, config.getMzabs(), config.getMzppm(), 
+					config.isSumFormulaRedundancyCheck(), config.isBreakAromaticRings(), config.getTreeDepth(), false, config.isHydrogenTest(), config.isNeutralLossAdd(), 
+					config.isBondEnergyScoring(), config.isOnlyBreakSelectedBonds(), config, true, config.getMaximumNeutralLossCombination()));		
+		}
+		
+		threadExecutor.shutdown();
+		
+		//wait until all threads are finished
+		int count = 0;
+		while(!threadExecutor.isTerminated())
+		{
+			try {
+				Thread.sleep(5000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}//sleep for 1000 ms
+			if(count == 1000)
+				System.err.println("ThreadExecutor is not terminated!");
+			else
+				Thread.sleep(5000);
+			
+			count++;
+		}
+		
+
+		evaluateResults(getCorrectCandidateID(spectrum, database), spectrum, true, config.getFolder(), writeSDF);		
+	}
+	
+	
+	/**
+	 * MetFrag. Start the fragmenter thread. Afterwards score the results.
+	 * This method is mainly used to evaluate MetFrag against the test data set.
+	 * 
+	 * @param database the database
+	 * @param searchPPM the search ppm
+	 * @param databaseID the database id
+	 * @param molecularFormula the molecular formula
+	 * @param exactMass the exact mass
+	 * @param spectrum the spectrum
+	 * 
+	 * @return the string
+	 * 
+	 * @throws Exception the exception
+	 */
+	public void startScriptableMetChem(boolean useProxy, boolean writeSDF) throws Exception
+	{
+		results = new FragmenterResult();
+		//get configuration
+		Config config = new Config("outside");
+		WrapperSpectrum spectrum = new WrapperSpectrum(config.getFolder() + file);
+		
+		String database = config.getDatabase();
 		
 		PubChemWebService pubchem = null;
 		List<String> candidates = Candidates.getLocally(database, spectrum.getExactMass(), config.getSearchPPM(), config.getJdbc(), config.getUsername(), config.getPassword());
 		
 //		this.candidateCount = candidates.size();
 		results.addToCompleteLog("\n*****************************************************\n\n");
-		results.addToCompleteLog("\nFile: " + file + " ====> " + getCorrectCandidateID(spectrum, config));
+		results.addToCompleteLog("\nFile: " + file + " ====> " + getCorrectCandidateID(spectrum, database));
 		
 		
 		//now fill executor!!!
@@ -667,17 +833,19 @@ public class MetFrag {
 		}
 		
 
-		evaluateResults(getCorrectCandidateID(spectrum, config), spectrum, true, config.getFolder(), writeSDF);		
+		evaluateResults(getCorrectCandidateID(spectrum, database), spectrum, true, config.getFolder(), writeSDF);		
 	}
 	
 	
-	private String getCorrectCandidateID(WrapperSpectrum spectrum, Config config)
+	private String getCorrectCandidateID(WrapperSpectrum spectrum, String database)
 	{
 		String candidate = "";
-		if(config.isPubChem())
+		if(database.equals("pubchem"))
 			candidate = Integer.toString(spectrum.getCID());
-		else if(config.isKEGG())
+		else if(database.equals("kegg"))
 			candidate = spectrum.getKEGG();
+		else if(database.equals("chebi"))
+			candidate = spectrum.getChebi();
 		return candidate;
 	}
 	
