@@ -129,7 +129,7 @@ public class MassbankParser{
 			  		else if(line.contains("KEGG"))
 			  			linkKEGG = line.substring(line.indexOf("CH$LINK: KEGG")+14);
 			  		else if(line.contains("CHEBI"))
-			  			linkCHEBI = "CHEBI:" + line.substring(line.indexOf("CH$LINK: CHEBI")+15);
+			  			linkCHEBI = "CHEBI:" + line.substring(line.indexOf("CH$LINK: CHEBI")+15).split("\\s")[0];
 			  		
 			  		line = reader.readLine();
 	  			}
@@ -219,7 +219,7 @@ public class MassbankParser{
 	}
 	
 	public static void main(String[] args) {
-		Vector<Spectrum> spectra = Read("/home/swolf/Downloads/PR020154.txt");
+		Vector<Spectrum> spectra = Read("/vol/massbank/data/PR100304PR100305.txt");
 		System.out.println(spectra.get(0).getCHEBI());
 		System.out.println(spectra.get(0).getKEGG());
 		System.out.println(spectra.get(0).getCID());
