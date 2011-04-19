@@ -36,11 +36,13 @@ public class Spectrum  implements java.io.Serializable, Comparable<Spectrum> {
 	private String InchI;
 	private int CID;
 	private String KEGG;
+	private String CHEBI;
 	private String nameTrivial;
 	private String formula;
 	private boolean isPositive;
+	private String precursorType;
 	
-	public Spectrum(int collisionEnergy, double tic, Vector<Peak> peaks, double exactMass, int mode, String InchI, int CID, String KEGG, String nameTrivial, String formula, boolean isPositive){
+	public Spectrum(int collisionEnergy, double tic, Vector<Peak> peaks, double exactMass, int mode, String InchI, int CID, String KEGG, String CHEBI, String nameTrivial, String formula, String precursorType, boolean isPositive){
 		this.collisionEnergy = collisionEnergy;
 		this.tic = tic;
 		this.peaks = peaks;
@@ -50,12 +52,14 @@ public class Spectrum  implements java.io.Serializable, Comparable<Spectrum> {
 		this.CID = CID;
 		this.KEGG = KEGG;
 		this.nameTrivial = nameTrivial;
+		this.precursorType = precursorType;
 		this.setFormula(formula);
 		this.isPositive = isPositive;
+		this.CHEBI = CHEBI;
 	}
 	
-	public Spectrum(int collisionEnergy, Vector<Peak> peaks, double exactMass, int mode, String InchI, int CID, String KEGG, String nameTrivial, String formula, boolean isPositive){
-		this(collisionEnergy, 0.0, peaks, exactMass, mode, InchI, CID, KEGG, nameTrivial, formula, isPositive);
+	public Spectrum(int collisionEnergy, Vector<Peak> peaks, double exactMass, int mode, String InchI, int CID, String KEGG, String linkCHEBI, String nameTrivial, String formula, String precursorType, boolean isPositive){
+		this(collisionEnergy, 0.0, peaks, exactMass, mode, InchI, CID, KEGG, linkCHEBI, nameTrivial, formula, precursorType, isPositive);
 	}	
 	
 	public int getCollisionEnergy(){
@@ -164,6 +168,14 @@ public class Spectrum  implements java.io.Serializable, Comparable<Spectrum> {
 		return formula;
 	}
 
+	public void setPrecursorType(String precursorType) {
+		this.precursorType = precursorType;
+	}
+
+	public String getPrecursorType() {
+		return precursorType;
+	}
+
 	public void setPositive(boolean isPositive) {
 		this.isPositive = isPositive;
 	}
@@ -175,5 +187,13 @@ public class Spectrum  implements java.io.Serializable, Comparable<Spectrum> {
 	 */
 	public boolean isPositive() {
 		return isPositive;
+	}
+
+	public void setCHEBI(String cHEBI) {
+		CHEBI = cHEBI;
+	}
+
+	public String getCHEBI() {
+		return CHEBI;
 	}
 }

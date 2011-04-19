@@ -41,9 +41,10 @@ public class MassbankParser{
 		BufferedReader reader;
 		ObjectOutputStream oostream;
 		String formula = "";
-		String line, name = "", instrument = "";
+		String line, name = "", instrument = "", precursorType = "";
 		String nameTrivial = "";
 		int linkPubChem = 0;
+		String linkCHEBI = "";
 		String linkKEGG = "none";
 		String[] array;
 		String IUPAC = "";
@@ -84,6 +85,9 @@ public class MassbankParser{
 			  	else
 			  	{
 			  		nameTrivial = name;
+			  		while (line != null && !line.contains("CH$FORMULA")){
+			  			line = reader.readLine();
+					}
 			  	}
 			  	
 				formula = line.substring(line.indexOf("CH$FORMULA")+12);
@@ -114,6 +118,8 @@ public class MassbankParser{
 			  			linkPubChem = Integer.parseInt(line.substring(line.indexOf("CH$LINK: PUBCHEM CID:")+21).split("\\ ")[0]);
 			  		else if(line.contains("KEGG"))
 			  			linkKEGG = line.substring(line.indexOf("CH$LINK: KEGG")+14);
+			  		else if(line.contains("CHEBI"))
+			  			linkCHEBI = "CHEBI:" + line.substring(line.indexOf("CH$LINK: CHEBI")+15);
 			  		
 			  		line = reader.readLine();
 	  			}
@@ -156,7 +162,7 @@ public class MassbankParser{
 				}
 			}
 		  	
-		  		//skipped PRECURSER SELECTION, FRAGMENTATION_EQUIPMENT, SPECTRUM_TYPE.....
+	  		//skipped PRECURSER SELECTION, FRAGMENTATION_EQUIPMENT, SPECTRUM_TYPE.....
 		  	while (line != null && !line.contains("AC$ANALYTICAL_CONDITION: COLLISION_ENERGY")){
 		  	  line = reader.readLine();
 		  	}
@@ -169,21 +175,28 @@ public class MassbankParser{
 				//error in source file
 				collisionEnergy = 0;
 			}
-		  	
-		  	
+			
+			
+			while (!line.contains("PK$PEAK") && line != null && !line.contains("MS$FOCUSED_ION: PRECURSOR_TYPE")){
+			  	  line = reader.readLine();
+			}
+			if(!line.contains("PK$PEAK"))
+				precursorType = line.substring(31);
+	  	
+	  	
 			while (line != null && !line.contains("PK$PEAK")){
 		  	  line = reader.readLine();
 		  	}
+			line = reader.readLine();
+			peaks = new Vector<Peak>();
+			while (line != null && !line.contains("//")){
+				array = line.split(" ");
+				// array[2] is mass, array[3] abs. intensity, array[4] rel. intensity.
+				// spectra.size shows how many spectra had a lower energy than the spectrum this peak belongs to.
+				peaks.add(new Peak(Double.parseDouble(array[2]), Double.parseDouble(array[3]), Double.parseDouble(array[4]), collisionEnergy));
 				line = reader.readLine();
-				peaks = new Vector<Peak>();
-				while (line != null && !line.contains("//")){
-					array = line.split(" ");
-					// array[2] is mass, array[3] abs. intensity, array[4] rel. intensity.
-					// spectra.size shows how many spectra had a lower energy than the spectrum this peak belongs to.
-					peaks.add(new Peak(Double.parseDouble(array[2]), Double.parseDouble(array[3]), Double.parseDouble(array[4]), collisionEnergy));
-					line = reader.readLine();
-				}
-				spectra.add(new Spectrum(collisionEnergy, peaks, mass, mode, IUPAC, linkPubChem, linkKEGG, nameTrivial, formula, isPositive));
+			}
+			spectra.add(new Spectrum(collisionEnergy, peaks, mass, mode, IUPAC, linkPubChem, linkKEGG, linkCHEBI, nameTrivial, formula, precursorType, isPositive));
 			
 				
 			}
