@@ -56,6 +56,7 @@ public class FragmenterThread implements Runnable{
 	private PubChemWebService pw = null;
 	private String candidate = null;
 	private CandidateMetChem candidateMetChem;
+	private boolean useMetChem = false;
 	private double mzabs;
 	private double mzppm;
 	private boolean sumFormulaRedundancyCheck = true;
@@ -100,6 +101,53 @@ public class FragmenterThread implements Runnable{
 			boolean generateFragmentsInMemory, int neutralLossCombination)
 	{
 		this.candidate = candidate;
+		this.pw = pw;
+		this.database = database;
+		this.mzabs = mzabs;
+		this.mzppm = mzppm;
+		this.sumFormulaRedundancyCheck = sumFormulaRedundancyCheck;
+		this.breakAromaticRings = breakAromaticRings;
+		this.spectrum = spectrum;
+		this.hydrogenTest = hydrogenTest;
+		this.neutralLossAdd = neutralLossAdd;
+		this.bondEnergyScoring = bondEnergyScoring;
+		this.isOnlyBreakSelectedBonds = isOnlyBreakSelectedBonds;
+		this.treeDepth = treeDepth;
+		this.c = c;
+		this.generateFragmentsInMemory = generateFragmentsInMemory;
+		this.neutralLossCombination = neutralLossCombination;
+	}
+	
+	
+	/**
+	 * Instantiates a new pubChem search thread. ONLINE
+	 * 
+	 * @param candidate the candidate
+	 * @param mzabs the mzabs
+	 * @param mzppm the mzppm
+	 * @param sumFormulaRedundancyCheck the sum formula redundancy check
+	 * @param breakAromaticRings the break aromatic rings
+	 * @param treeDepth the tree depth
+	 * @param showDiagrams the show diagrams
+	 * @param spectrum the spectrum
+	 * @param hydrogenTest the hydrogen test
+	 * @param database the database
+	 * @param pw the pw
+	 * @param neutralLossAdd the neutral loss add
+	 * @param bondEnergyScoring the bond energy scoring
+	 * @param isOnlyBreakSelectedBonds the is only break selected bonds
+	 * @param c the c
+	 * @param generateFragmentsInMemory the generate fragments in memory
+	 */
+	public FragmenterThread(CandidateMetChem candidateMetChem, String database, PubChemWebService pw,
+			WrapperSpectrum spectrum, double mzabs, double mzppm, boolean sumFormulaRedundancyCheck,
+			boolean breakAromaticRings, int treeDepth, boolean showDiagrams, boolean hydrogenTest,
+			boolean neutralLossAdd, boolean bondEnergyScoring, boolean isOnlyBreakSelectedBonds, Config c,
+			boolean generateFragmentsInMemory, int neutralLossCombination)
+	{
+		this.candidateMetChem = candidateMetChem;
+		this.candidate = candidateMetChem.getAccession();
+		useMetChem = true;
 		this.pw = pw;
 		this.database = database;
 		this.mzabs = mzabs;
@@ -198,9 +246,12 @@ public class FragmenterThread implements Runnable{
 		
 		try
 		{	    
-			
+			if(useMetChem)
+			{
+				molecule = CandidatesMetChem.getCompound(candidateMetChem.getCompoundID(), c.getJdbcPostgres(), c.getUsernamePostgres(), c.getPasswordPostgres());
+			}
 			//retrieve the candidate from the database
-			if(this.candidateStructure != null)
+			else if(this.candidateStructure != null)
 				molecule = this.candidateStructure;
 			else if(pw == null && c == null)
 				molecule = Candidates.getCompoundLocally(this.database, candidate, jdbc, username, password, false, "");
@@ -469,6 +520,26 @@ public class FragmenterThread implements Runnable{
 			else
 				MetFrag.results.addToCompleteLog("Out of memory! "+ e.getMessage() + "File: " + candidate);
 		}
+	}
+
+
+	public void setCandidateMetChem(CandidateMetChem candidateMetChem) {
+		this.candidateMetChem = candidateMetChem;
+	}
+
+
+	public CandidateMetChem getCandidateMetChem() {
+		return candidateMetChem;
+	}
+
+
+	public void setUseMetChem(boolean useMetChem) {
+		this.useMetChem = useMetChem;
+	}
+
+
+	public boolean isUseMetChem() {
+		return useMetChem;
 	}
 
 }
