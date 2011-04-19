@@ -35,6 +35,7 @@ import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.tools.CDKHydrogenAdder;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 
+import de.ipbhalle.metfrag.databaseMetChem.CandidateMetChem;
 import de.ipbhalle.metfrag.fragmenter.Fragmenter;
 import de.ipbhalle.metfrag.main.Config;
 import de.ipbhalle.metfrag.main.MetFrag;
@@ -54,6 +55,7 @@ public class FragmenterThread implements Runnable{
 	private String database = null;
 	private PubChemWebService pw = null;
 	private String candidate = null;
+	private CandidateMetChem candidateMetChem;
 	private double mzabs;
 	private double mzppm;
 	private boolean sumFormulaRedundancyCheck = true;
