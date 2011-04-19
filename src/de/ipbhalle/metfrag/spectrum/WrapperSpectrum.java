@@ -48,6 +48,7 @@ public class WrapperSpectrum {
 	private String InchI;
 	private int CID;
 	private String KEGG;
+	private String chebi;
 	private String nameTrivial;
 	private String filename;
 	private String formula;
@@ -70,6 +71,7 @@ public class WrapperSpectrum {
 		this.CID = spectra.get(0).getCID();
 		this.KEGG = spectra.get(0).getKEGG();
 		this.nameTrivial = spectra.get(0).getTrivialName();
+		this.chebi = spectra.get(0).getCHEBI();
 		this.setPrecursorType(spectra.get(0).getPrecursorType());
 		String[] fileTemp = filename.split("\\/");
 		this.filename = fileTemp[fileTemp.length - 1];
@@ -89,7 +91,7 @@ public class WrapperSpectrum {
 	public WrapperSpectrum(String peakString, int mode, double exactMass, boolean isPositive){
 		this.spectra = new Vector<Spectrum>();
 		this.collisionEnergy = -1;
-		spectra.add(new Spectrum(-1, parsePeaks(peakString), exactMass, mode, "none", -1, "none", "none","", "", isPositive));
+		spectra.add(new Spectrum(-1, parsePeaks(peakString), exactMass, mode, "none", -1, "none", "none", "none", "", "", isPositive));
 		
 		this.peaks = spectra.get(0).getPeaks(); //just one spectra for now
 		this.exactMass = spectra.get(0).getExactMass();
@@ -97,6 +99,7 @@ public class WrapperSpectrum {
 		this.InchI = spectra.get(0).getInchi();
 		this.CID = spectra.get(0).getCID();
 		this.KEGG = spectra.get(0).getKEGG();
+		this.chebi = spectra.get(0).getCHEBI();
 		this.nameTrivial = spectra.get(0).getTrivialName();
 		this.setFormula(spectra.get(0).getFormula());
 		this.setPositive(isPositive);
@@ -381,6 +384,16 @@ public class WrapperSpectrum {
 
 	public boolean isPositive() {
 		return isPositive;
+	}
+
+
+	public void setChebi(String chebi) {
+		this.chebi = chebi;
+	}
+
+
+	public String getChebi() {
+		return chebi;
 	}
 	
 }

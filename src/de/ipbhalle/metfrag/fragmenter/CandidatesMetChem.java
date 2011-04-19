@@ -56,7 +56,7 @@ public class CandidatesMetChem {
 	 * @throws ClassNotFoundException the class not found exception
 	 * @throws RemoteException the remote exception
 	 */
-	public static List<String> queryMass(String database, String formula, String databaseUrl, String username, String password) throws SQLException, ClassNotFoundException, RemoteException
+	public static List<String> queryFormula(String database, String formula, String databaseUrl, String username, String password) throws SQLException, ClassNotFoundException, RemoteException
 	{
 		List<String> candidates = new ArrayList<String>();
 		Query query = new Query(username, password, databaseUrl);

@@ -60,16 +60,22 @@ public class BatchFileProcessingLocal {
 			System.exit(1);
 		}
 		
-
+		Config config = null;
+		try {
+			config = new Config("outside");
+		} catch (IOException e1) {
+			System.err.println("Config not found! Please set: e.g.: -Dproperty.file.path=/vol/local/lib/MetFrag/MetFragPaper/");
+			e1.printStackTrace();
+		}
+		
 	    String strLine;
-	    String pubchemID = "";
 	    String peaks = "";
 	    Double exactMass = 0.0;
 	    String sample = "";
 	    Integer mode = 1;
-	    String jdbc = "jdbc:mysql://rdbms/MetFrag";
-	    String username = "swolf";
-	    String password = "populusromanus";
+	    String jdbc =  config.getJdbcPostgres();
+	    String username = config.getUsernamePostgres();
+	    String password = config.getPasswordPostgres();
 	    Integer searchPPM = 10;
 	    boolean isPositive = false;
 	    
@@ -88,9 +94,6 @@ public class BatchFileProcessingLocal {
 		    	if(strLine.startsWith("# Sample:"))
 		    		sample = strLine.substring(10).replace('/', '_').trim();
 		    	
-		    	//pubchem id
-		    	if(strLine.startsWith("# PubChem ID:"))
-		    		pubchemID = strLine.substring(14);
 		    	
 		    	//parent mass
 		    	if(strLine.startsWith("# Parent Mass:"))
@@ -122,7 +125,7 @@ public class BatchFileProcessingLocal {
 		    exactMass = exactMass - ((double)mode * Constants.PROTON_MASS);
 		    
 		    //Fragment the structures!
-		    List<MetFragResult> results = MetFrag.startConvenienceMetFusion(database, "", "", exactMass, new WrapperSpectrum(peaks, mode, exactMass, isPositive), false, mzabs, mzppm, searchPPM, true, true, treeDepth, true, false, true, false, Integer.MAX_VALUE, jdbc, username, password, 3);
+		    List<MetFragResult> results = MetFrag.startConvenienceLocal(database, "", "", exactMass, new WrapperSpectrum(peaks, mode, exactMass, isPositive), false, mzabs, mzppm, searchPPM, true, true, treeDepth, true, false, true, false, Integer.MAX_VALUE, jdbc, username, password, 3);
 		    MoleculeSet setOfMolecules = new MoleculeSet();
 			for (MetFragResult result : results) {
 				//get corresponding structure

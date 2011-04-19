@@ -61,7 +61,6 @@ public class BatchFileProcessingOnline {
 		
 
 	    String strLine;
-	    String pubchemID = "";
 	    String peaks = "";
 	    Double exactMass = 0.0;
 	    String sample = "";
@@ -85,10 +84,6 @@ public class BatchFileProcessingOnline {
 		    	//sample
 		    	if(strLine.startsWith("# Sample:"))
 		    		sample = strLine.substring(10).replace('/', '_').trim();
-		    	
-		    	//pubchem id
-		    	if(strLine.startsWith("# PubChem ID:"))
-		    		pubchemID = strLine.substring(14);
 		    	
 		    	//parent mass
 		    	if(strLine.startsWith("# Parent Mass:"))

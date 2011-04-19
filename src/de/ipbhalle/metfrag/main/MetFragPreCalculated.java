@@ -79,13 +79,13 @@ public class MetFragPreCalculated {
 		Config config = new Config();
 		WrapperSpectrum spectrum = new WrapperSpectrum(config.getFolder() + file);
 		
-		String database = "";
+		String database = config.getDatabase();
 		List<CMLMolecule> candidates = CMLTools.readFolder(folderToMopac);
 		
 		
 //		this.candidateCount = candidates.size();
 		results.addToCompleteLog("\n*****************************************************\n\n");
-		results.addToCompleteLog("\nFile: " + file + " ====> " + getCorrectCandidateID(spectrum, config));
+		results.addToCompleteLog("\nFile: " + file + " ====> " + getCorrectCandidateID(spectrum, database));
 		
 		
 		//now fill executor!!!
@@ -123,17 +123,19 @@ public class MetFragPreCalculated {
 		}
 		
 
-		evaluateResults(getCorrectCandidateID(spectrum, config), spectrum, true, config.getFolder(), writeSDF);		
+		evaluateResults(getCorrectCandidateID(spectrum, database), spectrum, true, config.getFolder(), writeSDF);		
 	}
 	
 	
-	private String getCorrectCandidateID(WrapperSpectrum spectrum, Config config)
+	private String getCorrectCandidateID(WrapperSpectrum spectrum, String database)
 	{
 		String candidate = "";
-		if(config.isPubChem())
-			candidate = Integer.toString(spectrum.getCID()) + "_Combined.cml";
-		else if(config.isKEGG())
+		if(database.equals("pubchem"))
+			candidate = Integer.toString(spectrum.getCID());
+		else if(database.equals("kegg"))
 			candidate = spectrum.getKEGG();
+		else if(database.equals("chebi"))
+			candidate = spectrum.getChebi();
 		return candidate;
 	}
 	
