@@ -310,11 +310,6 @@ public class AssignFragmentPeak {
 				}			
 				
 				
-				if(this.html)
-	        		molecularFormulaString = MolecularFormulaManipulator.getHTML(molecularFormula) + modeString;
-	        	else
-	        		molecularFormulaString = MolecularFormulaManipulator.getString(molecularFormula) + modeString;
-				
 				if(countNL == neutralLossRulesToApply.length)
 				{
 					Double maxBondLengthChangeNL = 0.0;
@@ -377,6 +372,10 @@ public class AssignFragmentPeak {
 			            	maxBondLengthChangeNL = bondLengthChangeNL;
 		        	}
 		        	
+					if(this.html)
+		        		molecularFormulaString = MolecularFormulaManipulator.getHTML(molecularFormula) + modeString;
+		        	else
+		        		molecularFormulaString = MolecularFormulaManipulator.getString(molecularFormula) + modeString;
 
 					matchedFragments.add(new MatchedFragment(peak, fragmentMass, (matchedMass + (this.hydrogenPenalty * Constants.HYDROGEN_MASS)), fragmentStructure, neutralLossRulesToApply , hydrogenPenalty, maxBondLengthChangeNL, molecularFormulaString, matchedAtomsSMARTS));
 				}

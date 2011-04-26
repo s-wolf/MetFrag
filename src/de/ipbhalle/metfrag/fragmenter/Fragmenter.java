@@ -41,6 +41,7 @@ import java.util.Vector;
 
 
 import org.openscience.cdk.Atom;
+import org.openscience.cdk.Element;
 import org.openscience.cdk.Molecule;
 import org.openscience.cdk.SingleElectron;
 import org.openscience.cdk.aromaticity.AromaticityCalculator;
@@ -65,6 +66,7 @@ import org.openscience.cdk.io.CMLWriter;
 import org.openscience.cdk.io.SDFWriter;
 import org.openscience.cdk.isomorphism.IsomorphismTester;
 import org.openscience.cdk.isomorphism.UniversalIsomorphismTester;
+import org.openscience.cdk.nonotify.NNAtom;
 import org.openscience.cdk.nonotify.NoNotificationChemObjectBuilder;
 import org.openscience.cdk.qsar.DescriptorValue;
 import org.openscience.cdk.qsar.descriptors.molecular.ALOGPDescriptor;
@@ -126,6 +128,7 @@ public class Fragmenter {
     private boolean isOnlyBreakSelectedBonds = false;
     private BondPrediction bondPrediction = null;
     private boolean partialChargesPreferred = true;
+    private boolean optimizeStructure = false;
     
     private Map<String, Object> moleculeDescriptors;
       
@@ -405,13 +408,24 @@ public class Fragmenter {
     		}
     		bondPrediction.setBondLength(bondToBondLength);
     	}
-    	else
+    	else if(this.optimizeStructure)
     	{
     		//now find all bonds which are worth splitting
     		bondPrediction = new BondPrediction(this.aromaticBonds);
     		this.bondsToBreak = bondPrediction.calculateBondsToBreak("/vol/local/bin/", this.originalMolecule, 600, "AM1", 600, true);
     	}
+    	else
+    	{
+    		setFakeBondLengths(this.originalMolecule);
+    	}
     } 
+    
+    private void setFakeBondLengths(IAtomContainer ac)
+    {
+    	for (IBond bond : ac.bonds()) {
+    		bond.setProperty("bondLengthChange", "0.0");		
+		}
+    }
     
     
     /**
@@ -828,8 +842,10 @@ public class Fragmenter {
                         //now set property from both bonds
                         temp = setBondEnergy(temp, currentBondEnergyRing, currentBondEnergy);
                         //set the partial charge diff 
-                        temp = setCharge(temp, bondPrediction.getBondLength(bondInRing.getID()), bondPrediction.getBondLength(bond.getID()));
-                        
+                        if(optimizeStructure)
+                        	temp = setCharge(temp, bondPrediction.getBondLength(bondInRing.getID()), bondPrediction.getBondLength(bond.getID()));
+                        else
+                        	temp = setCharge(temp, 0.0);
                         
                         if(radicalGeneration)
                         {
@@ -896,7 +912,10 @@ public class Fragmenter {
                 
         		//now set property: BondEnergy!
                 temp = setBondEnergy(temp, currentBondEnergy);
-                temp = setCharge(temp, bondPrediction.getBondLength(bond.getID()));
+                if(optimizeStructure)
+                	temp = setCharge(temp, bondPrediction.getBondLength(bond.getID()));
+                else
+                	temp = setCharge(temp, 0.0);
                 
                 if(radicalGeneration)
                 {
@@ -1563,30 +1582,76 @@ public class Fragmenter {
      */
     private IAtomContainer makeAtomContainer(IAtom atom, List<IBond> parts) {
     	
-    	boolean[] atomsDone = new boolean[this.atomsContained];
+    	IAtom[] atomsDone = new NNAtom[this.atomsContained];
     	
     	IChemObjectBuilder builder = NoNotificationChemObjectBuilder.getInstance();
         IAtomContainer partContainer = builder.newInstance(IAtomContainer.class);
-        partContainer.addAtom(atom);
         
+        IsotopeFactory isof = null;
+		try {
+			isof = IsotopeFactory.getInstance(builder);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
         
-        atomsDone[Integer.parseInt(atom.getID())] = true;
+//        partContainer.addAtom(atom);        
+//        atomsDone[Integer.parseInt(atom.getID())] = true;
                   
         for (IBond aBond : parts) {
+        	
+        	IAtom atom1 = null;
+        	IAtom atom2 = null;
+        	boolean first = true;
+        	
             for (IAtom bondedAtom : aBond.atoms()) {
-            	//check if the atom is already contained
-            	if(atomsDone[Integer.parseInt(bondedAtom.getID())])
-            		continue;
             	
-            	partContainer.addAtom(bondedAtom);
-            	atomsDone[Integer.parseInt(bondedAtom.getID())] = true;
+            	
+            	//check if the atom is already contained
+            	if(atomsDone[Integer.parseInt(bondedAtom.getID())] != null)
+            	{
+            		if(first)
+                	{
+                		atom1 = atomsDone[Integer.parseInt(bondedAtom.getID())];
+                		first = false;
+                	}
+                	else
+                	{
+                		atom2 = atomsDone[Integer.parseInt(bondedAtom.getID())];
+                	}
+            		
+            		continue;
+            	}
+            	else
+            	{
+            		partContainer.addAtom(builder.newInstance(IAtom.class, bondedAtom.getSymbol()));
+            		if(first)
+                	{
+                		atom1 = partContainer.getAtom(partContainer.getAtomCount() - 1);
+                		isof.configure(atom1);
+                		first = false;
+                		atomsDone[Integer.parseInt(bondedAtom.getID())] = atom1;
+                		atom1.setID(bondedAtom.getID());
+                	}
+                	else
+                	{
+                		atom2 = partContainer.getAtom(partContainer.getAtomCount() - 1);
+                		isof.configure(atom2);
+                		atomsDone[Integer.parseInt(bondedAtom.getID())] = atom2;
+                		atom2.setID(bondedAtom.getID());
+                	}
+            	}
+
+            	
+//            	copyAtomProperties(bondedAtom, partContainer.getAtom(partContainer.getAtomCount()-1));          	
+         	    
             }
-            partContainer.addBond(aBond);
+            partContainer.addBond(builder.newInstance(IBond.class, atom1, atom2));
+            partContainer.getBond(partContainer.getBondCount() - 1).setProperties(aBond.getProperties());
         }
 
         return partContainer;
     }
-    
     
     /**
      * Resursively traverse the molecule to get all the bonds in a list and return them. Start
@@ -1797,5 +1862,15 @@ public class Fragmenter {
     {
     	return this.originalMolecule;
     }
+
+
+	public void setOptimizeStructure(boolean optimizeStructure) {
+		this.optimizeStructure = optimizeStructure;
+	}
+
+
+	public boolean isOptimizeStructure() {
+		return optimizeStructure;
+	}
 
 }

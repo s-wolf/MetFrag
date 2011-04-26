@@ -48,7 +48,7 @@ public class SMARTSTools {
 	 */
 	public SMARTSTools(IAtomContainer target) throws CDKException
 	{
-		this.querytool = new SMARTSQueryTool("C");	
+		this.querytool = null;	
 		this.target = target;
 	}
 	
@@ -61,7 +61,10 @@ public class SMARTSTools {
 	 */
 	public void matchSMARTS(String SMARTS) throws CDKException
 	{
-		this.querytool.setSmarts(SMARTS);
+		if(querytool == null)
+			querytool = new SMARTSQueryTool(SMARTS);
+		else
+			this.querytool.setSmarts(SMARTS);
 		matched = querytool.matches(target);
 		if(matched)
 			matchedAtoms = querytool.getMatchingAtoms();

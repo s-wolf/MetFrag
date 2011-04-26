@@ -42,6 +42,7 @@ import de.ipbhalle.metfrag.main.MetFrag;
 import de.ipbhalle.metfrag.main.MetFragPreCalculated;
 import de.ipbhalle.metfrag.massbankParser.Peak;
 import de.ipbhalle.metfrag.pubchem.PubChemWebService;
+import de.ipbhalle.metfrag.read.CMLTools;
 import de.ipbhalle.metfrag.read.Molfile;
 import de.ipbhalle.metfrag.scoring.Scoring;
 import de.ipbhalle.metfrag.spectrum.AssignFragmentPeak;
@@ -307,7 +308,7 @@ public class FragmenterThread implements Runnable{
 	        	else
 	        	{
 	        		List<File> fragsFiles = fragmenter.generateFragmentsEfficient(molecule, false, treeDepth, candidate, true);
-	        		generatedFrags = Molfile.ReadfolderTemp(fragsFiles);
+	        		generatedFrags = CMLTools.ReadfolderTemp(fragsFiles);
 	        	}
 	        }
 	        catch(OutOfMemoryError e)
