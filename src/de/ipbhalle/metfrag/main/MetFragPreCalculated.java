@@ -76,7 +76,7 @@ public class MetFragPreCalculated {
 	{
 		results = new FragmenterResult();
 		//get configuration
-		Config config = new Config();
+		Config config = new Config("outside");
 		WrapperSpectrum spectrum = new WrapperSpectrum(config.getFolder() + file);
 		
 		String database = config.getDatabase();
@@ -192,6 +192,10 @@ public class MetFragPreCalculated {
 	 */
 	private void evaluateResults(String correctCandidateID, WrapperSpectrum spectrum, boolean generateOptimizationMatrix, String folder, boolean writeSDF) throws InterruptedException
 	{
+		//TODO: hack for local file
+		correctCandidateID = correctCandidateID + "_Combined.cml";
+		
+		
 		//now collect the result
 		Map<String, IAtomContainer> candidateToStructure = results.getMapCandidateToStructure();
 		Map<String, Double> candidateToEnergy = results.getMapCandidateToEnergy();
@@ -487,7 +491,9 @@ public class MetFragPreCalculated {
 		boolean writeSDF = false;
 		String CMLFiles = "";
 		
-		//test parameters: CID_3365_spectrum.txt 2011-02-02_16-00-00 /home/swolf/MOPAC/ProofOfConcept/pubchem/CID_3365_spectrum/mopac/ 1
+		//test parameters: 
+		//"Naltrexone_10Naltrexone_20Naltrexone_30Naltrexone_40Naltrexone_50.txt" "2011-04-20_13-33-33" "/home/swolf/MOPAC/Hill_PubChem_Formula/pubchemClusteredMopac/mopac_600/C20H23NO4/"
+		//-Dproperty.file.path=/home/swolf/MOPAC/Hill_PubChem_Formula/config/ -Xms1500m -Xmx5500m
 		
 		try
 		{
