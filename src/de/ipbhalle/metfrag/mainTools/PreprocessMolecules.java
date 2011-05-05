@@ -1,9 +1,11 @@
 package de.ipbhalle.metfrag.mainTools;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,7 +35,7 @@ import de.ipbhalle.metfrag.tools.MoleculeTools;
 
 public class PreprocessMolecules {
 	
-	// /home/swolf/MOPAC/ProofOfConcept/pubchem/CID_20097272_spectrum/20097272.sdf /home/swolf/MOPAC/ProofOfConcept/pubchem/CID_20097272_spectrum/mopac/ 600 600
+	// /home/swolf/MOPAC/ProofOfConcept/pubchem/CID_20097272_spectrum/20097272.sdf /home/swolf/MOPAC/ProofOfConcept/pubchem/CID_20097272_spectrum/mopac/ 600 600 
 	// LARGE BUG: /home/swolf/MOPAC/ProofOfConcept/pubchem/CID_3002977_spectrum/3002977.sdf /home/swolf/MOPAC/ProofOfConcept/pubchem/CID_3002977_spectrum/mopac/ 600 600
 	public static void main(String[] args) {
 		
@@ -41,6 +43,8 @@ public class PreprocessMolecules {
 		String outputFolder = "";
 		int mopacRuntime = 0;
 		int ffSteps = 600;
+		
+		String outputMOPACDebug = "";
 		
 		if(args.length < 3)
 		{
@@ -54,6 +58,8 @@ public class PreprocessMolecules {
 			mopacRuntime = Integer.parseInt(args[2]);
 			if(args.length > 3)
 				ffSteps = Integer.parseInt(args[3]);
+			if(args.length > 4)
+				outputMOPACDebug = args[4];
 		}
 		
 		if(file.isFile())
@@ -131,6 +137,17 @@ public class PreprocessMolecules {
 									writerCML.write(results.get(i1).getMolWithProton());
 								writerCML.close();
 								
+								//write the mopac debug messages in one file
+								// Create file 
+								if(!outputMOPACDebug.equals(""))
+								{
+									FileWriter fstream = new FileWriter(new File(outputMOPACDebug + clusteredCompounds[c] + "_MOPAC_Debug.txt"), true);
+								    BufferedWriter out = new BufferedWriter(fstream);
+								    out.write(results.get(i1).getDebugMessages());
+								    //Close the output stream
+								    out.close();
+								}
+								
 							} catch (CDKException e) {
 								// TODO Auto-generated catch block
 								e.printStackTrace();
@@ -154,6 +171,18 @@ public class PreprocessMolecules {
 							else
 								writerCML.write(results.get(i1).getMolWithProton());
 							writerCML.close();
+							
+							//write the mopac debug messages in one file
+							// Create file 
+							if(!outputMOPACDebug.equals(""))
+							{
+								FileWriter fstream = new FileWriter(new File(outputMOPACDebug +  file.getName() + "_MOPAC_Debug.txt"), true);
+							    BufferedWriter out = new BufferedWriter(fstream);
+							    out.write(results.get(i1).getDebugMessages());
+							    //Close the output stream
+							    out.close();
+							}
+						    
 							
 						} catch (CDKException e) {
 							// TODO Auto-generated catch block

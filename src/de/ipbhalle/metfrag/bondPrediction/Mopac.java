@@ -1,14 +1,33 @@
+/*
+*
+* Copyright (C) 2009-2010 IPB Halle, Sebastian Wolf
+*
+* Contact: swolf@ipb-halle.de
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*
+*/
+
 package de.ipbhalle.metfrag.bondPrediction;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.openscience.cdk.ChemFile;
@@ -17,18 +36,26 @@ import org.openscience.cdk.Molecule;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IMolecule;
-import org.openscience.cdk.io.MDLV2000Writer;
+import org.openscience.cdk.io.MDLReader;
+import org.openscience.cdk.io.MDLV2000Reader;
 import org.openscience.cdk.io.Mol2Reader;
 import org.openscience.cdk.io.Mol2Writer;
-import org.openscience.cdk.io.formats.MOPAC2002Format;
-import org.openscience.cdk.modeling.builder3d.ForceFieldConfigurator;
+import org.openscience.cdk.tools.CDKHydrogenAdder;
+import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 import org.openscience.cdk.tools.manipulator.ChemFileManipulator;
 
+import de.ipbhalle.metfrag.main.MetFrag;
+import de.ipbhalle.metfrag.main.MetFragPreCalculated;
 import de.ipbhalle.metfrag.tools.StreamGobbler;
 import de.ipbhalle.mopac.converter.CoordinatesTransfer;
 import de.ipbhalle.mopac.converter.MOPACInputFormatWriter;
 
-public class Mopac {	
+public class Mopac {
+	
+	private double heatOfFormation;
+	private String errorMessage;
+	private String warningMessage;
+	private String time;
 	
 	/**
 	 * Run MOPAC to optimize the geometry of the molecule.
@@ -46,6 +73,12 @@ public class Mopac {
 	 */
 	public IAtomContainer runOptimization(String pathToBabel, IAtomContainer molToOptimize, int ffSteps, boolean verbose, String mopacMethod, Integer mopacRuntime, boolean firstRun, String atomProtonized, boolean deleteTemp) throws Exception
 	{		
+		
+		this.errorMessage = "";
+		this.heatOfFormation = -1.0;
+		this.time = "";
+		this.warningMessage = "";
+		
 		//write out the molecule
 //		File tempFile = File.createTempFile("mol",".mol");
 //		FileWriter fw = new FileWriter(tempFile);
@@ -300,7 +333,15 @@ public class Mopac {
         
         
         System.out.println("MOPAC error code " + exitVal);
-       
+        
+        //now parse the out file
+        MopacOutParser parser = new MopacOutParser(tempStringMopacOut + ".OUT");
+        this.errorMessage = parser.getError();
+        this.warningMessage = parser.getWarning();
+        this.heatOfFormation = parser.getHeatOfFormation();
+        this.time = parser.getTime();
+        
+        
         //now convert the result back to mol2
         File tempFileMOPACMol2 = File.createTempFile("molMopac",".mol2");
         if(deleteTemp)
@@ -328,4 +369,116 @@ public class Mopac {
 //        return containersList.get(0);
         return CoordinatesTransfer.transferCoordinates(molOptimized, molToOptimize);
 	}
+
+	public void setHeatOfFormation(double heatOfFormation) {
+		this.heatOfFormation = heatOfFormation;
+	}
+
+	public double getHeatOfFormation() {
+		return heatOfFormation;
+	}
+
+	public void setErrorMessage(String errorMessage) {
+		this.errorMessage = errorMessage;
+	}
+
+	public String getErrorMessage() {
+		return errorMessage;
+	}
+
+	public void setWarningMessage(String warningMessage) {
+		this.warningMessage = warningMessage;
+	}
+
+	public String getWarningMessage() {
+		return warningMessage;
+	}
+
+	public String getTime() {
+		return time;
+	}
+
+	public void setTime(String time) {
+		this.time = time;
+	}
+	
+	
+	
+	public static void main(String[] args) {
+		
+		try
+		{
+		File files = new File("/home/swolf/MOPAC/EMMATest/testMOPAC/");
+		File[] fileArr = files.listFiles();
+		for (int i = 0; i < fileArr.length; i++) {
+			String[] temp = fileArr[i].getName().split("\\.");
+			String extension = temp[(temp.length -1)];
+			if(fileArr[i].isFile() && extension.toLowerCase().equals("sdf"))
+			{
+				String error = "";
+				
+				Mopac mopac = new Mopac();
+				MDLV2000Reader reader;
+				List<IAtomContainer> containersList;
+				
+				reader = new MDLV2000Reader(new FileReader(fileArr[i]));
+		        ChemFile chemFile = (ChemFile)reader.read((ChemObject)new ChemFile());
+		        containersList = ChemFileManipulator.getAllAtomContainers(chemFile);
+		        IAtomContainer mol = containersList.get(0);
+			    
+		        try
+		        {
+			        //add hydrogens
+			        AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(mol);
+			        CDKHydrogenAdder hAdder = CDKHydrogenAdder.getInstance(mol.getBuilder());
+			        hAdder.addImplicitHydrogens(mol);
+			        AtomContainerManipulator.convertImplicitToExplicitHydrogens(mol);
+		        }
+		        //there is a bug in cdk??
+		        catch(IllegalArgumentException e)
+	            {
+		        	System.err.println("Error CDK! " + e.getMessage());
+		        	error = e.getMessage();
+		        	e.getStackTrace();
+	            }
+		        catch(CDKException e)
+		        {
+		        	System.err.println("Error CDK! " + e.getMessage());
+		        	error = e.getMessage();
+		        	e.getStackTrace();
+		        }
+		        
+		        String output = "";
+				if(error.equals(""))
+				{
+					mopac.runOptimization("/vol/local/bin/", mol, 600, true, "AM1", 1200, true, "none", false);
+					output = fileArr[i].getName() + "\tHeat of Formation: " + mopac.getHeatOfFormation() + "\tTime: " + mopac.getTime() + "\tWarning: " + mopac.getWarningMessage() + "\tError: " + mopac.getErrorMessage() + "\n";
+				}
+				else
+					output = fileArr[i].getName() + "\t" + error + "\n";
+				
+				try{
+				    // Create file 
+				    FileWriter fstream = new FileWriter("/home/swolf/MOPAC/EMMATest/testMOPAC/log/output.txt", true);
+				    BufferedWriter out = new BufferedWriter(fstream);
+				    out.write(output);
+				    //Close the output stream
+				    out.close();
+			    }catch (Exception e){//Catch exception if any
+			      System.err.println("Error: " + e.getMessage());
+			    }
+				
+			}
+		}
+		}
+		catch(FileNotFoundException e)
+		{
+			System.err.println("Error! " + e.getMessage());
+			e.printStackTrace();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 }

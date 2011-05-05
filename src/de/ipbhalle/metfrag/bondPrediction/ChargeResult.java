@@ -9,6 +9,7 @@ public class ChargeResult {
 	private IAtomContainer molWithCharge = null;
 	private String chargeString = "";
 	private String protonatedAtom = "";
+	private String debugMessages = "";
 	
 	/**
 	 * Instantiates a new charge result.
@@ -17,14 +18,17 @@ public class ChargeResult {
 	 * @param molWithProton the mol with proton
 	 * @param molWithCharge the mol with charge
 	 * @param chargeString the charge string
+	 * @param protonatedAtom the protonated atom
+	 * @param debugMessages the debug messages
 	 */
-	public ChargeResult(IAtomContainer originalMol, IAtomContainer molWithProton, IAtomContainer molWithCharge, String chargeString, String protonatedAtom)
+	public ChargeResult(IAtomContainer originalMol, IAtomContainer molWithProton, IAtomContainer molWithCharge, String chargeString, String protonatedAtom, String debugMessages)
 	{
 		this.setOriginalMol(originalMol);
 		this.setMol(molWithProton);
 		this.setChargeString(chargeString);
 		this.setMolWithCharge(molWithCharge);
 		this.setProtonatedAtom(protonatedAtom);
+		this.setDebugMessages(debugMessages);
 	}
 
 	public void setMol(IAtomContainer molWithProton) {
@@ -75,6 +79,14 @@ public class ChargeResult {
 
 	public String getProtonatedAtom() {
 		return protonatedAtom;
+	}
+
+	public void setDebugMessages(String debugMessages) {
+		this.debugMessages = debugMessages;
+	}
+
+	public String getDebugMessages() {
+		return debugMessages;
 	}
 
 }

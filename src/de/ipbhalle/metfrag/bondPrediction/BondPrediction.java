@@ -52,6 +52,9 @@ public class BondPrediction {
 		private List<ChargeResult> results= null;
 		private List<IBond> aromaticBonds = null;
 		private boolean render = false;
+		private String mopacMessages = "";
+		private String mopacMessagesNeutral = "";
+		
 		
 		/**
 		 * Instantiates a new charges class.
@@ -106,9 +109,13 @@ public class BondPrediction {
 	    		this.mol = mopac.runOptimization(pathToBabel, mol, FFSteps, true, mopacMethod, mopacRuntime, true, "Neutral", deleteTemp);
 	    		if(this.mol == null)
 	    		{
+	    			this.mopacMessagesNeutral = "ERROR!\nHeat of Formation: " + mopac.getHeatOfFormation() + "\nTime: " + mopac.getTime() + "\nWarning: " + mopac.getWarningMessage() + "\nError: " + mopac.getErrorMessage() + "\n\n";
 	    			System.err.println("Was not able to optimize neutral molecule!");
 	    			throw new Exception("Error optimizing molecule!");
 	    		}
+	    		else
+	    			this.mopacMessagesNeutral = "Neutral Molecule MOPAC\nHeat of Formation: " + mopac.getHeatOfFormation() + "\nTime: " + mopac.getTime() + "\nWarning: " + mopac.getWarningMessage() + "\nError: " + mopac.getErrorMessage() + "\n\n";
+
 	    		
 	    		
 	        	GasteigerMarsiliPartialCharges peoe = new GasteigerMarsiliPartialCharges();
@@ -224,7 +231,12 @@ public class BondPrediction {
 		            	//something went wrong during optimization
 		            	if(protonatedMol == null)
 		            	{
+		            		this.mopacMessages = "ERROR after protonation! Atom " + chargesArray[i].getAtom().getSymbol()  + (Integer.parseInt(chargesArray[i].getAtom().getID()) + 1) + "\nHeat of Formation: " + mopac.getHeatOfFormation() + "\nTime: " + mopac.getTime() + "\nWarning: " + mopac.getWarningMessage() + "\nError: " + mopac.getErrorMessage() + "\n\n";
 		            		throw new Exception("MOPAC did not finish or error occured!");
+		            	}
+		            	else
+		            	{
+		            		this.mopacMessages = "Protonated Molecule MOPAC Atom " + chargesArray[i].getAtom().getSymbol()  + (Integer.parseInt(chargesArray[i].getAtom().getID()) + 1) + "\nHeat of Formation: " + mopac.getHeatOfFormation() + "\nHeat of Formation: " + mopac.getHeatOfFormation() + "\nTime: " + mopac.getTime() + "\nWarning: " + mopac.getWarningMessage() + "\nError: " + mopac.getErrorMessage() + "\n\n";
 		            	}
 		            	
 		            	
@@ -350,7 +362,7 @@ public class BondPrediction {
 						
 						if(verbose)
 							System.out.println(tempResult);
-						this.results.add(new ChargeResult(this.mol, protonatedMol, outputStructure, tempResult, chargesArray[i].getAtom().getSymbol()  + (Integer.parseInt(chargesArray[i].getAtom().getID()) + 1)));
+						this.results.add(new ChargeResult(this.mol, protonatedMol, outputStructure, tempResult, chargesArray[i].getAtom().getSymbol()  + (Integer.parseInt(chargesArray[i].getAtom().getID()) + 1), this.mopacMessages));
 
 //						for (String string : notMatched) {
 //							System.out.println(string);
@@ -410,7 +422,7 @@ public class BondPrediction {
 //	        AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(this.molWithAllProtonationSites);
 //	        this.molWithAllProtonationSites = MoleculeTools.moleculeNumbering(this.molWithAllProtonationSites);
 			
-			this.results.add(0, new ChargeResult(molOriginal, this.mol, this.molWithAllProtonationSites, combinedResults, "Combined"));
+			this.results.add(0, new ChargeResult(molOriginal, this.mol, this.molWithAllProtonationSites, combinedResults, "Combined", this.mopacMessagesNeutral));
 			
 			
 			return bondsToBreak;
@@ -485,6 +497,16 @@ public class BondPrediction {
 
 		public List<ChargeResult> getResults() {
 			return results;
+		}
+
+
+		public String getMopacMessages() {
+			return mopacMessages;
+		}
+
+
+		public void setMopacMessages(String mopacMessages) {
+			this.mopacMessages = mopacMessages;
 		}
 		
 }

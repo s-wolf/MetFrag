@@ -28,7 +28,6 @@ import java.util.Vector;
 
 import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 
-import de.ipbhalle.metfrag.fragmenter.Fragmenter;
 import de.ipbhalle.metfrag.massbankParser.Peak;
 import de.ipbhalle.metfrag.spectrum.MatchedFragment;
 import de.ipbhalle.metfrag.spectrum.NeutralLoss;

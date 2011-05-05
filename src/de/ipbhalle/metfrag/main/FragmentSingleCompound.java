@@ -23,6 +23,7 @@ package de.ipbhalle.metfrag.main;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
@@ -31,9 +32,13 @@ import java.util.concurrent.Executors;
 
 import org.openscience.cdk.DefaultChemObjectBuilder;
 import org.openscience.cdk.Molecule;
+import org.openscience.cdk.MoleculeSet;
+import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IMolecularFormula;
 import org.openscience.cdk.interfaces.IMolecule;
+import org.openscience.cdk.interfaces.IMoleculeSet;
+import org.openscience.cdk.io.SDFWriter;
 import org.openscience.cdk.smiles.SmilesGenerator;
 import org.openscience.cdk.smiles.SmilesParser;
 import org.openscience.cdk.tools.CDKHydrogenAdder;
@@ -82,7 +87,7 @@ public class FragmentSingleCompound {
 	 * @return the fragments
 	 * @throws Exception 
 	 */
-	public List<String> getFragments(String smilesToFragment, Double minMass, boolean render) throws Exception
+	public List<String> getFragments(String smilesToFragment, Double minMass, boolean render, boolean writeSDFFragments) throws Exception
 	{
 		List<String> resultingSmiles = new ArrayList<String>();
 		SmilesParser sp = new SmilesParser(DefaultChemObjectBuilder.getInstance());
@@ -106,6 +111,27 @@ public class FragmentSingleCompound {
 		//constructor for fragmenter
 		Fragmenter fragmenter = new Fragmenter((Vector<Peak>)spectrum.getPeakList().clone(), minMass,  true, sumFormulaRedundancyCheck, false);
 		List<IAtomContainer> listOfFrags = fragmenter.generateFragmentsInMemory(molecule, false, this.treeDepth, false);
+		
+		if(writeSDFFragments)
+		{
+			IMoleculeSet setOfMolecules = new MoleculeSet();
+			for (IAtomContainer iAtomContainer : listOfFrags) {
+				IMolecule mol = new Molecule(iAtomContainer);
+				setOfMolecules.addAtomContainer(mol);
+			}		
+
+			try {
+				SDFWriter writer = new SDFWriter(new FileWriter(new File("/home/swolf/test123" + ".sdf")));
+				writer.write(setOfMolecules);
+				writer.close();
+			} catch (CDKException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 		
 		List<String> results = new ArrayList<String>();
 		
@@ -192,40 +218,41 @@ public class FragmentSingleCompound {
 	
 	public static void main(String[] args) {
 		//example values
-		String smiles = "C1=CC(=C(C=C1F)F)C(CN2C=NC=N2)(CN3C=NC=N3)O";
+		String smiles = "CN1CC[C@]23[C@@H]4[C@H]1CC5=C2C(=C(C=C5)O)O[C@H]3[C@H](C=C4)O";
 		Double minMass = 50.0;
-		Boolean render = true;
+		Boolean render = false;
 		Boolean writeToFile = false;
 		
 		//get command line arguments
-		if(args != null && args.length == 5)
-		{
-//			smiles = args[0];
-			minMass = Double.parseDouble(args[1]);
-			if(args[2].equals("1"))
-				render = true;
-			writeToFile = true;
-		}
-		else if(args != null && args.length == 4)
-		{
-//			smiles = args[0];
-			minMass = Double.parseDouble(args[1]);
-			if(args[2].equals("1"))
-				render = true;
-		}
-		else
-		{
-			System.err.println("Please enter CL values!\n1. value: Smiles to fragment\n2. value: Minimum mass\n3. value: Render fragments? (1 --> true, 0 --> false)\n4. value: Tree depth\nExample: C1C(OC2=CC(=CC(=C2C1=O)O)O)C3=CC=C(C=C3)O 42.1 1 2\n");
-			System.exit(1);
-		}
+//		if(args != null && args.length == 5)
+//		{
+////			smiles = args[0];
+//			minMass = Double.parseDouble(args[1]);
+//			if(args[2].equals("1"))
+//				render = true;
+//			writeToFile = true;
+//		}
+//		else if(args != null && args.length == 4)
+//		{
+////			smiles = args[0];
+//			minMass = Double.parseDouble(args[1]);
+//			if(args[2].equals("1"))
+//				render = true;
+//		}
+//		else
+//		{
+//			System.err.println("Please enter CL values!\n1. value: Smiles to fragment\n2. value: Minimum mass\n3. value: Render fragments? (1 --> true, 0 --> false)\n4. value: Tree depth\nExample: C1C(OC2=CC(=CC(=C2C1=O)O)O)C3=CC=C(C=C3)O 42.1 1 2\n");
+//			System.exit(1);
+//		}
 		
 		FragmentSingleCompound test = new FragmentSingleCompound();
 		//those are the default values...no need to set them like this
 		test.setSumFormulaRedundancyCheck(true);
-		test.setTreeDepth(Integer.parseInt(args[3]));
+//		test.setTreeDepth(Integer.parseInt(args[3]));
+		test.setTreeDepth(3);
 		
 		try {
-			List<String> resultingFragments = test.getFragments(smiles, minMass, render);
+			List<String> resultingFragments = test.getFragments(smiles, minMass, render, true);
 			List<String> resultingEnergies = test.getEnergies();
 			List<String> resultingNeutralLosses = test.getNeutralLosses();
 			
