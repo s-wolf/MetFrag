@@ -1632,6 +1632,10 @@ public class Fragmenter {
                 		first = false;
                 		atomsDone[Integer.parseInt(bondedAtom.getID())] = atom1;
                 		atom1.setID(bondedAtom.getID());
+                		atom1.setFormalCharge(bondedAtom.getFormalCharge());
+                		atom1.setProperties(bondedAtom.getProperties());
+                		atom1.setFlags(bondedAtom.getFlags());
+                		atom1.setPoint3d(bondedAtom.getPoint3d());
                 	}
                 	else
                 	{
@@ -1639,6 +1643,10 @@ public class Fragmenter {
                 		isof.configure(atom2);
                 		atomsDone[Integer.parseInt(bondedAtom.getID())] = atom2;
                 		atom2.setID(bondedAtom.getID());
+                		atom2.setFormalCharge(bondedAtom.getFormalCharge());
+                		atom2.setProperties(bondedAtom.getProperties());
+                		atom2.setFlags(bondedAtom.getFlags());
+                		atom2.setPoint3d(bondedAtom.getPoint3d());
                 	}
             	}
 
@@ -1648,6 +1656,8 @@ public class Fragmenter {
             }
             partContainer.addBond(builder.newInstance(IBond.class, atom1, atom2));
             partContainer.getBond(partContainer.getBondCount() - 1).setProperties(aBond.getProperties());
+            partContainer.getBond(partContainer.getBondCount() - 1).setFlags(aBond.getFlags());
+            partContainer.getBond(partContainer.getBondCount() - 1).setOrder(aBond.getOrder());
         }
 
         return partContainer;

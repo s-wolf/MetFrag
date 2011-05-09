@@ -451,8 +451,15 @@ public class Mopac {
 		        String output = "";
 				if(error.equals(""))
 				{
-					mopac.runOptimization("/vol/local/bin/", mol, 600, true, "AM1", 1200, true, "none", false);
-					output = fileArr[i].getName() + "\tHeat of Formation: " + mopac.getHeatOfFormation() + "\tTime: " + mopac.getTime() + "\tWarning: " + mopac.getWarningMessage() + "\tError: " + mopac.getErrorMessage() + "\n";
+					try
+					{
+						mopac.runOptimization("/vol/local/bin/", mol, 600, true, "AM1", 1200, true, "none", false);
+						output = fileArr[i].getName() + "\tHeat of Formation: " + mopac.getHeatOfFormation() + "\tTime: " + mopac.getTime() + "\tWarning: " + mopac.getWarningMessage() + "\tError: " + mopac.getErrorMessage() + "\n";
+					}
+					catch(IndexOutOfBoundsException e)
+					{
+						output = fileArr[i].getName() + "\tError in Optimization\n";
+					}
 				}
 				else
 					output = fileArr[i].getName() + "\t" + error + "\n";

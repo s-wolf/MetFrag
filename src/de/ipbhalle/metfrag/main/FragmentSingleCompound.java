@@ -249,7 +249,7 @@ public class FragmentSingleCompound {
 		//those are the default values...no need to set them like this
 		test.setSumFormulaRedundancyCheck(true);
 //		test.setTreeDepth(Integer.parseInt(args[3]));
-		test.setTreeDepth(3);
+		test.setTreeDepth(2);
 		
 		try {
 			List<String> resultingFragments = test.getFragments(smiles, minMass, render, true);
