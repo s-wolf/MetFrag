@@ -20,6 +20,7 @@
 */
 package de.ipbhalle.metfrag.spectrum;
 
+import java.util.Iterator;
 import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -28,6 +29,7 @@ import org.openscience.cdk.interfaces.IMolecularFormulaSet;
 import org.openscience.cdk.formula.MassToFormulaTool;
 
 import de.ipbhalle.metfrag.massbankParser.*;
+
 
 
 
@@ -91,8 +93,8 @@ public class WrapperSpectrum {
 	public WrapperSpectrum(String peakString, int mode, double exactMass, boolean isPositive){
 		this.spectra = new Vector<Spectrum>();
 		this.collisionEnergy = -1;
-		spectra.add(new Spectrum(-1, parsePeaks(peakString), exactMass, mode, "none", -1, "none", "none", "none", "", "", isPositive));
-		
+		spectra.add(new Spectrum(-1, parsePeaks(peakString), exactMass, mode, "none", -1, "none", "none", "none", "", 0.0, "", isPositive));
+
 		this.peaks = spectra.get(0).getPeaks(); //just one spectra for now
 		this.exactMass = spectra.get(0).getExactMass();
 		this.mode = spectra.get(0).getMode();
@@ -305,6 +307,55 @@ public class WrapperSpectrum {
 	public Vector<Peak> getPeakList()
 	{
 		return this.peaks;
+	}
+	
+	
+	
+	/**
+	 * Gets the cleaned peaks.
+	 * More precisely all peaks with an intensity smaller than 5% of intensity of the peak with the maximal intensity are removed.  
+	 * 
+	 * @return the cleaned peaks
+	 */
+	public Vector<Peak> getCleanedPeakList()
+	{
+		
+		double intensities[]=new double[this.peaks.size()];
+		
+		Vector<Peak> cleanedPeaks = new Vector<Peak>();;
+		
+		int k=0;
+		for (Iterator iterator = peaks.iterator(); iterator.hasNext();) {
+			Peak peak = (Peak) iterator.next();
+			intensities[k] = peak.getRelIntensity();
+			k++;
+			cleanedPeaks.add(peak);
+		}
+		
+		double maxIntensity=intensities[0];
+		for(int i=1;i<intensities.length;i++)
+		{
+			if(intensities[i]>maxIntensity)
+			{
+				maxIntensity=intensities[i];
+			}
+		}
+		
+		
+		int anz=intensities.length;
+		
+		for(int iter=0;iter<anz;iter++)
+		{		
+			if(cleanedPeaks.elementAt(iter).getRelIntensity() < (0.05*maxIntensity))
+			{
+				
+				cleanedPeaks.removeElementAt(iter);
+				iter--;
+				anz--;			
+			}
+		}
+		
+		return cleanedPeaks;
 	}
 	
 	/**
