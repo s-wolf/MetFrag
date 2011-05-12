@@ -71,7 +71,7 @@ public class Mopac {
 	 * @return the i atom container
 	 * @throws Exception the exception
 	 */
-	public IAtomContainer runOptimization(String pathToBabel, IAtomContainer molToOptimize, int ffSteps, boolean verbose, String mopacMethod, Integer mopacRuntime, boolean firstRun, String atomProtonized, boolean deleteTemp) throws Exception
+	public IAtomContainer runOptimization(String pathToBabel, IAtomContainer molToOptimize, int ffSteps, boolean verbose, String ffMethod, String mopacMethod, Integer mopacRuntime, boolean firstRun, String atomProtonized, boolean deleteTemp) throws Exception
 	{		
 		
 		this.errorMessage = "";
@@ -132,7 +132,7 @@ public class Mopac {
 			tempFileFF.deleteOnExit();
 //		String command = "obminimize -n " + ffSteps + " -sd -ff MMFF94 " + tempFile.getPath();
 //		String command = "obminimize -c 1e-3 -sd -ff UFF " + tempFile.getPath();
-		String command = pathToBabel + "obminimize -n " + ffSteps + " -sd -ff UFF " + tempFileFFInput3D.getPath() + " > " + tempFileFF.getPath(); 
+		String command = pathToBabel + "obminimize -n " + ffSteps + " -sd -ff " + ffMethod + " " + tempFileFFInput3D.getPath() + " > " + tempFileFF.getPath(); 
 		String[] psCmd =
 		{
 		    "sh",
@@ -453,7 +453,7 @@ public class Mopac {
 				{
 					try
 					{
-						mopac.runOptimization("/vol/local/bin/", mol, 600, true, "AM1", 1200, true, "none", false);
+						mopac.runOptimization("/vol/local/bin/", mol, 600, true, "Ghemical", "AM1", 1200, true, "none", false);
 						output = fileArr[i].getName() + "\tHeat of Formation: " + mopac.getHeatOfFormation() + "\tTime: " + mopac.getTime() + "\tWarning: " + mopac.getWarningMessage() + "\tError: " + mopac.getErrorMessage() + "\n";
 					}
 					catch(IndexOutOfBoundsException e)
@@ -466,7 +466,7 @@ public class Mopac {
 				
 				try{
 				    // Create file 
-				    FileWriter fstream = new FileWriter("/home/swolf/MOPAC/EMMATest/testMOPAC/log/output.txt", true);
+				    FileWriter fstream = new FileWriter("/home/swolf/MOPAC/EMMATest/testMOPAC/log/mopacGhemical.txt", true);
 				    BufferedWriter out = new BufferedWriter(fstream);
 				    out.write(output);
 				    //Close the output stream
