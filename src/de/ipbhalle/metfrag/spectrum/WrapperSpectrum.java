@@ -54,6 +54,7 @@ public class WrapperSpectrum {
 	private String filename;
 	private String formula;
 	private String precursorType;
+	private double precursorMZ;
 	private boolean isPositive;
 	
 	
@@ -73,6 +74,7 @@ public class WrapperSpectrum {
 		this.KEGG = spectra.get(0).getKEGG();
 		this.nameTrivial = spectra.get(0).getTrivialName();
 		this.setPrecursorType(spectra.get(0).getPrecursorType());
+		this.setPrecursorMZ(spectra.get(0).getPrecursorMZ());
 		String[] fileTemp = filename.split("\\/");
 		this.filename = fileTemp[fileTemp.length - 1];
 		this.setFormula(spectra.get(0).getFormula());
@@ -425,6 +427,26 @@ public class WrapperSpectrum {
 		return precursorType;
 	}
 
+	
+	/**
+	 * Sets the precursor MZ as defined in the massbank record.
+	 *
+	 * @param precursorMZ the new precursor MZ
+	 */
+	public void setPrecursorMZ(double precursorMZ) {
+		this.precursorMZ = precursorMZ;
+	}
+
+
+	/**
+	 * Gets the precursor MZ as defined in the massbank record.
+	 *
+	 * @return the precursor MZ
+	 */
+	public double getPrecursorMZ() {
+		return precursorMZ;
+	}
+	
 	public void setPositive(boolean isPositive) {
 		this.isPositive = isPositive;
 	}
