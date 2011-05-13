@@ -1,0 +1,9 @@
+precursor-Type		mass-difference-from-exactMass
+[M+H]+				 1.0073
+[M-H]-				-1.0073 
+[M]+				 0.00055
+#[M-2H]-			 0.0
+#[M+K-2H]-			 0.0
+#[M+H-(C12H20O9)]+	 0.0
+#[M+H-H2O]+			 0.0
+#[M+K]+				 0.0
