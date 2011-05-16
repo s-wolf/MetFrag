@@ -364,6 +364,24 @@ public class WrapperSpectrum {
 	public String toString()
 	{
 		StringBuilder str = new StringBuilder();
+		Spectrum currentSpectrum = spectra.get(0);
+		str.append("Trvial Name: " + currentSpectrum.getTrivialName() + "\n");
+		str.append("Exact Mass: " + currentSpectrum.getExactMass() + "\n");
+		str.append("Formula: " + currentSpectrum.getFormula() + "\n");
+		str.append("CHEBI: " + currentSpectrum.getCHEBI() + "\n");
+		str.append("PubChem CID: " + currentSpectrum.getCID() + "\n");
+		str.append("KEGG: " + currentSpectrum.getKEGG() + "\n");
+		str.append("Precursor MZ: " + currentSpectrum.getPrecursorMZ() + "\n");
+		str.append("Precursor Type: " + currentSpectrum.getPrecursorType() + "\n");
+		str.append("Collision Energy: " + currentSpectrum.getCollisionEnergy() + "\n");
+		str.append("Mode: " + currentSpectrum.getMode() + " Positive: " + currentSpectrum.isPositive() + "\n");
+		str.append("Filename: " + this.filename + "\n");
+		
+		String peaksString = "";
+		for (Peak peak : currentSpectrum.getPeaks()) {
+			peaksString += peak.getMass() + " " + peak.getRelIntensity() + "\n"; 
+		}
+		str.append(peaksString + "\n");
 		
 		return str.toString();
 	}
@@ -478,4 +496,9 @@ public class WrapperSpectrum {
 		return chebi;
 	}
 	
+	
+	public static void main(String[] args) {
+		WrapperSpectrum spectrum = new WrapperSpectrum("/home/ftarutti/records/CO000001.txt");
+		System.out.println(spectrum.toString());
+	}
 }
