@@ -283,7 +283,7 @@ public class MassbankParser{
 				
 			}
 			
-			spectra.add(new Spectrum(collisionEnergy, peaks, mass, mode, IUPAC, linkPubChem, linkKEGG, nameTrivial, formula,precursorMZ, precursorType, isPositive));	
+			spectra.add(new Spectrum(collisionEnergy, peaks, mass, mode, IUPAC, linkPubChem, linkKEGG, linkCHEBI, nameTrivial, formula, precursorMZ, precursorType, isPositive));	
 			}
 			catch (IOException e) {
 				System.out.println("File not found!!! Error: " +e.getMessage());

@@ -115,7 +115,7 @@ public class PreprocessMolecules {
 			    bp.debug(false);
 			    System.out.println("MOPAC runtime: " + mopacRuntime + " FFSteps: " + ffSteps);
 			    //use babel version 2.3.0
-				bp.calculateBondsToBreak("/vol/local/bin/", molecule, ffSteps, "AM1", mopacRuntime, true);
+				bp.calculateBondsToBreak("/vol/local/bin/", molecule, ffSteps, "Ghemical", "AM1", mopacRuntime, true);
 				
 				List<ChargeResult> results = bp.getResults();
 				
