@@ -353,7 +353,7 @@ public class MassbankParser{
 	public static void main(String[] args) {
 		
 		Vector<Spectrum> spectra = Read("/home/ftarutti/records/CO000001.txt");
-		System.out.println(spectra.get(0).getPrecursorType() + spectra.get(0).getPrecursorMZ());
+		System.out.println(spectra.get(0).getPrecursorType() +"   "+ spectra.get(0).getPrecursorMZ()+"  "+spectra.get(0).getExactMass());
 		spectra = Read("/home/swolf/MassBankData/MetFragSunGrid/HillPaperDataMerged/4_Aminoantipyrine_104_Aminoantipyrine_204_Aminoantipyrine_304_Aminoantipyrine_404_Aminoantipyrine_50.txt");
 		//System.out.println(spectra.get(0).getCID());
 		
