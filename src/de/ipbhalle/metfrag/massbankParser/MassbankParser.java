@@ -161,7 +161,7 @@ public class MassbankParser{
 							mode = 1;
 							isPositive = true;
 						}
-						else
+						else if(line.contains("AC$ANALYTICAL_CONDITION: PRECURSOR_TYPE"))
 						{
 							mode = -1;
 							isPositive = false;
@@ -177,7 +177,7 @@ public class MassbankParser{
 							mode = 1;
 							isPositive = true;
 						}
-						else
+						else if(line.contains("AC$ANALYTICAL_CONDITION: MODE"))
 						{
 							mode = -1;
 							isPositive = false;
@@ -200,36 +200,6 @@ public class MassbankParser{
 					
 			  		line = reader.readLine();
 			  	}	
-			  	
-			  	
-			  	
-		  		// PRECURSOR_TYPE: POSITIVE (1) or NEGATIVE (-1)
-				if (line.contains("AC$ANALYTICAL_CONDITION: PRECURSOR_TYPE") && line.substring(line.indexOf("AC$ANALYTICAL_CONDITION: PRECURSOR_TYPE")+40).contains("[M+H]+"))
-				{
-					mode = 1;
-					isPositive = true;
-				}
-				else
-				{
-					mode = -1;
-					isPositive = false;
-				}
-				
-				if(line.contains("AC$ANALYTICAL_CONDITION: PRECURSOR_TYPE"))
-				{
-					precursorType = (line.substring(line.indexOf("AC$ANALYTICAL_CONDITION: PRECURSOR_TYPE")+40, line.length()));
-				}
-				//RIKEN Spektren
-				if (line.contains("AC$ANALYTICAL_CONDITION: MODE") && line.substring(line.indexOf("AC$ANALYTICAL_CONDITION: MODE")+30).contains("POSITIVE"))
-				{
-					mode = 1;
-					isPositive = true;
-				}
-				else
-				{
-					mode = -1;
-					isPositive = false;
-				}
 			}
 		  	
 	
