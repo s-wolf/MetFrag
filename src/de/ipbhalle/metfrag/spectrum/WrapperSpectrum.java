@@ -360,6 +360,15 @@ public class WrapperSpectrum {
 		return cleanedPeaks;
 	}
 	
+	
+	public String toString()
+	{
+		StringBuilder str = new StringBuilder();
+		
+		return str.toString();
+	}
+	
+	
 	/**
 	 * Gets the parent peak.
 	 * 

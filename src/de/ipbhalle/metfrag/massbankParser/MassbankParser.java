@@ -21,12 +21,14 @@
 package de.ipbhalle.metfrag.massbankParser;
 
 import java.io.*;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Vector;
 import java.util.TreeMap;
 
+import de.ipbhalle.metfrag.spectrum.AssignFragmentPeak;
 import de.ipbhalle.metfrag.spectrum.NeutralLoss;
 
 
@@ -220,30 +222,7 @@ public class MassbankParser{
 				}
 			}
 		  	
-		  	
 	
-			
-				
-			
-
-	  		//skipped PRECURSER SELECTION, FRAGMENTATION_EQUIPMENT, SPECTRUM_TYPE.....
-		  	while (line != null && !line.contains("AC$ANALYTICAL_CONDITION: COLLISION_ENERGY")){
-		  		if(line.contains("AC$ANALYTICAL_CONDITION: PRECURSOR_TYPE"))
-		  		{
-		  			precursorType = (line.substring(line.indexOf("AC$ANALYTICAL_CONDITION: PRECURSOR_TYPE")+40, line.length()));
-		  		}
-		  		line = reader.readLine();
-		  	}
-			try
-			{
-				collisionEnergy = Integer.parseInt(line.substring(line.indexOf("AC$ANALYTICAL_CONDITION: COLLISION_ENERGY")+42, line.length()-3));
-			}
-			catch(NumberFormatException e)
-			{
-				//error in source file
-				collisionEnergy = 0;
-			}
-		  				
 			while (!line.contains("PK$PEAK") && line != null && !line.contains("MS$FOCUSED_ION: PRECURSOR_TYPE")){
 			  	
 				if(line.contains("MS$FOCUSED_ION: PRECURSOR_M/Z"))
@@ -304,6 +283,12 @@ public class MassbankParser{
     		file = System.getProperty("property.file.path");
     		file += "precursorType.csv";
     	}
+		else
+    	{
+    		URL url = AssignFragmentPeak.class.getClassLoader().getResource("precursorType.csv");
+			file = url.getFile();
+    		//System.out.println("Pfad: " + url.getFile());
+    	}
 		try {
 			BufferedReader in = new BufferedReader(new FileReader(file));
 			
@@ -345,8 +330,9 @@ public class MassbankParser{
 	public static void main(String[] args) {
 		
 		Vector<Spectrum> spectra = Read("/home/ftarutti/records/CO000001.txt");
-		
-		//Vector<Spectrum> spectra = Read("/home/swolf/MassBankData/MetFragSunGrid/HillPaperDataMerged/4_Aminoantipyrine_104_Aminoantipyrine_204_Aminoantipyrine_304_Aminoantipyrine_404_Aminoantipyrine_50.txt");
+		System.out.println(spectra.get(0).getPrecursorType() + spectra.get(0).getPrecursorMZ());
+		spectra = Read("/home/swolf/MassBankData/MetFragSunGrid/HillPaperDataMerged/4_Aminoantipyrine_104_Aminoantipyrine_204_Aminoantipyrine_304_Aminoantipyrine_404_Aminoantipyrine_50.txt");
+		System.out.println(spectra.get(0).getCID());
 		
 		int j=0;
 		
