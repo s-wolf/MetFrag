@@ -166,6 +166,11 @@ public class MassbankParser{
 							mode = -1;
 							isPositive = false;
 						}
+						
+						if(line.contains("AC$ANALYTICAL_CONDITION: PRECURSOR_TYPE"))
+						{
+							precursorType = (line.substring(line.indexOf("AC$ANALYTICAL_CONDITION: PRECURSOR_TYPE")+40, line.length()));
+						}
 						//RIKEN Spektren
 						if (line.contains("AC$ANALYTICAL_CONDITION: MODE") && line.substring(line.indexOf("AC$ANALYTICAL_CONDITION: MODE")+30).contains("POSITIVE"))
 						{
@@ -209,6 +214,11 @@ public class MassbankParser{
 					mode = -1;
 					isPositive = false;
 				}
+				
+				if(line.contains("AC$ANALYTICAL_CONDITION: PRECURSOR_TYPE"))
+				{
+					precursorType = (line.substring(line.indexOf("AC$ANALYTICAL_CONDITION: PRECURSOR_TYPE")+40, line.length()));
+				}
 				//RIKEN Spektren
 				if (line.contains("AC$ANALYTICAL_CONDITION: MODE") && line.substring(line.indexOf("AC$ANALYTICAL_CONDITION: MODE")+30).contains("POSITIVE"))
 				{
@@ -223,6 +233,12 @@ public class MassbankParser{
 			}
 		  	
 	
+			
+			if(line.contains("MS$FOCUSED_ION: PRECURSOR_TYPE"))
+			{
+				precursorType = (line.substring(line.indexOf("MS$FOCUSED_ION: PRECURSOR_TYPE")+31, line.length()));
+			} 
+			
 			while (!line.contains("PK$PEAK") && line != null && !line.contains("MS$FOCUSED_ION: PRECURSOR_TYPE")){
 			  	
 				if(line.contains("MS$FOCUSED_ION: PRECURSOR_M/Z"))
@@ -230,8 +246,15 @@ public class MassbankParser{
 					precursorMZ = Double.valueOf(line.substring(line.indexOf("MS$FOCUSED_ION: PRECURSOR_M/Z")+30, line.length())).doubleValue();		
 				}
 				
+
 				line = reader.readLine();
 			}
+			
+			if(line.contains("MS$FOCUSED_ION: PRECURSOR_TYPE"))
+			{
+				precursorType = (line.substring(line.indexOf("MS$FOCUSED_ION: PRECURSOR_TYPE")+31, line.length()));
+			} 
+			
 			if(!line.contains("PK$PEAK"))
 				precursorType = line.substring(31);
 	  	
@@ -253,7 +276,7 @@ public class MassbankParser{
 			if(precursorMZ==0.0) //TODO: 
 			{
 				
-				Map<String ,Double> preType = readPrecrusorTypes();
+				Map<String ,Double> preType = readPrecursorTypes();
 			
 				if(preType.containsKey(precursorType))
 				{
@@ -272,7 +295,7 @@ public class MassbankParser{
 		return spectra;
 	}
 	
-	public static Map<String,Double> readPrecrusorTypes()
+	public static Map<String,Double> readPrecursorTypes()
 	{
 		Map<String, Double> preType = new HashMap<String, Double>();
 
@@ -332,7 +355,7 @@ public class MassbankParser{
 		Vector<Spectrum> spectra = Read("/home/ftarutti/records/CO000001.txt");
 		System.out.println(spectra.get(0).getPrecursorType() + spectra.get(0).getPrecursorMZ());
 		spectra = Read("/home/swolf/MassBankData/MetFragSunGrid/HillPaperDataMerged/4_Aminoantipyrine_104_Aminoantipyrine_204_Aminoantipyrine_304_Aminoantipyrine_404_Aminoantipyrine_50.txt");
-		System.out.println(spectra.get(0).getCID());
+		//System.out.println(spectra.get(0).getCID());
 		
 		int j=0;
 		
@@ -340,6 +363,6 @@ public class MassbankParser{
 			Spectrum spectrum = (Spectrum) iterator.next();
 		}
 		
-		readPrecrusorTypes();
+		readPrecursorTypes();
 	}
 }
