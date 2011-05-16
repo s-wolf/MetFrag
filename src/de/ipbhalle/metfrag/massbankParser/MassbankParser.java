@@ -21,8 +21,13 @@
 package de.ipbhalle.metfrag.massbankParser;
 
 import java.io.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Vector;
 import java.util.TreeMap;
+
+import de.ipbhalle.metfrag.spectrum.NeutralLoss;
 
 
 public class MassbankParser{
@@ -50,6 +55,9 @@ public class MassbankParser{
 		String IUPAC = "";
 		int mode = 0, collisionEnergy = 0;
 		double mass = 0.0, focusedMass = 0.0;
+		
+		double precursorMZ=0.0;
+		
 		Vector<Peak> peaks;
 		Vector<Spectrum> spectra = new Vector<Spectrum>();
 		//Vector<Compound> compounds = new Vector<Compound>(); not used....
@@ -95,7 +103,7 @@ public class MassbankParser{
 			  	  line = reader.readLine();
 			  	}
 			  	//exact mass
-			  	mass = Double.parseDouble(line.substring(line.indexOf("CH$EXACT_MASS")+15));
+			  	mass = Double.valueOf(line.substring(line.indexOf("CH$EXACT_MASS")+15));
 			  	
 			  	
 			  	//skipped CH$SMILES - SMILES code
@@ -184,11 +192,66 @@ public class MassbankParser{
 				  	}
 					
 			  		line = reader.readLine();
-			  	}		
+			  	}	
+			  	
+			  	
+			  	
+		  		// PRECURSOR_TYPE: POSITIVE (1) or NEGATIVE (-1)
+				if (line.contains("AC$ANALYTICAL_CONDITION: PRECURSOR_TYPE") && line.substring(line.indexOf("AC$ANALYTICAL_CONDITION: PRECURSOR_TYPE")+40).contains("[M+H]+"))
+				{
+					mode = 1;
+					isPositive = true;
+				}
+				else
+				{
+					mode = -1;
+					isPositive = false;
+				}
+				//RIKEN Spektren
+				if (line.contains("AC$ANALYTICAL_CONDITION: MODE") && line.substring(line.indexOf("AC$ANALYTICAL_CONDITION: MODE")+30).contains("POSITIVE"))
+				{
+					mode = 1;
+					isPositive = true;
+				}
+				else
+				{
+					mode = -1;
+					isPositive = false;
+				}
+			}
+		  	
+		  	
+	
+			
+				
+			
+
+	  		//skipped PRECURSER SELECTION, FRAGMENTATION_EQUIPMENT, SPECTRUM_TYPE.....
+		  	while (line != null && !line.contains("AC$ANALYTICAL_CONDITION: COLLISION_ENERGY")){
+		  		if(line.contains("AC$ANALYTICAL_CONDITION: PRECURSOR_TYPE"))
+		  		{
+		  			precursorType = (line.substring(line.indexOf("AC$ANALYTICAL_CONDITION: PRECURSOR_TYPE")+40, line.length()));
+		  		}
+		  		line = reader.readLine();
+		  	}
+			try
+			{
+				collisionEnergy = Integer.parseInt(line.substring(line.indexOf("AC$ANALYTICAL_CONDITION: COLLISION_ENERGY")+42, line.length()-3));
+			}
+			catch(NumberFormatException e)
+			{
+				//error in source file
+				collisionEnergy = 0;
 			}
 		  				
 			while (!line.contains("PK$PEAK") && line != null && !line.contains("MS$FOCUSED_ION: PRECURSOR_TYPE")){
-			  	  line = reader.readLine();
+			  	
+				if(line.contains("MS$FOCUSED_ION: PRECURSOR_M/Z"))
+				{
+					precursorMZ = Double.valueOf(line.substring(line.indexOf("MS$FOCUSED_ION: PRECURSOR_M/Z")+30, line.length())).doubleValue();		
+				}
+				
+				line = reader.readLine();
 			}
 			if(!line.contains("PK$PEAK"))
 				precursorType = line.substring(31);
@@ -203,12 +266,24 @@ public class MassbankParser{
 				array = line.split(" ");
 				// array[2] is mass, array[3] abs. intensity, array[4] rel. intensity.
 				// spectra.size shows how many spectra had a lower energy than the spectrum this peak belongs to.
-				peaks.add(new Peak(Double.parseDouble(array[2]), Double.parseDouble(array[3]), Double.parseDouble(array[4]), collisionEnergy));
+				peaks.add(new Peak(Double.valueOf(array[2]), Double.valueOf(array[3]), Double.valueOf(array[4]), collisionEnergy));
 				line = reader.readLine();
 			}
-			spectra.add(new Spectrum(collisionEnergy, peaks, mass, mode, IUPAC, linkPubChem, linkKEGG, linkCHEBI, nameTrivial, formula, precursorType, isPositive));
 			
+			
+			if(precursorMZ==0.0) //TODO: 
+			{
 				
+				Map<String ,Double> preType = readPrecrusorTypes();
+			
+				if(preType.containsKey(precursorType))
+				{
+					precursorMZ=preType.get(precursorType)+mass;
+				}
+				
+			}
+			
+			spectra.add(new Spectrum(collisionEnergy, peaks, mass, mode, IUPAC, linkPubChem, linkKEGG, nameTrivial, formula,precursorMZ, precursorType, isPositive));	
 			}
 			catch (IOException e) {
 				System.out.println("File not found!!! Error: " +e.getMessage());
@@ -218,10 +293,67 @@ public class MassbankParser{
 		return spectra;
 	}
 	
+	public static Map<String,Double> readPrecrusorTypes()
+	{
+		Map<String, Double> preType = new HashMap<String, Double>();
+
+		String file = "";
+		
+		if(System.getProperty("property.file.path") != null)
+    	{
+    		file = System.getProperty("property.file.path");
+    		file += "precursorType.csv";
+    	}
+		try {
+			BufferedReader in = new BufferedReader(new FileReader(file));
+			
+			
+			String line =in.readLine();
+			 line=in.readLine();
+			
+			while(line!=null)
+			{
+		
+				if(!line.substring(0,1).equals("#"))
+				{
+					
+					String [] dummi=new String[line.split("\\s+").length];
+					dummi=line.split("\\s+");
+					preType.put(dummi[0], Double.valueOf(dummi[1]).doubleValue());
+
+					
+				}
+				
+				
+				line =in.readLine();
+			}
+			
+			
+			
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+		return preType;
+	}
+	
 	public static void main(String[] args) {
-		Vector<Spectrum> spectra = Read("/vol/massbank/data/PR100304PR100305.txt");
-		System.out.println(spectra.get(0).getCHEBI());
-		System.out.println(spectra.get(0).getKEGG());
-		System.out.println(spectra.get(0).getCID());
+		
+		Vector<Spectrum> spectra = Read("/home/ftarutti/records/CO000001.txt");
+		
+		//Vector<Spectrum> spectra = Read("/home/swolf/MassBankData/MetFragSunGrid/HillPaperDataMerged/4_Aminoantipyrine_104_Aminoantipyrine_204_Aminoantipyrine_304_Aminoantipyrine_404_Aminoantipyrine_50.txt");
+		
+		int j=0;
+		
+		for (Iterator iterator = spectra.iterator(); iterator.hasNext();) {
+			Spectrum spectrum = (Spectrum) iterator.next();
+		}
+		
+		readPrecrusorTypes();
 	}
 }
