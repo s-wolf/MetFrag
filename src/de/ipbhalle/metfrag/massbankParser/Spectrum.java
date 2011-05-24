@@ -29,6 +29,7 @@ import java.util.Iterator;
 public class Spectrum  implements java.io.Serializable, Comparable<Spectrum> {
 
 	private int collisionEnergy;
+
 	private Vector<Peak> peaks;
 	private double tic;
 	private double exactMass;
@@ -44,7 +45,8 @@ public class Spectrum  implements java.io.Serializable, Comparable<Spectrum> {
 	private String precursorType;
 	
 	public Spectrum(int collisionEnergy, double tic, Vector<Peak> peaks, double exactMass, int mode, String InchI, int CID, String KEGG, String CHEBI, String nameTrivial, String formula, double precursorMZ, String precursorType, boolean isPositive){
-		this.collisionEnergy = collisionEnergy;
+		this.collisionEnergy =  collisionEnergy;
+		
 		this.tic = tic;
 		this.peaks = peaks;
 		this.exactMass = exactMass;
@@ -61,12 +63,15 @@ public class Spectrum  implements java.io.Serializable, Comparable<Spectrum> {
 	}
 	
 	public Spectrum(int collisionEnergy, Vector<Peak> peaks, double exactMass, int mode, String InchI, int CID, String KEGG, String linkCHEBI, String nameTrivial, String formula, double precursorMZ, String precursorType, boolean isPositive){
-		this(collisionEnergy, 0.0, peaks, exactMass, mode, InchI, CID, KEGG, linkCHEBI, nameTrivial, formula, precursorMZ, precursorType, isPositive);
+		this( collisionEnergy, 0.0, peaks, exactMass, mode, InchI, CID, KEGG, linkCHEBI, nameTrivial, formula, precursorMZ, precursorType, isPositive);
 	}	
 	
 	public int getCollisionEnergy(){
 		return collisionEnergy;
 	}
+	
+
+	
 	
 	public double getTic(){
 		return tic;
@@ -111,6 +116,8 @@ public class Spectrum  implements java.io.Serializable, Comparable<Spectrum> {
 		this.collisionEnergy = collisionEnergy;
 	}
 	
+
+	
 	public void setTic(double tic){
 		this.tic = tic;
 	}
@@ -120,7 +127,15 @@ public class Spectrum  implements java.io.Serializable, Comparable<Spectrum> {
 	}
 	
 	public int compareTo(Spectrum another){
-		return (collisionEnergy - another.collisionEnergy);
+		if(this.collisionEnergy==0.0 || another.collisionEnergy==0.0)
+		{
+			throw new NumberFormatException("For at least one spectra there is no collision energy stored or at least one spectra is a ramp spectra."); 
+		}
+		else
+		{
+			return (collisionEnergy - another.collisionEnergy);
+			
+		}
 	}
 	
 	/* TODO: Fix method ... IntensityComparator??? */
@@ -202,5 +217,22 @@ public class Spectrum  implements java.io.Serializable, Comparable<Spectrum> {
 
 	public String getCHEBI() {
 		return CHEBI;
+	}
+	
+	public void show()
+	{
+		System.out.println("coll energy "+collisionEnergy);
+	
+		System.out.println("exactMass " + exactMass);
+		System.out.println("mode " + mode);
+		System.out.println("InchI " +InchI);
+		System.out.println("CID " + CID);
+		System.out.println("KEGG " + KEGG);
+		System.out.println("linkCHEBI " + CHEBI);
+		System.out.println("nameTrivial " + nameTrivial);
+		System.out.println("formula " + formula);
+		System.out.println("precursorMZ " + precursorMZ);
+		System.out.println("precursorType " + precursorType);
+		System.out.println("isPositive " + isPositive);
 	}
 }
