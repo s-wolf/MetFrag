@@ -65,7 +65,7 @@ public class WrapperSpectrum {
 	 * @param filename the filename
 	 */
 	public WrapperSpectrum(String filename){
-		this.spectra = MassbankParser.Read(filename);
+		this.spectra = NewMassbankParser.Read(filename);
 		this.peaks = spectra.get(0).getPeaks(); //just one spectra for now
 		this.exactMass = spectra.get(0).getExactMass();
 		this.mode = spectra.get(0).getMode();
