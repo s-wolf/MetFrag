@@ -34,7 +34,7 @@ import de.ipbhalle.metfrag.spectrum.NeutralLoss;
 
 public class MassbankParser{
 	
-	public static Vector<Spectrum> Read(String filename) {
+	/*public static Vector<Spectrum> Read(String filename) {
 		ElementTable et = new ElementTable();
 		et.add(new Element("C", 12.0, 4));
 		et.add(new Element("H", 1.007825, 1));
@@ -255,7 +255,7 @@ public class MassbankParser{
 				
 			}
 			
-			spectra.add(new Spectrum(collisionEnergy, peaks, mass, mode, IUPAC, linkPubChem, linkKEGG, linkCHEBI, nameTrivial, formula, precursorMZ, precursorType, isPositive));	
+			spectra.add(new Spectrum(collisionEnergy,collisionEnergy, peaks, mass, mode, IUPAC, linkPubChem, linkKEGG, linkCHEBI, nameTrivial, formula, precursorMZ, precursorType, isPositive));	
 			}
 			catch (IOException e) {
 				System.out.println("File not found!!! Error: " +e.getMessage());
@@ -323,7 +323,7 @@ public class MassbankParser{
 	public static void main(String[] args) {
 		
 		Vector<Spectrum> spectra = Read("/home/ftarutti/records/CO000001.txt");
-		System.out.println(spectra.get(0).getPrecursorType() + spectra.get(0).getPrecursorMZ());
+		System.out.println(spectra.get(0).getPrecursorType() +"   "+ spectra.get(0).getPrecursorMZ()+"  "+spectra.get(0).getExactMass());
 		spectra = Read("/home/swolf/MassBankData/MetFragSunGrid/HillPaperDataMerged/4_Aminoantipyrine_104_Aminoantipyrine_204_Aminoantipyrine_304_Aminoantipyrine_404_Aminoantipyrine_50.txt");
 		//System.out.println(spectra.get(0).getCID());
 		
@@ -334,5 +334,5 @@ public class MassbankParser{
 		}
 		
 		readPrecursorTypes();
-	}
+	}*/
 }

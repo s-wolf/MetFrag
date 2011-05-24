@@ -44,8 +44,8 @@ public class Peak implements Comparable<Peak>, java.io.Serializable {
 		this.intensity = intensity;
 		this.relIntensityDB = relIntensityDB;
 		relIntensity = 0.0;
-		lowestEnergy = energy;
-		highestEnergy = energy;
+		this.lowestEnergy = energy;
+		this.highestEnergy = energy;
 	}
 	
 	/**
@@ -60,8 +60,8 @@ public class Peak implements Comparable<Peak>, java.io.Serializable {
 		this.intensity = intensity;
 		this.relIntensityDB = 0.0;
 		relIntensity = 0.0;		
-		lowestEnergy = energy;
-		highestEnergy = energy;
+		this.lowestEnergy = energy;
+		this.highestEnergy = energy;
 	}
 
 	public double getMass(){
@@ -120,6 +120,12 @@ public class Peak implements Comparable<Peak>, java.io.Serializable {
 	public void setEnergy(int energy){
 		this.lowestEnergy = energy;
 		this.highestEnergy = energy;		
+	}
+	
+	public void setEnergy(int lowestEnergy, int highestEnergy)
+	{
+		this.lowestEnergy = lowestEnergy;
+		this.highestEnergy = highestEnergy;
 	}
 	
 	public boolean isEnergyAdjacent(Peak another){
