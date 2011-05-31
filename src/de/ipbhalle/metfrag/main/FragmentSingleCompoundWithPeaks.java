@@ -47,6 +47,7 @@ import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 import de.ipbhalle.metfrag.fragmenter.Fragmenter;
 import de.ipbhalle.metfrag.keggWebservice.KeggWebservice;
 import de.ipbhalle.metfrag.massbankParser.Peak;
+import de.ipbhalle.metfrag.read.CMLTools;
 import de.ipbhalle.metfrag.read.Molfile;
 import de.ipbhalle.metfrag.spectrum.AssignFragmentPeak;
 import de.ipbhalle.metfrag.spectrum.CleanUpPeakList;
@@ -158,7 +159,7 @@ public class FragmentSingleCompoundWithPeaks {
 		
 		
 		List<IAtomContainer> l = new ArrayList<IAtomContainer>();
-		l = Molfile.ReadfolderTemp(l1);
+		l = CMLTools.ReadfolderTemp(l1);
 		
 		StructureRendererTable.Draw(molecule, l, "");
 		
