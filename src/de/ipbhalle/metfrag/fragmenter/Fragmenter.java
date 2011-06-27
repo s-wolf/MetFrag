@@ -1636,6 +1636,7 @@ public class Fragmenter {
                 		atom1.setProperties(bondedAtom.getProperties());
                 		atom1.setFlags(bondedAtom.getFlags());
                 		atom1.setPoint3d(bondedAtom.getPoint3d());
+                		atom1.setPoint2d(bondedAtom.getPoint2d());
                 	}
                 	else
                 	{
@@ -1647,6 +1648,7 @@ public class Fragmenter {
                 		atom2.setProperties(bondedAtom.getProperties());
                 		atom2.setFlags(bondedAtom.getFlags());
                 		atom2.setPoint3d(bondedAtom.getPoint3d());
+                		atom2.setPoint2d(bondedAtom.getPoint2d());
                 	}
             	}
 

@@ -22,6 +22,7 @@ package de.ipbhalle.metfrag.main;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -29,6 +30,8 @@ import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import javax.xml.rpc.ServiceException;
 
 import org.openscience.cdk.DefaultChemObjectBuilder;
 import org.openscience.cdk.Molecule;
@@ -47,7 +50,9 @@ import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 
 import de.ipbhalle.metfrag.fragmenter.Fragmenter;
 import de.ipbhalle.metfrag.massbankParser.Peak;
+import de.ipbhalle.metfrag.pubchem.PubChemWebService;
 import de.ipbhalle.metfrag.read.Molfile;
+import de.ipbhalle.metfrag.read.SDFFile;
 import de.ipbhalle.metfrag.spectrum.WrapperSpectrum;
 import de.ipbhalle.metfrag.tools.MolecularFormulaTools;
 import de.ipbhalle.metfrag.tools.renderer.StructureRenderer;
@@ -87,12 +92,10 @@ public class FragmentSingleCompound {
 	 * @return the fragments
 	 * @throws Exception 
 	 */
-	public List<String> getFragments(String smilesToFragment, Double minMass, boolean render, boolean writeSDFFragments) throws Exception
+	public List<String> getFragments(IAtomContainer molecule, Double minMass, boolean render, boolean writeSDFFragments) throws Exception
 	{
 		List<String> resultingSmiles = new ArrayList<String>();
-		SmilesParser sp = new SmilesParser(DefaultChemObjectBuilder.getInstance());
-		//parse smiles
-		IAtomContainer molecule = sp.parseSmiles(smilesToFragment);
+		
 		//configure atoms
 		AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(molecule);
 		//add all hydrogens explicitly
@@ -223,6 +226,43 @@ public class FragmentSingleCompound {
 		Boolean render = false;
 		Boolean writeToFile = false;
 		
+//		SmilesParser sp = new SmilesParser(DefaultChemObjectBuilder.getInstance());
+//		//parse smiles
+//		IAtomContainer molecule = sp.parseSmiles(smilesToFragment);
+		
+		
+//    	IAtomContainer molecule = null;
+//		try {
+//			PubChemWebService pubchemService = new PubChemWebService();
+//			molecule = pubchemService.getSingleMol("5288826", true);
+//		} catch (CDKException e1) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		} catch (InterruptedException e1) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		} catch (IOException e1) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		} catch (ServiceException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+
+		List<IAtomContainer> moleculeList = null;
+		try {
+			moleculeList = SDFFile.ReadSDFFile("/home/swolf/Downloads/Morphine3d.sdf");
+		} catch (FileNotFoundException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (CDKException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		IAtomContainer molecule = moleculeList.get(0);
+    	
+    	
+		
 		//get command line arguments
 //		if(args != null && args.length == 5)
 //		{
@@ -252,7 +292,7 @@ public class FragmentSingleCompound {
 		test.setTreeDepth(2);
 		
 		try {
-			List<String> resultingFragments = test.getFragments(smiles, minMass, render, true);
+			List<String> resultingFragments = test.getFragments(molecule, minMass, render, true);
 			List<String> resultingEnergies = test.getEnergies();
 			List<String> resultingNeutralLosses = test.getNeutralLosses();
 			
@@ -266,7 +306,7 @@ public class FragmentSingleCompound {
 				
 				SmilesParser sp = new SmilesParser(DefaultChemObjectBuilder.getInstance());
 				//parse smiles
-				IAtomContainer molecule = sp.parseSmiles(resultingFragments.get(i));
+				IAtomContainer mol = sp.parseSmiles(resultingFragments.get(i));
 				//configure atoms
 //				AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(molecule);
 //				//add all hydrogens explicitly
@@ -274,7 +314,7 @@ public class FragmentSingleCompound {
 //		        adder1.addImplicitHydrogens(molecule);
 //		        AtomContainerManipulator.convertImplicitToExplicitHydrogens(molecule); 
 		        
-		        IMolecularFormula formula = MolecularFormulaManipulator.getMolecularFormula(molecule);
+		        IMolecularFormula formula = MolecularFormulaManipulator.getMolecularFormula(mol);
 		  		
 		        if(writeToFile)
 			        out.write(resultingFragments.get(i) + "\t" + resultingEnergies.get(i) + "\t" + MolecularFormulaManipulator.getString(formula) + "\t" + MolecularFormulaTools.getMonoisotopicMass(formula) + "\t" + resultingNeutralLosses.get(i) +"\n"); 

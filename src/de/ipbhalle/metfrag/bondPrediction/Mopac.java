@@ -71,7 +71,7 @@ public class Mopac {
 	 * @return the i atom container
 	 * @throws Exception the exception
 	 */
-	public IAtomContainer runOptimization(String pathToBabel, IAtomContainer molToOptimize, int ffSteps, boolean verbose, String ffMethod, String mopacMethod, Integer mopacRuntime, boolean firstRun, String atomProtonized, boolean deleteTemp) throws Exception
+	public IAtomContainer runOptimization(String pathToBabel, IAtomContainer molToOptimize, int ffSteps, boolean verbose, String ffMethod, String mopacMethod, Integer mopacRuntime, boolean firstRun, String atomProtonized, boolean deleteTemp, int charge) throws Exception
 	{		
 		
 		this.errorMessage = "";
@@ -185,7 +185,7 @@ public class Mopac {
         //generate mopin from mol2
         
         //replace babel mopin generation with own mopin writer
-        MOPACInputFormatWriter mopIn = new MOPACInputFormatWriter(mopacMethod + " T=" + mopacRuntime + " GEO-OK, ECHO, MMOK, SCFCRT=1.D-4, GNORM=0.1, XYZ");
+        MOPACInputFormatWriter mopIn = new MOPACInputFormatWriter(mopacMethod + " T=" + mopacRuntime + " GEO-OK, ECHO, MMOK, SCFCRT=1.D-4, GNORM=0.1, XYZ, BONDS, EF");
         File tempFileMOPIn = File.createTempFile("molMopIN",".dat");
         if(deleteTemp)
         	tempFileMOPIn.deleteOnExit();
@@ -229,7 +229,7 @@ public class Mopac {
         int count = 0;
         //let the process calculate for 10 minutes
         boolean done = false;
-        while(count < ((mopacRuntime + 10)/6))
+        while(count < ((mopacRuntime + 50)/6))
         {
 //        	Thread.sleep(12000);
 //        	//test START
@@ -453,7 +453,7 @@ public class Mopac {
 				{
 					try
 					{
-						mopac.runOptimization("/vol/local/bin/", mol, 600, true, "Ghemical", "AM1", 1200, true, "none", false);
+						mopac.runOptimization("/vol/local/bin/", mol, 600, true, "Ghemical", "AM1", 1200, true, "none", false, 0);
 						output = fileArr[i].getName() + "\tHeat of Formation: " + mopac.getHeatOfFormation() + "\tTime: " + mopac.getTime() + "\tWarning: " + mopac.getWarningMessage() + "\tError: " + mopac.getErrorMessage() + "\n";
 					}
 					catch(IndexOutOfBoundsException e)
