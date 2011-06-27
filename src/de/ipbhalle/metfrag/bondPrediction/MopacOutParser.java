@@ -250,6 +250,11 @@ public class MopacOutParser {
 		this.error = error;
 	}
 	
+	public Map<String, ArrayList<String> > getBondOrder()
+	{
+		return bondOrder;
+	}
+	
 	public static void main(String[] args) {
 		//MopacOutParser parser = new MopacOutParser("/tmp/molMopIN970033810921000308.OUT");
 		//System.out.println("HoF: " + parser.getHeatOfFormation() + "\nTime: " + parser.getTime() + "\nWarning: " + parser.getWarning() + "\nError: " + parser.getError());
