@@ -24,6 +24,9 @@ package de.ipbhalle.metfrag.bondPrediction;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MopacOutParser {
 	
@@ -33,16 +36,27 @@ public class MopacOutParser {
 	private String error = "";
 	private String warning = "";
 	
+	private int numberOfAtoms=0;
+	
+	
+	Map<String, ArrayList<String> > bondOrder = new HashMap<String, ArrayList<String> >();
+	
+
+	
 	/**
 	 * Instantiates a new mopac out parser. This parses the *.OUT file from MOPAC
 	 * and scans it for errors and the HEAT OF FORMATION.
 	 *
 	 * @param fileName the file name
 	 */
-	public MopacOutParser(String fileName)
+	public MopacOutParser(String fileName,int numberOfAtoms)
 	{
+		this.numberOfAtoms=numberOfAtoms;
+		
 		this.filename = fileName;
 		readData();
+		
+		
 	}
 	
 	/**
@@ -108,6 +122,93 @@ public class MopacOutParser {
 					warning += line + "; ";
 				}
 				
+				
+				if(line.contains("BOND ORDERS AND VALENCIES"))
+				{
+
+			
+					do
+					{
+						line = br.readLine();
+					}
+					while(!line.contains("--"));
+					
+					line = br.readLine();
+					
+					while(line.split("\\s+").length>1)
+					{
+						String foo[] = new String [ line.split("\\s+").length];
+						foo = line.split("\\s+");
+						
+						ArrayList <String> pos= new ArrayList<String>();
+						for(int j=3;j<foo.length;j++)
+						{
+							pos.add(foo[j]);
+							
+						}
+						
+						bondOrder.put(foo[2] , pos);
+						
+						line = br.readLine();
+					}
+					
+
+					do
+					{
+						//Check, if there are more than one tables; the tables are separated with lines containing either 0 or 1					
+						while(line.split("\\s+").length==1)
+						{
+							line = br.readLine();
+							
+						}
+						
+						
+						
+						do
+						{
+							line = br.readLine();
+						}
+						while(!line.contains("--"));
+						
+						line=br.readLine();
+						
+						while(line.split("\\s+").length>1)
+						{
+					
+							String foo[] = new String [ line.split("\\s+").length];
+							foo = line.split("\\s+");
+							
+							
+							if(bondOrder.containsKey(foo[2]))
+							{
+								for(int j=3;j<foo.length;j++)
+								{
+									bondOrder.get(foo[2]).add(foo[j]);								
+								}
+							}
+							else{
+								ArrayList <String> pos= new ArrayList<String>();
+								for(int j=3;j<foo.length;j++)
+								{
+									pos.add(foo[j]);
+								
+								}
+							
+								bondOrder.put(foo[2] , pos);
+							}
+							line = br.readLine();
+							
+						}
+				
+		
+						
+					}
+					while(  !(bondOrder.size()==numberOfAtoms && bondOrder.get(""+numberOfAtoms).size() == numberOfAtoms ));
+					
+				
+					
+				}
+				
 				line = br.readLine();
 		    }
 			br.close();
@@ -150,12 +251,21 @@ public class MopacOutParser {
 	}
 	
 	public static void main(String[] args) {
-		MopacOutParser parser = new MopacOutParser("/tmp/molMopIN970033810921000308.OUT");
-		System.out.println("HoF: " + parser.getHeatOfFormation() + "\nTime: " + parser.getTime() + "\nWarning: " + parser.getWarning() + "\nError: " + parser.getError());
+		//MopacOutParser parser = new MopacOutParser("/tmp/molMopIN970033810921000308.OUT");
+		//System.out.println("HoF: " + parser.getHeatOfFormation() + "\nTime: " + parser.getTime() + "\nWarning: " + parser.getWarning() + "\nError: " + parser.getError());
 		
-		parser = new MopacOutParser("/tmp/molMopIN992547100097121308.OUT");
-		System.out.println("HoF: " + parser.getHeatOfFormation() + "\nTime: " + parser.getTime() + "\nWarning: " + parser.getWarning() + "\nError: " + parser.getError());
+		//parser = new MopacOutParser("/tmp/molMopIN992547100097121308.OUT");
+		//System.out.println("HoF: " + parser.getHeatOfFormation() + "\nTime: " + parser.getTime() + "\nWarning: " + parser.getWarning() + "\nError: " + parser.getError());
 
+		
+		MopacOutParser parser = new MopacOutParser("/home/ftarutti/Desktop/CheckParser/test35Atome.txt",35);
+		
+		//System.out.println(parser.bondOrder.get("1").toString());
+		for(int i=1;i<parser.bondOrder.size()+1;i++)
+		{
+			String key = ""+i;
+			System.out.println(parser.bondOrder.get(key).toString());
+		}
 	}
 
 }

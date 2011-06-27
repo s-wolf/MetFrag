@@ -178,10 +178,10 @@ public class NewMassbankParser {
 				while(!line.contains("//"))
 				{
 	
-					String dummi[] = new String[line.split("\\s+").length];
-					dummi=line.split("\\s+");
+					String splitString[] = new String[line.split("\\s+").length];
+					splitString=line.split("\\s+");
 
-					peaks.add(new Peak(Double.valueOf(dummi[1]), Double.valueOf(dummi[2]), Double.valueOf(dummi[3]), collisionEnergy));
+					peaks.add(new Peak(Double.valueOf(splitString[1]), Double.valueOf(splitString[2]), Double.valueOf(splitString[3]), collisionEnergy));
 					line = in.readLine();
 				}
 				
@@ -252,13 +252,13 @@ public class NewMassbankParser {
 			if(dblink[1].equals("PUBCHEM"))
 	  		{
 	
-				String dummi[] = new String[dblink[2].split(":").length];
+				String splitString[] = new String[dblink[2].split(":").length];
 				
-				dummi = dblink[2].split(":");
+				splitString = dblink[2].split(":");
 
 			
 				
-				linkPubChem = Integer.valueOf(dummi[1]).intValue();
+				linkPubChem = Integer.valueOf(splitString[1]).intValue();
 	  			
 	  		}
 	  		else if(dblink[1].equals("KEGG"))
@@ -280,33 +280,33 @@ public class NewMassbankParser {
 			{
 				
 			
-				String dummi[] = new String [ ac.split("\\s+").length];
-				dummi =ac.split("\\s+");
+				String splitString[] = new String [ ac.split("\\s+").length];
+				splitString =ac.split("\\s+");
 				
-				precursorType = dummi[2];
+				precursorType = splitString[2];
 			}
 			
 			if(ac.startsWith(COLLISION_ENERGY))
 			{
-				String dummi[] = new String[ ac.split("\\s+").length ];
-				dummi= ac.split("\\s+");
+				String splitString[] = new String[ ac.split("\\s+").length ];
+				splitString= ac.split("\\s+");
 	
 				try{
 					
-					collisionEnergy = Integer.valueOf(dummi[2]).intValue();
-					collisionEnergy = Integer.valueOf(dummi[2]).intValue();
+					collisionEnergy = Integer.valueOf(splitString[2]).intValue();
+					collisionEnergy = Integer.valueOf(splitString[2]).intValue();
 				}
 				catch(NumberFormatException e)
 				{
 	
-					dummi[2].toUpperCase();
-					if(dummi[2].equals("RAMP"))
+					splitString[2].toUpperCase();
+					if(splitString[2].equals("RAMP"))
 					{
-						String[] dummi2 = new String[dummi[3].split("-").length];
-						dummi2= dummi[3].split("-");
+						String[] splitString2 = new String[splitString[3].split("-").length];
+						splitString2= splitString[3].split("-");
 						
-						collisionEnergy =  Integer.valueOf(dummi2[0]).intValue();
-						collisionEnergy =  Integer.valueOf(dummi2[1]).intValue();
+						collisionEnergy =  Integer.valueOf(splitString2[0]).intValue();
+						collisionEnergy =  Integer.valueOf(splitString2[1]).intValue();
 						
 						
 					}
@@ -315,11 +315,11 @@ public class NewMassbankParser {
 			
 			if(ac.startsWith(MODE))
 			{
-				String dummi[] = new String[ac.split("\\s+").length];
+				String splitString[] = new String[ac.split("\\s+").length];
 				
-				dummi = ac.split("\\s+");
+				splitString = ac.split("\\s+");
 	
-				if(dummi[2].equals("POSITIVE"))
+				if(splitString[2].equals("POSITIVE"))
 				{
 					mode=1;
 					isPositive=true;
@@ -345,10 +345,10 @@ public class NewMassbankParser {
 			
 				if(ms.startsWith(PRECURSOR_TYPE))
 				{
-					String dummi[] = new String [ ms.split("\\s+").length];
-					dummi =ms.split("\\s+");
+					String splitString[] = new String [ ms.split("\\s+").length];
+					splitString =ms.split("\\s+");
 				
-					precursorType = dummi[2];
+					precursorType = splitString[2];
 				}
 			
 			}
@@ -387,28 +387,28 @@ public class NewMassbankParser {
 	
 	public static Map<String,ArrayList<String>> addElementsToMap(String line, Map<String,ArrayList<String>> map)
 	{
-		String[] dummi = new String[line.split(":").length];
-		dummi = line.split(":");
+		String[] splitString = new String[line.split(":").length];
+		splitString = line.split(":");
 
-		if(dummi.length>2)
+		if(splitString.length>2)
 		{
-			for (int i = 2; i < dummi.length; i++) {
-				dummi[1] += ":"+dummi[i]; 
+			for (int i = 2; i < splitString.length; i++) {
+				splitString[1] += ":"+splitString[i]; 
 			}
 		}
 		
-		if(map.containsKey(dummi[0]))
+		if(map.containsKey(splitString[0]))
 		{
 			
-			ArrayList<String> elements = map.get(dummi[0]);
-			elements.add(dummi[1]);
-			map.put(dummi[0], elements );	
+			ArrayList<String> elements = map.get(splitString[0]);
+			elements.add(splitString[1]);
+			map.put(splitString[0], elements );	
 		}
 		else{
 			
 			ArrayList<String> elements = new ArrayList<String>(); 
-			elements.add(dummi[1]);
-			map.put(dummi[0], elements );	
+			elements.add(splitString[1]);
+			map.put(splitString[0], elements );	
 		}
 		
 		return map;
@@ -444,9 +444,9 @@ public class NewMassbankParser {
 				if(!line.substring(0,1).equals("#"))
 				{
 					
-					String [] dummi=new String[line.split("\\s+").length];
-					dummi=line.split("\\s+");
-					preType.put(dummi[0], Double.valueOf(dummi[1]).doubleValue());
+					String [] splitString=new String[line.split("\\s+").length];
+					splitString=line.split("\\s+");
+					preType.put(splitString[0], Double.valueOf(splitString[1]).doubleValue());
 
 					
 				}
