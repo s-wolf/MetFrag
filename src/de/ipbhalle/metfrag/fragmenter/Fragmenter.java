@@ -412,7 +412,7 @@ public class Fragmenter {
     	{
     		//now find all bonds which are worth splitting
     		bondPrediction = new BondPrediction(this.aromaticBonds);
-    		this.bondsToBreak = bondPrediction.calculateBondsToBreak("/vol/local/bin/", this.originalMolecule, 600, "Ghemical", "AM1", 600, true);
+    		this.bondsToBreak = bondPrediction.calculateBondsToBreak("/vol/local/bin/", "wine /vol/local/bin/mopac6.exe", this.originalMolecule, 600, "Ghemical", "AM1", 600, true);
     	}
     	else
     	{
@@ -985,35 +985,7 @@ public class Fragmenter {
     {
     	return setBondEnergy(mol, bondEnergy.toString());
     }
-    
-    
-    /**
-     * Sets the bond energy.
-     * 
-     * @param mol the mol
-     * @param bondEnergy the bond energy
-     * 
-     * @return the i atom container
-     */
-    private IAtomContainer setBondEnergy(IAtomContainer origMol, IAtomContainer mol, Double bondEnergy)
-    {
-    	
-    	Map<Object, Object> props = mol.getProperties();
-    	String bondEnergyOrig = (String)origMol.getProperty("BondEnergy");
-    	if(bondEnergyOrig != null)
-    	{
-    		String sumEnergy = bondEnergyOrig + ";" + bondEnergy;
-    		props.put("BondEnergy", sumEnergy.toString());	
-    	}
-    	else
-    	{
-    		props.put("BondEnergy", bondEnergy.toString());
-    	}
-    	
-    	mol.setProperties(props);
-    	return mol;
-    }
-    
+        
     
     /**
      * Sets the bond energy.

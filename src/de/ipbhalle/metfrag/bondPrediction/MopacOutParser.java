@@ -263,13 +263,14 @@ public class MopacOutParser {
 		//System.out.println("HoF: " + parser.getHeatOfFormation() + "\nTime: " + parser.getTime() + "\nWarning: " + parser.getWarning() + "\nError: " + parser.getError());
 
 		
-		MopacOutParser parser = new MopacOutParser("/home/ftarutti/Desktop/CheckParser/test35Atome.txt",35);
+//		MopacOutParser parser = new MopacOutParser("/home/ftarutti/Desktop/CheckParser/test35Atome.txt",35);
+		MopacOutParser parser = new MopacOutParser("/tmp/molMopIN9025786486123172913.out", 34);
 		
 		//System.out.println(parser.bondOrder.get("1").toString());
 		for(int i=1;i<parser.bondOrder.size()+1;i++)
 		{
 			String key = ""+i;
-			System.out.println(parser.bondOrder.get(key).toString());
+			System.out.println(key + "\t" + parser.bondOrder.get(key).toString());
 		}
 	}
 

@@ -48,6 +48,7 @@ public class BondPrediction {
 		private IAtomContainer mol;
 		private IAtomContainer molWithAllProtonationSites;
 		private Map<String, Double> bondToBondLength;
+		private Map<String, Double> bondToBondOrder;
 		private boolean verbose = false;
 		private List<ChargeResult> results= null;
 		private List<IBond> aromaticBonds = null;
@@ -63,6 +64,7 @@ public class BondPrediction {
 		public BondPrediction(List<IBond> aromaticBonds)
 		{
 			this.bondToBondLength = new HashMap<String, Double>();
+			this.bondToBondOrder = new HashMap<String, Double>();
 			this.setResults(new ArrayList<ChargeResult>());
 			this.aromaticBonds = aromaticBonds;
 		}
@@ -98,7 +100,7 @@ public class BondPrediction {
 		 * @return the list< i bond>
 		 * @throws Exception the exception
 		 */
-		public List<String> calculateBondsToBreak(String pathToBabel, IAtomContainer mol, int FFSteps, String ffMethod, String mopacMethod, Integer mopacRuntime, boolean deleteTemp) throws Exception
+		public List<String> calculateBondsToBreak(String pathToBabel, String mopacExecuteable, IAtomContainer mol, int FFSteps, String ffMethod, String mopacMethod, Integer mopacRuntime, boolean deleteTemp) throws Exception
 		{		
 			List<String> bondsToBreak = new ArrayList<String>();
 			
@@ -106,7 +108,7 @@ public class BondPrediction {
 			Mopac mopac = new Mopac();
 			try {	
 				//now optimize the structure of the neutral molecue
-	    		this.mol = mopac.runOptimization(pathToBabel, mol, FFSteps, true, ffMethod, mopacMethod, mopacRuntime, true, "Neutral", deleteTemp, 0);
+	    		this.mol = mopac.runOptimization(pathToBabel,mopacExecuteable, mol, FFSteps, true, ffMethod, mopacMethod, mopacRuntime, true, "Neutral", deleteTemp, 0);
 	    		if(this.mol == null)
 	    		{
 	    			this.mopacMessagesNeutral = "ERROR!\nHeat of Formation: " + mopac.getHeatOfFormation() + "\nTime: " + mopac.getTime() + "\nWarning: " + mopac.getWarningMessage() + "\nError: " + mopac.getErrorMessage() + "\n\n";
@@ -116,7 +118,8 @@ public class BondPrediction {
 	    		else
 	    			this.mopacMessagesNeutral = "Neutral Molecule MOPAC\nHeat of Formation: " + mopac.getHeatOfFormation() + "\nTime: " + mopac.getTime() + "\nWarning: " + mopac.getWarningMessage() + "\nError: " + mopac.getErrorMessage() + "\n\n";
 
-	    		
+	    		Map<String, Double> bondToBondOrderOrig = new HashMap<String, Double>();
+            	bondToBondOrderOrig = mopac.getBondOrder();
 	    		
 	        	GasteigerMarsiliPartialCharges peoe = new GasteigerMarsiliPartialCharges();
 //	        	GasteigerPEPEPartialCharges pepe = new GasteigerPEPEPartialCharges();
@@ -189,7 +192,9 @@ public class BondPrediction {
 						System.out.println("Protonation of atom: " + chargesArray[i].getAtom().getSymbol()  + (Integer.parseInt(chargesArray[i].getAtom().getID()) + 1));
 					
 					IAtom hydrogenAtom = new Atom("H");
+					hydrogenAtom.setID(Integer.toString(this.mol.getAtomCount()));
 					IBond hydrogenBond = new Bond(AtomContainerManipulator.getAtomById(protonatedMol, chargesArray[i].getAtom().getID()), hydrogenAtom);
+					hydrogenBond.setID(Integer.toString(this.mol.getBondCount()));
 					protonatedMol.addAtom(hydrogenAtom);
 					protonatedMol.addBond(hydrogenBond);
 					AtomContainerManipulator.getAtomById(protonatedMol, chargesArray[i].getAtom().getID()).setFormalCharge(1);
@@ -227,7 +232,10 @@ public class BondPrediction {
 		            
 		            try
 		            {
-		            	protonatedMol = mopac.runOptimization(pathToBabel, protonatedMol, FFSteps, true, ffMethod, mopacMethod, mopacRuntime, false, chargesArray[i].getAtom().getSymbol()  + (Integer.parseInt(chargesArray[i].getAtom().getID()) + 1), deleteTemp, 1);
+		            	protonatedMol = mopac.runOptimization(pathToBabel, mopacExecuteable, protonatedMol, FFSteps, true, ffMethod, mopacMethod, mopacRuntime, false, chargesArray[i].getAtom().getSymbol()  + (Integer.parseInt(chargesArray[i].getAtom().getID()) + 1), deleteTemp, 1);
+		            	Map<String, Double> bondToBondOrderProtonated = new HashMap<String, Double>();
+		            	bondToBondOrderProtonated = mopac.getBondOrder();
+		            	
 		            	//something went wrong during optimization
 		            	if(protonatedMol == null)
 		            	{
@@ -344,13 +352,18 @@ public class BondPrediction {
 								double distRound = Math.round((dist * normalizedPartialChargeOfProtonizedAtom) * 1000.0)/1000.0;
 								
 								//set the bond length change
-								protonatedMol.getBond(AtomContainerManipulator.getAtomById(protonatedMol, cpd2BondToDistance.get(bondID).getAtom1ID()), AtomContainerManipulator.getAtomById(protonatedMol, cpd2BondToDistance.get(bondID).getAtom2ID())).setProperty("bondLengthChange", distRound);
+								protonatedMol.getBond(AtomContainerManipulator.getAtomById(protonatedMol, cpd2BondToDistance.get(bondID).getAtom1ID()), AtomContainerManipulator.getAtomById(protonatedMol, cpd2BondToDistance.get(bondID).getAtom2ID()))
+									.setProperty("bondLengthChange", distRound);
+								//set bond order
+								protonatedMol.getBond(AtomContainerManipulator.getAtomById(protonatedMol, cpd2BondToDistance.get(bondID).getAtom1ID()), AtomContainerManipulator.getAtomById(protonatedMol, cpd2BondToDistance.get(bondID).getAtom2ID()))
+									.setProperty("bondOrder", bondToBondOrderProtonated.get(bondID));								
 								
 								//now save only the maximum bond length change...
 								bondToBondLength = saveMaximum(bondToBondLength, cpd1BondToDistance.get(bondID).getBondID(), distRound);
+								this.bondToBondOrder = saveMinimum(bondToBondOrder, cpd1BondToDistance.get(bondID).getBondID(), bondToBondOrderProtonated.get(bondID));
 								
 	//								tempResult += cpd1BondToDistance.get(i1).getBond() + " " + cpd1BondToDistance.get(i1).getBondLength() + " " + cpd2BondToDistance.get(i1 + offset).getBondLength() + ": " + distRound + "\n";
-								tempResult += cpd1BondToDistance.get(bondID).getBond() +  "\t" + distRound + "\n";
+								tempResult += cpd1BondToDistance.get(bondID).getBond() +  "\t" + distRound + "\t" + bondToBondOrderProtonated.get(bondID) + "\n";
 								
 							}
 							else
@@ -407,10 +420,13 @@ public class BondPrediction {
 				if(bondToBondLength.get(bond.getID()) == null)
 				{
 					bond.setProperty("bondLengthChange", 0);
+					bond.setProperty("bondOrder", 0);
+					
 				}
 				else
 				{
 					bond.setProperty("bondLengthChange", bondToBondLength.get(bond.getID()));
+					bond.setProperty("bondOrder", this.bondToBondOrder.get(bond.getID()));
 				}
 				
 			}
@@ -435,6 +451,16 @@ public class BondPrediction {
 			if(bondToBondLength.get(bondID) == null)
 				bondToBondLength.put(bondID, dist);
 			else if(bondToBondLength.get(bondID) < dist)
+				bondToBondLength.put(bondID, dist);
+			
+			return bondToBondLength;
+		}
+		
+		private Map<String, Double> saveMinimum(Map<String, Double> bondToBondLength, String bondID, Double dist)
+		{
+			if(bondToBondLength.get(bondID) == null)
+				bondToBondLength.put(bondID, dist);
+			else if(bondToBondLength.get(bondID) > dist)
 				bondToBondLength.put(bondID, dist);
 			
 			return bondToBondLength;

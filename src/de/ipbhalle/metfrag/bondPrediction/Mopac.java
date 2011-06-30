@@ -28,13 +28,16 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.openscience.cdk.ChemFile;
 import org.openscience.cdk.ChemObject;
 import org.openscience.cdk.Molecule;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.interfaces.IAtomContainer;
+import org.openscience.cdk.interfaces.IBond;
 import org.openscience.cdk.interfaces.IMolecule;
 import org.openscience.cdk.io.MDLReader;
 import org.openscience.cdk.io.MDLV2000Reader;
@@ -46,6 +49,7 @@ import org.openscience.cdk.tools.manipulator.ChemFileManipulator;
 
 import de.ipbhalle.metfrag.main.MetFrag;
 import de.ipbhalle.metfrag.main.MetFragPreCalculated;
+import de.ipbhalle.metfrag.tools.MoleculeTools;
 import de.ipbhalle.metfrag.tools.StreamGobbler;
 import de.ipbhalle.mopac.converter.CoordinatesTransfer;
 import de.ipbhalle.mopac.converter.MOPACInputFormatWriter;
@@ -56,6 +60,7 @@ public class Mopac {
 	private String errorMessage;
 	private String warningMessage;
 	private String time;
+	private Map<String, Double> bondOrder;
 	
 	/**
 	 * Run MOPAC to optimize the geometry of the molecule.
@@ -71,7 +76,7 @@ public class Mopac {
 	 * @return the i atom container
 	 * @throws Exception the exception
 	 */
-	public IAtomContainer runOptimization(String pathToBabel, IAtomContainer molToOptimize, int ffSteps, boolean verbose, String ffMethod, String mopacMethod, Integer mopacRuntime, boolean firstRun, String atomProtonized, boolean deleteTemp, int charge) throws Exception
+	public IAtomContainer runOptimization(String pathToBabel, String mopacExecuteable, IAtomContainer molToOptimize, int ffSteps, boolean verbose, String ffMethod, String mopacMethod, Integer mopacRuntime, boolean firstRun, String atomProtonized, boolean deleteTemp, int charge) throws Exception
 	{		
 		
 		this.errorMessage = "";
@@ -133,6 +138,7 @@ public class Mopac {
 //		String command = "obminimize -n " + ffSteps + " -sd -ff MMFF94 " + tempFile.getPath();
 //		String command = "obminimize -c 1e-3 -sd -ff UFF " + tempFile.getPath();
 		String command = pathToBabel + "obminimize -n " + ffSteps + " -sd -ff " + ffMethod + " " + tempFileFFInput3D.getPath() + " > " + tempFileFF.getPath(); 
+//		String command = pathToBabel + "obminimize -n " + ffSteps + " -ff " + ffMethod + " " + tempFileFFInput3D.getPath() + " > " + tempFileFF.getPath();
 		String[] psCmd =
 		{
 		    "sh",
@@ -185,7 +191,7 @@ public class Mopac {
         //generate mopin from mol2
         
         //replace babel mopin generation with own mopin writer
-        MOPACInputFormatWriter mopIn = new MOPACInputFormatWriter(mopacMethod + " T=" + mopacRuntime + " GEO-OK, ECHO, MMOK, SCFCRT=1.D-4, GNORM=0.1, XYZ, BONDS, EF");
+        MOPACInputFormatWriter mopIn = new MOPACInputFormatWriter(mopacMethod + " T=" + mopacRuntime + " GEO-OK, ECHO, MMOK, SCFCRT=1.D-4, GNORM=0.1, XYZ, BONDS");
         File tempFileMOPIn = File.createTempFile("molMopIN",".dat");
         if(deleteTemp)
         	tempFileMOPIn.deleteOnExit();
@@ -213,7 +219,7 @@ public class Mopac {
         
         //now run mopac on mopin
         String tempStringMopacOut = tempFileMOPIn.getParent() + System.getProperty("file.separator") + tempFileMOPIn.getName().split("\\.")[0];
-        command = "run_mopac7 " + tempStringMopacOut;
+        command = mopacExecuteable + " " + tempStringMopacOut;
 //        String[] psCmdMOPAC =
 //		{
 //        	"sh",
@@ -335,18 +341,21 @@ public class Mopac {
         System.out.println("MOPAC error code " + exitVal);
         
         //now parse the out file
-        MopacOutParser parser = new MopacOutParser(tempStringMopacOut + ".OUT");
+        MopacOutParser parser = new MopacOutParser(tempStringMopacOut + ".out", molToOptimize.getAtomCount());
         this.errorMessage = parser.getError();
         this.warningMessage = parser.getWarning();
         this.heatOfFormation = parser.getHeatOfFormation();
         this.time = parser.getTime();
+        Map<String, ArrayList<String>> bondOrderMatrix = parser.getBondOrder();
+        generateBondOrderMap(bondOrderMatrix, molToOptimize);
+        
         
         
         //now convert the result back to mol2
         File tempFileMOPACMol2 = File.createTempFile("molMopac",".mol2");
         if(deleteTemp)
         	tempFileMOPACMol2.deleteOnExit();
-        command = pathToBabel + "babel -i mopout " + tempStringMopacOut + ".OUT" + " -o mol2 " + tempFileMOPACMol2;
+        command = pathToBabel + "babel -i mopout " + tempStringMopacOut + ".out" + " -o mol2 " + tempFileMOPACMol2;
         String[] psCmdMOPACMol2 =
 		{
 		    "sh",
@@ -369,6 +378,47 @@ public class Mopac {
 //        return containersList.get(0);
         return CoordinatesTransfer.transferCoordinates(molOptimized, molToOptimize);
 	}
+	
+	
+	/**
+	 * Generate bond order map. Easily map bonds to bond orders
+	 *
+	 * @param bondOrderMatrix the bond order m atrix
+	 * @param mol the mol
+	 */
+	private void generateBondOrderMap(Map<String, ArrayList<String>> bondOrderMatrix, IAtomContainer mol)
+	{
+		this.bondOrder = new HashMap<String, Double>();
+		for (IBond bond : mol.bonds()) {
+			Integer atom1ID = Integer.parseInt(bond.getAtom(0).getID());
+			Integer atom2ID = Integer.parseInt(bond.getAtom(1).getID());
+			this.bondOrder.put(bond.getAtom(0).getSymbol() + (atom1ID + 1) + "-" + bond.getAtom(1).getSymbol() + (atom2ID + 1), getBondOrderFromMatrix(bondOrderMatrix, (atom1ID + 1), (atom2ID + 1))) ;
+		}
+	}
+	
+	/**
+	 * Gets the bond order from the parsed matrix.
+	 *
+	 * @param bondOrderMatrix the bond order matrix
+	 * @param a1 the a1
+	 * @param a2 the a2
+	 * @return the bond order from matrix
+	 */
+	private Double getBondOrderFromMatrix(Map<String, ArrayList<String>> bondOrderMatrix, Integer a1, Integer a2)
+	{
+		for (int i = 1; i <= bondOrderMatrix.keySet().size(); i++) {
+			for (int j = 1; j <= bondOrderMatrix.get(Integer.toString(i)).size(); j++) {
+				if((i == a1 && j == a2) || (i == a2 && j == a1))
+				{
+					Double bondOrder = Double.parseDouble(bondOrderMatrix.get(Integer.toString(i)).get(j - 1));
+					return bondOrder;
+				}
+			}
+		}
+		return -1.0;
+	}
+	
+	
 
 	public void setHeatOfFormation(double heatOfFormation) {
 		this.heatOfFormation = heatOfFormation;
@@ -402,20 +452,46 @@ public class Mopac {
 		this.time = time;
 	}
 	
-	
-	
+	/**
+	 * Gets the bond order. Each bond is assigned with the atom symbol and its 
+	 * identifier (starting from 1)
+	 * e.g. key: C1-C2 value: 0.964785
+	 *
+	 * @return the bond order
+	 */
+	public Map<String, Double> getBondOrder() {
+		return bondOrder;
+	}
+
+
+	public void setBondOrder(Map<String, Double> bondOrder) {
+		this.bondOrder = bondOrder;
+	}
+
+
 	public static void main(String[] args) {
 		
 		try
 		{
 		File files = new File("/home/swolf/MOPAC/EMMATest/testMOPAC/");
 		File[] fileArr = files.listFiles();
+		
+//		boolean skip = true;
+		
 		for (int i = 0; i < fileArr.length; i++) {
 			String[] temp = fileArr[i].getName().split("\\.");
 			String extension = temp[(temp.length -1)];
 			if(fileArr[i].isFile() && extension.toLowerCase().equals("sdf"))
 			{
 				String error = "";
+//				if(fileArr[i].getName().equals("1000_molec_try8_wM_END981.sdf"))
+//				{
+//					skip = false;
+//					continue;
+//				}
+//				
+//				if(skip)
+//					continue;
 				
 				Mopac mopac = new Mopac();
 				MDLV2000Reader reader;
@@ -433,6 +509,7 @@ public class Mopac {
 			        CDKHydrogenAdder hAdder = CDKHydrogenAdder.getInstance(mol.getBuilder());
 			        hAdder.addImplicitHydrogens(mol);
 			        AtomContainerManipulator.convertImplicitToExplicitHydrogens(mol);
+			        mol = MoleculeTools.moleculeNumbering(mol);
 		        }
 		        //there is a bug in cdk??
 		        catch(IllegalArgumentException e)
@@ -453,10 +530,10 @@ public class Mopac {
 				{
 					try
 					{
-						mopac.runOptimization("/vol/local/bin/", mol, 600, true, "Ghemical", "AM1", 1200, true, "none", false, 0);
+						mopac.runOptimization("/vol/local/bin/", "wine /vol/local/bin/mopac6.exe", mol, 600, true, "UFF", "AM1", 1200, true, "none", false, 0);
 						output = fileArr[i].getName() + "\tHeat of Formation: " + mopac.getHeatOfFormation() + "\tTime: " + mopac.getTime() + "\tWarning: " + mopac.getWarningMessage() + "\tError: " + mopac.getErrorMessage() + "\n";
 					}
-					catch(IndexOutOfBoundsException e)
+					catch(Exception e)
 					{
 						output = fileArr[i].getName() + "\tError in Optimization\n";
 					}
@@ -466,7 +543,7 @@ public class Mopac {
 				
 				try{
 				    // Create file 
-				    FileWriter fstream = new FileWriter("/home/swolf/MOPAC/EMMATest/testMOPAC/log/mopacGhemical.txt", true);
+				    FileWriter fstream = new FileWriter("/home/swolf/MOPAC/EMMATest/testMOPAC/log/mopacUFF_woEF.txt", true);
 				    BufferedWriter out = new BufferedWriter(fstream);
 				    out.write(output);
 				    //Close the output stream
