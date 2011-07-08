@@ -123,7 +123,8 @@ public class MopacOutParser {
 				}
 				
 				
-				if(line.contains("BOND ORDERS AND VALENCIES"))
+//				if(line.contains("BOND ORDERS AND VALENCIES"))
+				if(line.contains("DEGREES OF BONDING"))
 				{
 
 			

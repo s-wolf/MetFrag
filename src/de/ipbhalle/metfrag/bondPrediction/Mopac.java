@@ -191,7 +191,7 @@ public class Mopac {
         //generate mopin from mol2
         
         //replace babel mopin generation with own mopin writer
-        MOPACInputFormatWriter mopIn = new MOPACInputFormatWriter(mopacMethod + " T=" + mopacRuntime + " GEO-OK, ECHO, MMOK, SCFCRT=1.D-4, GNORM=0.1, XYZ, BONDS");
+        MOPACInputFormatWriter mopIn = new MOPACInputFormatWriter(mopacMethod + ", T=" + mopacRuntime);
         File tempFileMOPIn = File.createTempFile("molMopIN",".dat");
         if(deleteTemp)
         	tempFileMOPIn.deleteOnExit();
@@ -341,7 +341,7 @@ public class Mopac {
         System.out.println("MOPAC error code " + exitVal);
         
         //now parse the out file
-        MopacOutParser parser = new MopacOutParser(tempStringMopacOut + ".out", molToOptimize.getAtomCount());
+        MopacOutParser parser = new MopacOutParser(tempStringMopacOut + ".OUT", molToOptimize.getAtomCount());
         this.errorMessage = parser.getError();
         this.warningMessage = parser.getWarning();
         this.heatOfFormation = parser.getHeatOfFormation();
@@ -355,7 +355,7 @@ public class Mopac {
         File tempFileMOPACMol2 = File.createTempFile("molMopac",".mol2");
         if(deleteTemp)
         	tempFileMOPACMol2.deleteOnExit();
-        command = pathToBabel + "babel -i mopout " + tempStringMopacOut + ".out" + " -o mol2 " + tempFileMOPACMol2;
+        command = pathToBabel + "babel -i mopout " + tempStringMopacOut + ".OUT" + " -o mol2 " + tempFileMOPACMol2;
         String[] psCmdMOPACMol2 =
 		{
 		    "sh",
@@ -471,98 +471,103 @@ public class Mopac {
 
 	public static void main(String[] args) {
 		
-		try
-		{
-		File files = new File("/home/swolf/MOPAC/EMMATest/testMOPAC/");
-		File[] fileArr = files.listFiles();
+		String[] methods = {"UFF", "MMFF94", "Ghemical"};
+		String folder = "/home/swolf/MOPAC/EMMATest/MMFF94ValidationSet/single/";
 		
-//		boolean skip = true;
-		
-		for (int i = 0; i < fileArr.length; i++) {
-			String[] temp = fileArr[i].getName().split("\\.");
-			String extension = temp[(temp.length -1)];
-			if(fileArr[i].isFile() && extension.toLowerCase().equals("sdf"))
+		for (int j = 0; j < methods.length; j++) {
+			try
 			{
-				String error = "";
-//				if(fileArr[i].getName().equals("1000_molec_try8_wM_END981.sdf"))
-//				{
-//					skip = false;
-//					continue;
-//				}
-//				
-//				if(skip)
-//					continue;
-				
-				Mopac mopac = new Mopac();
-				MDLV2000Reader reader;
-				List<IAtomContainer> containersList;
-				
-				reader = new MDLV2000Reader(new FileReader(fileArr[i]));
-		        ChemFile chemFile = (ChemFile)reader.read((ChemObject)new ChemFile());
-		        containersList = ChemFileManipulator.getAllAtomContainers(chemFile);
-		        IAtomContainer mol = containersList.get(0);
-			    
-		        try
-		        {
-			        //add hydrogens
-			        AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(mol);
-			        CDKHydrogenAdder hAdder = CDKHydrogenAdder.getInstance(mol.getBuilder());
-			        hAdder.addImplicitHydrogens(mol);
-			        AtomContainerManipulator.convertImplicitToExplicitHydrogens(mol);
-			        mol = MoleculeTools.moleculeNumbering(mol);
-		        }
-		        //there is a bug in cdk??
-		        catch(IllegalArgumentException e)
-	            {
-		        	System.err.println("Error CDK! " + e.getMessage());
-		        	error = e.getMessage();
-		        	e.getStackTrace();
-	            }
-		        catch(CDKException e)
-		        {
-		        	System.err.println("Error CDK! " + e.getMessage());
-		        	error = e.getMessage();
-		        	e.getStackTrace();
-		        }
-		        
-		        String output = "";
-				if(error.equals(""))
+			File files = new File(folder);
+			File[] fileArr = files.listFiles();
+			
+//			boolean skip = true;
+			
+			for (int i = 0; i < fileArr.length; i++) {
+				String[] temp = fileArr[i].getName().split("\\.");
+				String extension = temp[(temp.length -1)];
+				if(fileArr[i].isFile() && extension.toLowerCase().equals("sdf"))
 				{
-					try
+					String error = "";
+//					if(fileArr[i].getName().equals("1000_molec_try8_wM_END981.sdf"))
+//					{
+//						skip = false;
+//						continue;
+//					}
+//					
+//					if(skip)
+//						continue;
+					
+					Mopac mopac = new Mopac();
+					MDLV2000Reader reader;
+					List<IAtomContainer> containersList;
+					
+					reader = new MDLV2000Reader(new FileReader(fileArr[i]));
+			        ChemFile chemFile = (ChemFile)reader.read((ChemObject)new ChemFile());
+			        containersList = ChemFileManipulator.getAllAtomContainers(chemFile);
+			        IAtomContainer mol = containersList.get(0);
+				    reader.close();
+				    
+			        try
+			        {
+				        //add hydrogens
+				        AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(mol);
+				        CDKHydrogenAdder hAdder = CDKHydrogenAdder.getInstance(mol.getBuilder());
+				        hAdder.addImplicitHydrogens(mol);
+				        AtomContainerManipulator.convertImplicitToExplicitHydrogens(mol);
+				        mol = MoleculeTools.moleculeNumbering(mol);
+			        }
+			        //there is a bug in cdk??
+			        catch(IllegalArgumentException e)
+		            {
+			        	System.err.println("Error CDK! " + e.getMessage());
+			        	error = e.getMessage();
+			        	e.getStackTrace();
+		            }
+			        catch(CDKException e)
+			        {
+			        	System.err.println("Error CDK! " + e.getMessage());
+			        	error = e.getMessage();
+			        	e.getStackTrace();
+			        }
+			        
+			        String output = "";
+					if(error.equals(""))
 					{
-						mopac.runOptimization("/vol/local/bin/", "wine /vol/local/bin/mopac6.exe", mol, 600, true, "UFF", "AM1", 1200, true, "none", false, 0);
-						output = fileArr[i].getName() + "\tHeat of Formation: " + mopac.getHeatOfFormation() + "\tTime: " + mopac.getTime() + "\tWarning: " + mopac.getWarningMessage() + "\tError: " + mopac.getErrorMessage() + "\n";
+						try
+						{
+							mopac.runOptimization("/vol/local/bin/", "run_mopac7", mol, 1200, true, methods[j], "AM1", 1200, true, "none", false, 0);
+							output = fileArr[i].getName() + "\tHeat of Formation: " + mopac.getHeatOfFormation() + "\tTime: " + mopac.getTime() + "\tWarning: " + mopac.getWarningMessage() + "\tError: " + mopac.getErrorMessage() + "\n";
+						}
+						catch(Exception e)
+						{
+							output = fileArr[i].getName() + "\tError in Optimization\n";
+						}
 					}
-					catch(Exception e)
-					{
-						output = fileArr[i].getName() + "\tError in Optimization\n";
-					}
+					else
+						output = fileArr[i].getName() + "\t" + error + "\n";
+					
+					try{
+					    // Create file 
+					    FileWriter fstream = new FileWriter(folder + "/log/mopacMP7" + methods[j] + ".txt", true);
+					    BufferedWriter out = new BufferedWriter(fstream);
+					    out.write(output);
+					    //Close the output stream
+					    out.close();
+				    }catch (Exception e){//Catch exception if any
+				      System.err.println("Error: " + e.getMessage());
+				    }
+					
 				}
-				else
-					output = fileArr[i].getName() + "\t" + error + "\n";
-				
-				try{
-				    // Create file 
-				    FileWriter fstream = new FileWriter("/home/swolf/MOPAC/EMMATest/testMOPAC/log/mopacUFF_woEF.txt", true);
-				    BufferedWriter out = new BufferedWriter(fstream);
-				    out.write(output);
-				    //Close the output stream
-				    out.close();
-			    }catch (Exception e){//Catch exception if any
-			      System.err.println("Error: " + e.getMessage());
-			    }
-				
+			}
+			}
+			catch(FileNotFoundException e)
+			{
+				System.err.println("Error! " + e.getMessage());
+				e.printStackTrace();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 		}
-		}
-		catch(FileNotFoundException e)
-		{
-			System.err.println("Error! " + e.getMessage());
-			e.printStackTrace();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-	
+	}	
 }

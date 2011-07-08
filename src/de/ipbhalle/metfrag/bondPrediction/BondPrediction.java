@@ -235,7 +235,7 @@ public class BondPrediction {
 		            	protonatedMol = mopac.runOptimization(pathToBabel, mopacExecuteable, protonatedMol, FFSteps, true, ffMethod, mopacMethod, mopacRuntime, false, chargesArray[i].getAtom().getSymbol()  + (Integer.parseInt(chargesArray[i].getAtom().getID()) + 1), deleteTemp, 1);
 		            	Map<String, Double> bondToBondOrderProtonated = new HashMap<String, Double>();
 		            	bondToBondOrderProtonated = mopac.getBondOrder();
-		            	
+
 		            	//something went wrong during optimization
 		            	if(protonatedMol == null)
 		            	{
@@ -245,6 +245,7 @@ public class BondPrediction {
 		            	else
 		            	{
 		            		this.mopacMessages = "Protonated Molecule MOPAC Atom " + chargesArray[i].getAtom().getSymbol()  + (Integer.parseInt(chargesArray[i].getAtom().getID()) + 1) + "\nHeat of Formation: " + mopac.getHeatOfFormation() + "\nHeat of Formation: " + mopac.getHeatOfFormation() + "\nTime: " + mopac.getTime() + "\nWarning: " + mopac.getWarningMessage() + "\nError: " + mopac.getErrorMessage() + "\n\n";
+		            		protonatedMol.setProperty("HeatOfFormation", mopac.getHeatOfFormation());
 		            	}
 		            	
 		            	
@@ -354,9 +355,20 @@ public class BondPrediction {
 								//set the bond length change
 								protonatedMol.getBond(AtomContainerManipulator.getAtomById(protonatedMol, cpd2BondToDistance.get(bondID).getAtom1ID()), AtomContainerManipulator.getAtomById(protonatedMol, cpd2BondToDistance.get(bondID).getAtom2ID()))
 									.setProperty("bondLengthChange", distRound);
-								//set bond order
-								protonatedMol.getBond(AtomContainerManipulator.getAtomById(protonatedMol, cpd2BondToDistance.get(bondID).getAtom1ID()), AtomContainerManipulator.getAtomById(protonatedMol, cpd2BondToDistance.get(bondID).getAtom2ID()))
-									.setProperty("bondOrder", bondToBondOrderProtonated.get(bondID));								
+								
+								if(cpd2BondToDistance.get(bondID).getBondLength() == 0.0)
+								{
+									//set bond order
+									protonatedMol.getBond(AtomContainerManipulator.getAtomById(protonatedMol, cpd2BondToDistance.get(bondID).getAtom1ID()), AtomContainerManipulator.getAtomById(protonatedMol, cpd2BondToDistance.get(bondID).getAtom2ID()))
+										.setProperty("bondOrder", 2.0);
+								}
+								else
+								{
+									//set bond order
+									protonatedMol.getBond(AtomContainerManipulator.getAtomById(protonatedMol, cpd2BondToDistance.get(bondID).getAtom1ID()), AtomContainerManipulator.getAtomById(protonatedMol, cpd2BondToDistance.get(bondID).getAtom2ID()))
+										.setProperty("bondOrder", bondToBondOrderProtonated.get(bondID));
+								}
+																
 								
 								//now save only the maximum bond length change...
 								bondToBondLength = saveMaximum(bondToBondLength, cpd1BondToDistance.get(bondID).getBondID(), distRound);
@@ -416,7 +428,7 @@ public class BondPrediction {
 			String combinedResults = "";
 			for (IBond bond : this.mol.bonds()) {
 				
-				combinedResults += bond.getAtom(0).getSymbol() + (Integer.parseInt(bond.getAtom(0).getID()) + 1) + "-" + bond.getAtom(1).getSymbol() + (Integer.parseInt(bond.getAtom(1).getID()) + 1) + "\t" + bondToBondLength.get(bond.getID()) + "\n";
+				combinedResults += bond.getAtom(0).getSymbol() + (Integer.parseInt(bond.getAtom(0).getID()) + 1) + "-" + bond.getAtom(1).getSymbol() + (Integer.parseInt(bond.getAtom(1).getID()) + 1) + "\t" + bondToBondLength.get(bond.getID()) + "\t" + bondToBondOrder.get(bond.getID()) + "\n";
 				if(bondToBondLength.get(bond.getID()) == null)
 				{
 					bond.setProperty("bondLengthChange", 0);

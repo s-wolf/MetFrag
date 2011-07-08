@@ -63,7 +63,7 @@ public class WritePDFTable extends MoleculeCell {
     private Document document;
     private int width;
     private int height;
-    int ncol = 3;
+    int ncol = 4;
     private int imageCount = 0;
     
     
@@ -87,25 +87,37 @@ public class WritePDFTable extends MoleculeCell {
             PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(file));
 
             float[] widths = new float[ncol];
-            for (int i = 0; i < ncol; i += 3) {
+            for (int i = 0; i < ncol; i += 4) {
                     widths[i] = 2.5f;
-                    widths[i + 1] = 0.75f;
-                    widths[i + 2] = 0.75f;
+                    widths[i + 1] = 0.5f;
+                    widths[i + 2] = 0.5f;
+                    widths[i + 3] = 0.5f;
             }
             table = new PdfPTable(widths);
             document.open();
             
-            boolean drawPartialCharges = true;
+            boolean firstMol = true;
             
             for (ChargeResult result : chargeResults) {
             	
+            	String stringPDFBonds = "";
+                String stringPDFBondsDist = "";
+                String stringPDFBondsOrder = "";
+                
+                if(!firstMol)
+                {
+                	stringPDFBonds = "HoF\n";
+	                stringPDFBondsDist = Double.toString(Math.round((Double)result.getMolWithProton().getProperty("HeatOfFormation")*100.0)/100.0) + "\n";
+	                stringPDFBondsOrder = "\n";
+                }
             	
-            	if(drawPartialCharges)
+            	if(firstMol)
             	{
             		PdfPCell cellBonds = new PdfPCell();
                 	PdfPCell cellBondsDist = new PdfPCell();
                     Phrase phraseBonds = new Phrase();
                     Phrase phraseBondsDist = new Phrase();
+                    PdfPCell cellEmpty = new PdfPCell();
 
                     com.lowagie.text.Image image = com.lowagie.text.Image.getInstance(writeMOL2PNGFile(result.getOriginalMol()).getAbsolutePath());
                     image.setAbsolutePosition(0, 0);
@@ -127,20 +139,22 @@ public class WritePDFTable extends MoleculeCell {
                     cellBondsDist.addElement(phraseBondsDist);
                     table.addCell(cellBonds);
                     table.addCell(cellBondsDist);
-                    drawPartialCharges = false;
+                    table.addCell(cellEmpty);
+                    firstMol = false;
             	}        	
             	
             	PdfPCell cellBonds = new PdfPCell();
             	PdfPCell cellBondsDist = new PdfPCell();
+            	PdfPCell cellBondsOrder = new PdfPCell();
                 Phrase phraseBonds = new Phrase();
                 Phrase phraseBondsDist = new Phrase();
+                Phrase phraseBondsOrder = new Phrase();
 
                 com.lowagie.text.Image image = com.lowagie.text.Image.getInstance(writeMOL2PNGFile(result.getOriginalMol(), result.getMolWithProton()).getAbsolutePath());
                 image.setAbsolutePosition(0, 0);
                 table.addCell(image);
                 
-                String stringPDFBonds = "";
-                String stringPDFBondsDist = "";
+                
                 String[] lines = result.getChargeString().split("\n");
                 for (int i = 0; i < lines.length; i++) {
                 	boolean carbonHydrogenBond = lines[i].matches("[A-Z]+[0-9]+-H[0-9]+.*");
@@ -148,16 +162,20 @@ public class WritePDFTable extends MoleculeCell {
 					{
 						String[] linesArr = lines[i].split("\t");
 						stringPDFBondsDist += linesArr[1] + "\n";
+						stringPDFBondsOrder += Math.round(Double.parseDouble(linesArr[2])*1000.0)/1000.0 + "\n";
 						stringPDFBonds += linesArr[0] + "\n";
 					}
 				}
                 
                 addProperty(phraseBonds, stringPDFBonds);
                 addProperty(phraseBondsDist, stringPDFBondsDist);
+                addProperty(phraseBondsOrder, stringPDFBondsOrder);
                 cellBonds.addElement(phraseBonds);
                 cellBondsDist.addElement(phraseBondsDist);
+                cellBondsOrder.addElement(phraseBondsOrder);
                 table.addCell(cellBonds);
                 table.addCell(cellBondsDist);
+                table.addCell(cellBondsOrder);
 			}
             
             document.add(table);
