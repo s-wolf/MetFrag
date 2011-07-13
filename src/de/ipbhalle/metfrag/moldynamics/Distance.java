@@ -27,6 +27,7 @@ public class Distance {
 	private String bondID = "";
 	private String atom1ID;
 	private String atom2ID;
+	private boolean inAromaticRing;
 	
 	/**
 	 * Instantiates a new distance.
@@ -42,18 +43,22 @@ public class Distance {
 	
 	/**
 	 * Instantiates a new distance.
-	 * 
+	 *
 	 * @param bond the bond
 	 * @param bondLength the bond length
 	 * @param bondID the bond id
+	 * @param atom1ID the atom1 id
+	 * @param atom2ID the atom2 id
+	 * @param isInAromaticRing the is in aromatic ring
 	 */
-	public Distance(String bond, Double bondLength, String bondID, String atom1ID, String atom2ID)
+	public Distance(String bond, Double bondLength, String bondID, String atom1ID, String atom2ID, boolean isInAromaticRing)
 	{
 		setBond(bond);
 		setBondLength(bondLength);
 		setBondID(bondID);
 		setAtom1ID(atom1ID);
 		setAtom2ID(atom2ID);
+		setInAromaticRing(isInAromaticRing);
 	}
 
 	/**
@@ -114,6 +119,14 @@ public class Distance {
 
 	public String getAtom2ID() {
 		return atom2ID;
+	}
+
+	public void setInAromaticRing(boolean inAromaticRing) {
+		this.inAromaticRing = inAromaticRing;
+	}
+
+	public boolean isInAromaticRing() {
+		return inAromaticRing;
 	}
 
 }

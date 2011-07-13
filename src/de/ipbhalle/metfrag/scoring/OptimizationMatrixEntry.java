@@ -27,29 +27,34 @@ public class OptimizationMatrixEntry {
 	private Double peakInt;
 	private String bondEnergyString;
 	private int hydrogenPenalty;
-	private String chargesDiffString;
+	private String bondLengthChange;
 	private String neutralLossRules;
+	private String bondOrderString;
+	private String bondRemoved;
 	
 	/**
 	 * Instantiates a new optimization matrix entry.
-	 * 
+	 *
 	 * @param candidateID the candidate id
 	 * @param peakMass the peak mass
 	 * @param peakInt the peak int
-	 * @param weightedPeak the weighted peak
 	 * @param bondEnergyString the bond energy string
 	 * @param hydrogenPenalty the hydrogen penalty
-	 * @param chargesDiffString the charges diff string
+	 * @param bondLengthChange the bond length change
+	 * @param neutralLossRules the neutral loss rules
+	 * @param bondOrder the bond order
 	 */
-	public OptimizationMatrixEntry(String candidateID, Double peakMass, Double peakInt, String bondEnergyString, int hydrogenPenalty, String chargesDiffString, String neutralLossRules)
+	public OptimizationMatrixEntry(String candidateID, Double peakMass, Double peakInt, String bondEnergyString, int hydrogenPenalty, String bondLengthChange, String neutralLossRules, String bondOrder, String bondRemoved)
 	{
 		setBondEnergyString(bondEnergyString);
 		setCandidateID(candidateID);
-		setChargesDiffString(chargesDiffString);
+		setbondLengthChange(bondLengthChange);
 		setHydrogenPenalty(hydrogenPenalty);
 		setPeakInt(peakInt);
 		setPeakMass(peakMass);
 		setNeutralLossRules(neutralLossRules);
+		setBondOrderString(bondOrder);
+		setBondRemoved(bondRemoved);
 	}
 
 	/**
@@ -147,8 +152,8 @@ public class OptimizationMatrixEntry {
 	 * 
 	 * @param chargesDiffString the new charges diff string
 	 */
-	public void setChargesDiffString(String chargesDiffString) {
-		this.chargesDiffString = chargesDiffString;
+	public void setbondLengthChange(String bondLengthChange) {
+		this.bondLengthChange = bondLengthChange;
 	}
 
 	/**
@@ -156,8 +161,8 @@ public class OptimizationMatrixEntry {
 	 * 
 	 * @return the charges diff string
 	 */
-	public String getChargesDiffString() {
-		return chargesDiffString;
+	public String getBondLengthChange() {
+		return bondLengthChange;
 	}
 
 	/**
@@ -176,6 +181,26 @@ public class OptimizationMatrixEntry {
 	 */
 	public String getNeutralLossRules() {
 		return neutralLossRules;
+	}
+
+	public void setBondOrderString(String bondOrderString) {
+		this.bondOrderString = bondOrderString;
+	}
+
+	public String getBondOrderString() {
+		return bondOrderString;
+	}
+
+	public void setBondLengthChange(String bondLengthChange) {
+		this.bondLengthChange = bondLengthChange;
+	}
+
+	public void setBondRemoved(String bondRemoved) {
+		this.bondRemoved = bondRemoved;
+	}
+
+	public String getBondRemoved() {
+		return bondRemoved;
 	}
 
 }

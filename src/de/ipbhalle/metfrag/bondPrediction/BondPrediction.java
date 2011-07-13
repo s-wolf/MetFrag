@@ -38,6 +38,7 @@ import org.openscience.cdk.nonotify.NoNotificationChemObjectBuilder;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 
 import de.ipbhalle.metfrag.moldynamics.Distance;
+import de.ipbhalle.metfrag.tools.Constants;
 import de.ipbhalle.metfrag.tools.MoleculeTools;
 import de.ipbhalle.metfrag.tools.renderer.StructureRenderer;
 
@@ -123,9 +124,9 @@ public class BondPrediction {
 	    		
 	        	GasteigerMarsiliPartialCharges peoe = new GasteigerMarsiliPartialCharges();
 //	        	GasteigerPEPEPartialCharges pepe = new GasteigerPEPEPartialCharges();
-	        	AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(this.mol);
-	            AtomContainerManipulator.convertImplicitToExplicitHydrogens(this.mol);
-	            this.mol = MoleculeTools.moleculeNumbering(this.mol);
+//	        	AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(this.mol);
+//	            AtomContainerManipulator.convertImplicitToExplicitHydrogens(this.mol);
+//	            this.mol = MoleculeTools.moleculeNumbering(this.mol);
 	    		peoe.calculateCharges(this.mol);
 //		    	pepe.calculateCharges(this.mol);
 	    		
@@ -302,23 +303,23 @@ public class BondPrediction {
 									continue;
 								
 								//give penalty for aromatic rings...they usually don't split...also assume the aromatic rings for the protonated molecule
-								if(this.aromaticBonds.contains(bond) || this.aromaticBonds.contains(molArray[0].getBond(AtomContainerManipulator.getAtomById(molArray[0], atom1.getID()), AtomContainerManipulator.getAtomById(molArray[0], atom2.getID()))))
+								if(this.aromaticBonds.contains(bond) || this.aromaticBonds.contains(this.mol.getBond(AtomContainerManipulator.getAtomById(this.mol, atom1.getID()), AtomContainerManipulator.getAtomById(this.mol, atom2.getID()))))
 								{
-									dist = new Distance(atom1.getSymbol() + (Integer.parseInt(atom1.getID()) + 1) + "-" + atom2.getSymbol() + (Integer.parseInt(atom2.getID()) + 1), 0.0, bond.getID(), atom1.getID(), atom2.getID());
+									dist = new Distance(atom1.getSymbol() + (Integer.parseInt(atom1.getID()) + 1) + "-" + atom2.getSymbol() + (Integer.parseInt(atom2.getID()) + 1), 0.0, bond.getID(), atom1.getID(), atom2.getID(), true);
 								}
 								//penalty for double bond to terminal oxygen
 								else if(atom1.getSymbol().equals("O") && chargesArray[i].getAtom().getID().equals(atom1.getID()) && doubleBond)
 								{
-									dist = new Distance(atom1.getSymbol() + (Integer.parseInt(atom1.getID()) + 1) + "-" + atom2.getSymbol() + (Integer.parseInt(atom2.getID()) + 1), 0.0, bond.getID(), atom1.getID(), atom2.getID());
+									dist = new Distance(atom1.getSymbol() + (Integer.parseInt(atom1.getID()) + 1) + "-" + atom2.getSymbol() + (Integer.parseInt(atom2.getID()) + 1), 0.0, bond.getID(), atom1.getID(), atom2.getID(), true);
 								}
 								//penalty for double bond to terminal oxygen
 								else if(atom2.getSymbol().equals("O") && chargesArray[i].getAtom().getID().equals(atom2.getID()) && doubleBond)
 								{
-									dist = new Distance(atom1.getSymbol() + (Integer.parseInt(atom1.getID()) + 1) + "-" + atom2.getSymbol() + (Integer.parseInt(atom2.getID()) + 1), 0.0, bond.getID(), atom1.getID(), atom2.getID());
+									dist = new Distance(atom1.getSymbol() + (Integer.parseInt(atom1.getID()) + 1) + "-" + atom2.getSymbol() + (Integer.parseInt(atom2.getID()) + 1), 0.0, bond.getID(), atom1.getID(), atom2.getID(), true);
 								}
 								else 
 								{
-									dist = new Distance(atom1.getSymbol() + (Integer.parseInt(atom1.getID()) + 1) + "-" + atom2.getSymbol() + (Integer.parseInt(atom2.getID()) + 1), distance, bond.getID(), atom1.getID(), atom2.getID());
+									dist = new Distance(atom1.getSymbol() + (Integer.parseInt(atom1.getID()) + 1) + "-" + atom2.getSymbol() + (Integer.parseInt(atom2.getID()) + 1), distance, bond.getID(), atom1.getID(), atom2.getID(), false);
 								}
 								String key = atom1.getSymbol() + (Integer.parseInt(atom1.getID()) + 1) + "-"  +	atom2.getSymbol() + (Integer.parseInt(atom2.getID()) + 1);
 					        	//original molecule
@@ -351,31 +352,35 @@ public class BondPrediction {
 								Double normalizedPartialChargeOfProtonizedAtom = (chargesArray[i].getCharge() / minCharge);
 	
 								double distRound = Math.round((dist * normalizedPartialChargeOfProtonizedAtom) * 1000.0)/1000.0;
-								
 								//set the bond length change
 								protonatedMol.getBond(AtomContainerManipulator.getAtomById(protonatedMol, cpd2BondToDistance.get(bondID).getAtom1ID()), AtomContainerManipulator.getAtomById(protonatedMol, cpd2BondToDistance.get(bondID).getAtom2ID()))
-									.setProperty("bondLengthChange", distRound);
+									.setProperty(Constants.BONDLENGTHCHANGE, distRound);
+								//now save only the maximum bond length change...
+								bondToBondLength = saveMaximum(bondToBondLength, cpd1BondToDistance.get(bondID).getBondID(), distRound);
 								
-								if(cpd2BondToDistance.get(bondID).getBondLength() == 0.0)
+								Double currentBondOrder = 0.0;
+								if(cpd2BondToDistance.get(bondID).isInAromaticRing())
 								{
 									//set bond order
 									protonatedMol.getBond(AtomContainerManipulator.getAtomById(protonatedMol, cpd2BondToDistance.get(bondID).getAtom1ID()), AtomContainerManipulator.getAtomById(protonatedMol, cpd2BondToDistance.get(bondID).getAtom2ID()))
-										.setProperty("bondOrder", 2.0);
+										.setProperty(Constants.BONDORDER, 2.0);
+									this.bondToBondOrder = saveMinimum(bondToBondOrder, cpd1BondToDistance.get(bondID).getBondID(), 2.0);
+									currentBondOrder = 2.0;
 								}
 								else
 								{
 									//set bond order
 									protonatedMol.getBond(AtomContainerManipulator.getAtomById(protonatedMol, cpd2BondToDistance.get(bondID).getAtom1ID()), AtomContainerManipulator.getAtomById(protonatedMol, cpd2BondToDistance.get(bondID).getAtom2ID()))
-										.setProperty("bondOrder", bondToBondOrderProtonated.get(bondID));
+										.setProperty(Constants.BONDORDER, bondToBondOrderProtonated.get(bondID));
+									this.bondToBondOrder = saveMinimum(bondToBondOrder, cpd1BondToDistance.get(bondID).getBondID(), bondToBondOrderProtonated.get(bondID));
+									currentBondOrder = bondToBondOrderProtonated.get(bondID);
 								}
 																
 								
-								//now save only the maximum bond length change...
-								bondToBondLength = saveMaximum(bondToBondLength, cpd1BondToDistance.get(bondID).getBondID(), distRound);
-								this.bondToBondOrder = saveMinimum(bondToBondOrder, cpd1BondToDistance.get(bondID).getBondID(), bondToBondOrderProtonated.get(bondID));
+								
 								
 	//								tempResult += cpd1BondToDistance.get(i1).getBond() + " " + cpd1BondToDistance.get(i1).getBondLength() + " " + cpd2BondToDistance.get(i1 + offset).getBondLength() + ": " + distRound + "\n";
-								tempResult += cpd1BondToDistance.get(bondID).getBond() +  "\t" + distRound + "\t" + bondToBondOrderProtonated.get(bondID) + "\n";
+								tempResult += cpd1BondToDistance.get(bondID).getBond() +  "\t" + distRound + "\t" + currentBondOrder + "\n";
 								
 							}
 							else
@@ -431,14 +436,14 @@ public class BondPrediction {
 				combinedResults += bond.getAtom(0).getSymbol() + (Integer.parseInt(bond.getAtom(0).getID()) + 1) + "-" + bond.getAtom(1).getSymbol() + (Integer.parseInt(bond.getAtom(1).getID()) + 1) + "\t" + bondToBondLength.get(bond.getID()) + "\t" + bondToBondOrder.get(bond.getID()) + "\n";
 				if(bondToBondLength.get(bond.getID()) == null)
 				{
-					bond.setProperty("bondLengthChange", 0);
-					bond.setProperty("bondOrder", 0);
+					bond.setProperty(Constants.BONDLENGTHCHANGE, 0);
+					bond.setProperty(Constants.BONDORDER, 0);
 					
 				}
 				else
 				{
-					bond.setProperty("bondLengthChange", bondToBondLength.get(bond.getID()));
-					bond.setProperty("bondOrder", this.bondToBondOrder.get(bond.getID()));
+					bond.setProperty(Constants.BONDLENGTHCHANGE, bondToBondLength.get(bond.getID()));
+					bond.setProperty(Constants.BONDORDER, this.bondToBondOrder.get(bond.getID()));
 				}
 				
 			}
@@ -514,6 +519,31 @@ public class BondPrediction {
 		public Double getBondLength(String bondID)
 		{
 			return this.bondToBondLength.get(bondID);
+		}
+		
+		
+		/**
+		 * Gets the bond order for a specified bond ID.
+		 * Molecule bonds are numbered using MoleculeTools.moleculeNumbering
+		 * 
+		 * @param bondID the bond id
+		 * 
+		 * @return the bond length
+		 */
+		public Double getBondOrder(String bondID)
+		{
+			return this.bondToBondOrder.get(bondID);
+		}
+		
+		
+		/**
+		 * Sets the bond orders.
+		 *
+		 * @param bondToBondOrder the bond to bond order
+		 */
+		public void setBondOrder(Map<String, Double> bondToBondOrder)
+		{
+			this.bondToBondOrder = bondToBondOrder;
 		}
 		
 		

@@ -407,7 +407,7 @@ public class MetFragPreCalculated {
 		parameterOptimizationMatrix.append(header);
 		for (String candidate : candidateToOptimizationMatrixEntries.keySet()) {
 			for (OptimizationMatrixEntry entry : candidateToOptimizationMatrixEntries.get(candidate)) {
-				parameterOptimizationMatrix.append(candidate + "\t" + entry.getPeakMass() + "\t" + entry.getPeakInt() + "\t" + entry.getBondEnergyString() + "\t" + entry.getHydrogenPenalty() + "\t" + entry.getChargesDiffString() + "\t" + entry.getNeutralLossRules() + "\n");
+				parameterOptimizationMatrix.append(candidate + "\t" + entry.getPeakMass() + "\t" + entry.getPeakInt() + "\t" + entry.getBondEnergyString() + "\t" + entry.getHydrogenPenalty() + "\t" + entry.getBondLengthChange() + "\t" + entry.getNeutralLossRules() + "\n");
 			}
 		}
 		
@@ -448,7 +448,7 @@ public class MetFragPreCalculated {
 		for (String candidate : candidateToOptimizationMatrixEntries.keySet()) {
 			double maxBondLengthChange = 0.0;
 			for (OptimizationMatrixEntry entry : candidateToOptimizationMatrixEntries.get(candidate)) {
-				double temp = MoleculeTools.getCombinedEnergy(entry.getChargesDiffString());
+				double temp = MoleculeTools.getCombinedEnergy(entry.getBondLengthChange());
 				if(temp > maxBondLengthChange)
 					maxBondLengthChange = temp;
 			}
@@ -464,8 +464,8 @@ public class MetFragPreCalculated {
 			for (OptimizationMatrixEntry entry : candidateToOptimizationMatrixEntries.get(candidate)) {
 				bondEnergy += MoleculeTools.getCombinedEnergy(entry.getBondEnergyString());
 				hydrogenPenalty += entry.getHydrogenPenalty();
-				bondLengthChange += MoleculeTools.getCombinedEnergy(entry.getChargesDiffString());
-				bondLengthChangeNorm += MoleculeTools.getCombinedEnergy(entry.getChargesDiffString()) / candToMaxBondLEngthChange.get(candidate);
+				bondLengthChange += MoleculeTools.getCombinedEnergy(entry.getBondLengthChange());
+				bondLengthChangeNorm += MoleculeTools.getCombinedEnergy(entry.getBondLengthChange()) / candToMaxBondLEngthChange.get(candidate);
 				neutralLossRules += entry.getNeutralLossRules() + " ";
 			}
 			parameterOptimizationMatrix.append(candidate + "\t" + candidateToOptimizationMatrixEntries.get(candidate).size() + "\t" + bondEnergy + "\t" + hydrogenPenalty + "\t" + bondLengthChange + "\t" + bondLengthChangeNorm + "\t" + neutralLossRules + "\n");

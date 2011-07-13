@@ -96,19 +96,15 @@ public class PreprocessMolecules {
 		        CDKHueckelAromaticityDetector.detectAromaticity(molecule);
 		        
 		    	for (IBond bond : molecule.bonds()) {
-		            boolean aromatic = false;
 		            //lets see if it is a ring and aromatic
 		            IRingSet rings = allRings.getRings(bond);
 		            //don't split up aromatic rings...see constructor for option
-		        	for (int i1 = 0; i1 < rings.getAtomContainerCount(); i1++) {
-		        		aromatic =  AromaticityCalculator.isAromatic((IRing)rings.getAtomContainer(i1), molecule);
-		            	if(aromatic)
+		            for (int i = 0; i < rings.getAtomContainerCount(); i++) {
+		            	if(MoleculeTools.ringIsAromatic((IRing)rings.getAtomContainer(i)))
 		            	{
-		            		aromatic = true;
 		            		aromaticBonds.add(bond);
-		            		break;
 		            	}
-					}
+		            }
 		        }
 		    	
 		    	BondPrediction bp = new BondPrediction(aromaticBonds);

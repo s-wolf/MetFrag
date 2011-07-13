@@ -50,10 +50,10 @@ public class MatchedFragment {
 	 * @param fragmentStructure the fragment structure
 	 * @param neutralLosses the neutral loss
 	 * @param hydrogenPenalty the hydrogen penalty
-	 * @param partialChargeDiff the partial charge diff
+	 * @param bondLengthChange the partial charge diff
 	 * @param molecularFormulaString the molecular formula string
 	 */
-	public MatchedFragment(Peak peak, double fragmentMass, double matchedMass, IAtomContainer fragmentStructure, NeutralLoss[] neutralLosses, int hydrogenPenalty, Double partialChargeDiff, String molecularFormulaString)
+	public MatchedFragment(Peak peak, double fragmentMass, double matchedMass, IAtomContainer fragmentStructure, NeutralLoss[] neutralLosses, int hydrogenPenalty, Double bondLengthChange, String molecularFormulaString)
 	{
 		setFragmentMass(fragmentMass);
 		setMatchedMass(matchedMass);
@@ -61,7 +61,7 @@ public class MatchedFragment {
 		setFragmentStructure(fragmentStructure);
 		setNeutralLosses(neutralLosses);
 		setHydrogenPenalty(hydrogenPenalty);
-		setPartialChargeDiff(partialChargeDiff);
+		setPartialChargeDiff(bondLengthChange);
 		setMolecularFormulaString(molecularFormulaString);
 	}
 	

@@ -32,6 +32,7 @@ import de.ipbhalle.metfrag.massbankParser.Peak;
 import de.ipbhalle.metfrag.spectrum.MatchedFragment;
 import de.ipbhalle.metfrag.spectrum.NeutralLoss;
 import de.ipbhalle.metfrag.spectrum.WrapperSpectrum;
+import de.ipbhalle.metfrag.tools.Constants;
 import de.ipbhalle.metfrag.tools.MoleculeTools;
 
 
@@ -139,7 +140,7 @@ public class Scoring {
 			}
 						
 			//add new entry to optimization matrix
-			this.optimizationMatrixEntries.add(new OptimizationMatrixEntry(candidateID, hits.get(i).getPeak().getMass(), hits.get(i).getPeak().getIntensity(), (String)hits.get(i).getFragmentStructure().getProperty("BondEnergy"), hits.get(i).getHydrogenPenalty(), (String)hits.get(i).getFragmentStructure().getProperty("PartialChargeDiff"), neutralLossString));
+			this.optimizationMatrixEntries.add(new OptimizationMatrixEntry(candidateID, hits.get(i).getPeak().getMass(), hits.get(i).getPeak().getIntensity(), (String)hits.get(i).getFragmentStructure().getProperty(Constants.BDE), hits.get(i).getHydrogenPenalty(), (String)hits.get(i).getFragmentStructure().getProperty(Constants.BONDLENGTHCHANGE), neutralLossString, (String)hits.get(i).getFragmentStructure().getProperty(Constants.BONDORDER), (String)hits.get(i).getFragmentStructure().getProperty(Constants.BONDREMOVED)));
 			
 		}
 
@@ -193,7 +194,7 @@ public class Scoring {
 			}
 			
 			//add new entry to optimization matrix
-			this.optimizationMatrixEntries.add(new OptimizationMatrixEntry(candidateID, hits.get(i).getPeak().getMass(), hits.get(i).getPeak().getRelIntensity(), bondEnergies, hits.get(i).getHydrogenPenalty(), Double.toString(hits.get(i).getPartialChargeDiff()), neutralLossString));
+			this.optimizationMatrixEntries.add(new OptimizationMatrixEntry(candidateID, hits.get(i).getPeak().getMass(), hits.get(i).getPeak().getRelIntensity(), bondEnergies, hits.get(i).getHydrogenPenalty(), Double.toString(hits.get(i).getPartialChargeDiff()), neutralLossString, (String)hits.get(i).getFragmentStructure().getProperty(Constants.BONDORDER), (String)hits.get(i).getFragmentStructure().getProperty(Constants.BONDREMOVED)));
 			
 		}
 		
