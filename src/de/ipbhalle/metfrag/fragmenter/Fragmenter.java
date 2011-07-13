@@ -21,7 +21,6 @@
 package de.ipbhalle.metfrag.fragmenter;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -41,15 +40,12 @@ import java.util.Vector;
 
 
 import org.openscience.cdk.Atom;
-import org.openscience.cdk.Element;
 import org.openscience.cdk.Molecule;
 import org.openscience.cdk.SingleElectron;
-import org.openscience.cdk.aromaticity.AromaticityCalculator;
 import org.openscience.cdk.aromaticity.CDKHueckelAromaticityDetector;
 import org.openscience.cdk.config.IsotopeFactory;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.exception.NoSuchAtomException;
-import org.openscience.cdk.formula.MolecularFormula;
 import org.openscience.cdk.interfaces.IBond.Order;
 import org.openscience.cdk.interfaces.IChemObjectBuilder;
 import org.openscience.cdk.interfaces.IElement;
@@ -64,7 +60,6 @@ import org.openscience.cdk.interfaces.IRingSet;
 import org.openscience.cdk.interfaces.ISingleElectron;
 import org.openscience.cdk.interfaces.IBond.Stereo;
 import org.openscience.cdk.io.CMLWriter;
-import org.openscience.cdk.io.SDFWriter;
 import org.openscience.cdk.isomorphism.IsomorphismTester;
 import org.openscience.cdk.isomorphism.UniversalIsomorphismTester;
 import org.openscience.cdk.nonotify.NNAtom;
@@ -80,9 +75,7 @@ import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 import de.ipbhalle.metfrag.bondPrediction.BondPrediction;
 import de.ipbhalle.metfrag.graphviz.GraphViz;
 import de.ipbhalle.metfrag.massbankParser.Peak;
-import de.ipbhalle.metfrag.spectrum.AssignFragmentPeak;
 import de.ipbhalle.metfrag.tools.Constants;
-import de.ipbhalle.metfrag.tools.MolecularFormulaTools;
 import de.ipbhalle.metfrag.tools.MoleculeTools;
 import de.ipbhalle.metfrag.tools.PPMTool;
 
@@ -415,14 +408,15 @@ public class Fragmenter {
     	}
     	else
     	{
-    		setFakeBondLengths(this.originalMolecule);
+    		setFakeData(this.originalMolecule);
     	}
     } 
     
-    private void setFakeBondLengths(IAtomContainer ac)
+    private void setFakeData(IAtomContainer ac)
     {
     	for (IBond bond : ac.bonds()) {
-    		bond.setProperty(Constants.BONDLENGTHCHANGE, "0.0");		
+    		bond.setProperty(Constants.BONDLENGTHCHANGE, "0.0");
+    		bond.setProperty(Constants.BONDORDER, "2.0");		
 		}
     }
     
