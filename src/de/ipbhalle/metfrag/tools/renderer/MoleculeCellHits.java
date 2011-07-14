@@ -60,6 +60,7 @@ import org.openscience.cdk.renderer.visitor.AWTDrawVisitor;
 import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 
 import de.ipbhalle.metfrag.spectrum.MatchedFragment;
+import de.ipbhalle.metfrag.tools.Constants;
 import de.ipbhalle.metfrag.tools.MolecularFormulaTools;
 
 
@@ -139,8 +140,8 @@ public class MoleculeCellHits extends JPanel{
         if(matchedFragment.getPeak().getMass() != 0.0)
         {
 	        g.drawString("P:" + matchedFragment.getPeak().getMass() + " MM:" + matchedFragment.getMatchedMass(), (preferredWidth + 10), 12);
-	        g.drawString(" FM:" + matchedFragment.getFragmentMass(), (preferredWidth + 10), 22);
-	        g.drawString(" PC:" + matchedFragment.getPartialChargeDiff() + " HP:" + matchedFragment.getHydrogenPenalty() + " TD: " + matchedFragment.getFragmentStructure().getProperty("TreeDepth").toString(), (preferredWidth + 10), 32);
+	        g.drawString(" FM:" + Math.round(matchedFragment.getFragmentMass() * 1000.0)/1000.0 + " BO: " + matchedFragment.getFragmentStructure().getProperty(Constants.BONDORDER), (preferredWidth + 10), 22);
+	        g.drawString(" BLC:" + matchedFragment.getFragmentStructure().getProperty(Constants.BONDLENGTHCHANGE) + " HP:" + matchedFragment.getHydrogenPenalty() + " TD: " + matchedFragment.getFragmentStructure().getProperty("TreeDepth").toString(), (preferredWidth + 10), 32);
 	        if(!neutralLossString.equals(""))
 	        {
 	        	g.drawString(" NL:" + neutralLossString, (preferredWidth + 10), 42);

@@ -9,6 +9,6 @@ public class Constants {
 	public static final String BONDORDER = "bondOrder";
 	public static final String BONDLENGTHCHANGE = "bondLengthChange";
 	public static final String BONDREMOVED = "bondRemoved";
-	public static final String TREEDRPTH = "TreeDepth";
+	public static final String TREEDEPTH = "TreeDepth";
 	public static final String BDE = "BondEnergy";
 }

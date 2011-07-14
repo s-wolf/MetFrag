@@ -122,6 +122,7 @@ public class Fragmenter {
     private BondPrediction bondPrediction = null;
     private boolean bondLengthChangePreferred = true;
     private boolean optimizeStructure = false;
+    private boolean isPrecalculated = false;
     
     private Map<String, Object> moleculeDescriptors;
       
@@ -398,6 +399,8 @@ public class Fragmenter {
     			bondToBondOrder.put(bond.getID(), Double.parseDouble((String)bond.getProperty(Constants.BONDORDER)));
     		}
     		bondPrediction.setBondLength(bondToBondLength);
+    		bondPrediction.setBondOrder(bondToBondOrder);
+    		this.isPrecalculated = true;
     	}
     	else if(this.optimizeStructure)
     	{
@@ -418,6 +421,24 @@ public class Fragmenter {
     		bond.setProperty(Constants.BONDLENGTHCHANGE, "0.0");
     		bond.setProperty(Constants.BONDORDER, "2.0");		
 		}
+    }
+    
+    
+    /**
+     * Sets the initial properties of the molecule....use a cloned one!
+     *
+     * @param mol the mol
+     * @return the i atom container
+     */
+    private IAtomContainer setInitialProperties(IAtomContainer mol)
+    {
+    	mol.setProperty(Constants.BONDLENGTHCHANGE, "0.0");
+    	mol.setProperty(Constants.TREEDEPTH, "0");
+    	mol.setProperty(Constants.BDE, "0");
+    	mol.setProperty(Constants.BONDORDER, "2.0");
+    	mol.setProperty(Constants.BONDREMOVED, "none");
+    	
+    	return mol;
     }
     
     
@@ -467,9 +488,6 @@ public class Fragmenter {
 		preprocessMolecule(atomContainer, isPrecalculated);
 
 		//add the original molecule
-    	this.originalMolecule.setProperty(Constants.BONDLENGTHCHANGE, "0.0");
-		this.originalMolecule.setProperty(Constants.TREEDRPTH, "0");
-		this.originalMolecule.setProperty(Constants.BDE, "0");
 		fragmentsReturn.add(writeMoleculeToTemp(this.originalMolecule, identifier, globalCount, "0.0", 0, "0.0", "2.0", "none")); 
     	
 		//add original molecule to it
@@ -594,13 +612,8 @@ public class Fragmenter {
         
 		//do preprocess: find all rings and aromatic rings...mark all bonds
 		preprocessMolecule(atomContainer, isPrecalculated);
-		
-		this.originalMolecule.setProperty(Constants.BONDLENGTHCHANGE, "0.0");
-		this.originalMolecule.setProperty(Constants.TREEDRPTH, "0");
-		this.originalMolecule.setProperty(Constants.BDE, "0");
-		this.originalMolecule.setProperty(Constants.BONDORDER, "2.0");
-		this.originalMolecule.setProperty(Constants.BONDREMOVED, "none");
-		fragmentsReturn.add(this.originalMolecule);
+				
+		fragmentsReturn.add(setInitialProperties((IAtomContainer)this.originalMolecule.clone()));
     	
 		//add original molecule to it
         fragmentQueue.offer(new Node(0, 0, this.originalMolecule, 0));       
@@ -642,7 +655,7 @@ public class Fragmenter {
                                 
                 for (IAtomContainer partContainer : parts) {
                 	//Render.Draw(partContainer, "Round: " + this.nround);
-                	partContainer.setProperty(Constants.TREEDRPTH, treeDepth.toString());
+                	partContainer.setProperty(Constants.TREEDEPTH, treeDepth.toString());
                     fragmentQueue.offer(new Node(globalCount, parent, partContainer, treeDepth));
                     fragmentsReturn.add(partContainer);                    
                     globalCount++;
@@ -837,7 +850,7 @@ public class Fragmenter {
                         //now set property from both bonds
                         temp = setBondEnergy(temp, currentBondEnergyRing, currentBondEnergy);
                         //set the partial charge diff 
-                        if(optimizeStructure)
+                        if(optimizeStructure || isPrecalculated)
                         {
                         	temp = setBondLengthChange(temp, bondPrediction.getBondLength(bondInRing.getID()), bondPrediction.getBondLength(bond.getID()));
                         	temp = setBondOrder(temp, bondPrediction.getBondOrder(bondInRing.getID()), bondPrediction.getBondLength(bond.getID()));
@@ -917,7 +930,7 @@ public class Fragmenter {
                 
         		//now set property: BondEnergy!
                 temp = setBondEnergy(temp, currentBondEnergy);
-                if(optimizeStructure)
+                if(optimizeStructure || isPrecalculated)
                 {
                 	temp = setBondLengthChange(temp, bondPrediction.getBondLength(bond.getID()));
                 	temp = setBondOrder(temp, bondPrediction.getBondOrder(bond.getID()));
@@ -980,13 +993,13 @@ public class Fragmenter {
     private String getBondString(IBond bond)
     {
     	if(bond.getOrder().equals(Order.SINGLE))
-    		return bond.getAtom(0) + "-" + bond.getAtom(1);
+    		return bond.getAtom(0).getSymbol() + "-" + bond.getAtom(1).getSymbol();
     	else if(bond.getOrder().equals(Order.DOUBLE))
-    		return bond.getAtom(0) + "=" + bond.getAtom(1);
+    		return bond.getAtom(0).getSymbol() + "=" + bond.getAtom(1).getSymbol();
     	else if(bond.getOrder().equals(Order.TRIPLE))
-    		return bond.getAtom(0) + "~" + bond.getAtom(1);
+    		return bond.getAtom(0).getSymbol() + "~" + bond.getAtom(1).getSymbol();
     	else
-    		return bond.getAtom(0) + "?" + bond.getAtom(1);
+    		return bond.getAtom(0).getSymbol() + "?" + bond.getAtom(1).getSymbol();
     }
     
     
@@ -1859,7 +1872,7 @@ public class Fragmenter {
         IMolecule test = new Molecule(tmp);
         test.setProperties(props);
         test.setProperty(Constants.BDE, bondEnergy);
-        test.setProperty(Constants.TREEDRPTH, treeDepth.toString());
+        test.setProperty(Constants.TREEDEPTH, treeDepth.toString());
         test.setProperty(Constants.BONDLENGTHCHANGE, bondLengthChange);
         test.setProperty(Constants.BONDORDER, bondOrder);
         test.setProperty(Constants.BONDREMOVED, bondRemoved);

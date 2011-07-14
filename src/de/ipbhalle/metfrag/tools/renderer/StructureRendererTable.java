@@ -61,7 +61,7 @@ public class StructureRendererTable {
 	public static void DrawHits(IAtomContainer original, Vector<MatchedFragment> l, String name) {
 		
 		List<MatchedFragment> containers = new ArrayList<MatchedFragment>();
-		containers.add(new MatchedFragment(new Peak(0.0, 0.0, 0), 0.0, 0.0, original, null, 0, 0.0, ""));
+		containers.add(new MatchedFragment(new Peak(0.0, 0.0, 0), 0.0, 0.0, original, null, 0, ""));
 		boolean showHydrogen = true;
 		//add fragments to list
 		if(!showHydrogen)

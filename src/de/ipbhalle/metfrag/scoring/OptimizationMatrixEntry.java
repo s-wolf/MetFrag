@@ -40,11 +40,12 @@ public class OptimizationMatrixEntry {
 	 * @param peakInt the peak int
 	 * @param bondEnergyString the bond energy string
 	 * @param hydrogenPenalty the hydrogen penalty
-	 * @param bondLengthChange the bond length change
 	 * @param neutralLossRules the neutral loss rules
+	 * @param bondLengthChange the bond length change
 	 * @param bondOrder the bond order
+	 * @param bondRemoved the bond removed
 	 */
-	public OptimizationMatrixEntry(String candidateID, Double peakMass, Double peakInt, String bondEnergyString, int hydrogenPenalty, String bondLengthChange, String neutralLossRules, String bondOrder, String bondRemoved)
+	public OptimizationMatrixEntry(String candidateID, Double peakMass, Double peakInt, String bondEnergyString, int hydrogenPenalty, String neutralLossRules, String bondLengthChange, String bondOrder, String bondRemoved)
 	{
 		setBondEnergyString(bondEnergyString);
 		setCandidateID(candidateID);
@@ -183,22 +184,47 @@ public class OptimizationMatrixEntry {
 		return neutralLossRules;
 	}
 
+	/**
+	 * Sets the bond order string.
+	 *
+	 * @param bondOrderString the new bond order string
+	 */
 	public void setBondOrderString(String bondOrderString) {
 		this.bondOrderString = bondOrderString;
 	}
 
+	/**
+	 * Gets the bond order string.
+	 *
+	 * @return the bond order string
+	 */
 	public String getBondOrderString() {
 		return bondOrderString;
 	}
 
+	/**
+	 * Sets the bond length change.
+	 *
+	 * @param bondLengthChange the new bond length change
+	 */
 	public void setBondLengthChange(String bondLengthChange) {
 		this.bondLengthChange = bondLengthChange;
 	}
 
+	/**
+	 * Sets the bond removed.
+	 *
+	 * @param bondRemoved the new bond removed
+	 */
 	public void setBondRemoved(String bondRemoved) {
 		this.bondRemoved = bondRemoved;
 	}
 
+	/**
+	 * Gets the bond removed.
+	 *
+	 * @return the bond removed
+	 */
 	public String getBondRemoved() {
 		return bondRemoved;
 	}

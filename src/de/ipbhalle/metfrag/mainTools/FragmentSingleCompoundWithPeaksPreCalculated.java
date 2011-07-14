@@ -73,9 +73,16 @@ public class FragmentSingleCompoundWithPeaksPreCalculated {
 		
 		this.molecule = mol;
 		
-		String peaks = "220.07 300 30\n" +
-				"238.08 500 50\n" +
-				"289.10 200 20\n";
+//		20097272
+		String peaks = "133.06 200 20\n" +
+		"183.08 150 15\n" +
+		"270.19 650 65\n";
+		
+		
+//		3365
+//		String peaks = "220.07 300 30\n" +
+//				"238.08 500 50\n" +
+//				"289.10 200 20\n";
 		
 //		double exactMass = 504.252332;
 //		String peaks = "279.1745 250\n" + 
@@ -151,7 +158,7 @@ public class FragmentSingleCompoundWithPeaksPreCalculated {
 	
 	public static void main(String[] args) {
 		long startTime = System.currentTimeMillis();
-		String file = "/home/swolf/MOPAC/ProofOfConcept/pubchem/CID_3365_spectrum/mopac_600/3365.sdf_Combined.cml";
+		String file = "/home/swolf/MOPAC/ComparisonToDFT/UFF_mopac7.0/CID_20097272.sdf_NEW_AM1_withoutSCFRT_withoutGNORM_aromatic_LONG_FIXED_FINAL2.cml";
 		
 		FragmentSingleCompoundWithPeaksPreCalculated test = null;
 		try {
