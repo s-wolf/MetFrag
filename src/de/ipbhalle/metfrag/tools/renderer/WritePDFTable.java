@@ -5,7 +5,7 @@ import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
 
-import de.ipbhalle.metfrag.bondPrediction.ChargeResult;
+import de.ipbhalle.metfrag.bondPrediction.CalculationResult;
 import de.ipbhalle.metfrag.similarity.Subgraph;
 
 
@@ -63,7 +63,7 @@ public class WritePDFTable extends MoleculeCell {
      * @param height the height
      * @param chargeResults the charge results
      */
-    public WritePDFTable(String odir, int width, int height, List<ChargeResult> chargeResults) {
+    public WritePDFTable(String odir, int width, int height, List<CalculationResult> chargeResults) {
         
     	this.width = width;
     	this.height = height;
@@ -85,7 +85,7 @@ public class WritePDFTable extends MoleculeCell {
             
             boolean firstMol = true;
             
-            for (ChargeResult result : chargeResults) {
+            for (CalculationResult result : chargeResults) {
             	
             	String stringPDFBonds = "";
                 String stringPDFBondsDist = "";
@@ -142,7 +142,7 @@ public class WritePDFTable extends MoleculeCell {
                 table.addCell(image);
                 
                 
-                String[] lines = result.getChargeString().split("\n");
+                String[] lines = result.resultString().split("\n");
                 for (int i = 0; i < lines.length; i++) {
                 	boolean carbonHydrogenBond = lines[i].matches("[A-Z]+[0-9]+-H[0-9]+.*");
 					if(!carbonHydrogenBond)

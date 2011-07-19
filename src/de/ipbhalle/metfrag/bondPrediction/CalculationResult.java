@@ -2,12 +2,12 @@ package de.ipbhalle.metfrag.bondPrediction;
 
 import org.openscience.cdk.interfaces.IAtomContainer;
 
-public class ChargeResult {
+public class CalculationResult {
 	
 	private IAtomContainer originalMol = null;
 	private IAtomContainer molWithProton = null;
-	private IAtomContainer molWithCharge = null;
-	private String chargeString = "";
+	private IAtomContainer molOutput = null;
+	private String resultString = "";
 	private String protonatedAtom = "";
 	private String debugMessages = "";
 	
@@ -16,17 +16,17 @@ public class ChargeResult {
 	 *
 	 * @param originalMol the original mol
 	 * @param molWithProton the mol with proton
-	 * @param molWithCharge the mol with charge
-	 * @param chargeString the charge string
+	 * @param molOutput the mol with charge
+	 * @param resultString the charge string
 	 * @param protonatedAtom the protonated atom
 	 * @param debugMessages the debug messages
 	 */
-	public ChargeResult(IAtomContainer originalMol, IAtomContainer molWithProton, IAtomContainer molWithCharge, String chargeString, String protonatedAtom, String debugMessages)
+	public CalculationResult(IAtomContainer originalMol, IAtomContainer molWithProton, IAtomContainer molOutput, String resultString, String protonatedAtom, String debugMessages)
 	{
 		this.setOriginalMol(originalMol);
 		this.setMol(molWithProton);
-		this.setChargeString(chargeString);
-		this.setMolWithCharge(molWithCharge);
+		this.setResultString(resultString);
+		this.setMolOutput(molOutput);
 		this.setProtonatedAtom(protonatedAtom);
 		this.setDebugMessages(debugMessages);
 	}
@@ -44,33 +44,38 @@ public class ChargeResult {
 		return molWithProton;
 	}
 
-	public void setChargeString(String chargeString) {
-		this.chargeString = chargeString;
+	public void setResultString(String resultString) {
+		this.resultString = resultString;
 	}
 
-	public String getChargeString() {
-		return chargeString;
+	public String resultString() {
+		return resultString;
 	}
 
 	public void setOriginalMol(IAtomContainer originalMol) {
 		this.originalMol = originalMol;
 	}
 
+	/**
+	 * Gets the original mol without modifications on the structure
+	 *
+	 * @return the original mol
+	 */
 	public IAtomContainer getOriginalMol() {
 		return originalMol;
 	}
 
-	public void setMolWithCharge(IAtomContainer molWithCharge) {
-		this.molWithCharge = molWithCharge;
+	public void setMolOutput(IAtomContainer molOutput) {
+		this.molOutput = molOutput;
 	}
 
 	/**
-	 * Gets the mol only with the charge changed on one atom.
+	 * Gets the mol without hydrogens but with charge on the protonated atom
 	 *
 	 * @return the mol with charge
 	 */
-	public IAtomContainer getMolWithCharge() {
-		return molWithCharge;
+	public IAtomContainer getMolOutput() {
+		return molOutput;
 	}
 
 	public void setProtonatedAtom(String protonatedAtom) {

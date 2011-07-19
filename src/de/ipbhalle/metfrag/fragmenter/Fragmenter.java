@@ -395,8 +395,19 @@ public class Fragmenter {
     		Map<String, Double> bondToBondOrder = new HashMap<String, Double>();
     		for(IBond bond : this.originalMolecule.bonds())
     		{
-    			bondToBondLength.put(bond.getID(), Double.parseDouble((String)bond.getProperty(Constants.BONDLENGTHCHANGE)));
-    			bondToBondOrder.put(bond.getID(), Double.parseDouble((String)bond.getProperty(Constants.BONDORDER)));
+    			String bondOrderString = (String)bond.getProperty(Constants.BONDORDER);
+    			String bondLengthChangeString = (String)bond.getProperty(Constants.BONDLENGTHCHANGE);
+    			if(bondOrderString == null || bondLengthChangeString == null)
+    			{
+    				bondToBondLength.put(bond.getID(), 0.0);
+        			bondToBondOrder.put(bond.getID(), 2.0);
+    			}
+    			else
+    			{
+    				bondToBondLength.put(bond.getID(), Double.parseDouble(bondLengthChangeString));
+        			bondToBondOrder.put(bond.getID(), Double.parseDouble(bondOrderString));
+    			}
+    			
     		}
     		bondPrediction.setBondLength(bondToBondLength);
     		bondPrediction.setBondOrder(bondToBondOrder);
@@ -853,12 +864,12 @@ public class Fragmenter {
                         if(optimizeStructure || isPrecalculated)
                         {
                         	temp = setBondLengthChange(temp, bondPrediction.getBondLength(bondInRing.getID()), bondPrediction.getBondLength(bond.getID()));
-                        	temp = setBondOrder(temp, bondPrediction.getBondOrder(bondInRing.getID()), bondPrediction.getBondLength(bond.getID()));
+                        	temp = setBondOrder(temp, bondPrediction.getBondOrder(bondInRing.getID()), bondPrediction.getBondOrder(bond.getID()));
                         }
                         else
                         {
                         	temp = setBondLengthChange(temp, 0.0);
-                        	temp = setBondOrder(temp, 0.0);
+                        	temp = setBondOrder(temp, 2.0);
                         }
                         
                         temp = setBondRemoved(temp, getBondString(bondInRing), getBondString(bond));

@@ -51,7 +51,7 @@ public class BondPrediction {
 		private Map<String, Double> bondToBondLength;
 		private Map<String, Double> bondToBondOrder;
 		private boolean verbose = false;
-		private List<ChargeResult> results= null;
+		private List<CalculationResult> results= null;
 		private List<IBond> aromaticBonds = null;
 		private boolean render = false;
 		private String mopacMessages = "";
@@ -66,7 +66,7 @@ public class BondPrediction {
 		{
 			this.bondToBondLength = new HashMap<String, Double>();
 			this.bondToBondOrder = new HashMap<String, Double>();
-			this.setResults(new ArrayList<ChargeResult>());
+			this.setResults(new ArrayList<CalculationResult>());
 			this.aromaticBonds = aromaticBonds;
 		}
 		
@@ -351,7 +351,8 @@ public class BondPrediction {
 								//now normalize the current charge
 								Double normalizedPartialChargeOfProtonizedAtom = (chargesArray[i].getCharge() / minCharge);
 	
-								double distRound = Math.round((dist * normalizedPartialChargeOfProtonizedAtom) * 1000.0)/1000.0;
+//								double distRound = Math.round((dist * normalizedPartialChargeOfProtonizedAtom) * 1000.0)/1000.0;
+								double distRound = Math.round((dist) * 1000.0)/1000.0;
 								//set the bond length change
 								protonatedMol.getBond(AtomContainerManipulator.getAtomById(protonatedMol, cpd2BondToDistance.get(bondID).getAtom1ID()), AtomContainerManipulator.getAtomById(protonatedMol, cpd2BondToDistance.get(bondID).getAtom2ID()))
 									.setProperty(Constants.BONDLENGTHCHANGE, distRound);
@@ -363,17 +364,17 @@ public class BondPrediction {
 								{
 									//set bond order
 									protonatedMol.getBond(AtomContainerManipulator.getAtomById(protonatedMol, cpd2BondToDistance.get(bondID).getAtom1ID()), AtomContainerManipulator.getAtomById(protonatedMol, cpd2BondToDistance.get(bondID).getAtom2ID()))
-										.setProperty(Constants.BONDORDER, 2.0);
-									this.bondToBondOrder = saveMinimum(bondToBondOrder, cpd1BondToDistance.get(bondID).getBondID(), 2.0);
+										.setProperty(Constants.BONDORDER, 2.0);									
 									currentBondOrder = 2.0;
+									this.bondToBondOrder = saveMinimum(bondToBondOrder, cpd1BondToDistance.get(bondID).getBondID(), 2.0);
 								}
 								else
 								{
 									//set bond order
-									protonatedMol.getBond(AtomContainerManipulator.getAtomById(protonatedMol, cpd2BondToDistance.get(bondID).getAtom1ID()), AtomContainerManipulator.getAtomById(protonatedMol, cpd2BondToDistance.get(bondID).getAtom2ID()))
-										.setProperty(Constants.BONDORDER, bondToBondOrderProtonated.get(bondID));
-									this.bondToBondOrder = saveMinimum(bondToBondOrder, cpd1BondToDistance.get(bondID).getBondID(), bondToBondOrderProtonated.get(bondID));
 									currentBondOrder = bondToBondOrderProtonated.get(bondID);
+									protonatedMol.getBond(AtomContainerManipulator.getAtomById(protonatedMol, cpd2BondToDistance.get(bondID).getAtom1ID()), AtomContainerManipulator.getAtomById(protonatedMol, cpd2BondToDistance.get(bondID).getAtom2ID()))
+										.setProperty(Constants.BONDORDER, currentBondOrder);									
+									this.bondToBondOrder = saveMinimum(bondToBondOrder, cpd1BondToDistance.get(bondID).getBondID(), bondToBondOrderProtonated.get(bondID));
 								}
 																
 								
@@ -392,7 +393,44 @@ public class BondPrediction {
 						
 						if(verbose)
 							System.out.println(tempResult);
-						this.results.add(new ChargeResult(this.mol, protonatedMol, outputStructure, tempResult, chargesArray[i].getAtom().getSymbol()  + (Integer.parseInt(chargesArray[i].getAtom().getID()) + 1), this.mopacMessages));
+						
+						
+						for (IBond bond : protonatedMol.bonds()) {
+							
+							if(bondToBondLength.get(bond.getID()) == null)
+							{
+								bond.setProperty(Constants.BONDLENGTHCHANGE, 0.0);
+								bond.setProperty(Constants.BONDORDER, 2.0);
+							}
+							else
+							{
+								bond.setProperty(Constants.BONDLENGTHCHANGE, bondToBondLength.get(bond.getID()));
+								String bondString = bond.getAtom(0).getSymbol() + (Integer.parseInt(bond.getAtom(0).getID()) + 1) + "-" + bond.getAtom(1).getSymbol() + (Integer.parseInt(bond.getAtom(1).getID()) + 1);
+								bond.setProperty(Constants.BONDORDER, bondToBondOrderProtonated.get(bondString));
+							}
+							
+						}
+						
+						
+						IAtomContainer molWithoutProton = (IAtomContainer) this.mol.clone();
+						molWithoutProton.setProperty("HeatOfFormation", mopac.getHeatOfFormation());
+						for (IBond bond : molWithoutProton.bonds()) {
+							
+							if(bondToBondLength.get(bond.getID()) == null)
+							{
+								bond.setProperty(Constants.BONDLENGTHCHANGE, 0.0);
+								bond.setProperty(Constants.BONDORDER, 2.0);
+							}
+							else
+							{
+								bond.setProperty(Constants.BONDLENGTHCHANGE, bondToBondLength.get(bond.getID()));
+								String bondString = bond.getAtom(0).getSymbol() + (Integer.parseInt(bond.getAtom(0).getID()) + 1) + "-" + bond.getAtom(1).getSymbol() + (Integer.parseInt(bond.getAtom(1).getID()) + 1);
+								bond.setProperty(Constants.BONDORDER, bondToBondOrderProtonated.get(bondString));
+							}
+							
+						}
+												
+						this.results.add(new CalculationResult(molWithoutProton, protonatedMol, outputStructure, tempResult, chargesArray[i].getAtom().getSymbol()  + (Integer.parseInt(chargesArray[i].getAtom().getID()) + 1), this.mopacMessages));
 
 //						for (String string : notMatched) {
 //							System.out.println(string);
@@ -431,13 +469,13 @@ public class BondPrediction {
 			IAtomContainer molOriginal = (IAtomContainer)this.mol.clone();
 			
 			String combinedResults = "";
-			for (IBond bond : this.mol.bonds()) {
+			for (IBond bond : molOriginal.bonds()) {
 				
 				combinedResults += bond.getAtom(0).getSymbol() + (Integer.parseInt(bond.getAtom(0).getID()) + 1) + "-" + bond.getAtom(1).getSymbol() + (Integer.parseInt(bond.getAtom(1).getID()) + 1) + "\t" + bondToBondLength.get(bond.getID()) + "\t" + bondToBondOrder.get(bond.getID()) + "\n";
 				if(bondToBondLength.get(bond.getID()) == null)
 				{
-					bond.setProperty(Constants.BONDLENGTHCHANGE, 0);
-					bond.setProperty(Constants.BONDORDER, 0);
+					bond.setProperty(Constants.BONDLENGTHCHANGE, 0.0);
+					bond.setProperty(Constants.BONDORDER, 2.0);
 					
 				}
 				else
@@ -455,7 +493,7 @@ public class BondPrediction {
 //	        AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(this.molWithAllProtonationSites);
 //	        this.molWithAllProtonationSites = MoleculeTools.moleculeNumbering(this.molWithAllProtonationSites);
 			
-			this.results.add(0, new ChargeResult(molOriginal, this.mol, this.molWithAllProtonationSites, combinedResults, "Combined", this.mopacMessagesNeutral));
+			this.results.add(0, new CalculationResult(molOriginal, this.mol, this.molWithAllProtonationSites, combinedResults, "Combined", this.mopacMessagesNeutral));
 			
 			
 			return bondsToBreak;
@@ -558,12 +596,12 @@ public class BondPrediction {
 		}
 		
 		
-		public void setResults(List<ChargeResult> results) {
+		public void setResults(List<CalculationResult> results) {
 			this.results = results;
 		}
 
 
-		public List<ChargeResult> getResults() {
+		public List<CalculationResult> getResults() {
 			return results;
 		}
 

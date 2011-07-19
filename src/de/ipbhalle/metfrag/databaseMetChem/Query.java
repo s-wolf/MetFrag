@@ -228,6 +228,57 @@ public class Query {
 	}
 	
 	
+	/**
+	 * Gets the compound using identifier.
+	 *
+	 * @param identifier the identifier
+	 * @param database the database (pubchem, kegg, chebi, knapsack)
+	 * @return the compound using identifier
+	 * @throws Exception 
+	 */
+	public IAtomContainer getCompoundUsingIdentifier(String identifier, String database) throws Exception
+	{
+		Integer databaseID = databaseToID.get(database);
+		IAtomContainer ret = null;
+		
+		if(databaseID == null)
+			throw new Exception("Database not supported!");
+		
+		try
+		{
+			con = DriverManager.getConnection(url, username, password);
+			PreparedStatement pstmt = con.prepareStatement("SELECT v3000(mol_structure) from compound c inner join substance s on s.compound_id = c.compound_id " +
+			"where s.library_id = ? and s.accession = ?;");
+		    pstmt.setInt(1, databaseID);
+		    pstmt.setString(2, identifier);
+		    System.out.println(pstmt.toString());
+	        ResultSet res = pstmt.executeQuery();
+	        while(res.next()){
+	        	String molString = res.getString(1);
+	        	MDLV3000Reader reader = new MDLV3000Reader(new ByteArrayInputStream(molString.getBytes()));
+	        	ret = (IAtomContainer)reader.read(new NNMolecule());
+	        }
+	        pstmt.close();
+		}
+		catch(SQLException e)
+		{
+			System.err.println("SQL error! " + e.getMessage());
+			e.printStackTrace();
+		}
+        finally
+		{
+			try {
+				con.close();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+        
+        return ret;
+	}
+	
+	
 	public static void main(String[] args) {
 
 		try {

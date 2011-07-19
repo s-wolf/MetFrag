@@ -30,7 +30,7 @@ import org.openscience.cdk.tools.manipulator.ChemFileManipulator;
 import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 
 import de.ipbhalle.metfrag.bondPrediction.BondPrediction;
-import de.ipbhalle.metfrag.bondPrediction.ChargeResult;
+import de.ipbhalle.metfrag.bondPrediction.CalculationResult;
 import de.ipbhalle.metfrag.tools.MoleculeTools;
 
 public class PreprocessMolecules {
@@ -111,9 +111,9 @@ public class PreprocessMolecules {
 			    bp.debug(false);
 			    System.out.println("MOPAC runtime: " + mopacRuntime + " FFSteps: " + ffSteps);
 			    //use babel version 2.3.0
-				bp.calculateBondsToBreak("/vol/local/bin/", "wine /vol/local/bin/mopac6.exe", molecule, ffSteps, "UFF", "AM1", mopacRuntime, true);
+				bp.calculateBondsToBreak("/vol/local/bin/","run_mopac7", molecule, 2400, "UFF", "AM1, GEO-OK, ECHO, MMOK, XYZ, BONDS", 2400, true);
 				
-				List<ChargeResult> results = bp.getResults();
+				List<CalculationResult> results = bp.getResults();
 				
 				if(molecule.getProperty("candidatesClustered") != null)
 				{
@@ -127,10 +127,10 @@ public class PreprocessMolecules {
 								CMLWriter writerCML = new CMLWriter(new FileOutputStream(new File(outputFolder + clusteredCompounds[c] + "_" + results.get(i1).getProtonatedAtom() + ".cml")));
 								//thats the molecule containing the all the bond length changes from all protonation sites
 								if(i1 == 0)
-									writerCML.write(results.get(i1).getMolWithProton());
+									writerCML.write(results.get(i1).getOriginalMol());
 								//thats the mol containing the individual changes from one protonation site
 								else
-									writerCML.write(results.get(i1).getMolWithProton());
+									writerCML.write(results.get(i1).getOriginalMol());
 								writerCML.close();
 								
 								//write the mopac debug messages in one file
@@ -162,10 +162,15 @@ public class PreprocessMolecules {
 							CMLWriter writerCML = new CMLWriter(new FileOutputStream(new File(outputFolder + file.getName() + "_" + results.get(i1).getProtonatedAtom() + ".cml")));
 							//thats the molecule containing the all the bond length changes from all protonation sites
 							if(i1 == 0)
-								writerCML.write(results.get(i1).getMolWithProton());
+							{
+								writerCML.write(results.get(i1).getOriginalMol());
+							}
 							//thats the mol containing the individual changes from one protonation site
 							else
-								writerCML.write(results.get(i1).getMolWithProton());
+							{
+								results.get(i1).getOriginalMol().setProperty("cdk:Title", Double.toString((Double)results.get(i1).getOriginalMol().getProperty("HeatOfFormation")));
+								writerCML.write(results.get(i1).getOriginalMol());
+							}
 							writerCML.close();
 							
 							//write the mopac debug messages in one file

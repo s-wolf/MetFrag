@@ -311,7 +311,7 @@ public class AssignFragmentPeak {
 				if(countNL == neutralLossRulesToApply.length)
 				{
 					Double maxBondLengthChangeNL = 0.0;
-					Double minBondOrderNL = 0.0;
+					Double minBondOrderNL = 2.0;
 					//now get the bond length changes
 					for (List<Integer> list : matchedAtomsSMARTS) {
 						List<Integer> matched = list;
@@ -355,15 +355,15 @@ public class AssignFragmentPeak {
 									if(bond.getAtom(0).getSymbol().equals(mainAtom) && !foundAtoms.contains(bond.getAtom(0)))
 									{
 										foundAtoms.add(bond.getAtom(0));
-										bondLengthChangeNL += Double.parseDouble((String)bondOrig.getProperty(Constants.BONDLENGTHCHANGE));
-										bondOrderNL += Double.parseDouble((String)bondOrig.getProperty(Constants.BONDORDER));
+										bondLengthChangeNL = Double.parseDouble((String)bondOrig.getProperty(Constants.BONDLENGTHCHANGE));
+										bondOrderNL = Double.parseDouble((String)bondOrig.getProperty(Constants.BONDORDER));
 										break;
 									}
 									else if(bond.getAtom(1).getSymbol().equals(mainAtom) && !foundAtoms.contains(bond.getAtom(1)))
 									{
 										foundAtoms.add(bond.getAtom(1));
-										bondLengthChangeNL += Double.parseDouble((String)bondOrig.getProperty(Constants.BONDLENGTHCHANGE));
-										bondOrderNL += Double.parseDouble((String)bondOrig.getProperty(Constants.BONDORDER));
+										bondLengthChangeNL = Double.parseDouble((String)bondOrig.getProperty(Constants.BONDLENGTHCHANGE));
+										bondOrderNL = Double.parseDouble((String)bondOrig.getProperty(Constants.BONDORDER));
 										break;
 									}
 									
