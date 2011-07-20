@@ -171,7 +171,7 @@ public class FragmentSingleCompoundWithPeaksPreCalculated {
 	public static void main(String[] args) {
 		long startTime = System.currentTimeMillis();
 //		String file = "/home/swolf/MOPAC/ComparisonToDFT/UFF_mopac7.0/CID_20097272.sdf_NEW_AM1_withoutSCFRT_withoutGNORM_aromatic_LONG_FIXED_FINAL2.cml";
-		String file = "/home/swolf/MOPAC/BondOrderTests/CID_932.sdf_NEW_AM1_withoutSCFRT_withoutGNORM_aromatic_LONG_FIXED_FINAL_4.cml";
+		String file = "/home/swolf/MOPAC/BondOrderTests/Naringenin/PB000122PB000123PB000124PB000125_4.cml";
 		
 		FragmentSingleCompoundWithPeaksPreCalculated test = null;
 		try {

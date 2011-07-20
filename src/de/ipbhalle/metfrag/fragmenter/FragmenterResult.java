@@ -36,6 +36,8 @@ import de.ipbhalle.metfrag.spectrum.MatchedFragment;
 public class FragmenterResult {
 	
 	private StringBuilder completeLog = null;
+	private StringBuilder positivePeaks = null;
+	private StringBuilder negativePeaks = null;
 	private Map<String, Double> mapCandidateToEnergy = null;
 	private Map<String, Double> mapCandidateToHydrogenPenalty = null;
 	private Map<String, Double> mapCandidateToPartialChargesDiff = null;
@@ -49,6 +51,8 @@ public class FragmenterResult {
 	public FragmenterResult()
 	{
 		completeLog = new StringBuilder();
+		positivePeaks = new StringBuilder();
+		negativePeaks = new StringBuilder();
 		mapCandidateToEnergy = Collections.synchronizedMap(new HashMap<String, Double>());
 		mapCandidateToHydrogenPenalty = Collections.synchronizedMap(new HashMap<String, Double>());
 		mapCandidateToPartialChargesDiff = Collections.synchronizedMap(new HashMap<String, Double>());
@@ -137,6 +141,22 @@ public class FragmenterResult {
 
 	public Map<String, List<OptimizationMatrixEntry>> getCandidateToOptimizationMatrixEntries() {
 		return candidateToOptimizationMatrixEntries;
+	}
+
+	public synchronized void setPositivePeaks(StringBuilder positivePeaks) {
+		this.positivePeaks = positivePeaks;
+	}
+
+	public StringBuilder getPositivePeaks() {
+		return positivePeaks;
+	}
+
+	public synchronized void setNegativePeaks(StringBuilder negativePeaks) {
+		this.negativePeaks = negativePeaks;
+	}
+
+	public StringBuilder getNegativePeaks() {
+		return negativePeaks;
 	}
 
 }

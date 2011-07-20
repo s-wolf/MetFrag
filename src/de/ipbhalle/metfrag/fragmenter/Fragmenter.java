@@ -120,7 +120,7 @@ public class Fragmenter {
     private List<String> bondsToBreak = null;
     private boolean isOnlyBreakSelectedBonds = false;
     private BondPrediction bondPrediction = null;
-    private boolean bondLengthChangePreferred = true;
+    private boolean bondLengthChangePreferred = false;
     private boolean optimizeStructure = false;
     private boolean isPrecalculated = false;
     

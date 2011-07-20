@@ -471,7 +471,8 @@ public class Mopac {
 
 	public static void main(String[] args) {
 		
-		String[] methods = {"UFF", "MMFF94", "Ghemical"};
+//		String[] methods = {"UFF", "MMFF94", "Ghemical"};
+		String[] methods = {"MMFF94", "Ghemical"};
 		String folder = "/home/swolf/MOPAC/EMMATest/MMFF94ValidationSet/single/";
 		
 		for (int j = 0; j < methods.length; j++) {
@@ -535,7 +536,7 @@ public class Mopac {
 					{
 						try
 						{
-							mopac.runOptimization("/vol/local/bin/", "run_mopac7", mol, 1200, true, methods[j], "AM1", 1200, true, "none", false, 0);
+							mopac.runOptimization("/vol/local/bin/", "run_mopac7", mol, 2400, true, methods[j], "AM1, GEO-OK, ECHO, MMOK, XYZ, BONDS", 2400, true, "none", false, 0);
 							output = fileArr[i].getName() + "\tHeat of Formation: " + mopac.getHeatOfFormation() + "\tTime: " + mopac.getTime() + "\tWarning: " + mopac.getWarningMessage() + "\tError: " + mopac.getErrorMessage() + "\n";
 						}
 						catch(Exception e)
@@ -548,7 +549,7 @@ public class Mopac {
 					
 					try{
 					    // Create file 
-					    FileWriter fstream = new FileWriter(folder + "/log/mopacMP7" + methods[j] + ".txt", true);
+					    FileWriter fstream = new FileWriter(folder + "/log/mopacMP7NewParams" + methods[j] + ".txt", true);
 					    BufferedWriter out = new BufferedWriter(fstream);
 					    out.write(output);
 					    //Close the output stream

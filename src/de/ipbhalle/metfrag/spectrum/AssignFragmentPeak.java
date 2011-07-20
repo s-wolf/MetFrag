@@ -30,6 +30,7 @@ import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 
+import de.ipbhalle.metfrag.main.MetFragPreCalculated;
 import de.ipbhalle.metfrag.massbankParser.Peak;
 import de.ipbhalle.metfrag.tools.Constants;
 import de.ipbhalle.metfrag.tools.MolecularFormulaTools;
@@ -99,6 +100,11 @@ public class AssignFragmentPeak {
 //		//initialize neutral losses
 //		getNeutralLosses();
 		
+		List<String> explainedPeak = new ArrayList<String>();
+		explainedPeak.add("m/z\tbondOrder\tbondLength\tbondEnergy");
+		
+		List<String> notExplainedPeak = new ArrayList<String>();
+		notExplainedPeak.add("m/z\tbondOrder\tbondLength\tbondEnergy");
 		
 		for (int i=0; i< peakList.size(); i++)
 		{
@@ -107,7 +113,8 @@ public class AssignFragmentPeak {
 			List<MatchedFragment> fragmentsMatched = new ArrayList<MatchedFragment>();
 			for (int j = 0; j < this.acs.size(); j++) {
 				//match peaks
-				fragmentsMatched.addAll(matchPeak(this.acs.get(j), this.peakList.get(i), mode, neutralLossCombination, isPositive));
+				List<MatchedFragment> list = matchPeak(this.acs.get(j), this.peakList.get(i), mode, neutralLossCombination, isPositive);
+				fragmentsMatched.addAll(list);
 			}
 			
 			if(fragmentsMatched.size() == 0)
@@ -142,7 +149,7 @@ public class AssignFragmentPeak {
 			Arrays.sort(array);
 			List<MatchedFragment> bestHits = valueToFragment.get(array[array.length - 1]); 
 			
-			//now save this fragment in the list with the best hits...save only the best hit
+			//if there are several hits with the same bondorder use the one with the least hydrogen penalty
 			int minHydrogenPenalty = 10;
 			MatchedFragment bestHit = null;
 			for (MatchedFragment matchedFragment : bestHits) {
@@ -157,6 +164,40 @@ public class AssignFragmentPeak {
 			hitsPeaks.add(this.peakList.get(i).getMass());
 			hitsAll.addAll(fragmentsMatched);
 		}
+		Map<Double, MatchedFragment> peakAnnotated = new HashMap<Double, MatchedFragment>();
+		for (MatchedFragment mf : hits) {
+			peakAnnotated.put(mf.getFragmentMass(), mf);
+		}
+		
+		String header = "fragmentMass\tbondOrder\tbondLengthChange\tBDE\tbondsRemoved";
+		MetFragPreCalculated.results.setPositivePeaks(MetFragPreCalculated.results.getPositivePeaks().append(header + "\tpeak\n"));
+		MetFragPreCalculated.results.setNegativePeaks(MetFragPreCalculated.results.getNegativePeaks().append(header + "\n"));
+		
+		for (int j = 0; j < this.acs.size(); j++) {
+			
+			//skip original molecule
+			if(j == 0)
+				continue;
+			
+			double fragmentMass = 0.0;
+			if(this.acs.get(j).getProperty("FragmentMass") != null && this.acs.get(j).getProperty("FragmentMass") != "")
+	        	fragmentMass = Double.parseDouble(this.acs.get(j).getProperty("FragmentMass").toString());
+	        else
+	        {
+	        	fragmentMass = MolecularFormulaTools.getMonoisotopicMass(MolecularFormulaManipulator.getMolecularFormula(this.acs.get(j)));
+	        }
+			
+			if(peakAnnotated.containsKey(fragmentMass))
+			{				
+				MetFragPreCalculated.results.setPositivePeaks(MetFragPreCalculated.results.getPositivePeaks().append(fragmentMass + "\t" + this.acs.get(j).getProperty(Constants.BONDORDER) + "\t" + this.acs.get(j).getProperty(Constants.BONDLENGTHCHANGE) + "\t" + this.acs.get(j).getProperty(Constants.BDE) + "\t" + this.acs.get(j).getProperty(Constants.BONDREMOVED) + "\t" + peakAnnotated.get(fragmentMass).getPeak().getMass() + "\n"));
+			}
+			else
+			{
+				MetFragPreCalculated.results.setNegativePeaks(MetFragPreCalculated.results.getNegativePeaks().append(fragmentMass + "\t" + this.acs.get(j).getProperty(Constants.BONDORDER) + "\t" + this.acs.get(j).getProperty(Constants.BONDLENGTHCHANGE) + "\t" + this.acs.get(j).getProperty(Constants.BDE) + "\t" + this.acs.get(j).getProperty(Constants.BONDREMOVED) + "\n"));
+			}
+		}
+		
+		
 	}
 	
 	

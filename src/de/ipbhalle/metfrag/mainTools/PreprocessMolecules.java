@@ -80,7 +80,7 @@ public class PreprocessMolecules {
 		        outputFolder += MolecularFormulaManipulator.getString(MolecularFormulaManipulator.getMolecularFormula(molecule)) + "/";
 		        
 		        //Skip already calculated files!
-		        if(new File(outputFolder + file.getName().split("\\.")[0] + "_Combined.cml").exists())
+		        if(new File(outputFolder + file.getName().split("\\.cml")[0] + "_Combined.cml").exists())
 		        	System.exit(0);
 		        
 		        
@@ -126,11 +126,16 @@ public class PreprocessMolecules {
 								new File(outputFolder).mkdirs();
 								CMLWriter writerCML = new CMLWriter(new FileOutputStream(new File(outputFolder + clusteredCompounds[c] + "_" + results.get(i1).getProtonatedAtom() + ".cml")));
 								//thats the molecule containing the all the bond length changes from all protonation sites
+								
 								if(i1 == 0)
+								{
 									writerCML.write(results.get(i1).getOriginalMol());
-								//thats the mol containing the individual changes from one protonation site
+								}
 								else
+								{
+									results.get(i1).getOriginalMol().setID(Double.toString((Double)results.get(i1).getOriginalMol().getProperty("HeatOfFormation")));
 									writerCML.write(results.get(i1).getOriginalMol());
+								}
 								writerCML.close();
 								
 								//write the mopac debug messages in one file
@@ -168,7 +173,7 @@ public class PreprocessMolecules {
 							//thats the mol containing the individual changes from one protonation site
 							else
 							{
-								results.get(i1).getOriginalMol().setProperty("cdk:Title", Double.toString((Double)results.get(i1).getOriginalMol().getProperty("HeatOfFormation")));
+								results.get(i1).getOriginalMol().setID(Double.toString((Double)results.get(i1).getOriginalMol().getProperty("HeatOfFormation")));
 								writerCML.write(results.get(i1).getOriginalMol());
 							}
 							writerCML.close();

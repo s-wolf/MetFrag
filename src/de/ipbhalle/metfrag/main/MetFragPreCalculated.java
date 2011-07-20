@@ -72,15 +72,24 @@ public class MetFragPreCalculated {
 	 * 
 	 * @throws Exception the exception
 	 */
-	public void startScriptable(boolean useProxy, boolean writeSDF, File folderToMopac) throws Exception
+	public void startScriptable(boolean useProxy, boolean writeSDF, File folderToMopac, boolean getLowestHeatofFormation) throws Exception
 	{
 		results = new FragmenterResult();
 		//get configuration
 		Config config = new Config("outside");
-		WrapperSpectrum spectrum = new WrapperSpectrum(config.getFolder() + file);
+		WrapperSpectrum spectrum = new WrapperSpectrum(file);
 		
 		String database = config.getDatabase();
-		List<CMLMolecule> candidates = CMLTools.readFolder(folderToMopac);
+		List<CMLMolecule> candidates = new ArrayList<CMLMolecule>();
+		
+		if(getLowestHeatofFormation)
+		{
+			File tmp = new File(file);
+			candidates.add(CMLTools.readFolderReturnLowestHoF(folderToMopac, tmp.getName().substring(0, tmp.getName().lastIndexOf("."))));
+		}
+		else		
+			candidates = CMLTools.readFolder(folderToMopac);			
+		
 		
 		
 //		this.candidateCount = candidates.size();
@@ -356,6 +365,8 @@ public class MetFragPreCalculated {
 		completeLog.append(similarity);			
 		completeLog.append("\n*****************************************************\n\n");	
 
+		File tmp = new File(this.file);
+		String fileTmp = tmp.getName().substring(0, tmp.getName().lastIndexOf("."));
 		System.out.println("Finished LOG!!! " + this.file);
 		
 		//write string to disk
@@ -365,11 +376,14 @@ public class MetFragPreCalculated {
 
 			//complete log
 			Writer.writeToFile(folder + "logs/" + date + "_log.txt", completeLog.toString());
+			//positive and negative hits in peaks hist
+			Writer.writeToFile(folder + "logs/" + date + "_hist_Positive.txt", results.getPositivePeaks().toString());
+			Writer.writeToFile(folder + "logs/" + date + "_hist_Negative.txt", results.getNegativePeaks().toString());
 			//write peak data of the correct compounds to file
 			Writer.writeToFile(folder + "logs/" + date + "_results.txt", resultsTable);
 			new File(folder + "logs/" + date + "/").mkdirs();
-			Writer.writeToFile(folder + "logs/" + date + "/" + this.file, parameterOptimization);
-			Writer.writeToFile(folder + "logs/" + date + "/" + this.file + "_Combined", parameterOptimizationCombined);
+			Writer.writeToFile(folder + "logs/" + date + "/" + fileTmp, parameterOptimization);
+			Writer.writeToFile(folder + "logs/" + date + "/" + fileTmp + "_Combined", parameterOptimizationCombined);
 		}
 		catch (InterruptedException e) {
 			// TODO Auto-generated catch block
@@ -390,7 +404,7 @@ public class MetFragPreCalculated {
 		
 		ret += pubChemIdentifier + "\n";
 		ret += exactMass.toString() + "\n\n";
-		ret += "candidate\tpeakMass\tpeakInt\tbondEnergy\thydrogenPenalty\tpCharges\n";
+		ret += "candidate\tpeakMass\tpeakInt\tbondEnergy\thydrogenPenalty\tpbondLengthChange\tBondOrder\tBondRemoved\tNeutralLossRules\n";
 		
 		return ret;
 	}
@@ -407,7 +421,7 @@ public class MetFragPreCalculated {
 		parameterOptimizationMatrix.append(header);
 		for (String candidate : candidateToOptimizationMatrixEntries.keySet()) {
 			for (OptimizationMatrixEntry entry : candidateToOptimizationMatrixEntries.get(candidate)) {
-				parameterOptimizationMatrix.append(candidate + "\t" + entry.getPeakMass() + "\t" + entry.getPeakInt() + "\t" + entry.getBondEnergyString() + "\t" + entry.getHydrogenPenalty() + "\t" + entry.getBondLengthChange() + "\t" + entry.getNeutralLossRules() + "\n");
+				parameterOptimizationMatrix.append(candidate + "\t" + entry.getPeakMass() + "\t" + entry.getPeakInt() + "\t" + entry.getBondEnergyString() + "\t" + entry.getHydrogenPenalty() + "\t" + entry.getBondLengthChange() + "\t" + entry.getBondOrderString() + "\t" + entry.getBondRemoved()  + "\t" + entry.getNeutralLossRules() + "\n");
 			}
 		}
 		
@@ -427,7 +441,7 @@ public class MetFragPreCalculated {
 		
 		ret += pubChemIdentifier + "\n";
 		ret += exactMass.toString() + "\n\n";
-		ret += "Candidate\t#Peaks\tBondEnergy\tHydrogenPenalty\tBondLengthChange\tNormBondLengthChange\tNeutralLossRules\n";
+		ret += "Candidate\t#Peaks\tBondEnergy\tHydrogenPenalty\tBondLengthChange\tNormBondLengthChange\tBondOrder\tNeutralLossRules\n";
 		
 		return ret;
 	}
@@ -460,15 +474,17 @@ public class MetFragPreCalculated {
 			int hydrogenPenalty = 0;
 			double bondLengthChange = 0.0;
 			double bondLengthChangeNorm = 0.0;
+			double bondOrder = 0.0;
 			String neutralLossRules = "";
 			for (OptimizationMatrixEntry entry : candidateToOptimizationMatrixEntries.get(candidate)) {
 				bondEnergy += MoleculeTools.getCombinedEnergy(entry.getBondEnergyString());
 				hydrogenPenalty += entry.getHydrogenPenalty();
 				bondLengthChange += MoleculeTools.getCombinedEnergy(entry.getBondLengthChange());
 				bondLengthChangeNorm += MoleculeTools.getCombinedEnergy(entry.getBondLengthChange()) / candToMaxBondLEngthChange.get(candidate);
+				bondOrder += MoleculeTools.getCombinedEnergy(entry.getBondOrderString()); 
 				neutralLossRules += entry.getNeutralLossRules() + " ";
 			}
-			parameterOptimizationMatrix.append(candidate + "\t" + candidateToOptimizationMatrixEntries.get(candidate).size() + "\t" + bondEnergy + "\t" + hydrogenPenalty + "\t" + bondLengthChange + "\t" + bondLengthChangeNorm + "\t" + neutralLossRules + "\n");
+			parameterOptimizationMatrix.append(candidate + "\t" + candidateToOptimizationMatrixEntries.get(candidate).size() + "\t" + bondEnergy + "\t" + hydrogenPenalty + "\t" + bondLengthChange + "\t" + bondLengthChangeNorm + "\t"+ bondOrder + "\t" + neutralLossRules + "\n");
 		}
 		
 		return parameterOptimizationMatrix.toString();
@@ -495,6 +511,9 @@ public class MetFragPreCalculated {
 		//"Naltrexone_10Naltrexone_20Naltrexone_30Naltrexone_40Naltrexone_50.txt" "2011-04-20_13-33-33" "/home/swolf/MOPAC/Hill_PubChem_Formula/pubchemClusteredMopac/mopac_600/C20H23NO4/"
 		//-Dproperty.file.path=/home/swolf/MOPAC/Hill_PubChem_Formula/config/ -Xms1500m -Xmx5500m
 		
+		//NaringeninTest
+//		"/home/swolf/MOPAC/BondOrderTests/Naringenin/spectrum/PB000122PB000123PB000124PB000125.txt" "2011-04-20_13-33-33" "/home/swolf/MOPAC/BondOrderTests/Naringenin/"
+//		-Dproperty.file.path=/home/swolf/MOPAC/BondOrderTests/Naringenin/config/ -Xms1500m -Xmx5500m
 		try
 		{
 			//thats the current file 
@@ -546,7 +565,7 @@ public class MetFragPreCalculated {
 		MetFragPreCalculated metFrag = new MetFragPreCalculated(currentFile, date);
 		try {
 //			String resultsTable = "Spectrum\tCorrectCpdID\tHits\trankWorstCase\trankTanimoto\trankIsomorph\texactMass\tRuntime";
-			metFrag.startScriptable(true, writeSDF, new File(CMLFiles));
+			metFrag.startScriptable(true, writeSDF, new File(CMLFiles), true);
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(1);

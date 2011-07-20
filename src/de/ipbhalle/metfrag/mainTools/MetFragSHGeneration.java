@@ -22,10 +22,10 @@ public class MetFragSHGeneration {
 		
 		//"/home/swolf/MOPAC/BATCH/jar/PreprocessMolecules.jar" "/home/swolf/MOPAC/ProofOfConcept/pubchem/" "/home/swolf/MOPAC/BATCH/sh/" 600 600
 		
-		String writePath = "/home/swolf/MOPAC/BATCH/MFsh/";
-		String pathToSDF = "/home/swolf/MOPAC/Hill_PubChem_Formula/";
-		String pathToJar = "/home/swolf/MOPAC/BATCH/jar/MetFragPreCalculated.jar";
-		String pathToPreCalculatedCML = "/home/swolf/MOPAC/Hill_PubChem_Formula/pubchemClusteredMopac/mopac_600/";
+		String writePath = "/home/swolf/MOPAC/BondOrderTests/Hill_ProofOfConcept/MFsh/";
+		String pathToSpectra = "/home/swolf/MOPAC/BondOrderTests/Hill_ProofOfConcept/testData/";
+		String pathToJar = "/home/swolf/MOPAC/BondOrderTests/Hill_ProofOfConcept/jar/MetFragPreCalculated.jar";
+		String pathToPreCalculatedCML = "/home/swolf/MOPAC/BondOrderTests/Hill_ProofOfConcept/mopac_2400/";
 		
 		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
 	    java.util.Date date = new java.util.Date();
@@ -41,7 +41,7 @@ public class MetFragSHGeneration {
 		FileUtils.deleteDirectory(new File(writePath));
 		new File(writePath).mkdirs();
 		
-		File[] spectraFolder = new File(pathToSDF).listFiles();
+		File[] spectraFolder = new File(pathToSpectra).listFiles();
 		Arrays.sort(spectraFolder);
 		for (File file : spectraFolder) {
 			
@@ -62,7 +62,7 @@ public class MetFragSHGeneration {
 			out.write("#!/bin/bash");
 			out.newLine();
 			//CID_3365_spectrum.txt 2011-02-02_16-00-00 /home/swolf/MOPAC/Hill_PubChem_Formula/pubchemClusteredMopac/mopac_600/C30H60N3O3/ 1
-			out.write("java -Dproperty.file.path=" + pathToSDF + "config/" + " -Xms1500m -Xmx5500m -jar " + pathToJar + " \"" + file.getName() + "\" \"" + dateString + "\" \"" + new File(pathToPreCalculatedCML) + "/" + spectrum.getFormula() + "/\"");
+			out.write("java -Dproperty.file.path=" + pathToSpectra + "config/" + " -Xms1500m -Xmx5500m -jar " + pathToJar + " \"" + file.getPath() + "\" \"" + dateString + "\" \"" + new File(pathToPreCalculatedCML) + "/" + spectrum.getFormula().trim() + "/\"");
 		  	out.close();
 
 		}
