@@ -90,21 +90,20 @@ public class Query {
      * Gets the sorted candidates. This is the MassStruct method to retrieve candidates in
      * a sorted way. Reference: http://dx.doi.org/10.2390/biecoll-jib-2011-157
      *
-     * @param cn the cn
-     * @param ws the ws
-     * @param exactMassRestriction the exact mass restriction
+     * @param ws the spectrum
+     * @param searchPPM the exact mass restriction
      * @param mzabs the mzabs
      * @param mzppm the mzppm
      * @return the sorted candidates
      */
-    public List<String> getSortedCandidates(WrapperSpectrum ws, String exactMassRestriction, double mzabs, double mzppm) {
+    public List<String> getSortedCandidates(WrapperSpectrum ws, String searchPPM, double mzabs, double mzppm) {
         List<String> SortedList = new ArrayList<String>();
         ResultSet rs = null;
         PreparedStatement pstmt = null;
         String query = null;
         try {
             //try to parse restriction in ppm
-            double ppm = Double.parseDouble(exactMassRestriction);
+            double ppm = Double.parseDouble(searchPPM);
             query = "SELECT"
                     + " substance.accession, Score"
                     + " FROM substance, compound" + ", library,"
@@ -163,7 +162,7 @@ public class Query {
                     + " library,"
                     + " (SELECT MIN(compound_id) AS firstcompound_id"
                     + " FROM compound"
-                    + " WHERE formula = " + exactMassRestriction
+                    + " WHERE formula = " + searchPPM
                     + " GROUP BY inchi_key_1) AS firstcandidate,"
                     + " compound AS Candidates"
                     + " LEFT OUTER JOIN (SELECT mcs.mcs_structure,"
@@ -186,7 +185,7 @@ public class Query {
                             + " AND   Candidates.compound_id = firstcompound_id"
                             + " GROUP BY accession, inchi_key_1"
                             + " ORDER BY Score DESC) AS results"
-                            + " WHERE formula = " + exactMassRestriction
+                            + " WHERE formula = " + searchPPM
                             + " AND substance.compound_id = compound.compound_id"
                             + " AND substance.library_id = library.library_id"
                             + " AND library_name = 'pubchem'"
@@ -430,15 +429,21 @@ public class Query {
 		try {
 			Config c = new Config();
 			Query test = new Query(c.getUsernamePostgres(),c.getPasswordPostgres(),c.getJdbcPostgres());
-			System.out.println(test.queryByFormula("C15H12O5", "pubchem").size());
-			System.out.println(test.queryByMass(272.071, 272.072, "pubchem").size());			
-			System.out.println(test.getCompound(12337526));
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (CDKException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+//			System.out.println(test.queryByFormula("C15H12O5", "pubchem").size());
+//			System.out.println(test.queryByMass(272.071, 272.072, "pubchem").size());			
+//			System.out.println(test.getCompound(12337526));
+			
+			WrapperSpectrum ws = new WrapperSpectrum("/home/swolf/MOPAC/BondOrderTests/Naringenin/spectrum/PB000122PB000123PB000124PB000125.txt");
+			List<String> sortedCands = test.getSortedCandidates(ws, "10.0", 0.01, 10);
+			for (String string : sortedCands) {
+				System.out.println(string);
+			}
+//		} catch (SQLException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		} catch (CDKException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
