@@ -27,6 +27,9 @@ import org.openscience.cdk.smiles.SmilesParser;
 import org.openscience.cdk.tools.manipulator.ChemFileManipulator;
 
 import de.ipbhalle.metfrag.main.Config;
+import de.ipbhalle.metfrag.massbankParser.Peak;
+import de.ipbhalle.metfrag.spectrum.WrapperSpectrum;
+import de.ipbhalle.metfrag.tools.PPMTool;
 
 public class Query {
 	
@@ -35,8 +38,9 @@ public class Query {
 	String url;
     String username;
     String password;
-	
-	/**
+    
+    
+    /**
 	 * Instantiates a new query.
 	 *
 	 * @param username the username
@@ -80,6 +84,148 @@ public class Query {
 		}
 		
 	}
+    
+    
+    /**
+     * Gets the sorted candidates. This is the MassStruct method to retrieve candidates in
+     * a sorted way. Reference: http://dx.doi.org/10.2390/biecoll-jib-2011-157
+     *
+     * @param cn the cn
+     * @param ws the ws
+     * @param exactMassRestriction the exact mass restriction
+     * @param mzabs the mzabs
+     * @param mzppm the mzppm
+     * @return the sorted candidates
+     */
+    public List<String> getSortedCandidates(WrapperSpectrum ws, String exactMassRestriction, double mzabs, double mzppm) {
+        List<String> SortedList = new ArrayList<String>();
+        ResultSet rs = null;
+        PreparedStatement pstmt = null;
+        String query = null;
+        try {
+            //try to parse restriction in ppm
+            double ppm = Double.parseDouble(exactMassRestriction);
+            query = "SELECT"
+                    + " substance.accession, Score"
+                    + " FROM substance, compound" + ", library,"
+                    + " (SELECT inchi_key_1,"
+                    + " COUNT(DISTINCT MCS.cluster_id) AS Score"
+                    + " FROM substance,"
+                    + " library,"
+                    + " (SELECT MIN(compound_id) AS firstcompound_id"
+                    + " FROM compound"
+                    + " WHERE exact_mass BETWEEN " + calcMinValue(ws.getExactMass(), mzabs, mzppm)
+                    + " AND " + calcMaxValue(ws.getExactMass(), mzabs, mzppm)
+                    + " GROUP BY inchi_key_1) AS firstcandidate,"
+                    + " compound AS Candidates"
+                    + " LEFT OUTER JOIN (SELECT mcs.mcs_structure,"
+                    + " mz_cluster.cluster_id"
+                    + " FROM mcs,"
+                    + " mz_cluster"
+                    + " WHERE mcs.mz_cluster_id = mz_cluster.cluster_id"
+                    + " AND (";
+            for (Peak peak : ws.getPeakList()) {
+                if (peak.equals(ws.getPeakList().lastElement())) {
+                    query += "(min >= "
+                            + calcMinValue(peak.getMass(), mzabs, mzppm)
+                            + " AND max <= "
+                            + calcMaxValue(peak.getMass(), mzabs, mzppm)
+                            + "))) AS MCS "
+                            + " ON (MCS.mcs_structure <= Candidates.mol_structure)"
+                            + " WHERE substance.compound_id = firstcompound_id"
+                            + " AND   substance.library_id = library.library_id"
+                            + " AND   library_name = 'pubchem'"
+                            + " AND   Candidates.compound_id = firstcompound_id"
+                            + " GROUP BY accession, inchi_key_1"
+                            + " ORDER BY Score DESC) AS results"
+                            + " WHERE exact_mass BETWEEN " + calcMinValue(ws.getExactMass(), mzabs, mzppm)
+                            + " AND " + calcMaxValue(ws.getExactMass(), mzabs, mzppm)
+                            + " AND substance.compound_id = compound.compound_id"
+                            + " AND substance.library_id = library.library_id"
+                            + " AND library_name = 'pubchem'"
+                            + " AND compound.inchi_key_1 = results.inchi_key_1;";
+                } else {
+                    query += "(min >= "
+                            + calcMinValue(peak.getMass(), mzabs, mzppm)
+                            + " AND max <= "
+                            + calcMaxValue(peak.getMass(), mzabs, mzppm)
+                            + ") OR ";
+                }
+            }
+        } catch (Exception e) {
+            //it is not a ppm but a sum formula
+            query = "SELECT"
+                    + " substance.accession, Score"
+                    + " FROM substance, compound" + ", library,"
+                    + " (SELECT inchi_key_1,"
+                    + " COUNT(DISTINCT MCS.cluster_id) AS Score"
+                    + " FROM substance,"
+                    + " library,"
+                    + " (SELECT MIN(compound_id) AS firstcompound_id"
+                    + " FROM compound"
+                    + " WHERE formula = " + exactMassRestriction
+                    + " GROUP BY inchi_key_1) AS firstcandidate,"
+                    + " compound AS Candidates"
+                    + " LEFT OUTER JOIN (SELECT mcs.mcs_structure,"
+                    + " mz_cluster.cluster_id"
+                    + " FROM mcs,"
+                    + " mz_cluster"
+                    + " WHERE mcs.mz_cluster_id = mz_cluster.cluster_id"
+                    + " AND (";
+            for (Peak peak : ws.getPeakList()) {
+                if (peak.equals(ws.getPeakList().lastElement())) {
+                    query += "(min >= "
+                            + calcMinValue(peak.getMass(), mzabs, mzppm)
+                            + " AND max <= "
+                            + calcMaxValue(peak.getMass(), mzabs, mzppm)
+                            + "))) AS MCS "
+                            + " ON (MCS.mcs_structure <= Candidates.mol_structure)"
+                            + " WHERE substance.compound_id = firstcompound_id"
+                            + " AND   substance.library_id = library.library_id"
+                            + " AND   library_name = 'pubchem'"
+                            + " AND   Candidates.compound_id = firstcompound_id"
+                            + " GROUP BY accession, inchi_key_1"
+                            + " ORDER BY Score DESC) AS results"
+                            + " WHERE formula = " + exactMassRestriction
+                            + " AND substance.compound_id = compound.compound_id"
+                            + " AND substance.library_id = library.library_id"
+                            + " AND library_name = 'pubchem'"
+                            + " AND compound.inchi_key_1 = results.inchi_key_1;";
+                } else {
+                    query += "(min >= "
+                            + calcMinValue(peak.getMass(), mzabs, mzppm)
+                            + " AND max <= "
+                            + calcMaxValue(peak.getMass(), mzabs, mzppm)
+                            + ") OR ";
+                }
+            }
+        }
+        try {
+        	con = DriverManager.getConnection(url, username, password);
+            pstmt = con.prepareStatement(query);
+            rs = pstmt.executeQuery();
+        } catch (Exception e) {
+            System.err.println("Problems with Statement: "+e.getLocalizedMessage());
+        }
+        try {
+            while (rs.next()) {
+                SortedList.add(rs.getString(1));
+            }
+        } catch (Exception e) {
+            System.err.println("Problems with Resultset: " + e.getLocalizedMessage());
+        }
+        return SortedList;
+    }
+
+
+    private Double calcMinValue(Double d, double mz_abs, double ppm) {
+        return d - PPMTool.getPPMDeviation(d, ppm) - mz_abs;
+    }
+
+    private Double calcMaxValue(Double d, double mz_abs, double ppm) {
+        return d + PPMTool.getPPMDeviation(d, ppm) + mz_abs;
+    } 
+    
 	
 	/**
 	 * Query by mass. Returns a list with all compound ID's matching the
