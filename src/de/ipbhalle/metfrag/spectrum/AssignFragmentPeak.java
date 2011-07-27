@@ -169,9 +169,9 @@ public class AssignFragmentPeak {
 			peakAnnotated.put(mf.getFragmentMass(), mf);
 		}
 		
-		String header = "fragmentMass\tbondOrder\tbondLengthChange\tBDE\tbondsRemoved";
-		MetFragPreCalculated.results.setPositivePeaks(MetFragPreCalculated.results.getPositivePeaks().append(header + "\tpeak\n"));
-		MetFragPreCalculated.results.setNegativePeaks(MetFragPreCalculated.results.getNegativePeaks().append(header + "\n"));
+//		String header = "fragmentMass\tbondOrder\tbondLengthChange\tBDE\tbondsRemoved";
+//		MetFragPreCalculated.results.setPositivePeaks(MetFragPreCalculated.results.getPositivePeaks().append(header + "\tpeak\n"));
+//		MetFragPreCalculated.results.setNegativePeaks(MetFragPreCalculated.results.getNegativePeaks().append(header + "\n"));
 		
 		for (int j = 0; j < this.acs.size(); j++) {
 			

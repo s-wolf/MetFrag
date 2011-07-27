@@ -96,7 +96,6 @@ public class PubChemLocal {
 	    	candidatesString.add(rs.getString("id"));
 	    }
         con.close();
-        
         return candidatesString;
 	}
 	

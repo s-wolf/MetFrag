@@ -43,6 +43,7 @@ import org.openscience.cdk.io.MDLReader;
 import org.openscience.cdk.io.MDLV2000Reader;
 import org.openscience.cdk.io.Mol2Reader;
 import org.openscience.cdk.io.Mol2Writer;
+import org.openscience.cdk.io.SDFWriter;
 import org.openscience.cdk.tools.CDKHydrogenAdder;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 import org.openscience.cdk.tools.manipulator.ChemFileManipulator;
@@ -92,13 +93,13 @@ public class Mopac {
 //		m2w.writeMolecule(molecule);
 //		m2w.close();
 		
-		File tempFile = File.createTempFile("mol",".mol2");
+		File tempFile = File.createTempFile("mol",".sdf");
 		if(deleteTemp)
 			tempFile.deleteOnExit();
 		FileWriter fw = new FileWriter(tempFile);
-		Mol2Writer m2w = new Mol2Writer(fw);
+		SDFWriter m2w = new SDFWriter(fw);
 		IMolecule molecule = new Molecule(molToOptimize);
-		m2w.writeMolecule(molecule);
+		m2w.write(molecule);
 		m2w.close();
 		
 		Runtime rt = Runtime.getRuntime();
@@ -107,11 +108,11 @@ public class Mopac {
 		if(firstRun)
 		{
 			//convert it back to mol2
-	        tempFileFFInput3D = File.createTempFile("molFFInput",".mol2");
+	        tempFileFFInput3D = File.createTempFile("molFFInput",".sdf");
 	        if(deleteTemp)
 	        	tempFileFFInput3D.deleteOnExit();
 //	        String command = "babel --gen3d -i mol2 " + tempFile.getPath() + " -o mol2 " + tempFileFFInput3D.getPath();
-	        String command = pathToBabel + "babel --gen2D -i mol2 " + tempFile.getPath() + " -o mol2 " + tempFileFFInput3D.getPath();
+	        String command = pathToBabel + "babel --gen2D -i sdf " + tempFile.getPath() + " -o sdf " + tempFileFFInput3D.getPath();
 //	        String command = "babel -i mol2 " + tempFile.getPath() + " -o mol2 " + tempFileFFInput3D.getPath();
 	        String[] psCmdFFInput =
 			{
