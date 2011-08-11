@@ -404,7 +404,7 @@ public class MetFragPreCalculated {
 		
 		ret += pubChemIdentifier + "\n";
 		ret += exactMass.toString() + "\n\n";
-		ret += "candidate\tpeakMass\tpeakInt\tbondEnergy\thydrogenPenalty\tpbondLengthChange\tBondOrder\tBondRemoved\tNeutralLossRules\n";
+		ret += "candidate\tpeakMass\tpeakInt\tbondEnergy\thydrogenPenalty\tpbondLengthChange\tBondOrder\tBondOrderDiff\tBondRemoved\tNeutralLossRules\n";
 		
 		return ret;
 	}
@@ -421,7 +421,7 @@ public class MetFragPreCalculated {
 		parameterOptimizationMatrix.append(header);
 		for (String candidate : candidateToOptimizationMatrixEntries.keySet()) {
 			for (OptimizationMatrixEntry entry : candidateToOptimizationMatrixEntries.get(candidate)) {
-				parameterOptimizationMatrix.append(candidate + "\t" + entry.getPeakMass() + "\t" + entry.getPeakInt() + "\t" + entry.getBondEnergyString() + "\t" + entry.getHydrogenPenalty() + "\t" + entry.getBondLengthChange() + "\t" + entry.getBondOrderString() + "\t" + entry.getBondRemoved()  + "\t" + entry.getNeutralLossRules() + "\n");
+				parameterOptimizationMatrix.append(candidate + "\t" + entry.getPeakMass() + "\t" + entry.getPeakInt() + "\t" + entry.getBondEnergyString() + "\t" + entry.getHydrogenPenalty() + "\t" + entry.getBondLengthChange() + "\t" + entry.getBondOrderString() + "\t" + entry.getBondOrderDiffString()  + "\t" + entry.getBondRemoved()  + "\t" + entry.getNeutralLossRules() + "\n");
 			}
 		}
 		

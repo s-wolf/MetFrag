@@ -499,7 +499,7 @@ public class Fragmenter {
 		preprocessMolecule(atomContainer, isPrecalculated);
 
 		//add the original molecule
-		fragmentsReturn.add(writeMoleculeToTemp(this.originalMolecule, identifier, globalCount, "0.0", 0, "0.0", "2.0", "none")); 
+		fragmentsReturn.add(writeMoleculeToTemp(this.originalMolecule, identifier, globalCount, "0.0", 0, "0.0", "2.0", "none", "0.0")); 
     	
 		//add original molecule to it
         fragmentQueue.offer(new Node(0, 0, this.originalMolecule, 0));       
@@ -547,7 +547,7 @@ public class Fragmenter {
                 	
                 	//Render.Draw(partContainer, "Round: " + this.nround);
                     fragmentQueue.offer(new Node(globalCount, parent, partContainer, treeDepth));
-                    fragmentsReturn.add(writeMoleculeToTemp(partContainer, identifier, globalCount, (String)partContainer.getProperty(Constants.BDE), treeDepth, (String)partContainer.getProperty(Constants.BONDLENGTHCHANGE), (String)partContainer.getProperty(Constants.BONDORDER), (String)partContainer.getProperty(Constants.BONDREMOVED)));                    
+                    fragmentsReturn.add(writeMoleculeToTemp(partContainer, identifier, globalCount, (String)partContainer.getProperty(Constants.BDE), treeDepth, (String)partContainer.getProperty(Constants.BONDLENGTHCHANGE), (String)partContainer.getProperty(Constants.BONDORDER), (String)partContainer.getProperty(Constants.BONDREMOVED), (String)partContainer.getProperty(Constants.BONDORDERDIFF)));                    
                     globalCount++;
                     int parentPP = globalCount - 1;
                 }
@@ -865,11 +865,14 @@ public class Fragmenter {
                         {
                         	temp = setBondLengthChange(temp, bondPrediction.getBondLength(bondInRing.getID()), bondPrediction.getBondLength(bond.getID()));
                         	temp = setBondOrder(temp, bondPrediction.getBondOrder(bondInRing.getID()), bondPrediction.getBondOrder(bond.getID()));
+                        	temp = setBondOrderDiff(temp, bondPrediction.getBondOrder(bondInRing.getID()), bondPrediction.getBondOrder(bond.getID()));
                         }
                         else
                         {
                         	temp = setBondLengthChange(temp, 0.0);
                         	temp = setBondOrder(temp, 2.0);
+                        	temp = setBondOrderDiff(temp, 0.0);
+
                         }
                         
                         temp = setBondRemoved(temp, getBondString(bondInRing), getBondString(bond));
@@ -945,11 +948,13 @@ public class Fragmenter {
                 {
                 	temp = setBondLengthChange(temp, bondPrediction.getBondLength(bond.getID()));
                 	temp = setBondOrder(temp, bondPrediction.getBondOrder(bond.getID()));
+                	temp = setBondOrderDiff(temp, bondPrediction.getBondOrderDiff(bond.getID()));
                 }
                 else
                 {
                 	temp = setBondLengthChange(temp, 0.0);
                 	temp = setBondOrder(temp, 2.0);
+                	temp = setBondOrderDiff(temp, 0.0);
                 }
                 
                 temp = setBondRemoved(temp, getBondString(bond));
@@ -1084,6 +1089,18 @@ public class Fragmenter {
     	return setStructureProperty(mol, Constants.BONDORDER, Double.toString(bondOrder));
     }
     
+    /**
+     * Sets the bond order.
+     *
+     * @param mol the mol
+     * @param bondLengthChange the bond length change
+     * @return the i atom container
+     */
+    private IAtomContainer setBondOrderDiff(IAtomContainer mol, Double bondOrder)
+    {
+    	return setStructureProperty(mol, Constants.BONDORDERDIFF, Double.toString(bondOrder));
+    }
+    
     
     /**
      * Sets the bond order change.
@@ -1096,6 +1113,20 @@ public class Fragmenter {
     private IAtomContainer setBondOrder(IAtomContainer mol, Double bondOrder1, Double bondOrder2)
     {
     	return setStructureProperty(mol, Constants.BONDORDER, bondOrder1.toString() + "," + bondOrder2.toString());
+    }
+    
+    
+    /**
+     * Sets the bond order change.
+     *
+     * @param mol the mol
+     * @param bondOrder1 the bond order1
+     * @param bondOrder2 the bond order2
+     * @return the i atom container
+     */
+    private IAtomContainer setBondOrderDiff(IAtomContainer mol, Double bondOrder1, Double bondOrder2)
+    {
+    	return setStructureProperty(mol, Constants.BONDORDERDIFF, bondOrder1.toString() + "," + bondOrder2.toString());
     }
     
     
@@ -1865,7 +1896,7 @@ public class Fragmenter {
      * @throws IOException Signals that an I/O exception has occurred.
      * @throws CDKException the CDK exception
      */
-    private File writeMoleculeToTemp(IAtomContainer mol, String identifier, int globalCount, String bondEnergy, Integer treeDepth, String bondLengthChange, String bondOrder, String bondRemoved) throws IOException, CDKException
+    private File writeMoleculeToTemp(IAtomContainer mol, String identifier, int globalCount, String bondEnergy, Integer treeDepth, String bondLengthChange, String bondOrder, String bondRemoved, String bondOrderDiff) throws IOException, CDKException
     {
     	File temp = File.createTempFile(identifier + "_" + globalCount, ".cml");
         // Delete temp file when program exits.
@@ -1887,6 +1918,7 @@ public class Fragmenter {
         test.setProperty(Constants.BONDLENGTHCHANGE, bondLengthChange);
         test.setProperty(Constants.BONDORDER, bondOrder);
         test.setProperty(Constants.BONDREMOVED, bondRemoved);
+        test.setProperty(Constants.BONDORDERDIFF, bondOrderDiff);
         cw.write(test);
         cw.close();
         

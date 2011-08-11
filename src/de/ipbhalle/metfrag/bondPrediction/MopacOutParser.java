@@ -265,7 +265,8 @@ public class MopacOutParser {
 
 		
 //		MopacOutParser parser = new MopacOutParser("/home/ftarutti/Desktop/CheckParser/test35Atome.txt",35);
-		MopacOutParser parser = new MopacOutParser("/tmp/molMopIN9025786486123172913.out", 34);
+//		MopacOutParser parser = new MopacOutParser("/tmp/molMopIN9025786486123172913.out", 34);
+		MopacOutParser parser = new MopacOutParser("/tmp/molMopIN7921009951524815490.OUT", 53);
 		
 		//System.out.println(parser.bondOrder.get("1").toString());
 		for(int i=1;i<parser.bondOrder.size()+1;i++)

@@ -138,7 +138,7 @@ public class Scoring {
 			}
 						
 			//add new entry to optimization matrix
-			this.optimizationMatrixEntries.add(new OptimizationMatrixEntry(candidateID, hits.get(i).getPeak().getMass(), hits.get(i).getPeak().getIntensity(), (String)hits.get(i).getFragmentStructure().getProperty(Constants.BDE), hits.get(i).getHydrogenPenalty(), (String)hits.get(i).getFragmentStructure().getProperty(Constants.BONDLENGTHCHANGE), neutralLossString, (String)hits.get(i).getFragmentStructure().getProperty(Constants.BONDORDER), (String)hits.get(i).getFragmentStructure().getProperty(Constants.BONDREMOVED)));
+			this.optimizationMatrixEntries.add(new OptimizationMatrixEntry(candidateID, hits.get(i).getPeak().getMass(), hits.get(i).getPeak().getIntensity(), (String)hits.get(i).getFragmentStructure().getProperty(Constants.BDE), hits.get(i).getHydrogenPenalty(), (String)hits.get(i).getFragmentStructure().getProperty(Constants.BONDLENGTHCHANGE), neutralLossString, (String)hits.get(i).getFragmentStructure().getProperty(Constants.BONDORDER), (String)hits.get(i).getFragmentStructure().getProperty(Constants.BONDORDERDIFF), (String)hits.get(i).getFragmentStructure().getProperty(Constants.BONDREMOVED)));
 			
 		}
 
@@ -190,7 +190,7 @@ public class Scoring {
 			}
 			
 			//add new entry to optimization matrix
-			this.optimizationMatrixEntries.add(new OptimizationMatrixEntry(candidateID, hits.get(i).getPeak().getMass(), hits.get(i).getPeak().getRelIntensity(), bondEnergies, hits.get(i).getHydrogenPenalty(), neutralLossString, (String)hits.get(i).getFragmentStructure().getProperty(Constants.BONDLENGTHCHANGE), (String)hits.get(i).getFragmentStructure().getProperty(Constants.BONDORDER), (String)hits.get(i).getFragmentStructure().getProperty(Constants.BONDREMOVED)));
+			this.optimizationMatrixEntries.add(new OptimizationMatrixEntry(candidateID, hits.get(i).getPeak().getMass(), hits.get(i).getPeak().getRelIntensity(), bondEnergies, hits.get(i).getHydrogenPenalty(), neutralLossString, (String)hits.get(i).getFragmentStructure().getProperty(Constants.BONDLENGTHCHANGE), (String)hits.get(i).getFragmentStructure().getProperty(Constants.BONDORDER), (String)hits.get(i).getFragmentStructure().getProperty(Constants.BONDORDERDIFF),  (String)hits.get(i).getFragmentStructure().getProperty(Constants.BONDREMOVED)));
 			
 		}
 		

@@ -77,7 +77,7 @@ public class Mopac {
 	 * @return the i atom container
 	 * @throws Exception the exception
 	 */
-	public IAtomContainer runOptimization(String pathToBabel, String mopacExecuteable, IAtomContainer molToOptimize, int ffSteps, boolean verbose, String ffMethod, String mopacMethod, Integer mopacRuntime, boolean firstRun, String atomProtonized, boolean deleteTemp, int charge) throws Exception
+	public IAtomContainer runOptimization(String pathToBabel, String mopacExecuteable, IAtomContainer molToOptimize, int ffSteps, boolean verbose, String ffMethod, String mopacMethod, Integer mopacRuntime, boolean firstRun, String atomProtonized, boolean deleteTemp, int charge, boolean useGen2D) throws Exception
 	{		
 		
 		this.errorMessage = "";
@@ -112,7 +112,11 @@ public class Mopac {
 	        if(deleteTemp)
 	        	tempFileFFInput3D.deleteOnExit();
 //	        String command = "babel --gen3d -i mol2 " + tempFile.getPath() + " -o mol2 " + tempFileFFInput3D.getPath();
-	        String command = pathToBabel + "babel --gen2D -i sdf " + tempFile.getPath() + " -o sdf " + tempFileFFInput3D.getPath();
+//	        String command = pathToBabel + "babel --gen2D -i sdf " + tempFile.getPath() + " -o sdf " + tempFileFFInput3D.getPath();
+	        String command = pathToBabel + "babel -i sdf " + tempFile.getPath() + " -o sdf " + tempFileFFInput3D.getPath();
+	        if(useGen2D)
+	        	command = pathToBabel + "babel --gen2D -c -i sdf " + tempFile.getPath() + " -o sdf " + tempFileFFInput3D.getPath();
+	        	
 //	        String command = "babel -i mol2 " + tempFile.getPath() + " -o mol2 " + tempFileFFInput3D.getPath();
 	        String[] psCmdFFInput =
 			{
@@ -473,8 +477,9 @@ public class Mopac {
 	public static void main(String[] args) {
 		
 //		String[] methods = {"UFF", "MMFF94", "Ghemical"};
-		String[] methods = {"MMFF94", "Ghemical"};
-		String folder = "/home/swolf/MOPAC/EMMATest/MMFF94ValidationSet/single/";
+		String[] methods = {"MMFF94", "Ghemical", "UFF"};
+//		String folder = "/home/swolf/MOPAC/EMMATest/MMFF94ValidationSet/single/";
+		String folder = "/home/swolf/MOPAC/EMMATest/1000_molec_JAVA/";
 		
 		for (int j = 0; j < methods.length; j++) {
 			try
@@ -537,7 +542,7 @@ public class Mopac {
 					{
 						try
 						{
-							mopac.runOptimization("/vol/local/bin/", "run_mopac7", mol, 2400, true, methods[j], "AM1, GEO-OK, ECHO, MMOK, XYZ, BONDS", 2400, true, "none", false, 0);
+							mopac.runOptimization("/vol/local/bin/", "run_mopac7", mol, 2400, true, methods[j], "AM1, GEO-OK, ECHO, MMOK, XYZ, BONDS", 2400, true, "none", false, 0, false);
 							output = fileArr[i].getName() + "\tHeat of Formation: " + mopac.getHeatOfFormation() + "\tTime: " + mopac.getTime() + "\tWarning: " + mopac.getWarningMessage() + "\tError: " + mopac.getErrorMessage() + "\n";
 						}
 						catch(Exception e)
@@ -550,7 +555,7 @@ public class Mopac {
 					
 					try{
 					    // Create file 
-					    FileWriter fstream = new FileWriter(folder + "/log/mopacMP7NewParams" + methods[j] + ".txt", true);
+					    FileWriter fstream = new FileWriter(folder + "/log/mopacMP7NewParamsFixedFF" + methods[j] + ".txt", true);
 					    BufferedWriter out = new BufferedWriter(fstream);
 					    out.write(output);
 					    //Close the output stream

@@ -41,8 +41,8 @@ public class PreprocessMolecules {
 		
 		File file = null;
 		String outputFolder = "";
-		int mopacRuntime = 0;
-		int ffSteps = 600;
+		int mopacRuntime = 4800;
+		int ffSteps = 4800;
 		
 		String outputMOPACDebug = "";
 		
@@ -109,10 +109,10 @@ public class PreprocessMolecules {
 		    	
 		    	BondPrediction bp = new BondPrediction(aromaticBonds);
 			    bp.debug(false);
-			    System.out.println("MOPAC runtime: " + mopacRuntime + " FFSteps: " + ffSteps);
+//			    System.out.println("MOPAC runtime: " + mopacRuntime + " FFSteps: " + ffSteps);
 			    //use babel version 2.3.0
-				bp.calculateBondsToBreak("/vol/local/bin/","run_mopac7", molecule, 2400, "UFF", "AM1, GEO-OK, ECHO, MMOK, XYZ, BONDS", 2400, true);
-				
+				bp.calculateBondsToBreak("/vol/local/bin/","run_mopac7", molecule, 4800, "UFF", "AM1, GEO-OK, ECHO, MMOK, XYZ, BONDS", 4800, true);
+				output = file.getName() + "\tHeat of Formation: " + mopac.getHeatOfFormation() + "\tTime: " + mopac.getTime() + "\tWarning: " + mopac.getWarningMessage() + "\tError: " + mopac.getErrorMessage() + "\tCDKError: " + error  + "\n";
 				List<CalculationResult> results = bp.getResults();
 				
 				if(molecule.getProperty("candidatesClustered") != null)

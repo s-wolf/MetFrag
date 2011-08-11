@@ -43,11 +43,17 @@ public class PreprocessSHGeneration {
 		
 		//"/home/swolf/MOPAC/BATCH/jar/PreprocessMolecules.jar" "/home/swolf/MOPAC/ProofOfConcept/pubchem/" "/home/swolf/MOPAC/BATCH/sh/" 600 600
 		
-		String writePath = "/home/swolf/MOPAC/BondOrderTests/Hill_ProofOfConcept/sh/";
-		String pathToSDF = "/home/swolf/MOPAC/ProofOfConcept/Hill_OnlyCorrect/";
-		String pathToJar = "/home/swolf/MOPAC/BondOrderTests/Hill_ProofOfConcept/jar/PreprocessMolecules.jar";
-		String mopacRuntime = "2400";
-		String ffSteps = "2400";
+//		String writePath = "/home/swolf/MOPAC/BondOrderTests/Hill_ProofOfConcept/sh/";
+//		String pathToSDF = "/home/swolf/MOPAC/ProofOfConcept/Hill_OnlyCorrect/";
+//		String pathToJar = "/home/swolf/MOPAC/BondOrderTests/Hill_ProofOfConcept/jar/PreprocessMolecules.jar";
+		
+		String writePath = "/home/swolf/MOPAC/Hill-Riken-MM48_POSITIVE_PubChem_LocalMass2009_CHONPS_NEW/sh/";
+		String pathToSDF = "/home/swolf/MOPAC/Hill-Riken-MM48_POSITIVE_PubChem_LocalMass2009_CHONPS_NEW/pubchem/CO000021CO000022CO000023CO000024CO000025";
+		String pathToJar = "/home/swolf/MOPAC/Hill-Riken-MM48_POSITIVE_PubChem_LocalMass2009_CHONPS_NEW/jar/PreprocessMolecules.jar";
+			
+		
+		String mopacRuntime = "4800";
+		String ffSteps = "4800";
 		
 		if(args.length < 5)
 		{

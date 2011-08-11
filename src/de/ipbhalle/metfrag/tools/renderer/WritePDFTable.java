@@ -5,6 +5,7 @@ import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
 
+import de.ipbhalle.metfrag.bondPrediction.BondPrediction;
 import de.ipbhalle.metfrag.bondPrediction.CalculationResult;
 import de.ipbhalle.metfrag.similarity.Subgraph;
 
@@ -50,7 +51,7 @@ public class WritePDFTable extends MoleculeCell {
     private Document document;
     private int width;
     private int height;
-    int ncol = 4;
+    int ncol = 5;
     private int imageCount = 0;
     
     
@@ -74,11 +75,12 @@ public class WritePDFTable extends MoleculeCell {
             PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(file));
 
             float[] widths = new float[ncol];
-            for (int i = 0; i < ncol; i += 4) {
-                    widths[i] = 2.5f;
+            for (int i = 0; i < ncol; i += 5) {
+                    widths[i] = 2.0f;
                     widths[i + 1] = 0.5f;
                     widths[i + 2] = 0.5f;
                     widths[i + 3] = 0.5f;
+                    widths[i + 4] = 0.5f;
             }
             table = new PdfPTable(widths);
             document.open();
@@ -90,12 +92,14 @@ public class WritePDFTable extends MoleculeCell {
             	String stringPDFBonds = "";
                 String stringPDFBondsDist = "";
                 String stringPDFBondsOrder = "";
+                String stringPDFBondsOrderDiff = "";
                 
                 if(!firstMol)
                 {
                 	stringPDFBonds = "HoF\n";
 	                stringPDFBondsDist = Double.toString(Math.round((Double)result.getMolWithProton().getProperty("HeatOfFormation")*100.0)/100.0) + "\n";
 	                stringPDFBondsOrder = "\n";
+	                stringPDFBondsOrderDiff = "\n";
                 }
             	
             	if(firstMol)
@@ -119,7 +123,7 @@ public class WritePDFTable extends MoleculeCell {
 	                    	stringAtomsCharge += Math.round(atom.getCharge() * 100.0) / 100.0 + "\n";
                     	}
             		}
-                    
+                                        
                     addProperty(phraseBonds, stringAtoms);
                     addProperty(phraseBondsDist, stringAtomsCharge);
                     cellBonds.addElement(phraseBonds);
@@ -127,15 +131,26 @@ public class WritePDFTable extends MoleculeCell {
                     table.addCell(cellBonds);
                     table.addCell(cellBondsDist);
                     table.addCell(cellEmpty);
+                    table.addCell(cellEmpty);
                     firstMol = false;
-            	}        	
+            	} 
+//            	else
+//            	{
+//            		String bondOrderDiff = BondPrediction.compareBondOrdersString(chargeResults.get(0).getMolWithProton(), result.getOriginalMol());
+//                    //System.out.println(bondOrderDiff + "\n");
+//            	}
+            	
+            	
+                
             	
             	PdfPCell cellBonds = new PdfPCell();
             	PdfPCell cellBondsDist = new PdfPCell();
             	PdfPCell cellBondsOrder = new PdfPCell();
+            	PdfPCell cellBondsOrderDiff = new PdfPCell();
                 Phrase phraseBonds = new Phrase();
                 Phrase phraseBondsDist = new Phrase();
                 Phrase phraseBondsOrder = new Phrase();
+                Phrase phraseBondsOrderDiff = new Phrase();
 
                 com.lowagie.text.Image image = com.lowagie.text.Image.getInstance(writeMOL2PNGFile(result.getOriginalMol(), result.getMolWithProton()).getAbsolutePath());
                 image.setAbsolutePosition(0, 0);
@@ -150,6 +165,7 @@ public class WritePDFTable extends MoleculeCell {
 						String[] linesArr = lines[i].split("\t");
 						stringPDFBondsDist += linesArr[1] + "\n";
 						stringPDFBondsOrder += Math.round(Double.parseDouble(linesArr[2])*1000.0)/1000.0 + "\n";
+						stringPDFBondsOrderDiff += linesArr[3] + "\n";
 						stringPDFBonds += linesArr[0] + "\n";
 					}
 				}
@@ -157,12 +173,15 @@ public class WritePDFTable extends MoleculeCell {
                 addProperty(phraseBonds, stringPDFBonds);
                 addProperty(phraseBondsDist, stringPDFBondsDist);
                 addProperty(phraseBondsOrder, stringPDFBondsOrder);
+                addProperty(phraseBondsOrderDiff, stringPDFBondsOrderDiff);
                 cellBonds.addElement(phraseBonds);
                 cellBondsDist.addElement(phraseBondsDist);
                 cellBondsOrder.addElement(phraseBondsOrder);
+                cellBondsOrderDiff.addElement(phraseBondsOrderDiff);
                 table.addCell(cellBonds);
                 table.addCell(cellBondsDist);
                 table.addCell(cellBondsOrder);
+                table.addCell(cellBondsOrderDiff);
 			}
             
             document.add(table);
@@ -241,9 +260,9 @@ public class WritePDFTable extends MoleculeCell {
 		
 		List<IGenerator<IAtomContainer>> generators = new ArrayList<IGenerator<IAtomContainer>>();
 		generators.add(new BasicSceneGenerator());
-        generators.add(new BasicBondGenerator());
-        generators.add(new BasicAtomGenerator());
-        generators.add(new RingGenerator());
+//        generators.add(new BasicBondGenerator());
+		generators.add(new RingGenerator());
+        generators.add(new BasicAtomGenerator());        
         generators.add(new AtomNumberGenerator());
 //        generators.add(new RadicalGenerator());
         
@@ -304,9 +323,9 @@ public class WritePDFTable extends MoleculeCell {
 		
 		List<IGenerator<IAtomContainer>> generators = new ArrayList<IGenerator<IAtomContainer>>();
 		generators.add(new BasicSceneGenerator());
-        generators.add(new BasicBondGenerator());
-        generators.add(new BasicAtomGenerator());
-        generators.add(new RingGenerator());
+//        generators.add(new BasicBondGenerator());
+		generators.add(new RingGenerator());
+        generators.add(new BasicAtomGenerator());        
         generators.add(new AtomNumberGenerator());
 //        generators.add(new RadicalGenerator());
         

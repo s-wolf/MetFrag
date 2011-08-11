@@ -3,6 +3,7 @@ package de.ipbhalle.metfrag.databaseMetChem;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -50,9 +51,10 @@ public class Query {
 	public Query(String username, String password, String url)
 	{
 		String driver = "org.postgresql.Driver"; 
+		Driver driverPostgres = new org.postgresql.Driver();
 		try {
 			Class.forName(driver);
-			DriverManager.registerDriver(new org.postgresql.Driver()); 
+			DriverManager.registerDriver (driverPostgres);
 	        //database data
 	        this.url = url + "?protocolVersion=2";
 	        this.username = username;
@@ -77,6 +79,7 @@ public class Query {
 		{
 			try {
 				con.close();
+				DriverManager.deregisterDriver(driverPostgres);
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

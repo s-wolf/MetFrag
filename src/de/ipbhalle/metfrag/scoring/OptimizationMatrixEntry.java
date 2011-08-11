@@ -30,6 +30,7 @@ public class OptimizationMatrixEntry {
 	private String bondLengthChange;
 	private String neutralLossRules;
 	private String bondOrderString;
+	private String bondOrderDiffString;
 	private String bondRemoved;
 	
 	/**
@@ -45,7 +46,7 @@ public class OptimizationMatrixEntry {
 	 * @param bondOrder the bond order
 	 * @param bondRemoved the bond removed
 	 */
-	public OptimizationMatrixEntry(String candidateID, Double peakMass, Double peakInt, String bondEnergyString, int hydrogenPenalty, String neutralLossRules, String bondLengthChange, String bondOrder, String bondRemoved)
+	public OptimizationMatrixEntry(String candidateID, Double peakMass, Double peakInt, String bondEnergyString, int hydrogenPenalty, String neutralLossRules, String bondLengthChange, String bondOrder, String bondOrderDiff, String bondRemoved)
 	{
 		setBondEnergyString(bondEnergyString);
 		setCandidateID(candidateID);
@@ -56,6 +57,7 @@ public class OptimizationMatrixEntry {
 		setNeutralLossRules(neutralLossRules);
 		setBondOrderString(bondOrder);
 		setBondRemoved(bondRemoved);
+		setBondOrderDiffString(bondOrderDiff);
 	}
 
 	/**
@@ -227,6 +229,24 @@ public class OptimizationMatrixEntry {
 	 */
 	public String getBondRemoved() {
 		return bondRemoved;
+	}
+
+	/**
+	 * Gets the bond order diff string.
+	 *
+	 * @return the bond order diff string
+	 */
+	public String getBondOrderDiffString() {
+		return bondOrderDiffString;
+	}
+
+	/**
+	 * Sets the bond order diff string.
+	 *
+	 * @param bondOrderDiffString the new bond order diff string
+	 */
+	public void setBondOrderDiffString(String bondOrderDiffString) {
+		this.bondOrderDiffString = bondOrderDiffString;
 	}
 
 }
