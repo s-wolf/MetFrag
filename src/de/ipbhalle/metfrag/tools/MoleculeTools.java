@@ -26,7 +26,9 @@ import java.util.List;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IBond;
+import org.openscience.cdk.interfaces.IMolecularFormula;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
+import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 
 import de.ipbhalle.metfrag.bondPrediction.AtomProperty;
 
@@ -53,6 +55,27 @@ public class MoleculeTools {
 		}
 		
 		return mol;
+	}
+	
+	
+	/**
+	 * Checks if the molecule has hydrogens already attached.
+	 *
+	 * @param mol the mol
+	 * @return true, if successful
+	 */
+	public static boolean HydrogenAlreadyAdded(IAtomContainer mol)
+	{
+		boolean test = false;
+		IMolecularFormula formula = MolecularFormulaManipulator.getMolecularFormula(mol);
+		String formulaString = MolecularFormulaManipulator.getString(formula);
+		
+		if(formulaString.contains("H"))
+		{
+			test = true;
+		}
+		
+		return test;
 	}
 
 }

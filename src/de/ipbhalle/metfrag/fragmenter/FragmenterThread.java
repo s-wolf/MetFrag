@@ -52,6 +52,7 @@ import de.ipbhalle.metfrag.spectrum.AssignFragmentPeak;
 import de.ipbhalle.metfrag.spectrum.CleanUpPeakList;
 import de.ipbhalle.metfrag.spectrum.PeakMolPair;
 import de.ipbhalle.metfrag.spectrum.WrapperSpectrum;
+import de.ipbhalle.metfrag.tools.MoleculeTools;
 import de.ipbhalle.metfrag.tools.renderer.StructureRenderer;
 
 public class FragmenterThread implements Runnable{
@@ -271,36 +272,41 @@ public class FragmenterThread implements Runnable{
 			if(!isConnected)
 				return;
 	        
-	         
-	        try
-	        {
-	        	//percieve atom types
-	        	synchronized (molecule) {
-	        		CDKAtomTypeMatcher matcher = CDKAtomTypeMatcher.getInstance(molecule.getBuilder());
-	        		while(matcher == null)
-	        		{
-	        			matcher = CDKAtomTypeMatcher.getInstance(molecule.getBuilder());
-	        			System.err.println("BUG: percieve and cofigure atoms");
-	        		}
-	        		
-	                for (IAtom atom : molecule.atoms()) {
-	                    if (!(atom instanceof IPseudoAtom)) {
-	                        IAtomType matched = matcher.findMatchingAtomType(molecule, atom);
-	                        if (matched != null) AtomTypeManipulator.configure(atom, matched);
-	                    }
-	                }
-				}      
-		        CDKHydrogenAdder hAdder = CDKHydrogenAdder.getInstance(molecule.getBuilder());
-		        hAdder.addImplicitHydrogens(molecule);
-		        AtomContainerManipulator.convertImplicitToExplicitHydrogens(molecule);
-	        }
-	        //there is a bug in cdk??
-	        catch(IllegalArgumentException e)
-            {
-	        	MetFrag.results.addToCompleteLog("Error: " + candidate + " Message: " + e.getMessage());
-            	//skip it
-            	return;
-            }
+	        
+			if(!MoleculeTools.HydrogenAlreadyAdded(molecule))
+			{
+				try
+		        {
+		        	//percieve atom types
+		        	synchronized (molecule) {
+		        		CDKAtomTypeMatcher matcher = CDKAtomTypeMatcher.getInstance(molecule.getBuilder());
+		        		while(matcher == null)
+		        		{
+		        			matcher = CDKAtomTypeMatcher.getInstance(molecule.getBuilder());
+		        			System.err.println("BUG: percieve and cofigure atoms");
+		        		}
+		        		
+		                for (IAtom atom : molecule.atoms()) {
+		                    if (!(atom instanceof IPseudoAtom)) {
+		                        IAtomType matched = matcher.findMatchingAtomType(molecule, atom);
+		                        if (matched != null) AtomTypeManipulator.configure(atom, matched);
+		                    }
+		                }
+					}      
+			        CDKHydrogenAdder hAdder = CDKHydrogenAdder.getInstance(molecule.getBuilder());
+			        hAdder.addImplicitHydrogens(molecule);
+			        AtomContainerManipulator.convertImplicitToExplicitHydrogens(molecule);
+		        }
+		        //there is a bug in cdk??
+		        catch(IllegalArgumentException e)
+	            {
+		        	MetFrag.results.addToCompleteLog("Error: " + candidate + " Message: " + e.getMessage());
+	            	//skip it
+	            	return;
+	            }
+			}
+			
+	        
 	        
 	        
 	        //get the original peak list again
