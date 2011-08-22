@@ -27,7 +27,9 @@ public class MopacGridEngineSH {
 		String pathToJar = "/home/swolf/MOPAC/EMMATest/1000_molec_JAVA/jar/MopacGridEngine.jar";
 		String mopacRuntime = "2400";
 		String ffSteps = "2400";
-		String ffMethod = "UFF";
+//		String ffMethod = "UFF";
+//		String ffMethod = "MMFF94";
+		String ffMethod = "Ghemical";
 		String mopacParameters = "AM1, GEO-OK, ECHO, MMOK, XYZ";
 		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd-HH:mm");
         Date date = new Date();
