@@ -51,6 +51,7 @@ import de.ipbhalle.metfrag.spectrum.MatchedFragment;
 import de.ipbhalle.metfrag.spectrum.WrapperSpectrum;
 import de.ipbhalle.metfrag.tools.Constants;
 import de.ipbhalle.metfrag.tools.MoleculeTools;
+import de.ipbhalle.metfrag.tools.renderer.StructureRenderer;
 
 public class FragmenterThread implements Runnable{
 	
@@ -275,25 +276,27 @@ public class FragmenterThread implements Runnable{
 			if(!isConnected)
 				return;
 	        
-	         
-	        try
-	        {
-		        //add hydrogens
-		        AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(molecule);
-		        CDKHydrogenAdder hAdder = CDKHydrogenAdder.getInstance(molecule.getBuilder());
-		        hAdder.addImplicitHydrogens(molecule);
-		        AtomContainerManipulator.convertImplicitToExplicitHydrogens(molecule);
-	        }
-	        //there is a bug in cdk??
-	        catch(IllegalArgumentException e)
-            {
-	        	if(isPreCalculated)
-	        		MetFragPreCalculated.results.addToCompleteLog("Error: " + candidate + " Message: " + e.getMessage());
-	        	else
-	        		MetFrag.results.addToCompleteLog("Error: " + candidate + " Message: " + e.getMessage());
-            	//skip it
-            	return;
-            }
+			if(!MoleculeTools.HydrogenAlreadyAdded(molecule))
+			{
+				try
+					{
+						//add hydrogens
+						AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(molecule);
+						CDKHydrogenAdder hAdder = CDKHydrogenAdder.getInstance(molecule.getBuilder());
+						hAdder.addImplicitHydrogens(molecule);
+						AtomContainerManipulator.convertImplicitToExplicitHydrogens(molecule);
+					}
+					//there is a bug in cdk??
+					catch(IllegalArgumentException e)
+				    {
+						if(isPreCalculated)
+							MetFragPreCalculated.results.addToCompleteLog("Error: " + candidate + " Message: " + e.getMessage());
+						else
+							MetFrag.results.addToCompleteLog("Error: " + candidate + " Message: " + e.getMessage());
+				    	//skip it
+				    	return;
+				    }
+			}
 	        
 	        
 	        //get the original peak list again
