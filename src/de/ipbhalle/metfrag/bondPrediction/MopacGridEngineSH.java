@@ -18,18 +18,19 @@ public class MopacGridEngineSH {
 		//"/home/swolf/MOPAC/BATCH/jar/PreprocessMolecules.jar" "/home/swolf/MOPAC/ProofOfConcept/pubchem/" "/home/swolf/MOPAC/BATCH/sh/" 600 600
 		
 		
-//		String writePath = "/home/swolf/MOPAC/EMMATest/MMFF94ValidationSet_JAVA/sh/";
-//		String pathToSDF = "/home/swolf/MOPAC/EMMATest/MMFF94ValidationSet_JAVA/data/";
-//		String pathToJar = "/home/swolf/MOPAC/EMMATest/MMFF94ValidationSet_JAVA/jar/MopacGridEngine.jar";
+		String writePath = "/home/swolf/MOPAC/EMMATest/MMFF94ValidationSet_JAVA/sh/";
+		String pathToSDF = "/home/swolf/MOPAC/EMMATest/MMFF94ValidationSet_JAVA/data/";
+		String pathToJar = "/home/swolf/MOPAC/EMMATest/MMFF94ValidationSet_JAVA/jar/MopacGridEngine.jar";
 		
-		String writePath = "/home/swolf/MOPAC/EMMATest/1000_molec_JAVA/sh/";
-		String pathToSDF = "/home/swolf/MOPAC/EMMATest/1000_molec_JAVA/data/";
-		String pathToJar = "/home/swolf/MOPAC/EMMATest/1000_molec_JAVA/jar/MopacGridEngine.jar";
+//		String writePath = "/home/swolf/MOPAC/EMMATest/1000_molec_JAVA/sh/";
+//		String pathToSDF = "/home/swolf/MOPAC/EMMATest/1000_molec_JAVA/data/";
+//		String pathToJar = "/home/swolf/MOPAC/EMMATest/1000_molec_JAVA/jar/MopacGridEngine.jar";
+		
 		String mopacRuntime = "2400";
 		String ffSteps = "2400";
 //		String ffMethod = "UFF";
-//		String ffMethod = "MMFF94";
-		String ffMethod = "Ghemical";
+		String ffMethod = "MMFF94";
+//		String ffMethod = "Ghemical";
 		String mopacParameters = "AM1, GEO-OK, ECHO, MMOK, XYZ";
 		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd-HH:mm");
         Date date = new Date();

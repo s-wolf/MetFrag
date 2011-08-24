@@ -107,7 +107,7 @@ public class BondPrediction {
 		 * @return the list< i bond>
 		 * @throws Exception the exception
 		 */
-		public List<String> calculateBondsToBreak(String pathToBabel, String mopacExecuteable, IAtomContainer mol, int FFSteps, String ffMethod, String mopacMethod, Integer mopacRuntime, boolean deleteTemp) throws Exception
+		public List<String> calculateBondsToBreak(String pathToBabel, String mopacExecuteable, IAtomContainer mol, int FFSteps, String ffMethod, String mopacMethod, Integer mopacRuntime, boolean deleteTemp, boolean useGen2D) throws Exception
 		{		
 			List<String> bondsToBreak = new ArrayList<String>();
 			
@@ -116,15 +116,15 @@ public class BondPrediction {
 			Map<String, Double> bondToBondOrderOrig = new HashMap<String, Double>();
 			try {	
 				//now optimize the structure of the neutral molecue
-	    		this.mol = mopac.runOptimization(pathToBabel,mopacExecuteable, mol, FFSteps, true, ffMethod, mopacMethod, mopacRuntime, true, "Neutral", deleteTemp, 0);
+	    		this.mol = mopac.runOptimization(pathToBabel,mopacExecuteable, mol, FFSteps, true, ffMethod, mopacMethod, mopacRuntime, true, "Neutral", deleteTemp, 0, useGen2D);
 	    		if(this.mol == null)
 	    		{
-	    			this.mopacMessagesNeutral = "ERROR!\nHeat of Formation: " + mopac.getHeatOfFormation() + "\nTime: " + mopac.getTime() + "\nWarning: " + mopac.getWarningMessage() + "\nError: " + mopac.getErrorMessage() + "\n\n";
+	    			this.mopacMessagesNeutral = "\tHeat of Formation: " + mopac.getHeatOfFormation() + "\tTime: " + mopac.getTime() + "\tWarning: " + mopac.getWarningMessage() + "\tError: " + mopac.getErrorMessage() + "\tERROR\n";
 	    			System.err.println("Was not able to optimize neutral molecule!");
 	    			throw new Exception("Error optimizing molecule!");
 	    		}
 	    		else
-	    			this.mopacMessagesNeutral = "Neutral Molecule MOPAC\nHeat of Formation: " + mopac.getHeatOfFormation() + "\nTime: " + mopac.getTime() + "\nWarning: " + mopac.getWarningMessage() + "\nError: " + mopac.getErrorMessage() + "\n\n";
+	    			this.mopacMessagesNeutral = "\tHeat of Formation: " + mopac.getHeatOfFormation() + "\tTime: " + mopac.getTime() + "\tWarning: " + mopac.getWarningMessage() + "\tError: " + mopac.getErrorMessage() + "\n";
 
 	           	bondToBondOrderOrig = mopac.getBondOrder();
 	           	for (IBond bond : this.mol.bonds()) {
@@ -245,7 +245,7 @@ public class BondPrediction {
 		            
 		            try
 		            {
-		            	protonatedMol = mopac.runOptimization(pathToBabel, mopacExecuteable, protonatedMol, FFSteps, true, ffMethod, mopacMethod, mopacRuntime, false, chargesArray[i].getAtom().getSymbol()  + (Integer.parseInt(chargesArray[i].getAtom().getID()) + 1), deleteTemp, 1);
+		            	protonatedMol = mopac.runOptimization(pathToBabel, mopacExecuteable, protonatedMol, FFSteps, true, ffMethod, mopacMethod, mopacRuntime, false, chargesArray[i].getAtom().getSymbol()  + (Integer.parseInt(chargesArray[i].getAtom().getID()) + 1), deleteTemp, 1, useGen2D);
 		            	Map<String, Double> bondToBondOrderProtonated = new HashMap<String, Double>();
 		            	bondToBondOrderProtonated = mopac.getBondOrder();
 		            	
@@ -255,12 +255,12 @@ public class BondPrediction {
 		            	//something went wrong during optimization
 		            	if(protonatedMol == null)
 		            	{
-		            		this.mopacMessages = "ERROR after protonation! Atom " + chargesArray[i].getAtom().getSymbol()  + (Integer.parseInt(chargesArray[i].getAtom().getID()) + 1) + "\nHeat of Formation: " + mopac.getHeatOfFormation() + "\nTime: " + mopac.getTime() + "\nWarning: " + mopac.getWarningMessage() + "\nError: " + mopac.getErrorMessage() + "\n\n";
+		            		this.mopacMessages = chargesArray[i].getAtom().getSymbol()  + (Integer.parseInt(chargesArray[i].getAtom().getID()) + 1) + "\tHeat of Formation: " + mopac.getHeatOfFormation() + "\tTime: " + mopac.getTime() + "\tWarning: " + mopac.getWarningMessage() + "\tError: " + mopac.getErrorMessage() + "\tERROR\n";
 		            		throw new Exception("MOPAC did not finish or error occured!");
 		            	}
 		            	else
 		            	{
-		            		this.mopacMessages = "Protonated Molecule MOPAC Atom " + chargesArray[i].getAtom().getSymbol()  + (Integer.parseInt(chargesArray[i].getAtom().getID()) + 1) + "\nHeat of Formation: " + mopac.getHeatOfFormation() + "\nHeat of Formation: " + mopac.getHeatOfFormation() + "\nTime: " + mopac.getTime() + "\nWarning: " + mopac.getWarningMessage() + "\nError: " + mopac.getErrorMessage() + "\n\n";
+		            		this.mopacMessages = chargesArray[i].getAtom().getSymbol()  + (Integer.parseInt(chargesArray[i].getAtom().getID()) + 1) + "\tHeat of Formation: " + mopac.getHeatOfFormation() + "\tTime: " + mopac.getTime() + "\tWarning: " + mopac.getWarningMessage() + "\tError: " + mopac.getErrorMessage() + "\n";
 		            		protonatedMol.setProperty("HeatOfFormation", mopac.getHeatOfFormation());
 		            	}
 		            	

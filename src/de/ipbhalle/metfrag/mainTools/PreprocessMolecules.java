@@ -32,18 +32,18 @@ import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 import de.ipbhalle.metfrag.bondPrediction.BondPrediction;
 import de.ipbhalle.metfrag.bondPrediction.CalculationResult;
 import de.ipbhalle.metfrag.tools.MoleculeTools;
+import de.ipbhalle.metfrag.tools.Writer;
 
 public class PreprocessMolecules {
 	
-	// /home/swolf/MOPAC/ProofOfConcept/pubchem/CID_20097272_spectrum/20097272.sdf /home/swolf/MOPAC/ProofOfConcept/pubchem/CID_20097272_spectrum/mopac/ 600 600 
-	// LARGE BUG: /home/swolf/MOPAC/ProofOfConcept/pubchem/CID_3002977_spectrum/3002977.sdf /home/swolf/MOPAC/ProofOfConcept/pubchem/CID_3002977_spectrum/mopac/ 600 600
+	// /home/swolf/MOPAC/ProofOfConcept/pubchem/CID_20097272_spectrum/20097272.sdf /home/swolf/MOPAC/ProofOfConcept/pubchem/CID_20097272_spectrum/mopac/ 600 600 /home/swolf/MOPAC/ProofOfConcept/pubchem/CID_20097272_spectrum/mopac/mopacDebug.txt
+	// LARGE BUG: /home/swolf/MOPAC/ProofOfConcept/pubchem/CID_3002977_spectrum/3002977.sdf /home/swolf/MOPAC/ProofOfConcept/pubchem/CID_3002977_spectrum/mopac/ 600 600 /home/swolf/MOPAC/ProofOfConcept/pubchem/CID_3002977_spectrum/mopac/mopacDebug.txt
 	public static void main(String[] args) {
 		
 		File file = null;
 		String outputFolder = "";
 		int mopacRuntime = 4800;
-		int ffSteps = 4800;
-		
+		int ffSteps = 4800;		
 		String outputMOPACDebug = "";
 		
 		if(args.length < 3)
@@ -111,8 +111,7 @@ public class PreprocessMolecules {
 			    bp.debug(false);
 //			    System.out.println("MOPAC runtime: " + mopacRuntime + " FFSteps: " + ffSteps);
 			    //use babel version 2.3.0
-				bp.calculateBondsToBreak("/vol/local/bin/","run_mopac7", molecule, 4800, "UFF", "AM1, GEO-OK, ECHO, MMOK, XYZ, BONDS", 4800, true);
-				output = file.getName() + "\tHeat of Formation: " + mopac.getHeatOfFormation() + "\tTime: " + mopac.getTime() + "\tWarning: " + mopac.getWarningMessage() + "\tError: " + mopac.getErrorMessage() + "\tCDKError: " + error  + "\n";
+				bp.calculateBondsToBreak("/vol/local/bin/","run_mopac7", molecule, 4800, "UFF", "AM1, GEO-OK, ECHO, MMOK, XYZ, BONDS", 4800, true, true);
 				List<CalculationResult> results = bp.getResults();
 				
 				if(molecule.getProperty("candidatesClustered") != null)
@@ -142,11 +141,7 @@ public class PreprocessMolecules {
 								// Create file 
 								if(!outputMOPACDebug.equals(""))
 								{
-									FileWriter fstream = new FileWriter(new File(outputMOPACDebug + clusteredCompounds[c] + "_MOPAC_Debug.txt"), true);
-								    BufferedWriter out = new BufferedWriter(fstream);
-								    out.write(results.get(i1).getDebugMessages());
-								    //Close the output stream
-								    out.close();
+									Writer.writeToFile(outputMOPACDebug, file.getName() + "_" +  results.get(i1).getDebugMessages());
 								}
 								
 							} catch (CDKException e) {
@@ -182,9 +177,9 @@ public class PreprocessMolecules {
 							// Create file 
 							if(!outputMOPACDebug.equals(""))
 							{
-								FileWriter fstream = new FileWriter(new File(outputMOPACDebug +  file.getName() + "_MOPAC_Debug.txt"), true);
+								FileWriter fstream = new FileWriter(new File(outputMOPACDebug), true);
 							    BufferedWriter out = new BufferedWriter(fstream);
-							    out.write(results.get(i1).getDebugMessages());
+							    out.write(file.getName() + "_" + results.get(i1).getDebugMessages());
 							    //Close the output stream
 							    out.close();
 							}

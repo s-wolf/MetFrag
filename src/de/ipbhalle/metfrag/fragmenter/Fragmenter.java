@@ -417,7 +417,7 @@ public class Fragmenter {
     	{
     		//now find all bonds which are worth splitting
     		bondPrediction = new BondPrediction(this.aromaticBonds);
-    		this.bondsToBreak = bondPrediction.calculateBondsToBreak("/vol/local/bin/","run_mopac7", this.originalMolecule, 2400, "UFF", "AM1, GEO-OK, ECHO, MMOK, XYZ, BONDS", 2400, false);
+    		this.bondsToBreak = bondPrediction.calculateBondsToBreak("/vol/local/bin/","run_mopac7", this.originalMolecule, 2400, "UFF", "AM1, GEO-OK, ECHO, MMOK, XYZ, BONDS", 2400, false, true);
     		
     	}
     	else
