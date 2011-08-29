@@ -57,6 +57,7 @@ public class WrapperSpectrum {
 	private String precursorType;
 	private double precursorMZ;
 	private boolean isPositive;
+	private String smiles;
 	
 	
 	/**
@@ -81,6 +82,8 @@ public class WrapperSpectrum {
 		this.filename = fileTemp[fileTemp.length - 1];
 		this.setFormula(spectra.get(0).getFormula());
 		this.isPositive = spectra.get(0).isPositive();
+		
+		this.smiles=spectra.get(0).getSmiles();
 	}
 	
 	
@@ -92,10 +95,10 @@ public class WrapperSpectrum {
 	 * @param mode the mode
 	 * @param exactMass the exact mass
 	 */
-	public WrapperSpectrum(String peakString, int mode, double exactMass, boolean isPositive){
+	public WrapperSpectrum(String peakString, int mode, double exactMass, boolean isPositive, String smiles){
 		this.spectra = new Vector<Spectrum>();
 		this.collisionEnergy = -1;
-		spectra.add(new Spectrum(-1, parsePeaks(peakString), exactMass, mode, "none", -1, "none", "none", "none", "", 0.0, "", isPositive));
+		spectra.add(new Spectrum(-1, parsePeaks(peakString), exactMass, mode, "none", -1, "none", "none", "none", "", 0.0, "", isPositive,smiles));
 
 		this.peaks = spectra.get(0).getPeaks(); //just one spectra for now
 		this.exactMass = spectra.get(0).getExactMass();
@@ -107,6 +110,8 @@ public class WrapperSpectrum {
 		this.nameTrivial = spectra.get(0).getTrivialName();
 		this.setFormula(spectra.get(0).getFormula());
 		this.setPositive(isPositive);
+		
+		this.smiles =smiles;
 	}
 	
 	
@@ -497,8 +502,14 @@ public class WrapperSpectrum {
 	}
 	
 	
+	public String getSmiles(){
+		
+		return smiles;
+	}
+	
 	public static void main(String[] args) {
 		WrapperSpectrum spectrum = new WrapperSpectrum("/home/ftarutti/records/CO000001.txt");
 		System.out.println(spectrum.toString());
+
 	}
 }
