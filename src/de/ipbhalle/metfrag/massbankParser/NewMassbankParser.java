@@ -1,3 +1,23 @@
+/*
+*
+* Copyright (C) 2009-2010 IPB Halle, Franziska Taruttis
+*
+* Contact: ftarutti@ipb-halle.de
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*
+*/
 package de.ipbhalle.metfrag.massbankParser;
 
 import java.io.BufferedReader;
@@ -17,51 +37,121 @@ import java.util.Vector;
 
 import de.ipbhalle.metfrag.spectrum.AssignFragmentPeak;
 
+
+/**
+ * The Class NewMassbankParser.
+ */
 public class NewMassbankParser {
 	
 	//Record specific information
  	
-	private enum recordInformation { ACCESSION , RECORD_TITLE , DATE , AUTHORS , COPYRIGHT , PUBLICATION , COMMENT };
+	/**
+	 * The Enum recordInformation.
+	 */
+	private enum recordInformation { /** The ACCESSION. */
+ ACCESSION , /** The RECOR d_ title. */
+ RECORD_TITLE , /** The DATE. */
+ DATE , /** The AUTHORS. */
+ AUTHORS , /** The COPYRIGHT. */
+ COPYRIGHT , /** The PUBLICATION. */
+ PUBLICATION , /** The COMMENT. */
+ COMMENT };
 	
 	//Compound information
 	
+	/** The Constant CH$. */
 	private final static String CH$ = "CH$";
 	
-	private enum CH { NAME , COMPOUND_CLASS , FORMULA , EXACT_MASS , SMILES , IUPAC , LINK , COMMENT };
+	/**
+	 * The Enum CH.
+	 */
+	private enum CH { /** The NAME. */
+ NAME , /** The COMPOUN d_ class. */
+ COMPOUND_CLASS , /** The FORMULA. */
+ FORMULA , /** The EXAC t_ mass. */
+ EXACT_MASS , /** The SMILES. */
+ SMILES , /** The IUPAC. */
+ IUPAC , /** The LINK. */
+ LINK , /** The COMMENT. */
+ COMMENT };
 	
 	//Sample information
 	
+	/** The Constant SP$. */
 	private final static String SP$ = "SP$";
 	
-	private enum SP { SCIENTIFIC_NAME , NAME , LINEAGE , LINK , SAMPLE ,  COMMENT };
+	/**
+	 * The Enum SP.
+	 */
+	private enum SP { /** The SCIENTIFI c_ name. */
+ SCIENTIFIC_NAME , /** The NAME. */
+ NAME , /** The LINEAGE. */
+ LINEAGE , /** The LINK. */
+ LINK , /** The SAMPLE. */
+ SAMPLE ,  /** The COMMENT. */
+  COMMENT };
 	
 	//Analytical information
 	
+	/** The Constant AC$. */
 	private final static String AC$ = "AC$";
 	
-	private enum AC { INSTRUMENT , INSTRUMENT_TYPE , ANALYTICAL_CONDITION , COMMENT  };
+	/**
+	 * The Enum AC.
+	 */
+	private enum AC { /** The INSTRUMENT. */
+ INSTRUMENT , /** The INSTRUMEN t_ type. */
+ INSTRUMENT_TYPE , /** The ANALYTICA l_ condition. */
+ ANALYTICAL_CONDITION , /** The COMMENT. */
+ COMMENT  };
 	
+	/** The Constant PRECURSOR_TYPE. */
 	private final static String PRECURSOR_TYPE=" PRECURSOR_TYPE";
 	
+	/** The Constant COLLISION_ENERGY. */
 	private final static String COLLISION_ENERGY=" COLLISION_ENERGY";
 	
+	/** The Constant MODE. */
 	private final static String MODE=" MODE";
 	
 	// Spectral information
 	
+	/** The Constant MS$. */
 	private final static String MS$ = "MS$";
 	
-	private enum MS{ RELATED_MS , FOCUSED_ION , DATA_PROCESSING , COMMENT };
+	/**
+	 * The Enum MS.
+	 */
+	private enum MS{ /** The RELATE d_ ms. */
+ RELATED_MS , /** The FOCUSE d_ ion. */
+ FOCUSED_ION , /** The DAT a_ processing. */
+ DATA_PROCESSING , /** The COMMENT. */
+ COMMENT };
 	
 	// Peak information
 	
+	/** The Constant PK$. */
 	private final static String PK$ = "PK$";
 	
-	private enum PK{ NUM_PEAK ,  ANNOTATION_METHOD , ANNOTATION , COMMENT , PEAK }
+	/**
+	 * The Enum PK.
+	 */
+	private enum PK{ /** The NU m_ peak. */
+ NUM_PEAK ,  /** The ANNOTATIO n_ method. */
+  ANNOTATION_METHOD , /** The ANNOTATION. */
+ ANNOTATION , /** The COMMENT. */
+ COMMENT , /** The PEAK. */
+ PEAK }
 	
 	
 	
 	
+	/**
+	 * Read the spectra.
+	 *
+	 * @param filename the filename
+	 * @return the Spectrum
+	 */
 	public static Vector<Spectrum> Read(String filename)  {
 
 		ElementTable et = new ElementTable();
@@ -89,6 +179,8 @@ public class NewMassbankParser {
 		double mass = 0.0, focusedMass = 0.0;
 		
 		double precursorMZ=0.0;
+		
+		String smiles;
 		
 		Vector<Peak> peaks = null;
 		Vector<Spectrum> spectra = new Vector<Spectrum>();
@@ -131,6 +223,8 @@ public class NewMassbankParser {
 					recordSpecificInformation = addElementsToMap(line, recordSpecificInformation);
 					
 					line = in.readLine();
+				
+					
 				}
 								
 				//Compound information
@@ -139,6 +233,7 @@ public class NewMassbankParser {
 					compoundInformation = addElementsToMap(line,  compoundInformation);
 					
 					line = in.readLine();
+			
 				}
 				//Sample information
 				while(line.contains(SP$))
@@ -146,6 +241,7 @@ public class NewMassbankParser {
 					sampleInformation = addElementsToMap(line,  sampleInformation);
 					
 					line = in.readLine();
+					
 				}
 				//Analytical information
 				while(line.contains(AC$))
@@ -153,6 +249,7 @@ public class NewMassbankParser {
 					analyticalInformation = addElementsToMap(line, analyticalInformation);
 					
 					line = in.readLine();
+					
 				}
 				
 				
@@ -162,6 +259,7 @@ public class NewMassbankParser {
 					spectralInformation = addElementsToMap(line, spectralInformation);
 					
 					line = in.readLine();
+		
 				}
 				
 				//Peak information
@@ -170,20 +268,25 @@ public class NewMassbankParser {
 					peakInformation = addElementsToMap(line, peakInformation);
 					
 					line = in.readLine();
+					
 				}
 							
 				//read Peaks
 				peaks = new Vector<Peak>();
 				
-				while(!line.contains("//"))
+				while(!line.contains("//"))/* && line!=null*/    
 				{
 	
+					if(line.equals("")) break;
+		
 					String splitString[] = new String[line.split("\\s+").length];
 					splitString=line.split("\\s+");
 
 					peaks.add(new Peak(Double.valueOf(splitString[1]), Double.valueOf(splitString[2]), Double.valueOf(splitString[3]), collisionEnergy));
 					line = in.readLine();
+			
 				}
+				
 				
 				line = in.readLine();
 				
@@ -236,36 +339,35 @@ public class NewMassbankParser {
 		mass = Double.valueOf(record.get(CH$).get(CH$+CH.EXACT_MASS.toString()).get(0)).doubleValue();
 		
 
-		
+		smiles = record.get(CH$).get(CH$+ CH.SMILES.toString()).get(0);		
 		//COMPOUND INFORMATION MAP
 		
 		Map<String, ArrayList<String>> chmap = record.get(CH$);
-		String chkey = CH$+CH.LINK.toString();
-		
-		ArrayList<String> chs = chmap.get(chkey);
-		
-		for (String ch : chs) {
-			
-			String [] dblink = ch.split("\\s+");
-			
-			
-			if(dblink[1].equals("PUBCHEM"))
-	  		{
-	
-				String splitString[] = new String[dblink[2].split(":").length];
-				
-				splitString = dblink[2].split(":");
+		if (record.get(CH$).containsKey(CH$ + CH.LINK.toString())) {
+			String chkey = CH$ + CH.LINK.toString();
 
-			
-				
-				linkPubChem = Integer.valueOf(splitString[1]).intValue();
-	  			
-	  		}
-	  		else if(dblink[1].equals("KEGG"))
-	  			linkKEGG = dblink[2];
-	  		else if(dblink[1].equals("CHEBI"))
-	  			linkCHEBI = dblink[2];
-			
+			ArrayList<String> chs = chmap.get(chkey);
+
+			// System.out.println(chmap.toString());
+
+			for (String ch : chs) {
+
+				String[] dblink = ch.split("\\s+");
+
+				if (dblink[1].equals("PUBCHEM")) {
+
+					String splitString[] = new String[dblink[2].split(":").length];
+
+					splitString = dblink[2].split(":");
+
+					linkPubChem = Integer.valueOf(splitString[1]).intValue();
+
+				} else if (dblink[1].equals("KEGG"))
+					linkKEGG = dblink[2];
+				else if (dblink[1].equals("CHEBI"))
+					linkCHEBI = dblink[2];
+
+			}
 		}
 		
 		// ANALYTICAL CONDITIONS MAP
@@ -380,11 +482,18 @@ public class NewMassbankParser {
 			
 		}
 		
-		spectra.add(new Spectrum(collisionEnergy, peaks, mass, mode, IUPAC, linkPubChem, linkKEGG, linkCHEBI, nameTrivial, formula, precursorMZ, precursorType, isPositive));	
+		spectra.add(new Spectrum(collisionEnergy, peaks, mass, mode, IUPAC, linkPubChem, linkKEGG, linkCHEBI, nameTrivial, formula, precursorMZ, precursorType, isPositive, smiles));	
 		return spectra;
 	}
 	
 	
+	/**
+	 * Adds the elements to map.
+	 *
+	 * @param line the line of massbank file
+	 * @param map the map
+	 * @return the map
+	 */
 	public static Map<String,ArrayList<String>> addElementsToMap(String line, Map<String,ArrayList<String>> map)
 	{
 		String[] splitString = new String[line.split(":").length];
@@ -414,6 +523,11 @@ public class NewMassbankParser {
 		return map;
 	}
 	
+	/**
+	 * Read precursor types.
+	 *
+	 * @return the map
+	 */
 	public static Map<String,Double> readPrecursorTypes()
 	{
 		Map<String, Double> preType = new HashMap<String, Double>();
@@ -429,7 +543,6 @@ public class NewMassbankParser {
     	{
     		URL url = AssignFragmentPeak.class.getClassLoader().getResource("precursorType.csv");
 			file = url.getFile();
-    		//System.out.println("Pfad: " + url.getFile());
     	}
 		try {
 			BufferedReader in = new BufferedReader(new FileReader(file));
@@ -496,12 +609,17 @@ public class NewMassbankParser {
 	}*/
 	
 	
+	/**
+	 * The main method.
+	 *
+	 * @param args the arguments
+	 */
 	public static void main(String[] args) {
 		
 		//Vector<Spectrum> spectra = Read("/home/ftarutti/records/CO000001.txt");
 		//Vector<Spectrum> spectra = Read("/home/ftarutti/records/PB000122.txt");
-		Vector<Spectrum> spectra = Read("/home/ftarutti/records/PR100124.txt");
-		
+		//Vector<Spectrum> spectra = Read("/home/ftarutti/records/PR100124.txt");
+		Vector<Spectrum> spectra = Read("/vol/massbank/data/records/PR100975.txt");
 		//Vector<Spectrum> spectra = Read("/home/ftarutti/records/PR100040.txt");
 		//Vector<Spectrum> spectra = Read("/home/ftarutti/records/PB006007.txt");
 		
