@@ -49,6 +49,7 @@ import de.ipbhalle.metfrag.spectrum.AssignFragmentPeak;
 import de.ipbhalle.metfrag.spectrum.CleanUpPeakList;
 import de.ipbhalle.metfrag.spectrum.MatchedFragment;
 import de.ipbhalle.metfrag.spectrum.WrapperSpectrum;
+import de.ipbhalle.metfrag.tools.Constants;
 import de.ipbhalle.metfrag.tools.MoleculeTools;
 
 public class FragmenterThread implements Runnable{
@@ -426,7 +427,7 @@ public class FragmenterThread implements Runnable{
 				Double bondEnergy = 0.0;
 				for (int i = 0; i < hits.size(); i++) {
 					bondEnergy += MoleculeTools.getCombinedEnergy((String)hits.get(i).getFragmentStructure().getProperty("BondEnergy"));
-					peaks += hits.get(i).getPeak().getMass() + "[" + hits.get(i).getFragmentStructure().getProperty("BondEnergy") + ", " + hits.get(i).getPartialChargeDiff() + "]" +  " ";
+					peaks += hits.get(i).getPeak().getMass() + "[" + hits.get(i).getFragmentStructure().getProperty(Constants.BDE) + ", " + hits.get(i).getFragmentStructure().getProperty(Constants.BONDLENGTHCHANGE) + ", " + hits.get(i).getFragmentStructure().getProperty(Constants.BONDORDER) + "] ";
 				}
 				
 

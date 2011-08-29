@@ -21,7 +21,6 @@
 package de.ipbhalle.metfrag.fragmenter;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -41,15 +40,13 @@ import java.util.Vector;
 
 
 import org.openscience.cdk.Atom;
-import org.openscience.cdk.Element;
 import org.openscience.cdk.Molecule;
 import org.openscience.cdk.SingleElectron;
-import org.openscience.cdk.aromaticity.AromaticityCalculator;
 import org.openscience.cdk.aromaticity.CDKHueckelAromaticityDetector;
 import org.openscience.cdk.config.IsotopeFactory;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.exception.NoSuchAtomException;
-import org.openscience.cdk.formula.MolecularFormula;
+import org.openscience.cdk.interfaces.IBond.Order;
 import org.openscience.cdk.interfaces.IChemObjectBuilder;
 import org.openscience.cdk.interfaces.IElement;
 import org.openscience.cdk.interfaces.IMolecularFormula;
@@ -63,7 +60,6 @@ import org.openscience.cdk.interfaces.IRingSet;
 import org.openscience.cdk.interfaces.ISingleElectron;
 import org.openscience.cdk.interfaces.IBond.Stereo;
 import org.openscience.cdk.io.CMLWriter;
-import org.openscience.cdk.io.SDFWriter;
 import org.openscience.cdk.isomorphism.IsomorphismTester;
 import org.openscience.cdk.isomorphism.UniversalIsomorphismTester;
 import org.openscience.cdk.nonotify.NNAtom;
@@ -77,12 +73,9 @@ import org.openscience.cdk.smiles.SmilesGenerator;
 import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 
 import de.ipbhalle.metfrag.bondPrediction.BondPrediction;
-import de.ipbhalle.metfrag.bondPrediction.Charges;
 import de.ipbhalle.metfrag.graphviz.GraphViz;
 import de.ipbhalle.metfrag.massbankParser.Peak;
-import de.ipbhalle.metfrag.spectrum.AssignFragmentPeak;
 import de.ipbhalle.metfrag.tools.Constants;
-import de.ipbhalle.metfrag.tools.MolecularFormulaTools;
 import de.ipbhalle.metfrag.tools.MoleculeTools;
 import de.ipbhalle.metfrag.tools.PPMTool;
 
@@ -127,8 +120,9 @@ public class Fragmenter {
     private List<String> bondsToBreak = null;
     private boolean isOnlyBreakSelectedBonds = false;
     private BondPrediction bondPrediction = null;
-    private boolean partialChargesPreferred = true;
+    private boolean bondLengthChangePreferred = false;
     private boolean optimizeStructure = false;
+    private boolean isPrecalculated = false;
     
     private Map<String, Object> moleculeDescriptors;
       
@@ -367,19 +361,15 @@ public class Fragmenter {
         CDKHueckelAromaticityDetector.detectAromaticity(this.originalMolecule);
         
     	for (IBond bond : this.originalMolecule.bonds()) {
-            boolean aromatic = false;
             //lets see if it is a ring and aromatic
             IRingSet rings = allRings.getRings(bond);
             //don't split up aromatic rings...see constructor for option
-        	for (int i = 0; i < rings.getAtomContainerCount(); i++) {
-        		aromatic =  AromaticityCalculator.isAromatic((IRing)rings.getAtomContainer(i), this.originalMolecule);
-            	if(aromatic)
+            for (int i = 0; i < rings.getAtomContainerCount(); i++) {
+            	if(MoleculeTools.ringIsAromatic((IRing)rings.getAtomContainer(i)))
             	{
-            		aromatic = true;
             		this.aromaticBonds.add(bond);
-            		break;
             	}
-			}
+            }
         }
     	
     	//calculate molecules descriptors: XlogP, AlogP and MannholdLogP
@@ -402,29 +392,64 @@ public class Fragmenter {
     		//now find all bonds which are worth splitting
     		bondPrediction = new BondPrediction(this.aromaticBonds);
     		Map<String, Double> bondToBondLength = new HashMap<String, Double>();
+    		Map<String, Double> bondToBondOrder = new HashMap<String, Double>();
     		for(IBond bond : this.originalMolecule.bonds())
     		{
-    			bondToBondLength.put(bond.getID(), Double.parseDouble((String)bond.getProperty("bondLengthChange")));
+    			String bondOrderString = (String)bond.getProperty(Constants.BONDORDER);
+    			String bondLengthChangeString = (String)bond.getProperty(Constants.BONDLENGTHCHANGE);
+    			if(bondOrderString == null || bondLengthChangeString == null)
+    			{
+    				bondToBondLength.put(bond.getID(), 0.0);
+        			bondToBondOrder.put(bond.getID(), 2.0);
+    			}
+    			else
+    			{
+    				bondToBondLength.put(bond.getID(), Double.parseDouble(bondLengthChangeString));
+        			bondToBondOrder.put(bond.getID(), Double.parseDouble(bondOrderString));
+    			}
+    			
     		}
     		bondPrediction.setBondLength(bondToBondLength);
+    		bondPrediction.setBondOrder(bondToBondOrder);
+    		this.isPrecalculated = true;
     	}
     	else if(this.optimizeStructure)
     	{
     		//now find all bonds which are worth splitting
     		bondPrediction = new BondPrediction(this.aromaticBonds);
-    		this.bondsToBreak = bondPrediction.calculateBondsToBreak("/vol/local/bin/", this.originalMolecule, 600, "Ghemical", "AM1", 600, true);
+    		this.bondsToBreak = bondPrediction.calculateBondsToBreak("/vol/local/bin/","run_mopac7", this.originalMolecule, 2400, "UFF", "AM1, GEO-OK, ECHO, MMOK, XYZ, BONDS", 2400, false);
+    		
     	}
     	else
     	{
-    		setFakeBondLengths(this.originalMolecule);
+    		setFakeData(this.originalMolecule);
     	}
     } 
     
-    private void setFakeBondLengths(IAtomContainer ac)
+    private void setFakeData(IAtomContainer ac)
     {
     	for (IBond bond : ac.bonds()) {
-    		bond.setProperty("bondLengthChange", "0.0");		
+    		bond.setProperty(Constants.BONDLENGTHCHANGE, "0.0");
+    		bond.setProperty(Constants.BONDORDER, "2.0");		
 		}
+    }
+    
+    
+    /**
+     * Sets the initial properties of the molecule....use a cloned one!
+     *
+     * @param mol the mol
+     * @return the i atom container
+     */
+    private IAtomContainer setInitialProperties(IAtomContainer mol)
+    {
+    	mol.setProperty(Constants.BONDLENGTHCHANGE, "0.0");
+    	mol.setProperty(Constants.TREEDEPTH, "0");
+    	mol.setProperty(Constants.BDE, "0");
+    	mol.setProperty(Constants.BONDORDER, "2.0");
+    	mol.setProperty(Constants.BONDREMOVED, "none");
+    	
+    	return mol;
     }
     
     
@@ -474,10 +499,7 @@ public class Fragmenter {
 		preprocessMolecule(atomContainer, isPrecalculated);
 
 		//add the original molecule
-    	this.originalMolecule.setProperty("PartialChargeDiff", "0.0");
-		this.originalMolecule.setProperty("TreeDepth", "0");
-		this.originalMolecule.setProperty("BondEnergy", "0");
-		fragmentsReturn.add(writeMoleculeToTemp(this.originalMolecule, identifier, globalCount, "0.0", 0, "0.0")); 
+		fragmentsReturn.add(writeMoleculeToTemp(this.originalMolecule, identifier, globalCount, "0.0", 0, "0.0", "2.0", "none", "0.0")); 
     	
 		//add original molecule to it
         fragmentQueue.offer(new Node(0, 0, this.originalMolecule, 0));       
@@ -525,7 +547,7 @@ public class Fragmenter {
                 	
                 	//Render.Draw(partContainer, "Round: " + this.nround);
                     fragmentQueue.offer(new Node(globalCount, parent, partContainer, treeDepth));
-                    fragmentsReturn.add(writeMoleculeToTemp(partContainer, identifier, globalCount, (String)partContainer.getProperty("BondEnergy"), treeDepth, (String)partContainer.getProperty("PartialChargeDiff")));                    
+                    fragmentsReturn.add(writeMoleculeToTemp(partContainer, identifier, globalCount, (String)partContainer.getProperty(Constants.BDE), treeDepth, (String)partContainer.getProperty(Constants.BONDLENGTHCHANGE), (String)partContainer.getProperty(Constants.BONDORDER), (String)partContainer.getProperty(Constants.BONDREMOVED), (String)partContainer.getProperty(Constants.BONDORDERDIFF)));                    
                     globalCount++;
                     int parentPP = globalCount - 1;
                 }
@@ -601,11 +623,8 @@ public class Fragmenter {
         
 		//do preprocess: find all rings and aromatic rings...mark all bonds
 		preprocessMolecule(atomContainer, isPrecalculated);
-		
-		this.originalMolecule.setProperty("PartialChargeDiff", "0.0");
-		this.originalMolecule.setProperty("TreeDepth", "0");
-		this.originalMolecule.setProperty("BondEnergy", "0");
-		fragmentsReturn.add(this.originalMolecule);
+				
+		fragmentsReturn.add(setInitialProperties((IAtomContainer)this.originalMolecule.clone()));
     	
 		//add original molecule to it
         fragmentQueue.offer(new Node(0, 0, this.originalMolecule, 0));       
@@ -647,7 +666,7 @@ public class Fragmenter {
                                 
                 for (IAtomContainer partContainer : parts) {
                 	//Render.Draw(partContainer, "Round: " + this.nround);
-                	partContainer.setProperty("TreeDepth", treeDepth.toString());
+                	partContainer.setProperty(Constants.TREEDEPTH, treeDepth.toString());
                     fragmentQueue.offer(new Node(globalCount, parent, partContainer, treeDepth));
                     fragmentsReturn.add(partContainer);                    
                     globalCount++;
@@ -842,10 +861,23 @@ public class Fragmenter {
                         //now set property from both bonds
                         temp = setBondEnergy(temp, currentBondEnergyRing, currentBondEnergy);
                         //set the partial charge diff 
-                        if(optimizeStructure)
-                        	temp = setCharge(temp, bondPrediction.getBondLength(bondInRing.getID()), bondPrediction.getBondLength(bond.getID()));
+                        if(optimizeStructure || isPrecalculated)
+                        {
+                        	temp = setBondLengthChange(temp, bondPrediction.getBondLength(bondInRing.getID()), bondPrediction.getBondLength(bond.getID()));
+                        	temp = setBondOrder(temp, bondPrediction.getBondOrder(bondInRing.getID()), bondPrediction.getBondOrder(bond.getID()));
+                        	temp = setBondOrderDiff(temp, bondPrediction.getBondOrder(bondInRing.getID()), bondPrediction.getBondOrder(bond.getID()));
+                        }
                         else
-                        	temp = setCharge(temp, 0.0);
+                        {
+                        	temp = setBondLengthChange(temp, 0.0);
+                        	temp = setBondOrder(temp, 2.0);
+                        	temp = setBondOrderDiff(temp, 0.0);
+
+                        }
+                        
+                        temp = setBondRemoved(temp, getBondString(bondInRing), getBondString(bond));
+                        
+                        
                         
                         if(radicalGeneration)
                         {
@@ -912,10 +944,20 @@ public class Fragmenter {
                 
         		//now set property: BondEnergy!
                 temp = setBondEnergy(temp, currentBondEnergy);
-                if(optimizeStructure)
-                	temp = setCharge(temp, bondPrediction.getBondLength(bond.getID()));
+                if(optimizeStructure || isPrecalculated)
+                {
+                	temp = setBondLengthChange(temp, bondPrediction.getBondLength(bond.getID()));
+                	temp = setBondOrder(temp, bondPrediction.getBondOrder(bond.getID()));
+                	temp = setBondOrderDiff(temp, bondPrediction.getBondOrderDiff(bond.getID()));
+                }
                 else
-                	temp = setCharge(temp, 0.0);
+                {
+                	temp = setBondLengthChange(temp, 0.0);
+                	temp = setBondOrder(temp, 2.0);
+                	temp = setBondOrderDiff(temp, 0.0);
+                }
+                
+                temp = setBondRemoved(temp, getBondString(bond));
                 
                 if(radicalGeneration)
                 {
@@ -958,6 +1000,24 @@ public class Fragmenter {
     }
     
     
+    /**
+     * Gets the bond string according to its bond order
+     *
+     * @param bond the bond
+     * @return the bond string
+     */
+    private String getBondString(IBond bond)
+    {
+    	if(bond.getOrder().equals(Order.SINGLE))
+    		return bond.getAtom(0).getSymbol() + "-" + bond.getAtom(1).getSymbol();
+    	else if(bond.getOrder().equals(Order.DOUBLE))
+    		return bond.getAtom(0).getSymbol() + "=" + bond.getAtom(1).getSymbol();
+    	else if(bond.getOrder().equals(Order.TRIPLE))
+    		return bond.getAtom(0).getSymbol() + "~" + bond.getAtom(1).getSymbol();
+    	else
+    		return bond.getAtom(0).getSymbol() + "?" + bond.getAtom(1).getSymbol();
+    }
+    
     
     /**
      * Sets the bond energy for bonds from a ring
@@ -970,7 +1030,7 @@ public class Fragmenter {
      */
     private IAtomContainer setBondEnergy(IAtomContainer mol, Double bondEnergy1, Double bondEnergy2)
     {
-    	return setBondEnergy(mol, bondEnergy1 + "," + bondEnergy2);
+    	return setStructureProperty(mol, Constants.BDE, bondEnergy1 + "," + bondEnergy2);
     }
     
     /**
@@ -983,63 +1043,10 @@ public class Fragmenter {
      */
     private IAtomContainer setBondEnergy(IAtomContainer mol, Double bondEnergy)
     {
-    	return setBondEnergy(mol, bondEnergy.toString());
+    	return setStructureProperty(mol, Constants.BDE, bondEnergy.toString());
     }
+        
     
-    
-    /**
-     * Sets the bond energy.
-     * 
-     * @param mol the mol
-     * @param bondEnergy the bond energy
-     * 
-     * @return the i atom container
-     */
-    private IAtomContainer setBondEnergy(IAtomContainer origMol, IAtomContainer mol, Double bondEnergy)
-    {
-    	
-    	Map<Object, Object> props = mol.getProperties();
-    	String bondEnergyOrig = (String)origMol.getProperty("BondEnergy");
-    	if(bondEnergyOrig != null)
-    	{
-    		String sumEnergy = bondEnergyOrig + ";" + bondEnergy;
-    		props.put("BondEnergy", sumEnergy.toString());	
-    	}
-    	else
-    	{
-    		props.put("BondEnergy", bondEnergy.toString());
-    	}
-    	
-    	mol.setProperties(props);
-    	return mol;
-    }
-    
-    
-    /**
-     * Sets the bond energy.
-     * 
-     * @param mol the mol
-     * @param bondEnergy the bond energy
-     * 
-     * @return the i atom container
-     */
-    private IAtomContainer setBondEnergy(IAtomContainer mol, String bondEnergy)
-    {
-    	
-    	Map<Object, Object> props = mol.getProperties();
-    	if(props.get("BondEnergy") != null)
-    	{
-    		String sumEnergy = (String)props.get("BondEnergy") + ";" + bondEnergy;
-    		props.put("BondEnergy", sumEnergy);	
-    	}
-    	else
-    	{
-    		props.put("BondEnergy", bondEnergy.toString());
-    	}
-    	
-    	mol.setProperties(props);
-    	return mol;
-    }
     
     
     /**
@@ -1051,23 +1058,104 @@ public class Fragmenter {
      * 
      * @return the i atom container
      */
-    private IAtomContainer setCharge(IAtomContainer mol, Double partialChargeDiff1, Double partialChargeDiff2)
+    private IAtomContainer setBondLengthChange(IAtomContainer mol, Double partialChargeDiff1, Double partialChargeDiff2)
     {
-    	return setCharge(mol, partialChargeDiff1.toString() + "," + partialChargeDiff2.toString());
+    	return setStructureProperty(mol, Constants.BONDLENGTHCHANGE, partialChargeDiff1.toString() + "," + partialChargeDiff2.toString());
     }
     
     /**
-     * Sets the charge.
-     * 
+     * Sets the bond length change.
+     *
      * @param mol the mol
-     * @param partialChargeDiff the partial charge diff
-     * 
+     * @param bondLengthChange the bond length change
      * @return the i atom container
      */
-    private IAtomContainer setCharge(IAtomContainer mol, Double partialChargeDiff)
+    private IAtomContainer setBondLengthChange(IAtomContainer mol, Double bondLengthChange)
     {
-    	return setCharge(mol, partialChargeDiff.toString());
+    	return setStructureProperty(mol, Constants.BONDLENGTHCHANGE, bondLengthChange.toString());
     }
+    
+    
+    
+    /**
+     * Sets the bond order.
+     *
+     * @param mol the mol
+     * @param bondLengthChange the bond length change
+     * @return the i atom container
+     */
+    private IAtomContainer setBondOrder(IAtomContainer mol, Double bondOrder)
+    {
+    	return setStructureProperty(mol, Constants.BONDORDER, Double.toString(bondOrder));
+    }
+    
+    /**
+     * Sets the bond order.
+     *
+     * @param mol the mol
+     * @param bondLengthChange the bond length change
+     * @return the i atom container
+     */
+    private IAtomContainer setBondOrderDiff(IAtomContainer mol, Double bondOrder)
+    {
+    	return setStructureProperty(mol, Constants.BONDORDERDIFF, Double.toString(bondOrder));
+    }
+    
+    
+    /**
+     * Sets the bond order change.
+     *
+     * @param mol the mol
+     * @param bondOrder1 the bond order1
+     * @param bondOrder2 the bond order2
+     * @return the i atom container
+     */
+    private IAtomContainer setBondOrder(IAtomContainer mol, Double bondOrder1, Double bondOrder2)
+    {
+    	return setStructureProperty(mol, Constants.BONDORDER, bondOrder1.toString() + "," + bondOrder2.toString());
+    }
+    
+    
+    /**
+     * Sets the bond order change.
+     *
+     * @param mol the mol
+     * @param bondOrder1 the bond order1
+     * @param bondOrder2 the bond order2
+     * @return the i atom container
+     */
+    private IAtomContainer setBondOrderDiff(IAtomContainer mol, Double bondOrder1, Double bondOrder2)
+    {
+    	return setStructureProperty(mol, Constants.BONDORDERDIFF, bondOrder1.toString() + "," + bondOrder2.toString());
+    }
+    
+    
+    /**
+     * Sets the bond which was removed.
+     *
+     * @param mol the mol
+     * @param bond1 the bond1
+     * @param bond2 the bond2
+     * @return the i atom container
+     */
+    private IAtomContainer setBondRemoved(IAtomContainer mol, String bond1, String bond2)
+    {
+    	return setStructureProperty(mol, Constants.BONDREMOVED, bond1.toString() + "," + bond2.toString());
+    }
+    
+    /**
+     * Sets the bond which was removed.
+     *
+     * @param mol the mol
+     * @param bond1 the bond1
+     * @param bond2 the bond2
+     * @return the i atom container
+     */
+    private IAtomContainer setBondRemoved(IAtomContainer mol, String bond)
+    {
+    	return setStructureProperty(mol, Constants.BONDREMOVED, bond.toString());
+    }
+    
     
     /**
      * Sets the partial charge difference previously calculated using Gasteiger-Marsili.
@@ -1077,18 +1165,18 @@ public class Fragmenter {
      * 
      * @return the i atom container
      */
-    private IAtomContainer setCharge(IAtomContainer mol, String partialChargeDiff)
+    private IAtomContainer setStructureProperty(IAtomContainer mol, String key, String value)
     {
     	
     	Map<Object, Object> props = mol.getProperties();
-    	if(props.get("PartialChargeDiff") != null)
+    	if(props.get(key) != null)
     	{
-    		String sumPartialChargeDiff = (String)props.get("PartialChargeDiff") + ";" + partialChargeDiff;
-    		props.put("PartialChargeDiff", sumPartialChargeDiff);	
+    		String sumPartialChargeDiff = (String)props.get(key) + ";" + value;
+    		props.put(key, sumPartialChargeDiff);	
     	}
     	else
     	{
-    		props.put("PartialChargeDiff", partialChargeDiff.toString());
+    		props.put(key, value.toString());
     	}
     	
     	mol.setProperties(props);
@@ -1219,12 +1307,12 @@ public class Fragmenter {
 	    		//now check if this fragment energy to create the fragment is lower 
 	    		if(molecularFormulaRedundancyCheck || smilesRedundancyCheck)
 	    		{
-	    			if(partialChargesPreferred)
+	    			if(bondLengthChangePreferred)
 	    			{
 	    				//now replace fragment if its "bond energy is less"
-			    		double partialChargeDiff = MoleculeTools.getCombinedEnergy((String)fragment.getProperty("PartialChargeDiff"));
+			    		double partialChargeDiff = MoleculeTools.getCombinedEnergy((String)fragment.getProperty(Constants.BONDLENGTHCHANGE));
 			    		for (IAtomContainer atomContainer : fragsToCompare) {
-							if(MoleculeTools.getCombinedEnergy((String)atomContainer.getProperty("PartialChargeDiff")) < partialChargeDiff )
+							if(MoleculeTools.getCombinedEnergy((String)atomContainer.getProperty(Constants.BONDLENGTHCHANGE)) < partialChargeDiff )
 							{
 								addFragmentToListMapReplace(fragment, currentSumFormula);
 							}
@@ -1233,9 +1321,9 @@ public class Fragmenter {
 	    			else
 	    			{
 	    				//now replace fragment if its "bond energy is less"
-			    		double bondEnergy = MoleculeTools.getCombinedEnergy((String)fragment.getProperty("BondEnergy"));
+			    		double bondEnergy = MoleculeTools.getCombinedEnergy((String)fragment.getProperty(Constants.BONDORDER));
 			    		for (IAtomContainer atomContainer : fragsToCompare) {
-							if(MoleculeTools.getCombinedEnergy((String)atomContainer.getProperty("BondEnergy")) > bondEnergy )
+							if(MoleculeTools.getCombinedEnergy((String)atomContainer.getProperty(Constants.BONDORDER)) > bondEnergy )
 							{
 								addFragmentToListMapReplace(fragment, currentSumFormula);
 							}
@@ -1808,7 +1896,7 @@ public class Fragmenter {
      * @throws IOException Signals that an I/O exception has occurred.
      * @throws CDKException the CDK exception
      */
-    private File writeMoleculeToTemp(IAtomContainer mol, String identifier, int globalCount, String bondEnergy, Integer treeDepth, String partialChargeDiff) throws IOException, CDKException
+    private File writeMoleculeToTemp(IAtomContainer mol, String identifier, int globalCount, String bondEnergy, Integer treeDepth, String bondLengthChange, String bondOrder, String bondRemoved, String bondOrderDiff) throws IOException, CDKException
     {
     	File temp = File.createTempFile(identifier + "_" + globalCount, ".cml");
         // Delete temp file when program exits.
@@ -1825,9 +1913,12 @@ public class Fragmenter {
         Map<Object, Object> props = mol.getProperties();
         IMolecule test = new Molecule(tmp);
         test.setProperties(props);
-        test.setProperty("BondEnergy", bondEnergy);
-        test.setProperty("TreeDepth", treeDepth.toString());
-        test.setProperty("PartialChargeDiff", partialChargeDiff);
+        test.setProperty(Constants.BDE, bondEnergy);
+        test.setProperty(Constants.TREEDEPTH, treeDepth.toString());
+        test.setProperty(Constants.BONDLENGTHCHANGE, bondLengthChange);
+        test.setProperty(Constants.BONDORDER, bondOrder);
+        test.setProperty(Constants.BONDREMOVED, bondRemoved);
+        test.setProperty(Constants.BONDORDERDIFF, bondOrderDiff);
         cw.write(test);
         cw.close();
         

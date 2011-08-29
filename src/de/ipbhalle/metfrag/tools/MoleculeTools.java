@@ -20,12 +20,15 @@
 */
 package de.ipbhalle.metfrag.tools;
 
+import static org.openscience.cdk.CDKConstants.ISAROMATIC;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IBond;
+import org.openscience.cdk.interfaces.IRing;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 
 import de.ipbhalle.metfrag.bondPrediction.AtomProperty;
@@ -53,6 +56,31 @@ public class MoleculeTools {
 		}
 		
 		return mol;
+	}
+	
+	/**
+	 * Check if ring is aromatic.
+	 *
+	 * @param ring the ring
+	 * @return true, if successful
+	 */
+	public static boolean ringIsAromatic(final IRing ring) {
+		boolean isAromatic = true;
+		for (IAtom atom : ring.atoms()) {
+			if (!atom.getFlag(ISAROMATIC)) {
+				isAromatic = false;
+				break;
+			}
+		}
+		if (!isAromatic) {
+		  isAromatic = true;
+			for (IBond b : ring.bonds()) {
+				if (!b.getFlag(ISAROMATIC)) {
+					return false;
+				}
+			}
+		}
+		return isAromatic;
 	}
 	
 	/**

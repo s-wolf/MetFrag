@@ -43,16 +43,22 @@ public class PreprocessSHGeneration {
 		
 		//"/home/swolf/MOPAC/BATCH/jar/PreprocessMolecules.jar" "/home/swolf/MOPAC/ProofOfConcept/pubchem/" "/home/swolf/MOPAC/BATCH/sh/" 600 600
 		
-		String writePath = "/home/swolf/MOPAC/BATCH/sh/";
-		String pathToSDF = "/home/swolf/MOPAC/ProofOfConcept/pubchem/";
-		String pathToJar = "/home/swolf/MOPAC/BATCH/jar/PreprocessMolecules.jar";
-		String mopacRuntime = "600";
-		String ffSteps = "600";
+//		String writePath = "/home/swolf/MOPAC/BondOrderTests/Hill_ProofOfConcept/sh/";
+//		String pathToSDF = "/home/swolf/MOPAC/ProofOfConcept/Hill_OnlyCorrect/";
+//		String pathToJar = "/home/swolf/MOPAC/BondOrderTests/Hill_ProofOfConcept/jar/PreprocessMolecules.jar";
+		
+		String writePath = "/home/swolf/MOPAC/Hill-Riken-MM48_POSITIVE_PubChem_LocalMass2009_CHONPS_NEW/sh/";
+		String pathToSDF = "/home/swolf/MOPAC/Hill-Riken-MM48_POSITIVE_PubChem_LocalMass2009_CHONPS_NEW/pubchem/CO000021CO000022CO000023CO000024CO000025";
+		String pathToJar = "/home/swolf/MOPAC/Hill-Riken-MM48_POSITIVE_PubChem_LocalMass2009_CHONPS_NEW/jar/PreprocessMolecules.jar";
+			
+		
+		String mopacRuntime = "4800";
+		String ffSteps = "4800";
 		
 		if(args.length < 5)
 		{
 			System.err.println("Not all arguments given");
-			System.exit(1);
+//			System.exit(1);
 		}
 		else
 		{
@@ -83,12 +89,13 @@ public class PreprocessSHGeneration {
 			if(dotPos >= 0)
 				extension = fileName.substring(dotPos);
 
-			File f2 = new File(writePath + "sge_" + String.format("%08d", Integer.parseInt(file.getName().split("\\.")[0])) + ".sh"); 
+			File f2 = new File(writePath + "sge_" + file.getName().split("\\.")[0] + ".sh"); 
 			
 			BufferedWriter out = new BufferedWriter(new FileWriter(f2));
 			out.write("#!/bin/bash");
 			out.newLine();
-			out.write("java -jar " + pathToJar + " \"" + file.getPath() + "\"" + " \"" + new File(new File(file.getParent()).getParent()).getParent() + "/pubchemClusteredMopac/mopac_" + mopacRuntime + "/\" " + mopacRuntime + " " + ffSteps);
+			out.write("java -jar " + pathToJar + " \"" + file.getPath() + "\"" + " \"" + new File(writePath).getParent()  + "/mopac_" + mopacRuntime + "/\" " + mopacRuntime + " " + ffSteps);
+//			out.write("java -jar " + pathToJar + " \"" + file.getPath() + "\"" + " \"" + new File(new File(file.getParent()).getParent()).getParent() + "/pubchemClusteredMopac/mopac_" + mopacRuntime + "/\" " + mopacRuntime + " " + ffSteps);
 //	  		out.write("java -jar /home/swolf/MOPAC/BATCH/jar/PreprocessMolecules.jar \"" + file.getPath() + "\"" + " \"" + file.getParent() + "/mopac_1200/\"" + " 1200 600");
 		  	out.close();
 

@@ -27,6 +27,8 @@ import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IMolecularFormula;
 
 import de.ipbhalle.metfrag.massbankParser.Peak;
+import de.ipbhalle.metfrag.tools.Constants;
+import de.ipbhalle.metfrag.tools.MoleculeTools;
 
 public class MatchedFragment {
 	
@@ -38,8 +40,10 @@ public class MatchedFragment {
 	private IMolecularFormula molecularFormula;
 	private String molecularFormulaString;
 	private int hydrogenPenalty;
-	private Double partialChargeDiff;
 	private List<List<Integer>> matchedAtoms;
+	private Double bondLengthChange;
+	private Double bondOrder;
+	private Double bde;
 	
 	/**
 	 * Instantiates a new matched fragment.
@@ -50,10 +54,10 @@ public class MatchedFragment {
 	 * @param fragmentStructure the fragment structure
 	 * @param neutralLosses the neutral loss
 	 * @param hydrogenPenalty the hydrogen penalty
-	 * @param partialChargeDiff the partial charge diff
+	 * @param bondLengthChange the partial charge diff
 	 * @param molecularFormulaString the molecular formula string
 	 */
-	public MatchedFragment(Peak peak, double fragmentMass, double matchedMass, IAtomContainer fragmentStructure, NeutralLoss[] neutralLosses, int hydrogenPenalty, Double partialChargeDiff, String molecularFormulaString)
+	public MatchedFragment(Peak peak, double fragmentMass, double matchedMass, IAtomContainer fragmentStructure, NeutralLoss[] neutralLosses, int hydrogenPenalty, String molecularFormulaString)
 	{
 		setFragmentMass(fragmentMass);
 		setMatchedMass(matchedMass);
@@ -61,7 +65,6 @@ public class MatchedFragment {
 		setFragmentStructure(fragmentStructure);
 		setNeutralLosses(neutralLosses);
 		setHydrogenPenalty(hydrogenPenalty);
-		setPartialChargeDiff(partialChargeDiff);
 		setMolecularFormulaString(molecularFormulaString);
 	}
 	
@@ -74,11 +77,10 @@ public class MatchedFragment {
 	 * @param fragmentStructure the fragment structure
 	 * @param neutralLosses the neutral losses
 	 * @param hydrogenPenalty the hydrogen penalty
-	 * @param partialChargeDiff the partial charge diff
 	 * @param molecularFormulaString the molecular formula string
 	 * @param matchedAtoms the matched atoms
 	 */
-	public MatchedFragment(Peak peak, double fragmentMass, double matchedMass, IAtomContainer fragmentStructure, NeutralLoss[] neutralLosses, int hydrogenPenalty, Double partialChargeDiff, String molecularFormulaString, List<List<Integer>> matchedAtoms)
+	public MatchedFragment(Peak peak, double fragmentMass, double matchedMass, IAtomContainer fragmentStructure, NeutralLoss[] neutralLosses, int hydrogenPenalty, String molecularFormulaString, List<List<Integer>> matchedAtoms)
 	{
 		setFragmentMass(fragmentMass);
 		setMatchedMass(matchedMass);
@@ -86,7 +88,6 @@ public class MatchedFragment {
 		setFragmentStructure(fragmentStructure);
 		setNeutralLosses(neutralLosses);
 		setHydrogenPenalty(hydrogenPenalty);
-		setPartialChargeDiff(partialChargeDiff);
 		setMolecularFormulaString(molecularFormulaString);
 		setMatchedAtoms(matchedAtoms);
 	}
@@ -169,19 +170,6 @@ public class MatchedFragment {
 		return molecularFormula;
 	}
 
-	public void setPartialChargeDiff(Double partialChargeDiff) {
-		this.partialChargeDiff = partialChargeDiff;
-	}
-
-	/**
-	 * Gets the partial charge difference.
-	 *
-	 * @return the partial charge difference
-	 */
-	public Double getPartialChargeDiff() {
-		return partialChargeDiff;
-	}
-
 	public void setMolecularFormulaString(String molecularFormulaString) {
 		this.molecularFormulaString = molecularFormulaString;
 	}
@@ -220,6 +208,46 @@ public class MatchedFragment {
 	 */
 	public List<List<Integer>> getMatchedAtoms() {
 		return matchedAtoms;
+	}
+
+	public void setBondOrder(double bondOrder) {
+		this.bondOrder = bondOrder;
+	}
+
+	/**
+	 * Gets the bond order.
+	 *
+	 * @return the bond order
+	 */
+	public double getBondOrder() {
+		if(bondOrder == null)
+			return MoleculeTools.getCombinedEnergy((String)this.fragmentStructure.getProperty(Constants.BONDORDER));
+		else
+			return bondOrder;
+	}
+
+	public void setBondLengthChange(double bondLengthChange) {
+		this.bondLengthChange = bondLengthChange;
+	}
+
+	/**
+	 * Gets the bond length change.
+	 *
+	 * @return the bond length change
+	 */
+	public Double getBondLengthChange() {
+		if(bondLengthChange == null)
+			return MoleculeTools.getCombinedEnergy((String)this.fragmentStructure.getProperty(Constants.BONDLENGTHCHANGE));
+		else
+			return bondLengthChange;
+	}
+
+	public void setBde(Double bde) {
+		this.bde = bde;
+	}
+
+	public Double getBde() {
+		return MoleculeTools.getCombinedEnergy((String)this.fragmentStructure.getProperty(Constants.BDE));
 	}
 
 }

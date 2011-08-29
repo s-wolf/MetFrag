@@ -32,6 +32,7 @@ import de.ipbhalle.metfrag.massbankParser.Peak;
 import de.ipbhalle.metfrag.spectrum.MatchedFragment;
 import de.ipbhalle.metfrag.spectrum.NeutralLoss;
 import de.ipbhalle.metfrag.spectrum.WrapperSpectrum;
+import de.ipbhalle.metfrag.tools.Constants;
 import de.ipbhalle.metfrag.tools.MoleculeTools;
 
 
@@ -49,7 +50,7 @@ public class Scoring {
 	private Map<Double, NeutralLoss> neutralLoss= null;
 	private double sumIntensities = 0;
 	double scoreBondEnergy = 0.0;
-	double scoreChargesDiff = 0.0;
+	double scoreBondLengthChange = 0.0;
 	private double penalty = 0.0;
 	private HashMap<Double, Integer> peakToRank;
 	private List<OptimizationMatrixEntry> optimizationMatrixEntries;
@@ -118,10 +119,8 @@ public class Scoring {
 			//W = [Peak intensity]^m * [Mass]^n
 			score += Math.pow(this.mzToIntensity.get(hits.get(i).getPeak().getMass()), 0.6) * Math.pow(hits.get(i).getPeak().getMass(),3);
 			
-			String bondEnergies = (String)hits.get(i).getFragmentStructure().getProperty("BondEnergy");
-			scoreBondEnergy = MoleculeTools.getCombinedEnergy(bondEnergies);
-
-			scoreChargesDiff = hits.get(i).getPartialChargeDiff();
+			scoreBondEnergy = hits.get(i).getBde();
+			scoreBondLengthChange = hits.get(i).getBondLengthChange();
 			
 			penalty += (hits.get(i).getHydrogenPenalty() * 100);
 			
@@ -139,7 +138,7 @@ public class Scoring {
 			}
 						
 			//add new entry to optimization matrix
-			this.optimizationMatrixEntries.add(new OptimizationMatrixEntry(candidateID, hits.get(i).getPeak().getMass(), hits.get(i).getPeak().getIntensity(), (String)hits.get(i).getFragmentStructure().getProperty("BondEnergy"), hits.get(i).getHydrogenPenalty(), (String)hits.get(i).getFragmentStructure().getProperty("PartialChargeDiff"), neutralLossString));
+			this.optimizationMatrixEntries.add(new OptimizationMatrixEntry(candidateID, hits.get(i).getPeak().getMass(), hits.get(i).getPeak().getIntensity(), (String)hits.get(i).getFragmentStructure().getProperty(Constants.BDE), hits.get(i).getHydrogenPenalty(), (String)hits.get(i).getFragmentStructure().getProperty(Constants.BONDLENGTHCHANGE), neutralLossString, (String)hits.get(i).getFragmentStructure().getProperty(Constants.BONDORDER), (String)hits.get(i).getFragmentStructure().getProperty(Constants.BONDORDERDIFF), (String)hits.get(i).getFragmentStructure().getProperty(Constants.BONDREMOVED)));
 			
 		}
 
@@ -161,7 +160,7 @@ public class Scoring {
 		double weightedPeaks = 0.0;
 		double BDE = 0.0;
 		double hydrogenPenalty = 0.0;
-		double partialChargesDiff = 0.0;
+		double bondLengthChange = 0.0;
 		
 		for (int i = 0; i < hits.size(); i++) {			
 			//Scoring like in Massbank paper m=0.6, n=3
@@ -175,9 +174,7 @@ public class Scoring {
 			
 			//hydrogen penalty
 			hydrogenPenalty += (hits.get(i).getHydrogenPenalty() * 100);
-			
-			//partial charges diff
-			partialChargesDiff += hits.get(i).getPartialChargeDiff();
+			bondLengthChange += hits.get(i).getBondLengthChange();
 			
 			//get all neutral losses
 			NeutralLoss[] nl = hits.get(i).getNeutralLosses();
@@ -193,13 +190,13 @@ public class Scoring {
 			}
 			
 			//add new entry to optimization matrix
-			this.optimizationMatrixEntries.add(new OptimizationMatrixEntry(candidateID, hits.get(i).getPeak().getMass(), hits.get(i).getPeak().getRelIntensity(), bondEnergies, hits.get(i).getHydrogenPenalty(), Double.toString(hits.get(i).getPartialChargeDiff()), neutralLossString));
+			this.optimizationMatrixEntries.add(new OptimizationMatrixEntry(candidateID, hits.get(i).getPeak().getMass(), hits.get(i).getPeak().getRelIntensity(), bondEnergies, hits.get(i).getHydrogenPenalty(), neutralLossString, (String)hits.get(i).getFragmentStructure().getProperty(Constants.BONDLENGTHCHANGE), (String)hits.get(i).getFragmentStructure().getProperty(Constants.BONDORDER), (String)hits.get(i).getFragmentStructure().getProperty(Constants.BONDORDERDIFF),  (String)hits.get(i).getFragmentStructure().getProperty(Constants.BONDREMOVED)));
 			
 		}
 		
 		
 		this.scoreBondEnergy = BDE;
-		this.scoreChargesDiff = partialChargesDiff;
+		this.scoreBondLengthChange = bondLengthChange;
 		this.penalty = hydrogenPenalty;
 		
 		//best result so far
@@ -212,7 +209,7 @@ public class Scoring {
 		if(hits.size() > 0)
 		{
 			tempBDE = BDE / hits.size();
-			tempPartialCharges = partialChargesDiff / hits.size();
+			tempPartialCharges = bondLengthChange / hits.size();
 		}
 		score = (a * weightedPeaks) - (b * (tempPartialCharges * tempPartialCharges));
 
@@ -336,7 +333,7 @@ public class Scoring {
 	
 	public double getPartialChargesDiff()
 	{
-		return this.scoreChargesDiff;
+		return this.scoreBondLengthChange;
 	}
 
 

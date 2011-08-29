@@ -10,6 +10,8 @@ import java.util.List;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.io.SDFWriter;
+import org.openscience.cdk.tools.CDKHydrogenAdder;
+import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 
 import de.ipbhalle.metfrag.fragmenter.Candidates;
 import de.ipbhalle.metfrag.main.Config;
@@ -29,10 +31,11 @@ public class RetrieveCompounds {
 		//parameters
 		String database = "pubchem";
 		double searchPPM = 10.0;
-		boolean isOnline = true;
+		boolean isOnline = false;
 		
 		
-		File f = new File("/home/swolf/MOPAC/Hill-Riken-MM48_POSITIVE_PubChem_Formula/");
+//		File f = new File("/home/swolf/MOPAC/Hill-Riken-MM48_POSITIVE_PubChem_Formula/");
+		File f = new File("/home/swolf/MOPAC/Hill-Riken-MM48_POSITIVE_PubChem_LocalMass2009_CHONPS_NEW/");
 		File files[] = f.listFiles();
 		Config config = null;
 		try {
@@ -57,17 +60,30 @@ public class RetrieveCompounds {
 				if(isOnline)
 				{
 					PubChemWebService pubchem = new PubChemWebService();
-					candidates = Candidates.queryOnline(database, "", spectrum.getFormula(), spectrum.getExactMass(), searchPPM, false, pubchem);
+					candidates = Candidates.queryOnline(database, "", "", spectrum.getExactMass(), searchPPM, false, pubchem);
 				}
 				else
 					candidates = Candidates.queryLocally(database, spectrum.getExactMass(), searchPPM, config.getJdbc(), config.getUsername(), config.getPassword());
 				
 				for (String candString : candidates) {
-					IAtomContainer mol = Candidates.getCompoundLocally(database, candString, config.getJdbc(), config.getUsername(), config.getPassword(), true, config.getChemspiderToken());
+					IAtomContainer mol = Candidates.getCompoundLocally(database, candString, config.getJdbc(), config.getUsername(), config.getPassword(), false, config.getChemspiderToken());
 					
 					if(mol == null)
 						continue;
-						
+					
+					try
+					{
+						AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(mol);
+				        CDKHydrogenAdder hAdder = CDKHydrogenAdder.getInstance(mol.getBuilder());
+				        hAdder.addImplicitHydrogens(mol);
+				        AtomContainerManipulator.convertImplicitToExplicitHydrogens(mol);
+					}
+					catch(CDKException e)
+					{
+						System.err.println(e.getMessage());
+					}
+					
+											
 					try {
 						new File(filePath + "/" + database + "/" + fileName).mkdirs();
 						

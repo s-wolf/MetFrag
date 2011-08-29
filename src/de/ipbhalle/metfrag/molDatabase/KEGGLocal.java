@@ -21,6 +21,7 @@
 package de.ipbhalle.metfrag.molDatabase;
 
 import java.sql.Connection;
+import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -73,7 +74,8 @@ public class KEGGLocal {
         String driver = "com.mysql.jdbc.Driver"; 
         Connection con = null; 
 		Class.forName(driver); 
-		DriverManager.registerDriver (new com.mysql.jdbc.Driver()); 
+		Driver driverMysql = new com.mysql.jdbc.Driver();
+		DriverManager.registerDriver (driverMysql); 
         // JDBC-driver
         Class.forName(driver);
         con = DriverManager.getConnection(url, username, password);
@@ -88,6 +90,7 @@ public class KEGGLocal {
 	    	candidatesString.add(rs.getString("id"));
 	    }
         con.close();
+        DriverManager.deregisterDriver(driverMysql);
         
         return candidatesString;
 	}
@@ -110,7 +113,8 @@ public class KEGGLocal {
         String driver = "com.mysql.jdbc.Driver"; 
         Connection con = null; 
 		Class.forName(driver); 
-		DriverManager.registerDriver (new com.mysql.jdbc.Driver()); 
+		Driver driverMysql = new com.mysql.jdbc.Driver();
+		DriverManager.registerDriver (driverMysql); 
         // JDBC-driver
         Class.forName(driver);
         con = DriverManager.getConnection(url, username, password);
@@ -127,6 +131,7 @@ public class KEGGLocal {
 	    		molecule = sp1.parseSmiles(smiles);
 	    }
 	    con.close();
+	    DriverManager.deregisterDriver(driverMysql);
 	    
 	    return molecule;
 	}

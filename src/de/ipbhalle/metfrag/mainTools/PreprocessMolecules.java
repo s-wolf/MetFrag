@@ -30,7 +30,7 @@ import org.openscience.cdk.tools.manipulator.ChemFileManipulator;
 import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 
 import de.ipbhalle.metfrag.bondPrediction.BondPrediction;
-import de.ipbhalle.metfrag.bondPrediction.ChargeResult;
+import de.ipbhalle.metfrag.bondPrediction.CalculationResult;
 import de.ipbhalle.metfrag.tools.MoleculeTools;
 
 public class PreprocessMolecules {
@@ -41,8 +41,8 @@ public class PreprocessMolecules {
 		
 		File file = null;
 		String outputFolder = "";
-		int mopacRuntime = 0;
-		int ffSteps = 600;
+		int mopacRuntime = 4800;
+		int ffSteps = 4800;
 		
 		String outputMOPACDebug = "";
 		
@@ -80,7 +80,7 @@ public class PreprocessMolecules {
 		        outputFolder += MolecularFormulaManipulator.getString(MolecularFormulaManipulator.getMolecularFormula(molecule)) + "/";
 		        
 		        //Skip already calculated files!
-		        if(new File(outputFolder + file.getName().split("\\.")[0] + "_Combined.cml").exists())
+		        if(new File(outputFolder + file.getName().split("\\.cml")[0] + "_Combined.cml").exists())
 		        	System.exit(0);
 		        
 		        
@@ -96,28 +96,24 @@ public class PreprocessMolecules {
 		        CDKHueckelAromaticityDetector.detectAromaticity(molecule);
 		        
 		    	for (IBond bond : molecule.bonds()) {
-		            boolean aromatic = false;
 		            //lets see if it is a ring and aromatic
 		            IRingSet rings = allRings.getRings(bond);
 		            //don't split up aromatic rings...see constructor for option
-		        	for (int i1 = 0; i1 < rings.getAtomContainerCount(); i1++) {
-		        		aromatic =  AromaticityCalculator.isAromatic((IRing)rings.getAtomContainer(i1), molecule);
-		            	if(aromatic)
+		            for (int i = 0; i < rings.getAtomContainerCount(); i++) {
+		            	if(MoleculeTools.ringIsAromatic((IRing)rings.getAtomContainer(i)))
 		            	{
-		            		aromatic = true;
 		            		aromaticBonds.add(bond);
-		            		break;
 		            	}
-					}
+		            }
 		        }
 		    	
 		    	BondPrediction bp = new BondPrediction(aromaticBonds);
 			    bp.debug(false);
-			    System.out.println("MOPAC runtime: " + mopacRuntime + " FFSteps: " + ffSteps);
+//			    System.out.println("MOPAC runtime: " + mopacRuntime + " FFSteps: " + ffSteps);
 			    //use babel version 2.3.0
-				bp.calculateBondsToBreak("/vol/local/bin/", molecule, ffSteps, "Ghemical", "AM1", mopacRuntime, true);
-				
-				List<ChargeResult> results = bp.getResults();
+				bp.calculateBondsToBreak("/vol/local/bin/","run_mopac7", molecule, 4800, "UFF", "AM1, GEO-OK, ECHO, MMOK, XYZ, BONDS", 4800, true);
+				output = file.getName() + "\tHeat of Formation: " + mopac.getHeatOfFormation() + "\tTime: " + mopac.getTime() + "\tWarning: " + mopac.getWarningMessage() + "\tError: " + mopac.getErrorMessage() + "\tCDKError: " + error  + "\n";
+				List<CalculationResult> results = bp.getResults();
 				
 				if(molecule.getProperty("candidatesClustered") != null)
 				{
@@ -130,11 +126,16 @@ public class PreprocessMolecules {
 								new File(outputFolder).mkdirs();
 								CMLWriter writerCML = new CMLWriter(new FileOutputStream(new File(outputFolder + clusteredCompounds[c] + "_" + results.get(i1).getProtonatedAtom() + ".cml")));
 								//thats the molecule containing the all the bond length changes from all protonation sites
+								
 								if(i1 == 0)
-									writerCML.write(results.get(i1).getMolWithProton());
-								//thats the mol containing the individual changes from one protonation site
+								{
+									writerCML.write(results.get(i1).getOriginalMol());
+								}
 								else
-									writerCML.write(results.get(i1).getMolWithProton());
+								{
+									results.get(i1).getOriginalMol().setID(Double.toString((Double)results.get(i1).getOriginalMol().getProperty("HeatOfFormation")));
+									writerCML.write(results.get(i1).getOriginalMol());
+								}
 								writerCML.close();
 								
 								//write the mopac debug messages in one file
@@ -166,10 +167,15 @@ public class PreprocessMolecules {
 							CMLWriter writerCML = new CMLWriter(new FileOutputStream(new File(outputFolder + file.getName() + "_" + results.get(i1).getProtonatedAtom() + ".cml")));
 							//thats the molecule containing the all the bond length changes from all protonation sites
 							if(i1 == 0)
-								writerCML.write(results.get(i1).getMolWithProton());
+							{
+								writerCML.write(results.get(i1).getOriginalMol());
+							}
 							//thats the mol containing the individual changes from one protonation site
 							else
-								writerCML.write(results.get(i1).getMolWithProton());
+							{
+								results.get(i1).getOriginalMol().setID(Double.toString((Double)results.get(i1).getOriginalMol().getProperty("HeatOfFormation")));
+								writerCML.write(results.get(i1).getOriginalMol());
+							}
 							writerCML.close();
 							
 							//write the mopac debug messages in one file

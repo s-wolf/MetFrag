@@ -35,9 +35,11 @@ import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IBond;
 import org.openscience.cdk.interfaces.IChemObjectBuilder;
 import org.openscience.cdk.nonotify.NoNotificationChemObjectBuilder;
+import org.openscience.cdk.tools.diff.tree.BondOrderDifference;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 
 import de.ipbhalle.metfrag.moldynamics.Distance;
+import de.ipbhalle.metfrag.tools.Constants;
 import de.ipbhalle.metfrag.tools.MoleculeTools;
 import de.ipbhalle.metfrag.tools.renderer.StructureRenderer;
 
@@ -48,8 +50,10 @@ public class BondPrediction {
 		private IAtomContainer mol;
 		private IAtomContainer molWithAllProtonationSites;
 		private Map<String, Double> bondToBondLength;
+		private Map<String, Double> bondToBondOrder;
+		private Map<String, Double> bondToBondOrderDiff;
 		private boolean verbose = false;
-		private List<ChargeResult> results= null;
+		private List<CalculationResult> results= null;
 		private List<IBond> aromaticBonds = null;
 		private boolean render = false;
 		private String mopacMessages = "";
@@ -63,7 +67,9 @@ public class BondPrediction {
 		public BondPrediction(List<IBond> aromaticBonds)
 		{
 			this.bondToBondLength = new HashMap<String, Double>();
-			this.setResults(new ArrayList<ChargeResult>());
+			this.bondToBondOrder = new HashMap<String, Double>();
+			this.bondToBondOrderDiff = new HashMap<String, Double>();
+			this.setResults(new ArrayList<CalculationResult>());
 			this.aromaticBonds = aromaticBonds;
 		}
 		
@@ -91,22 +97,26 @@ public class BondPrediction {
 		 * It returns a list with bonds.
 		 *
 		 * @param pathToBabel if a different openbael is to be used! e.g. "/vol/local/bin/"
+		 * @param mopacExecuteable the mopac executeable
 		 * @param mol the mol
 		 * @param FFSteps the fF steps
+		 * @param ffMethod the ff method
 		 * @param mopacMethod the mopac method
 		 * @param mopacRuntime the mopac runtime
+		 * @param deleteTemp the delete temp
 		 * @return the list< i bond>
 		 * @throws Exception the exception
 		 */
-		public List<String> calculateBondsToBreak(String pathToBabel, IAtomContainer mol, int FFSteps, String ffMethod, String mopacMethod, Integer mopacRuntime, boolean deleteTemp) throws Exception
+		public List<String> calculateBondsToBreak(String pathToBabel, String mopacExecuteable, IAtomContainer mol, int FFSteps, String ffMethod, String mopacMethod, Integer mopacRuntime, boolean deleteTemp) throws Exception
 		{		
 			List<String> bondsToBreak = new ArrayList<String>();
 			
 			//now optimize the geometry of the neutral molecule
 			Mopac mopac = new Mopac();
+			Map<String, Double> bondToBondOrderOrig = new HashMap<String, Double>();
 			try {	
 				//now optimize the structure of the neutral molecue
-	    		this.mol = mopac.runOptimization(pathToBabel, mol, FFSteps, true, ffMethod, mopacMethod, mopacRuntime, true, "Neutral", deleteTemp, 0);
+	    		this.mol = mopac.runOptimization(pathToBabel,mopacExecuteable, mol, FFSteps, true, ffMethod, mopacMethod, mopacRuntime, true, "Neutral", deleteTemp, 0);
 	    		if(this.mol == null)
 	    		{
 	    			this.mopacMessagesNeutral = "ERROR!\nHeat of Formation: " + mopac.getHeatOfFormation() + "\nTime: " + mopac.getTime() + "\nWarning: " + mopac.getWarningMessage() + "\nError: " + mopac.getErrorMessage() + "\n\n";
@@ -116,13 +126,19 @@ public class BondPrediction {
 	    		else
 	    			this.mopacMessagesNeutral = "Neutral Molecule MOPAC\nHeat of Formation: " + mopac.getHeatOfFormation() + "\nTime: " + mopac.getTime() + "\nWarning: " + mopac.getWarningMessage() + "\nError: " + mopac.getErrorMessage() + "\n\n";
 
-	    		
+	           	bondToBondOrderOrig = mopac.getBondOrder();
+	           	for (IBond bond : this.mol.bonds()) {
+					IAtom atom1 = bond.getAtom(0);
+					IAtom atom2 = bond.getAtom(1);
+					String key = atom1.getSymbol() + (Integer.parseInt(atom1.getID()) + 1) + "-"  +	atom2.getSymbol() + (Integer.parseInt(atom2.getID()) + 1);
+					bond.setProperty(Constants.BONDORDER, bondToBondOrderOrig.get(key));
+				}
 	    		
 	        	GasteigerMarsiliPartialCharges peoe = new GasteigerMarsiliPartialCharges();
 //	        	GasteigerPEPEPartialCharges pepe = new GasteigerPEPEPartialCharges();
-	        	AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(this.mol);
-	            AtomContainerManipulator.convertImplicitToExplicitHydrogens(this.mol);
-	            this.mol = MoleculeTools.moleculeNumbering(this.mol);
+//	        	AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(this.mol);
+//	            AtomContainerManipulator.convertImplicitToExplicitHydrogens(this.mol);
+//	            this.mol = MoleculeTools.moleculeNumbering(this.mol);
 	    		peoe.calculateCharges(this.mol);
 //		    	pepe.calculateCharges(this.mol);
 	    		
@@ -189,7 +205,9 @@ public class BondPrediction {
 						System.out.println("Protonation of atom: " + chargesArray[i].getAtom().getSymbol()  + (Integer.parseInt(chargesArray[i].getAtom().getID()) + 1));
 					
 					IAtom hydrogenAtom = new Atom("H");
+					hydrogenAtom.setID(Integer.toString(this.mol.getAtomCount()));
 					IBond hydrogenBond = new Bond(AtomContainerManipulator.getAtomById(protonatedMol, chargesArray[i].getAtom().getID()), hydrogenAtom);
+					hydrogenBond.setID(Integer.toString(this.mol.getBondCount()));
 					protonatedMol.addAtom(hydrogenAtom);
 					protonatedMol.addBond(hydrogenBond);
 					AtomContainerManipulator.getAtomById(protonatedMol, chargesArray[i].getAtom().getID()).setFormalCharge(1);
@@ -227,7 +245,13 @@ public class BondPrediction {
 		            
 		            try
 		            {
-		            	protonatedMol = mopac.runOptimization(pathToBabel, protonatedMol, FFSteps, true, ffMethod, mopacMethod, mopacRuntime, false, chargesArray[i].getAtom().getSymbol()  + (Integer.parseInt(chargesArray[i].getAtom().getID()) + 1), deleteTemp, 1);
+		            	protonatedMol = mopac.runOptimization(pathToBabel, mopacExecuteable, protonatedMol, FFSteps, true, ffMethod, mopacMethod, mopacRuntime, false, chargesArray[i].getAtom().getSymbol()  + (Integer.parseInt(chargesArray[i].getAtom().getID()) + 1), deleteTemp, 1);
+		            	Map<String, Double> bondToBondOrderProtonated = new HashMap<String, Double>();
+		            	bondToBondOrderProtonated = mopac.getBondOrder();
+		            	
+		            	Map<String, Double> bondToBondOrderProtonatedDiff = new HashMap<String, Double>();
+		            	bondToBondOrderProtonatedDiff = compareBondOrders(this.mol, bondToBondOrderProtonated);
+
 		            	//something went wrong during optimization
 		            	if(protonatedMol == null)
 		            	{
@@ -237,6 +261,7 @@ public class BondPrediction {
 		            	else
 		            	{
 		            		this.mopacMessages = "Protonated Molecule MOPAC Atom " + chargesArray[i].getAtom().getSymbol()  + (Integer.parseInt(chargesArray[i].getAtom().getID()) + 1) + "\nHeat of Formation: " + mopac.getHeatOfFormation() + "\nHeat of Formation: " + mopac.getHeatOfFormation() + "\nTime: " + mopac.getTime() + "\nWarning: " + mopac.getWarningMessage() + "\nError: " + mopac.getErrorMessage() + "\n\n";
+		            		protonatedMol.setProperty("HeatOfFormation", mopac.getHeatOfFormation());
 		            	}
 		            	
 		            	
@@ -267,14 +292,14 @@ public class BondPrediction {
 								}
 
 					        	double distance = atom1.getPoint3d().distance(atom2.getPoint3d());
-					        	
+					        	String bondAtomString = atom1.getSymbol() + (Integer.parseInt(atom1.getID()) + 1) + "-" + atom2.getSymbol() + (Integer.parseInt(atom2.getID()) + 1);
 					        	
 					        	if(verbose)
 					        	{
 					        		if(j == 0)
-					        			System.out.println("Neutral: " + atom1.getSymbol() + (Integer.parseInt(atom1.getID()) + 1) + "(" + atom1.getCharge()  + ") -"  +	atom2.getSymbol() + (Integer.parseInt(atom2.getID()) + 1) + "(" + atom2.getCharge()  + ") -" + "\t:" + distance);
+					        			System.out.println("Neutral: " + atom1.getSymbol() + (Integer.parseInt(atom1.getID()) + 1) + "(" + atom1.getCharge()  + ") -"  + atom2.getSymbol() + (Integer.parseInt(atom2.getID()) + 1) + "(" + atom2.getCharge()  + ") -" + "\t:" + distance + " BO: " + bondToBondOrderOrig.get(bondAtomString));
 					        		else
-					        			System.out.println("Protonated: " + atom1.getSymbol() + (Integer.parseInt(atom1.getID()) + 1) + "(" + atom1.getCharge()  + ") -"  +	atom2.getSymbol() + (Integer.parseInt(atom2.getID()) + 1) + "(" + atom2.getCharge()  + ") -" + "\t:" + distance);
+					        			System.out.println("Protonated: " + atom1.getSymbol() + (Integer.parseInt(atom1.getID()) + 1) + "(" + atom1.getCharge()  + ") -"  +	atom2.getSymbol() + (Integer.parseInt(atom2.getID()) + 1) + "(" + atom2.getCharge()  + ") -" + "\t:" + distance + " BO: " + bondToBondOrderProtonated.get(bondAtomString));
 					        	}
 					        	
 					        	Distance dist = null;
@@ -293,23 +318,23 @@ public class BondPrediction {
 									continue;
 								
 								//give penalty for aromatic rings...they usually don't split...also assume the aromatic rings for the protonated molecule
-								if(this.aromaticBonds.contains(bond) || this.aromaticBonds.contains(molArray[0].getBond(AtomContainerManipulator.getAtomById(molArray[0], atom1.getID()), AtomContainerManipulator.getAtomById(molArray[0], atom2.getID()))))
+								if(this.aromaticBonds.contains(bond) || this.aromaticBonds.contains(this.mol.getBond(AtomContainerManipulator.getAtomById(this.mol, atom1.getID()), AtomContainerManipulator.getAtomById(this.mol, atom2.getID()))))
 								{
-									dist = new Distance(atom1.getSymbol() + (Integer.parseInt(atom1.getID()) + 1) + "-" + atom2.getSymbol() + (Integer.parseInt(atom2.getID()) + 1), 0.0, bond.getID(), atom1.getID(), atom2.getID());
+									dist = new Distance(atom1.getSymbol() + (Integer.parseInt(atom1.getID()) + 1) + "-" + atom2.getSymbol() + (Integer.parseInt(atom2.getID()) + 1), 0.0, bond.getID(), atom1.getID(), atom2.getID(), true);
 								}
 								//penalty for double bond to terminal oxygen
 								else if(atom1.getSymbol().equals("O") && chargesArray[i].getAtom().getID().equals(atom1.getID()) && doubleBond)
 								{
-									dist = new Distance(atom1.getSymbol() + (Integer.parseInt(atom1.getID()) + 1) + "-" + atom2.getSymbol() + (Integer.parseInt(atom2.getID()) + 1), 0.0, bond.getID(), atom1.getID(), atom2.getID());
+									dist = new Distance(atom1.getSymbol() + (Integer.parseInt(atom1.getID()) + 1) + "-" + atom2.getSymbol() + (Integer.parseInt(atom2.getID()) + 1), 0.0, bond.getID(), atom1.getID(), atom2.getID(), true);
 								}
 								//penalty for double bond to terminal oxygen
 								else if(atom2.getSymbol().equals("O") && chargesArray[i].getAtom().getID().equals(atom2.getID()) && doubleBond)
 								{
-									dist = new Distance(atom1.getSymbol() + (Integer.parseInt(atom1.getID()) + 1) + "-" + atom2.getSymbol() + (Integer.parseInt(atom2.getID()) + 1), 0.0, bond.getID(), atom1.getID(), atom2.getID());
+									dist = new Distance(atom1.getSymbol() + (Integer.parseInt(atom1.getID()) + 1) + "-" + atom2.getSymbol() + (Integer.parseInt(atom2.getID()) + 1), 0.0, bond.getID(), atom1.getID(), atom2.getID(), true);
 								}
 								else 
 								{
-									dist = new Distance(atom1.getSymbol() + (Integer.parseInt(atom1.getID()) + 1) + "-" + atom2.getSymbol() + (Integer.parseInt(atom2.getID()) + 1), distance, bond.getID(), atom1.getID(), atom2.getID());
+									dist = new Distance(atom1.getSymbol() + (Integer.parseInt(atom1.getID()) + 1) + "-" + atom2.getSymbol() + (Integer.parseInt(atom2.getID()) + 1), distance, bond.getID(), atom1.getID(), atom2.getID(), false);
 								}
 								String key = atom1.getSymbol() + (Integer.parseInt(atom1.getID()) + 1) + "-"  +	atom2.getSymbol() + (Integer.parseInt(atom2.getID()) + 1);
 					        	//original molecule
@@ -341,16 +366,42 @@ public class BondPrediction {
 								//now normalize the current charge
 								Double normalizedPartialChargeOfProtonizedAtom = (chargesArray[i].getCharge() / minCharge);
 	
-								double distRound = Math.round((dist * normalizedPartialChargeOfProtonizedAtom) * 1000.0)/1000.0;
-								
+//								double distRound = Math.round((dist * normalizedPartialChargeOfProtonizedAtom) * 1000.0)/1000.0;
+								double distRound = Math.round((dist) * 1000.0)/1000.0;
 								//set the bond length change
-								protonatedMol.getBond(AtomContainerManipulator.getAtomById(protonatedMol, cpd2BondToDistance.get(bondID).getAtom1ID()), AtomContainerManipulator.getAtomById(protonatedMol, cpd2BondToDistance.get(bondID).getAtom2ID())).setProperty("bondLengthChange", distRound);
-								
+								protonatedMol.getBond(AtomContainerManipulator.getAtomById(protonatedMol, cpd2BondToDistance.get(bondID).getAtom1ID()), AtomContainerManipulator.getAtomById(protonatedMol, cpd2BondToDistance.get(bondID).getAtom2ID()))
+									.setProperty(Constants.BONDLENGTHCHANGE, distRound);
 								//now save only the maximum bond length change...
 								bondToBondLength = saveMaximum(bondToBondLength, cpd1BondToDistance.get(bondID).getBondID(), distRound);
 								
+								Double currentBondOrder = 0.0;
+								Double currentBondOrderDiff = 0.0;
+								if(cpd2BondToDistance.get(bondID).isInAromaticRing())
+								{
+									//set bond order
+									protonatedMol.getBond(AtomContainerManipulator.getAtomById(protonatedMol, cpd2BondToDistance.get(bondID).getAtom1ID()), AtomContainerManipulator.getAtomById(protonatedMol, cpd2BondToDistance.get(bondID).getAtom2ID()))
+										.setProperty(Constants.BONDORDER, 2.0);									
+									currentBondOrder = 2.0;
+									currentBondOrderDiff = 0.0;
+									this.bondToBondOrder = saveMinimum(bondToBondOrder, cpd1BondToDistance.get(bondID).getBondID(), 2.0);
+									this.bondToBondOrderDiff = saveMaximum(bondToBondOrderDiff, cpd1BondToDistance.get(bondID).getBondID(), 0.0);
+								}
+								else
+								{
+									//set bond order
+									currentBondOrder = bondToBondOrderProtonated.get(bondID);
+									currentBondOrderDiff = bondToBondOrderProtonatedDiff.get(bondID);
+									protonatedMol.getBond(AtomContainerManipulator.getAtomById(protonatedMol, cpd2BondToDistance.get(bondID).getAtom1ID()), AtomContainerManipulator.getAtomById(protonatedMol, cpd2BondToDistance.get(bondID).getAtom2ID()))
+										.setProperty(Constants.BONDORDER, currentBondOrder);									
+									this.bondToBondOrder = saveMinimum(bondToBondOrder, cpd1BondToDistance.get(bondID).getBondID(), bondToBondOrderProtonated.get(bondID));
+									this.bondToBondOrderDiff = saveMaximum(bondToBondOrderDiff, cpd1BondToDistance.get(bondID).getBondID(), bondToBondOrderProtonatedDiff.get(bondID));
+								}
+																
+								
+								
+								
 	//								tempResult += cpd1BondToDistance.get(i1).getBond() + " " + cpd1BondToDistance.get(i1).getBondLength() + " " + cpd2BondToDistance.get(i1 + offset).getBondLength() + ": " + distRound + "\n";
-								tempResult += cpd1BondToDistance.get(bondID).getBond() +  "\t" + distRound + "\n";
+								tempResult += cpd1BondToDistance.get(bondID).getBond() +  "\t" + distRound + "\t" + currentBondOrder + "\t" + currentBondOrderDiff +"\n";
 								
 							}
 							else
@@ -362,7 +413,48 @@ public class BondPrediction {
 						
 						if(verbose)
 							System.out.println(tempResult);
-						this.results.add(new ChargeResult(this.mol, protonatedMol, outputStructure, tempResult, chargesArray[i].getAtom().getSymbol()  + (Integer.parseInt(chargesArray[i].getAtom().getID()) + 1), this.mopacMessages));
+						
+						
+						for (IBond bond : protonatedMol.bonds()) {
+							
+							if(bondToBondLength.get(bond.getID()) == null)
+							{
+								bond.setProperty(Constants.BONDLENGTHCHANGE, 0.0);
+								bond.setProperty(Constants.BONDORDER, 2.0);
+								bond.setProperty(Constants.BONDORDERDIFF, 0.0);
+							}
+							else
+							{
+								bond.setProperty(Constants.BONDLENGTHCHANGE, bondToBondLength.get(bond.getID()));
+								String bondString = bond.getAtom(0).getSymbol() + (Integer.parseInt(bond.getAtom(0).getID()) + 1) + "-" + bond.getAtom(1).getSymbol() + (Integer.parseInt(bond.getAtom(1).getID()) + 1);
+								bond.setProperty(Constants.BONDORDER, bondToBondOrderProtonated.get(bondString));
+								bond.setProperty(Constants.BONDORDERDIFF, bondToBondOrderProtonatedDiff.get(bondString));
+							}
+							
+						}
+						
+						
+						IAtomContainer molWithoutProton = (IAtomContainer) this.mol.clone();
+						molWithoutProton.setProperty("HeatOfFormation", mopac.getHeatOfFormation());
+						for (IBond bond : molWithoutProton.bonds()) {
+							
+							if(bondToBondLength.get(bond.getID()) == null)
+							{
+								bond.setProperty(Constants.BONDLENGTHCHANGE, 0.0);
+								bond.setProperty(Constants.BONDORDER, 2.0);
+								bond.setProperty(Constants.BONDORDERDIFF, 0.0);
+							}
+							else
+							{
+								bond.setProperty(Constants.BONDLENGTHCHANGE, bondToBondLength.get(bond.getID()));
+								String bondString = bond.getAtom(0).getSymbol() + (Integer.parseInt(bond.getAtom(0).getID()) + 1) + "-" + bond.getAtom(1).getSymbol() + (Integer.parseInt(bond.getAtom(1).getID()) + 1);
+								bond.setProperty(Constants.BONDORDER, bondToBondOrderProtonated.get(bondString));
+								bond.setProperty(Constants.BONDORDERDIFF, bondToBondOrderProtonatedDiff.get(bondString));
+							}
+							
+						}
+												
+						this.results.add(new CalculationResult(molWithoutProton, protonatedMol, outputStructure, tempResult, chargesArray[i].getAtom().getSymbol()  + (Integer.parseInt(chargesArray[i].getAtom().getID()) + 1), this.mopacMessages));
 
 //						for (String string : notMatched) {
 //							System.out.println(string);
@@ -401,16 +493,21 @@ public class BondPrediction {
 			IAtomContainer molOriginal = (IAtomContainer)this.mol.clone();
 			
 			String combinedResults = "";
-			for (IBond bond : this.mol.bonds()) {
+			for (IBond bond : molOriginal.bonds()) {
 				
-				combinedResults += bond.getAtom(0).getSymbol() + (Integer.parseInt(bond.getAtom(0).getID()) + 1) + "-" + bond.getAtom(1).getSymbol() + (Integer.parseInt(bond.getAtom(1).getID()) + 1) + "\t" + bondToBondLength.get(bond.getID()) + "\n";
+				combinedResults += bond.getAtom(0).getSymbol() + (Integer.parseInt(bond.getAtom(0).getID()) + 1) + "-" + bond.getAtom(1).getSymbol() + (Integer.parseInt(bond.getAtom(1).getID()) + 1) + "\t" + bondToBondLength.get(bond.getID()) + "\t" + bondToBondOrder.get(bond.getID()) + "\t" + bondToBondOrderDiff.get(bond.getID()) + "\n";
 				if(bondToBondLength.get(bond.getID()) == null)
 				{
-					bond.setProperty("bondLengthChange", 0);
+					bond.setProperty(Constants.BONDLENGTHCHANGE, 0.0);
+					bond.setProperty(Constants.BONDORDER, 2.0);
+					bond.setProperty(Constants.BONDORDERDIFF, 0.0);
+					
 				}
 				else
 				{
-					bond.setProperty("bondLengthChange", bondToBondLength.get(bond.getID()));
+					bond.setProperty(Constants.BONDLENGTHCHANGE, bondToBondLength.get(bond.getID()));
+					bond.setProperty(Constants.BONDORDER, this.bondToBondOrder.get(bond.getID()));
+					bond.setProperty(Constants.BONDORDERDIFF, this.bondToBondOrderDiff.get(bond.getID()));
 				}
 				
 			}
@@ -422,7 +519,7 @@ public class BondPrediction {
 //	        AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(this.molWithAllProtonationSites);
 //	        this.molWithAllProtonationSites = MoleculeTools.moleculeNumbering(this.molWithAllProtonationSites);
 			
-			this.results.add(0, new ChargeResult(molOriginal, this.mol, this.molWithAllProtonationSites, combinedResults, "Combined", this.mopacMessagesNeutral));
+			this.results.add(0, new CalculationResult(molOriginal, this.mol, this.molWithAllProtonationSites, combinedResults, "Combined", this.mopacMessagesNeutral));
 			
 			
 			return bondsToBreak;
@@ -430,11 +527,90 @@ public class BondPrediction {
 		}
 		
 		
+		/**
+		 * Compare bond orders.
+		 *
+		 * @param source the source
+		 * @param candidate the candidate
+		 * @return the string
+		 */
+		public static String compareBondOrdersString(IAtomContainer source, IAtomContainer candidate)
+		{
+			String ret = "";
+			Map<String, Double> sourceBondMap = new HashMap<String, Double>();
+			for (IBond bond : source.bonds()) {
+				IAtom atom1 = bond.getAtom(0);
+				IAtom atom2 = bond.getAtom(1);
+				String key = atom1.getSymbol() + (Integer.parseInt(atom1.getID()) + 1) + "-"  +	atom2.getSymbol() + (Integer.parseInt(atom2.getID()) + 1);
+				sourceBondMap.put(key, (Double)bond.getProperty(Constants.BONDORDER));
+			}
+			
+			Map<String, Double> candidateBondMap = new HashMap<String, Double>();
+			for (IBond bond : candidate.bonds()) {
+				IAtom atom1 = bond.getAtom(0);
+				IAtom atom2 = bond.getAtom(1);
+				String key = atom1.getSymbol() + (Integer.parseInt(atom1.getID()) + 1) + "-"  +	atom2.getSymbol() + (Integer.parseInt(atom2.getID()) + 1);
+				candidateBondMap.put(key, (Double)bond.getProperty(Constants.BONDORDER));
+			}
+			
+			for (IBond bond : source.bonds()) {
+				IAtom atom1 = bond.getAtom(0);
+				IAtom atom2 = bond.getAtom(1);
+				String key = atom1.getSymbol() + (Integer.parseInt(atom1.getID()) + 1) + "-"  +	atom2.getSymbol() + (Integer.parseInt(atom2.getID()) + 1);
+				if(!key.contains("H"))
+					ret += key + ":" + (Math.round((sourceBondMap.get(key) - candidateBondMap.get(key)) * 1000)/1000.0) + "\n";
+			}
+			
+			return ret;
+		}
+		
+		
+		/**
+		 * Compare bond orders.
+		 *
+		 * @param source the source
+		 * @param candidate the candidate
+		 * @return the map
+		 */
+		public static Map<String, Double> compareBondOrders(IAtomContainer source, Map<String, Double> candidateBondMap)
+		{
+			Map<String, Double> ret = new HashMap<String, Double>();
+			Map<String, Double> sourceBondMap = new HashMap<String, Double>();
+			for (IBond bond : source.bonds()) {
+				IAtom atom1 = bond.getAtom(0);
+				IAtom atom2 = bond.getAtom(1);
+				String key = atom1.getSymbol() + (Integer.parseInt(atom1.getID()) + 1) + "-"  +	atom2.getSymbol() + (Integer.parseInt(atom2.getID()) + 1);
+				sourceBondMap.put(key, (Double)bond.getProperty(Constants.BONDORDER));
+			}
+			
+			for (IBond bond : source.bonds()) {
+				IAtom atom1 = bond.getAtom(0);
+				IAtom atom2 = bond.getAtom(1);
+				String key = atom1.getSymbol() + (Integer.parseInt(atom1.getID()) + 1) + "-"  +	atom2.getSymbol() + (Integer.parseInt(atom2.getID()) + 1);
+				if(!key.contains("H"))
+					ret.put(key, (Math.round((sourceBondMap.get(key) - candidateBondMap.get(key)) * 1000)/1000.0));
+			}
+			
+			return ret;
+		}
+		
+		
+		
 		private Map<String, Double> saveMaximum(Map<String, Double> bondToBondLength, String bondID, Double dist)
 		{
 			if(bondToBondLength.get(bondID) == null)
 				bondToBondLength.put(bondID, dist);
 			else if(bondToBondLength.get(bondID) < dist)
+				bondToBondLength.put(bondID, dist);
+			
+			return bondToBondLength;
+		}
+		
+		private Map<String, Double> saveMinimum(Map<String, Double> bondToBondLength, String bondID, Double dist)
+		{
+			if(bondToBondLength.get(bondID) == null)
+				bondToBondLength.put(bondID, dist);
+			else if(bondToBondLength.get(bondID) > dist)
 				bondToBondLength.put(bondID, dist);
 			
 			return bondToBondLength;
@@ -480,6 +656,44 @@ public class BondPrediction {
 		
 		
 		/**
+		 * Gets the bond order for a specified bond ID.
+		 * Molecule bonds are numbered using MoleculeTools.moleculeNumbering
+		 * 
+		 * @param bondID the bond id
+		 * 
+		 * @return the bond length
+		 */
+		public Double getBondOrder(String bondID)
+		{
+			return this.bondToBondOrder.get(bondID);
+		}
+		
+		/**
+		 * Gets the bond order diff. for a specified bond ID.
+		 * Molecule bonds are numbered using MoleculeTools.moleculeNumbering
+		 * 
+		 * @param bondID the bond id
+		 * 
+		 * @return the bond length
+		 */
+		public Double getBondOrderDiff(String bondID)
+		{
+			return this.bondToBondOrderDiff.get(bondID);
+		}
+		
+		
+		/**
+		 * Sets the bond orders.
+		 *
+		 * @param bondToBondOrder the bond to bond order
+		 */
+		public void setBondOrder(Map<String, Double> bondToBondOrder)
+		{
+			this.bondToBondOrder = bondToBondOrder;
+		}
+		
+		
+		/**
 		 * Sets the bond lengths.
 		 *
 		 * @param bondToBondLength the bond to bond length
@@ -490,12 +704,12 @@ public class BondPrediction {
 		}
 		
 		
-		public void setResults(List<ChargeResult> results) {
+		public void setResults(List<CalculationResult> results) {
 			this.results = results;
 		}
 
 
-		public List<ChargeResult> getResults() {
+		public List<CalculationResult> getResults() {
 			return results;
 		}
 
@@ -507,6 +721,16 @@ public class BondPrediction {
 
 		public void setMopacMessages(String mopacMessages) {
 			this.mopacMessages = mopacMessages;
+		}
+
+
+		public Map<String, Double> getBondToBondOrderDiff() {
+			return bondToBondOrderDiff;
+		}
+
+
+		public void setBondToBondOrderDiff(Map<String, Double> bondToBondOrderDiff) {
+			this.bondToBondOrderDiff = bondToBondOrderDiff;
 		}
 		
 }

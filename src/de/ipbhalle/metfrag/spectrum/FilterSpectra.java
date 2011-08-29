@@ -42,11 +42,6 @@ public class FilterSpectra {
 					files[i].renameTo(new File(folder + "fewPeaks", files[i].getName()));
 					continue;
 				}
-				else if(spectrum.getPeakList().size() <= 3)
-				{
-					files[i].renameTo(new File(folder + "fewPeaks", files[i].getName()));
-					continue;
-				}
 				
 				else if(spectrum.getMode() != 1)
 				{

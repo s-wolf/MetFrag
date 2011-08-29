@@ -67,6 +67,61 @@ public class CMLTools {
         return ret;  
 	}
 	
+	
+	/**
+	 * Read all cml files in given folder and return a List.
+	 * file extension has to be .cml! Assuming the folder containes
+	 * only protonated structures from 1 molecule. It returns the
+	 * mol with the lowest heat of formation!
+	 *
+	 * @param folder the folder
+	 * @param correctCandidateString the correct candidate string
+	 * @return the list
+	 * @throws FileNotFoundException the file not found exception
+	 * @throws CDKException the cDK exception
+	 */
+	public static CMLMolecule readFolderReturnLowestHoF(File folder, String correctCandidateString) throws FileNotFoundException, CDKException
+	{
+		CMLReader reader;
+		List<IAtomContainer> containersList;
+		List<CMLMolecule> ret = new ArrayList<CMLMolecule>();
+		
+		File files[] = folder.listFiles();
+
+		for(int i=0;i<files.length;i++)
+		{
+			if(!files[i].isFile())
+				continue;
+			
+			if(!files[i].getName().startsWith(correctCandidateString))
+				continue;
+			
+			int dotPos = files[i].getName().lastIndexOf(".");
+		    String extension = files[i].getName().substring(dotPos);
+			if(extension.equals(".cml") && !files[i].getName().contains("Combined"))
+			{
+		        ret.add(new CMLMolecule(files[i], files[i].getName())); //one container per file
+			}
+		}
+		
+		double minHof = Double.MAX_VALUE;
+		CMLMolecule currentBestSolution = null;
+		for (CMLMolecule mol : ret) {
+			IAtomContainer temp = mol.getMolStructure();
+			double currentHof = Double.parseDouble(temp.getID());
+			if(currentHof < minHof)
+			{
+				minHof = currentHof;
+				currentBestSolution = mol;
+			}
+		}
+		
+        return currentBestSolution;  
+	}
+	
+	
+	
+	
 	/**
 	 * Read single molecule from cml file.
 	 *
@@ -110,6 +165,21 @@ public class CMLTools {
 	        ret.add(containersList.get(0)); //one container per file
 		}
         return ret;    
+	}
+	
+	
+	public static void main(String[] args) {
+		try {
+			CMLMolecule test = CMLTools.readFolderReturnLowestHoF(new File("/home/swolf/MOPAC/BondOrderTests/"), "CID_932.sdf_NEW_AM1_withoutSCFRT_withoutGNORM_aromatic_LONG_FIXED_FINAL");
+			IAtomContainer tmp = test.getMolStructure();
+			System.out.println(tmp.getID());
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (CDKException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 }

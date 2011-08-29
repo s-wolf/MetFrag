@@ -29,8 +29,11 @@ public class ClusterCandidates {
 	 */
 	public static void main(String[] args) {
 		
-		String targetCandidates = "/home/swolf/MOPAC/Hill_PubChem_Formula/pubchem/";
-		String pathToWrite = "/home/swolf/MOPAC/Hill_PubChem_Formula/pubchemClustered/";
+//		String targetCandidates = "/home/swolf/MOPAC/Hill_PubChem_Formula/pubchem/";
+//		String pathToWrite = "/home/swolf/MOPAC/Hill_PubChem_Formula/pubchemClustered/";
+		
+		String targetCandidates = "/home/swolf/MOPAC/Hill-Riken-MM48_POSITIVE_PubChem_LocalMass2009_CHONPS_NEW/pubchem/";
+		String pathToWrite = "/home/swolf/MOPAC/Hill-Riken-MM48_POSITIVE_PubChem_LocalMass2009_CHONPS_NEW/pubchemClustered/";
 			
 		
 		File[] files = new File(targetCandidates).listFiles();

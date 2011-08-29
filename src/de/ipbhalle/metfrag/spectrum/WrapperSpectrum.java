@@ -20,15 +20,27 @@
 */
 package de.ipbhalle.metfrag.spectrum;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IMolecularFormulaSet;
+import org.openscience.cdk.io.SDFWriter;
+import org.openscience.cdk.exception.CDKException;
+import org.openscience.cdk.exception.InvalidSmilesException;
 import org.openscience.cdk.formula.MassToFormulaTool;
 
+import de.ipbhalle.metfrag.databaseMetChem.Query;
+import de.ipbhalle.metfrag.main.Config;
 import de.ipbhalle.metfrag.massbankParser.*;
+import de.ipbhalle.metfrag.molDatabase.PubChemLocal;
+import de.ipbhalle.metfrag.read.SDFFile;
 
 
 
@@ -508,8 +520,66 @@ public class WrapperSpectrum {
 	}
 	
 	public static void main(String[] args) {
-		WrapperSpectrum spectrum = new WrapperSpectrum("/home/ftarutti/records/CO000001.txt");
+		WrapperSpectrum spectrum = new WrapperSpectrum("/home/swolf/MassBankData/TestSpectra/HillMerged/CO000056CO000057CO000058CO000059CO000060.txt");
 		System.out.println(spectrum.toString());
-
+		System.out.println("PubChemID: " + spectrum.getCID());
+		Config conf;
+		try {
+			conf = new Config();
+			Query query = new Query(conf.getUsernamePostgres(), conf.getPasswordPostgres(), conf.getJdbcPostgres());
+			IAtomContainer mol = query.getCompoundUsingIdentifier(Integer.toString(spectrum.getCID()), "pubchem");
+			System.out.println(mol.getAtomCount());
+		}
+		catch(IOException e)
+		{
+			e.printStackTrace();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (CDKException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+//		File folder = new File("/home/swolf/MassBankData/TestSpectra/HillMerged/");
+//		File[] fileArr = folder.listFiles();
+//		for (int i = 0; i < fileArr.length; i++) {
+//			
+//			if(!fileArr[i].isFile())
+//				continue;
+//			
+//			if(fileArr[i].getName().split("\\.")[1].equals("txt"))
+//			{
+//				WrapperSpectrum spectrum = new WrapperSpectrum(fileArr[i].toString());
+//				Config conf;
+//				try {
+//					conf = new Config();
+//					Query query = new Query(conf.getUsernamePostgres(), conf.getPasswordPostgres(), conf.getJdbcPostgres());
+//					IAtomContainer mol = query.getCompoundUsingIdentifier(Integer.toString(spectrum.getCID()), "pubchem");
+//					SDFWriter writer = new SDFWriter(new FileOutputStream(new File("/home/swolf/MOPAC/ProofOfConcept/Hill_OnlyCorrect/" + fileArr[i].getName().split("\\.")[0] + ".sdf")));
+//					writer.write(mol);
+//					writer.close();
+//				} catch (IOException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				} catch (InvalidSmilesException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				} catch (SQLException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				} catch (CDKException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				} catch (Exception e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//				
+//			}
+//		}
 	}
 }

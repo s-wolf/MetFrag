@@ -5,22 +5,16 @@ import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
 
-import de.ipbhalle.metfrag.bondPrediction.AtomProperty;
-import de.ipbhalle.metfrag.bondPrediction.ChargeResult;
-import de.ipbhalle.metfrag.bondPrediction.Charges;
+import de.ipbhalle.metfrag.bondPrediction.BondPrediction;
+import de.ipbhalle.metfrag.bondPrediction.CalculationResult;
 import de.ipbhalle.metfrag.similarity.Subgraph;
-import de.ipbhalle.metfrag.tools.renderer.StructureRenderer.MoleculePanel;
 
 
-import org.openscience.cdk.DefaultChemObjectBuilder;
 import org.openscience.cdk.Molecule;
-import org.openscience.cdk.exception.CDKException;
-import org.openscience.cdk.exception.InvalidSmilesException;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IBond;
 import org.openscience.cdk.interfaces.IChemObject;
-import org.openscience.cdk.interfaces.IChemObjectBuilder;
 import org.openscience.cdk.interfaces.IMolecule;
 import org.openscience.cdk.layout.StructureDiagramGenerator;
 import org.openscience.cdk.renderer.AtomContainerRenderer;
@@ -32,19 +26,13 @@ import org.openscience.cdk.renderer.generators.AtomNumberGenerator;
 import org.openscience.cdk.renderer.generators.BasicAtomGenerator;
 import org.openscience.cdk.renderer.generators.BasicBondGenerator;
 import org.openscience.cdk.renderer.generators.BasicSceneGenerator;
-import org.openscience.cdk.renderer.generators.ExtendedAtomGenerator;
 import org.openscience.cdk.renderer.generators.IGenerator;
-import org.openscience.cdk.renderer.generators.IGeneratorParameter;
-import org.openscience.cdk.renderer.generators.RadicalGenerator;
 import org.openscience.cdk.renderer.generators.RingGenerator;
 import org.openscience.cdk.renderer.generators.BasicAtomGenerator.KekuleStructure;
 import org.openscience.cdk.renderer.visitor.AWTDrawVisitor;
-import org.openscience.cdk.smiles.SmilesParser;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 
 import javax.imageio.ImageIO;
-import javax.swing.BorderFactory;
-import javax.swing.JScrollPane;
 
 import java.awt.*;
 import java.awt.Image;
@@ -63,7 +51,7 @@ public class WritePDFTable extends MoleculeCell {
     private Document document;
     private int width;
     private int height;
-    int ncol = 3;
+    int ncol = 5;
     private int imageCount = 0;
     
     
@@ -76,7 +64,7 @@ public class WritePDFTable extends MoleculeCell {
      * @param height the height
      * @param chargeResults the charge results
      */
-    public WritePDFTable(String odir, int width, int height, List<ChargeResult> chargeResults) {
+    public WritePDFTable(String odir, int width, int height, List<CalculationResult> chargeResults) {
         
     	this.width = width;
     	this.height = height;
@@ -87,25 +75,40 @@ public class WritePDFTable extends MoleculeCell {
             PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(file));
 
             float[] widths = new float[ncol];
-            for (int i = 0; i < ncol; i += 3) {
-                    widths[i] = 2.5f;
-                    widths[i + 1] = 0.75f;
-                    widths[i + 2] = 0.75f;
+            for (int i = 0; i < ncol; i += 5) {
+                    widths[i] = 2.0f;
+                    widths[i + 1] = 0.5f;
+                    widths[i + 2] = 0.5f;
+                    widths[i + 3] = 0.5f;
+                    widths[i + 4] = 0.5f;
             }
             table = new PdfPTable(widths);
             document.open();
             
-            boolean drawPartialCharges = true;
+            boolean firstMol = true;
             
-            for (ChargeResult result : chargeResults) {
+            for (CalculationResult result : chargeResults) {
             	
+            	String stringPDFBonds = "";
+                String stringPDFBondsDist = "";
+                String stringPDFBondsOrder = "";
+                String stringPDFBondsOrderDiff = "";
+                
+                if(!firstMol)
+                {
+                	stringPDFBonds = "HoF\n";
+	                stringPDFBondsDist = Double.toString(Math.round((Double)result.getMolWithProton().getProperty("HeatOfFormation")*100.0)/100.0) + "\n";
+	                stringPDFBondsOrder = "\n";
+	                stringPDFBondsOrderDiff = "\n";
+                }
             	
-            	if(drawPartialCharges)
+            	if(firstMol)
             	{
             		PdfPCell cellBonds = new PdfPCell();
                 	PdfPCell cellBondsDist = new PdfPCell();
                     Phrase phraseBonds = new Phrase();
                     Phrase phraseBondsDist = new Phrase();
+                    PdfPCell cellEmpty = new PdfPCell();
 
                     com.lowagie.text.Image image = com.lowagie.text.Image.getInstance(writeMOL2PNGFile(result.getOriginalMol()).getAbsolutePath());
                     image.setAbsolutePosition(0, 0);
@@ -120,44 +123,65 @@ public class WritePDFTable extends MoleculeCell {
 	                    	stringAtomsCharge += Math.round(atom.getCharge() * 100.0) / 100.0 + "\n";
                     	}
             		}
-                    
+                                        
                     addProperty(phraseBonds, stringAtoms);
                     addProperty(phraseBondsDist, stringAtomsCharge);
                     cellBonds.addElement(phraseBonds);
                     cellBondsDist.addElement(phraseBondsDist);
                     table.addCell(cellBonds);
                     table.addCell(cellBondsDist);
-                    drawPartialCharges = false;
-            	}        	
+                    table.addCell(cellEmpty);
+                    table.addCell(cellEmpty);
+                    firstMol = false;
+            	} 
+//            	else
+//            	{
+//            		String bondOrderDiff = BondPrediction.compareBondOrdersString(chargeResults.get(0).getMolWithProton(), result.getOriginalMol());
+//                    //System.out.println(bondOrderDiff + "\n");
+//            	}
+            	
+            	
+                
             	
             	PdfPCell cellBonds = new PdfPCell();
             	PdfPCell cellBondsDist = new PdfPCell();
+            	PdfPCell cellBondsOrder = new PdfPCell();
+            	PdfPCell cellBondsOrderDiff = new PdfPCell();
                 Phrase phraseBonds = new Phrase();
                 Phrase phraseBondsDist = new Phrase();
+                Phrase phraseBondsOrder = new Phrase();
+                Phrase phraseBondsOrderDiff = new Phrase();
 
                 com.lowagie.text.Image image = com.lowagie.text.Image.getInstance(writeMOL2PNGFile(result.getOriginalMol(), result.getMolWithProton()).getAbsolutePath());
                 image.setAbsolutePosition(0, 0);
                 table.addCell(image);
                 
-                String stringPDFBonds = "";
-                String stringPDFBondsDist = "";
-                String[] lines = result.getChargeString().split("\n");
+                
+                String[] lines = result.resultString().split("\n");
                 for (int i = 0; i < lines.length; i++) {
                 	boolean carbonHydrogenBond = lines[i].matches("[A-Z]+[0-9]+-H[0-9]+.*");
 					if(!carbonHydrogenBond)
 					{
 						String[] linesArr = lines[i].split("\t");
 						stringPDFBondsDist += linesArr[1] + "\n";
+						stringPDFBondsOrder += Math.round(Double.parseDouble(linesArr[2])*1000.0)/1000.0 + "\n";
+						stringPDFBondsOrderDiff += linesArr[3] + "\n";
 						stringPDFBonds += linesArr[0] + "\n";
 					}
 				}
                 
                 addProperty(phraseBonds, stringPDFBonds);
                 addProperty(phraseBondsDist, stringPDFBondsDist);
+                addProperty(phraseBondsOrder, stringPDFBondsOrder);
+                addProperty(phraseBondsOrderDiff, stringPDFBondsOrderDiff);
                 cellBonds.addElement(phraseBonds);
                 cellBondsDist.addElement(phraseBondsDist);
+                cellBondsOrder.addElement(phraseBondsOrder);
+                cellBondsOrderDiff.addElement(phraseBondsOrderDiff);
                 table.addCell(cellBonds);
                 table.addCell(cellBondsDist);
+                table.addCell(cellBondsOrder);
+                table.addCell(cellBondsOrderDiff);
 			}
             
             document.add(table);
@@ -236,9 +260,9 @@ public class WritePDFTable extends MoleculeCell {
 		
 		List<IGenerator<IAtomContainer>> generators = new ArrayList<IGenerator<IAtomContainer>>();
 		generators.add(new BasicSceneGenerator());
-        generators.add(new BasicBondGenerator());
-        generators.add(new BasicAtomGenerator());
-        generators.add(new RingGenerator());
+//        generators.add(new BasicBondGenerator());
+		generators.add(new RingGenerator());
+        generators.add(new BasicAtomGenerator());        
         generators.add(new AtomNumberGenerator());
 //        generators.add(new RadicalGenerator());
         
@@ -299,9 +323,9 @@ public class WritePDFTable extends MoleculeCell {
 		
 		List<IGenerator<IAtomContainer>> generators = new ArrayList<IGenerator<IAtomContainer>>();
 		generators.add(new BasicSceneGenerator());
-        generators.add(new BasicBondGenerator());
-        generators.add(new BasicAtomGenerator());
-        generators.add(new RingGenerator());
+//        generators.add(new BasicBondGenerator());
+		generators.add(new RingGenerator());
+        generators.add(new BasicAtomGenerator());        
         generators.add(new AtomNumberGenerator());
 //        generators.add(new RadicalGenerator());
         

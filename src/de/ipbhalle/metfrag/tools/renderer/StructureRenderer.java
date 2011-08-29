@@ -100,7 +100,7 @@ public class StructureRenderer extends JFrame {
             
             List<IGenerator<IAtomContainer>> generators = new ArrayList<IGenerator<IAtomContainer>>();
             generators.add(new BasicSceneGenerator());
-            generators.add(new BasicBondGenerator());
+//            generators.add(new BasicBondGenerator());
             generators.add(new BasicAtomGenerator());
             generators.add(new AtomNumberGenerator());
             generators.add(new RingGenerator());
@@ -138,9 +138,10 @@ public class StructureRenderer extends JFrame {
             List<IGenerator<IAtomContainer>> generators = new ArrayList<IGenerator<IAtomContainer>>();
             
             generators.add(new BasicSceneGenerator());
-            generators.add(new BasicBondGenerator());
-            generators.add(new BasicAtomGenerator());
+//            generators.add(new BasicBondGenerator());
             generators.add(new RingGenerator());
+            generators.add(new BasicAtomGenerator());
+            
             
             IFontManager fm = new AWTFontManager();
             this.renderer = new AtomContainerRenderer(generators, fm); 
@@ -176,9 +177,10 @@ public class StructureRenderer extends JFrame {
             List<IGenerator<IAtomContainer>> generators = new ArrayList<IGenerator<IAtomContainer>>();
             
             generators.add(new BasicSceneGenerator());
-            generators.add(new BasicBondGenerator());
+//            generators.add(new BasicBondGenerator());
+            generators.add(new RingGenerator());
             generators.add(new BasicAtomGenerator());
-//            generators.add(new RingGenerator());
+            
              
             IFontManager fm = new AWTFontManager();
             this.renderer = new AtomContainerRenderer(generators, fm); 
