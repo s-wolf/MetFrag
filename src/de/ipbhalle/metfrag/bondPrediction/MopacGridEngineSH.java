@@ -28,8 +28,8 @@ public class MopacGridEngineSH {
 		
 		String mopacRuntime = "2400";
 		String ffSteps = "2400";
-//		String ffMethod = "UFF";
-		String ffMethod = "MMFF94";
+		String ffMethod = "UFF";
+//		String ffMethod = "MMFF94";
 //		String ffMethod = "Ghemical";
 		String mopacParameters = "AM1, GEO-OK, ECHO, MMOK, XYZ";
 		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd-HH:mm");

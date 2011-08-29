@@ -240,7 +240,7 @@ public class Mopac {
         int count = 0;
         //let the process calculate for 10 minutes
         boolean done = false;
-        while(count < ((mopacRuntime + 50)/6))
+        while(count < ((mopacRuntime + 180)/6))
         {
 //        	Thread.sleep(12000);
 //        	//test START
