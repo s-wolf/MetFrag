@@ -349,6 +349,58 @@ public class Query {
 	
 	
 	/**
+	 * Open connection.
+	 */
+	public void openConnection()
+	{
+		try {
+			con = DriverManager.getConnection(url, username, password);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	
+	public void closeConnection()
+	{
+		try {
+			con.close();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Gets the compound with already opened connection
+	 *
+	 * @param compoundID the compound id
+	 * @return the compound
+	 * @throws SQLException the sQL exception
+	 * @throws CDKException the cDK exception
+	 */
+	public IAtomContainer getCompoundConnectionOpened(Integer compoundID) throws SQLException, CDKException
+	{
+		IAtomContainer ret = null;
+		
+		PreparedStatement pstmt = con.prepareStatement("SELECT v3000(mol_structure) from compound c where compound_id = ? limit 1;");
+	    pstmt.setInt(1, compoundID);
+	    
+        ResultSet res = pstmt.executeQuery();
+        while(res.next()){
+        	String molString = res.getString(1);
+        	MDLV3000Reader reader = new MDLV3000Reader(new ByteArrayInputStream(molString.getBytes()));
+        	ret = (IAtomContainer)reader.read(new NNMolecule());
+        }
+        pstmt.close();
+        		
+        return ret;
+	}
+	
+	
+	
+	/**
 	 * Gets the compound.
 	 *
 	 * @param compoundID the compound id
@@ -359,6 +411,7 @@ public class Query {
 	public IAtomContainer getCompound(Integer compoundID) throws SQLException, CDKException
 	{
 		IAtomContainer ret = null;
+		
 		con = DriverManager.getConnection(url, username, password);
 		PreparedStatement pstmt = con.prepareStatement("SELECT v3000(mol_structure) from compound c where compound_id = ? limit 1;");
 	    pstmt.setInt(1, compoundID);

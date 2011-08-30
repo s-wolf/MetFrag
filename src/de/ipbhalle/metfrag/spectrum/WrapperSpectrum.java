@@ -128,6 +128,32 @@ public class WrapperSpectrum {
 	
 	
 	/**
+	 * Creates a new Spectrum with a given peaklist...used for the web interface
+	 * Ignores inchi, keggID, CID (-1), trivial name, collision energy (set to -1)
+	 * 
+	 * @param Peaks the peaks
+	 * @param mode the mode
+	 * @param exactMass the exact mass
+	 */
+	public WrapperSpectrum(String peakString, int mode, double exactMass, boolean isPositive){
+		this.spectra = new Vector<Spectrum>();
+		this.collisionEnergy = -1;
+		spectra.add(new Spectrum(-1, parsePeaks(peakString), exactMass, mode, "none", -1, "none", "none", "none", "", 0.0, "", isPositive));
+
+		this.peaks = spectra.get(0).getPeaks(); //just one spectra for now
+		this.exactMass = spectra.get(0).getExactMass();
+		this.mode = spectra.get(0).getMode();
+		this.InchI = spectra.get(0).getInchi();
+		this.CID = spectra.get(0).getCID();
+		this.KEGG = spectra.get(0).getKEGG();
+		this.chebi = spectra.get(0).getCHEBI();
+		this.nameTrivial = spectra.get(0).getTrivialName();
+		this.setFormula(spectra.get(0).getFormula());
+		this.setPositive(isPositive);
+	}
+	
+	
+	/**
 	 * Parses the peaks String from the web interface.
 	 * 
 	 * @param peakString the peak string
