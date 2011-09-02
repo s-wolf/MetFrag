@@ -66,18 +66,24 @@ public class Mopac {
 	/**
 	 * Run MOPAC to optimize the geometry of the molecule.
 	 *
+	 * @param filename the filename
 	 * @param pathToBabel if a different openbael is to be used! e.g. "/vol/local/bin/"
+	 * @param mopacExecuteable the mopac executeable
 	 * @param molToOptimize the mol to optimize
 	 * @param ffSteps the ff steps
 	 * @param verbose the verbose
+	 * @param ffMethod the ff method
 	 * @param mopacMethod the mopac method
 	 * @param mopacRuntime the mopac runtime
 	 * @param firstRun the first run
 	 * @param atomProtonized the atom protonized
+	 * @param deleteTemp the delete temp
+	 * @param charge the charge
+	 * @param useGen2D the use gen2 d
 	 * @return the i atom container
 	 * @throws Exception the exception
 	 */
-	public IAtomContainer runOptimization(String pathToBabel, String mopacExecuteable, IAtomContainer molToOptimize, int ffSteps, boolean verbose, String ffMethod, String mopacMethod, Integer mopacRuntime, boolean firstRun, String atomProtonized, boolean deleteTemp, int charge, boolean useGen2D) throws Exception
+	public IAtomContainer runOptimization(String filename, String pathToBabel, String mopacExecuteable, IAtomContainer molToOptimize, int ffSteps, boolean verbose, String ffMethod, String mopacMethod, Integer mopacRuntime, boolean firstRun, String atomProtonized, boolean deleteTemp, int charge, boolean useGen2D) throws Exception
 	{		
 		
 		this.errorMessage = "";
@@ -93,7 +99,7 @@ public class Mopac {
 //		m2w.writeMolecule(molecule);
 //		m2w.close();
 		
-		File tempFile = File.createTempFile("mol",".sdf");
+		File tempFile = File.createTempFile(filename + "mol",".sdf");
 		if(deleteTemp)
 			tempFile.deleteOnExit();
 		FileWriter fw = new FileWriter(tempFile);
@@ -108,7 +114,7 @@ public class Mopac {
 		if(firstRun)
 		{
 			//convert it back to mol2
-	        tempFileFFInput3D = File.createTempFile("molFFInput",".sdf");
+	        tempFileFFInput3D = File.createTempFile(filename + "molFFInput",".sdf");
 	        if(deleteTemp)
 	        	tempFileFFInput3D.deleteOnExit();
 //	        String command = "babel --gen3d -i mol2 " + tempFile.getPath() + " -o mol2 " + tempFileFFInput3D.getPath();
@@ -137,7 +143,7 @@ public class Mopac {
 		
 		//first of all do a force field optimization using open babel for a first optimization
 		//thats the ff optimized file
-		File tempFileFF = File.createTempFile("molFF",".pdb");
+		File tempFileFF = File.createTempFile(filename + "molFF",".pdb");
 		if(deleteTemp)
 			tempFileFF.deleteOnExit();
 //		String command = "obminimize -n " + ffSteps + " -sd -ff MMFF94 " + tempFile.getPath();
@@ -175,7 +181,7 @@ public class Mopac {
 		
 		
         //convert it back to mol2
-        File tempFileFFOptimized = File.createTempFile("molFF",".mol2");
+        File tempFileFFOptimized = File.createTempFile(filename + "molFF",".mol2");
         if(deleteTemp)
         	tempFileFFOptimized.deleteOnExit();
         command = pathToBabel + "babel " + tempFileFF.getPath() + " " + tempFileFFOptimized.getPath();
@@ -197,7 +203,7 @@ public class Mopac {
         
         //replace babel mopin generation with own mopin writer
         MOPACInputFormatWriter mopIn = new MOPACInputFormatWriter(mopacMethod + ", T=" + mopacRuntime);
-        File tempFileMOPIn = File.createTempFile("molMopIN",".dat");
+        File tempFileMOPIn = File.createTempFile(filename + "molMopIN",".dat");
         if(deleteTemp)
         	tempFileMOPIn.deleteOnExit();
         mopIn.write(tempFileFFOptimized, tempFileMOPIn);
@@ -357,7 +363,7 @@ public class Mopac {
         
         
         //now convert the result back to mol2
-        File tempFileMOPACMol2 = File.createTempFile("molMopac",".mol2");
+        File tempFileMOPACMol2 = File.createTempFile(filename + "molMopac",".mol2");
         if(deleteTemp)
         	tempFileMOPACMol2.deleteOnExit();
         command = pathToBabel + "babel -i mopout " + tempStringMopacOut + ".OUT" + " -o mol2 " + tempFileMOPACMol2;
@@ -542,7 +548,7 @@ public class Mopac {
 					{
 						try
 						{
-							mopac.runOptimization("/vol/local/bin/", "run_mopac7", mol, 2400, true, methods[j], "AM1, GEO-OK, ECHO, MMOK, XYZ, BONDS", 2400, true, "none", false, 0, false);
+							mopac.runOptimization(fileArr[i].getName(), "/vol/local/bin/", "run_mopac7", mol, 2400, true, methods[j], "AM1, GEO-OK, ECHO, MMOK, XYZ, BONDS", 2400, true, "none", false, 0, false);
 							output = fileArr[i].getName() + "\tHeat of Formation: " + mopac.getHeatOfFormation() + "\tTime: " + mopac.getTime() + "\tWarning: " + mopac.getWarningMessage() + "\tError: " + mopac.getErrorMessage() + "\n";
 						}
 						catch(Exception e)

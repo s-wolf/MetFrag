@@ -142,7 +142,7 @@ public class MopacGridEngine {
 		        String output = "";
 				try
 				{
-					mopac.runOptimization("/vol/local/bin/", "run_mopac7", mol, ffSteps, true, method, mopacParameters, mopacTime, true, "none", false, 0, false);
+					mopac.runOptimization(file.getName(), "/vol/local/bin/", "run_mopac7", mol, ffSteps, true, method, mopacParameters, mopacTime, true, "none", false, 0, false);
 					output = file.getName() + "\tHeat of Formation: " + mopac.getHeatOfFormation() + "\tTime: " + mopac.getTime() + "\tWarning: " + mopac.getWarningMessage() + "\tError: " + mopac.getErrorMessage() + "\tCDKError: " + error  + "\n";
 				}
 				catch(Exception e)

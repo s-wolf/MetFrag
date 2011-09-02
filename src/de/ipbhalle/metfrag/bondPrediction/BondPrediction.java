@@ -116,7 +116,7 @@ public class BondPrediction {
 			Map<String, Double> bondToBondOrderOrig = new HashMap<String, Double>();
 			try {	
 				//now optimize the structure of the neutral molecue
-	    		this.mol = mopac.runOptimization(pathToBabel,mopacExecuteable, mol, FFSteps, true, ffMethod, mopacMethod, mopacRuntime, true, "Neutral", deleteTemp, 0, useGen2D);
+	    		this.mol = mopac.runOptimization("bondPrediction", pathToBabel, mopacExecuteable, mol, FFSteps, true, ffMethod, mopacMethod, mopacRuntime, true, "Neutral", deleteTemp, 0, useGen2D);
 	    		if(this.mol == null)
 	    		{
 	    			this.mopacMessagesNeutral = "\tHeat of Formation: " + mopac.getHeatOfFormation() + "\tTime: " + mopac.getTime() + "\tWarning: " + mopac.getWarningMessage() + "\tError: " + mopac.getErrorMessage() + "\tERROR\n";
@@ -245,7 +245,7 @@ public class BondPrediction {
 		            
 		            try
 		            {
-		            	protonatedMol = mopac.runOptimization(pathToBabel, mopacExecuteable, protonatedMol, FFSteps, true, ffMethod, mopacMethod, mopacRuntime, false, chargesArray[i].getAtom().getSymbol()  + (Integer.parseInt(chargesArray[i].getAtom().getID()) + 1), deleteTemp, 1, useGen2D);
+		            	protonatedMol = mopac.runOptimization("bondPrediction", pathToBabel, mopacExecuteable, protonatedMol, FFSteps, true, ffMethod, mopacMethod, mopacRuntime, false, chargesArray[i].getAtom().getSymbol()  + (Integer.parseInt(chargesArray[i].getAtom().getID()) + 1), deleteTemp, 1, useGen2D);
 		            	Map<String, Double> bondToBondOrderProtonated = new HashMap<String, Double>();
 		            	bondToBondOrderProtonated = mopac.getBondOrder();
 		            	
