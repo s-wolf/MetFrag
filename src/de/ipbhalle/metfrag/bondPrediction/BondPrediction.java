@@ -96,6 +96,7 @@ public class BondPrediction {
 		 * Calculate bonds which will most likely break.
 		 * It returns a list with bonds.
 		 *
+		 * @param filename the filename
 		 * @param pathToBabel if a different openbael is to be used! e.g. "/vol/local/bin/"
 		 * @param mopacExecuteable the mopac executeable
 		 * @param mol the mol
@@ -104,10 +105,11 @@ public class BondPrediction {
 		 * @param mopacMethod the mopac method
 		 * @param mopacRuntime the mopac runtime
 		 * @param deleteTemp the delete temp
+		 * @param useGen2D the use gen2 d
 		 * @return the list< i bond>
 		 * @throws Exception the exception
 		 */
-		public List<String> calculateBondsToBreak(String pathToBabel, String mopacExecuteable, IAtomContainer mol, int FFSteps, String ffMethod, String mopacMethod, Integer mopacRuntime, boolean deleteTemp, boolean useGen2D) throws Exception
+		public List<String> calculateBondsToBreak(String filename, String pathToBabel, String mopacExecuteable, IAtomContainer mol, int FFSteps, String ffMethod, String mopacMethod, Integer mopacRuntime, boolean deleteTemp, boolean useGen2D) throws Exception
 		{		
 			List<String> bondsToBreak = new ArrayList<String>();
 			
@@ -116,7 +118,7 @@ public class BondPrediction {
 			Map<String, Double> bondToBondOrderOrig = new HashMap<String, Double>();
 			try {	
 				//now optimize the structure of the neutral molecue
-	    		this.mol = mopac.runOptimization("bondPrediction", pathToBabel, mopacExecuteable, mol, FFSteps, true, ffMethod, mopacMethod, mopacRuntime, true, "Neutral", deleteTemp, 0, useGen2D);
+	    		this.mol = mopac.runOptimization(filename, pathToBabel, mopacExecuteable, mol, FFSteps, true, ffMethod, mopacMethod, mopacRuntime, true, "Neutral", deleteTemp, 0, useGen2D);
 	    		if(this.mol == null)
 	    		{
 	    			this.mopacMessagesNeutral = "\tHeat of Formation: " + mopac.getHeatOfFormation() + "\tTime: " + mopac.getTime() + "\tWarning: " + mopac.getWarningMessage() + "\tError: " + mopac.getErrorMessage() + "\tERROR\n";
@@ -245,7 +247,7 @@ public class BondPrediction {
 		            
 		            try
 		            {
-		            	protonatedMol = mopac.runOptimization("bondPrediction", pathToBabel, mopacExecuteable, protonatedMol, FFSteps, true, ffMethod, mopacMethod, mopacRuntime, false, chargesArray[i].getAtom().getSymbol()  + (Integer.parseInt(chargesArray[i].getAtom().getID()) + 1), deleteTemp, 1, useGen2D);
+		            	protonatedMol = mopac.runOptimization(filename, pathToBabel, mopacExecuteable, protonatedMol, FFSteps, true, ffMethod, mopacMethod, mopacRuntime, false, chargesArray[i].getAtom().getSymbol()  + (Integer.parseInt(chargesArray[i].getAtom().getID()) + 1), deleteTemp, 1, useGen2D);
 		            	Map<String, Double> bondToBondOrderProtonated = new HashMap<String, Double>();
 		            	bondToBondOrderProtonated = mopac.getBondOrder();
 		            	
