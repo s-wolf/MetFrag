@@ -229,7 +229,7 @@ public class Mopac {
         
         
         //now run mopac on mopin
-        String tempStringMopacOut = tempFileMOPIn.getParent() + System.getProperty("file.separator") + tempFileMOPIn.getName().split("\\.")[0];
+        String tempStringMopacOut = tempFileMOPIn.getParent() + System.getProperty("file.separator") + tempFileMOPIn.getName().split("\\.dat")[0];
         command = mopacExecuteable + " " + tempStringMopacOut;
 //        String[] psCmdMOPAC =
 //		{
@@ -361,6 +361,9 @@ public class Mopac {
         generateBondOrderMap(bondOrderMatrix, molToOptimize);
         
         
+        //now delete the out file
+        if(deleteTemp)
+        	new File(tempStringMopacOut + ".OUT").delete();
         
         //now convert the result back to mol2
         File tempFileMOPACMol2 = File.createTempFile(filename + "molMopac",".mol2");
