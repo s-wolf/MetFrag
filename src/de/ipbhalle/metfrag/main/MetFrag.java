@@ -622,6 +622,104 @@ public class MetFrag {
 	}
 	
 	
+	/**
+	 * MetFrag. Start the fragmenter thread. Afterwards score the results. A Postgres JDBC url is needed!
+	 *
+	 * @param database the database
+	 * @param databaseID the database id
+	 * @param molecularFormula the molecular formula
+	 * @param exactMass the exact mass
+	 * @param spectrum the spectrum
+	 * @param useProxy the use proxy
+	 * @param mzabs the mzabs
+	 * @param mzppm the mzppm
+	 * @param searchPPM the search ppm
+	 * @param molecularFormulaRedundancyCheck the molecular formula redundancy check
+	 * @param breakAromaticRings the break aromatic rings
+	 * @param treeDepth the tree depth
+	 * @param hydrogenTest the hydrogen test
+	 * @param neutralLossInEveryLayer the neutral loss in every layer
+	 * @param bondEnergyScoring the bond energy scoring
+	 * @param breakOnlySelectedBonds the break only selected bonds
+	 * @param limit the limit
+	 * @param jdbc the jdbc
+	 * @param username the username
+	 * @param password the password
+	 * @param maxNeutralLossCombination the max neutral loss combination
+	 * @return the string
+	 * @throws Exception the exception
+	 */
+	public static List<MetFragResult> startConvenienceLocalMetChem(String database, String databaseID, String molecularFormula, Double exactMass, WrapperSpectrum spectrum, boolean useProxy, 
+			double mzabs, double mzppm, double searchPPM, boolean molecularFormulaRedundancyCheck, boolean breakAromaticRings, int treeDepth,
+			boolean hydrogenTest, boolean neutralLossInEveryLayer, boolean bondEnergyScoring, boolean breakOnlySelectedBonds, int limit, Config config, int maxNeutralLossCombination) throws Exception
+	{
+		
+		PubChemWebService pw = null;
+		results = new FragmenterResult();
+		List<CandidateMetChem> candidates = null;
+		if(molecularFormula != null && !molecularFormula.equals(""))
+			candidates = CandidatesMetChem.queryFormula(database, molecularFormula, config.getJdbcPostgres(), config.getUsernamePostgres(), config.getPasswordPostgres());
+		else
+			candidates = CandidatesMetChem.queryMass(database, exactMass, searchPPM, config.getJdbcPostgres(), config.getUsernamePostgres(), config.getPasswordPostgres());
+
+		System.out.println("Hits in database: " + candidates.size());
+		
+		//now fill executor!!!
+		//number of threads depending on the available processors
+	    int threads = Runtime.getRuntime().availableProcessors();
+	    //thread executor
+	    ExecutorService threadExecutor = null;
+	    System.out.println("Used Threads: " + threads);
+	    threadExecutor = Executors.newFixedThreadPool(threads);
+			
+		for (int c = 0; c < candidates.size(); c++) {
+			
+			if(c > limit)
+				break;
+			//TODO fix the candidate retrieval!!!
+			threadExecutor.execute(new FragmenterThread(candidates.get(c), database, pw, spectrum, mzabs, mzppm, 
+					molecularFormulaRedundancyCheck, breakAromaticRings, treeDepth, false, hydrogenTest, neutralLossInEveryLayer, 
+					bondEnergyScoring, breakOnlySelectedBonds, config, true));	
+			
+		}
+		
+		threadExecutor.shutdown();
+		
+		//wait until all threads are finished
+		while(!threadExecutor.isTerminated())
+		{
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}//sleep for 1000 ms
+		}
+
+		Map<Double, Vector<String>> scoresNormalized = Scoring.getCombinedScore(results.getRealScoreMap(), results.getMapCandidateToEnergy(), results.getMapCandidateToHydrogenPenalty());
+		Double[] scores = new Double[scoresNormalized.size()];
+		scores = scoresNormalized.keySet().toArray(scores);
+		Arrays.sort(scores);
+
+		//now collect the result
+		Map<String, IAtomContainer> candidateToStructure = results.getMapCandidateToStructure();
+		Map<String, Vector<PeakMolPair>> candidateToFragments = results.getMapCandidateToFragments();
+
+		List<MetFragResult> results = new ArrayList<MetFragResult>();
+		for (int i = scores.length -1; i >=0 ; i--) {
+			Vector<String> list = scoresNormalized.get(scores[i]);
+			for (String string : list) {
+				//get corresponding structure
+				IAtomContainer tmp = candidateToStructure.get(string);
+				tmp = AtomContainerManipulator.removeHydrogens(tmp);
+				
+				results.add(new MetFragResult(string, tmp, scores[i], candidateToFragments.get(string).size()));
+			}
+		}		
+		
+		return results;
+	}
+	
+	
 	
 	/**
 	 * MetFrag. Start the fragmenter thread. Afterwards score the results.
