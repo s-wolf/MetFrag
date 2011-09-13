@@ -398,6 +398,47 @@ public class Query {
         return ret;
 	}
 	
+	/**
+	 * Gets the compound using identifier. (Previously opened connection)
+	 *
+	 * @param identifier the identifier
+	 * @param database the database (pubchem, kegg, chebi, knapsack)
+	 * @return the compound using identifier
+	 * @throws Exception 
+	 */
+	public IAtomContainer getCompoundUsingIdentifierConnectionOpen(String identifier, String database) throws Exception
+	{
+		Integer databaseID = databaseToID.get(database);
+		IAtomContainer ret = null;
+		
+		if(databaseID == null)
+			throw new Exception("Database not supported!");
+		
+		try
+		{
+			PreparedStatement pstmt = con.prepareStatement("SELECT v3000(mol_structure) from compound c inner join substance s on s.compound_id = c.compound_id " +
+			"where s.library_id = ? and s.accession = ?;");
+		    pstmt.setInt(1, databaseID);
+		    pstmt.setString(2, identifier);
+		    System.out.println(pstmt.toString());
+	        ResultSet res = pstmt.executeQuery();
+	        while(res.next()){
+	        	String molString = res.getString(1);
+	        	MDLV3000Reader reader = new MDLV3000Reader(new ByteArrayInputStream(molString.getBytes()));
+	        	ret = (IAtomContainer)reader.read(new NNMolecule());
+	        }
+	        pstmt.close();
+		}
+		catch(SQLException e)
+		{
+			System.err.println("SQL error! " + e.getMessage());
+			e.printStackTrace();
+		}
+        
+        return ret;
+	}
+	
+	
 	
 	
 	/**
@@ -485,18 +526,18 @@ public class Query {
 		try {
 			Config c = new Config();
 			Query test = new Query(c.getUsernamePostgres(),c.getPasswordPostgres(),c.getJdbcPostgres());
-//			System.out.println(test.queryByFormula("C15H12O5", "pubchem").size());
+			System.out.println(test.queryByFormula("C15H12O5", "pubchem").size());
 //			System.out.println(test.queryByMass(272.071, 272.072, "pubchem").size());			
 //			System.out.println(test.getCompound(12337526));
 			
-			WrapperSpectrum ws = new WrapperSpectrum("/home/swolf/MOPAC/BondOrderTests/Naringenin/spectrum/PB000122PB000123PB000124PB000125.txt");
-			List<String> sortedCands = test.getSortedCandidates(ws, "10.0", 0.01, 10);
-			for (String string : sortedCands) {
-				System.out.println(string);
-			}
-//		} catch (SQLException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
+//			WrapperSpectrum ws = new WrapperSpectrum("/home/swolf/MOPAC/BondOrderTests/Naringenin/spectrum/PB000122PB000123PB000124PB000125.txt");
+//			List<String> sortedCands = test.getSortedCandidates(ws, "10.0", 0.01, 10);
+//			for (String string : sortedCands) {
+//				System.out.println(string);
+//			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 //		} catch (CDKException e) {
 //			// TODO Auto-generated catch block
 //			e.printStackTrace();
