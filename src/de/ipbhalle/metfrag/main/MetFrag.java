@@ -679,7 +679,7 @@ public class MetFrag {
 			//TODO fix the candidate retrieval!!!
 			threadExecutor.execute(new FragmenterThread(candidates.get(c), database, pw, spectrum, mzabs, mzppm, 
 					molecularFormulaRedundancyCheck, breakAromaticRings, treeDepth, false, hydrogenTest, neutralLossInEveryLayer, 
-					bondEnergyScoring, breakOnlySelectedBonds, config, true));	
+					bondEnergyScoring, breakOnlySelectedBonds, config, true, config.getMaximumNeutralLossCombination()));	
 			
 		}
 		
@@ -702,7 +702,7 @@ public class MetFrag {
 
 		//now collect the result
 		Map<String, IAtomContainer> candidateToStructure = results.getMapCandidateToStructure();
-		Map<String, Vector<PeakMolPair>> candidateToFragments = results.getMapCandidateToFragments();
+		Map<String, Vector<MatchedFragment>> candidateToFragments = results.getMapCandidateToFragments();
 
 		List<MetFragResult> results = new ArrayList<MetFragResult>();
 		for (int i = scores.length -1; i >=0 ; i--) {
