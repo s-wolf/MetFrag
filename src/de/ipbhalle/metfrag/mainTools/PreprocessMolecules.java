@@ -137,14 +137,16 @@ public class PreprocessMolecules {
 								}
 								writerCML.close();
 								
-								//TODODODODODOODODODODODODODODODODODODOODODOD
+								//only do this for the one compound and not for every isomorph structure
 								//write the mopac debug messages in one file
 								// Create file 
-								if(!outputMOPACDebug.equals(""))
+								if(c == 0)
 								{
-									Writer.writeToFile(outputMOPACDebug, file.getName() + "_" +  results.get(i1).getDebugMessages());
-								}
-								
+									if(!outputMOPACDebug.equals(""))
+									{
+										Writer.writeToFile(outputMOPACDebug, file.getName() + "_" +  results.get(i1).getDebugMessages());
+									}
+								}								
 							} catch (CDKException e) {
 								// TODO Auto-generated catch block
 								e.printStackTrace();
