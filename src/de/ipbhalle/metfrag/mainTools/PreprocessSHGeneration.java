@@ -25,8 +25,11 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Iterator;
 
 import org.apache.commons.io.FileUtils;
@@ -48,7 +51,7 @@ public class PreprocessSHGeneration {
 //		String pathToJar = "/home/swolf/MOPAC/BondOrderTests/Hill_ProofOfConcept/jar/PreprocessMolecules.jar";
 		
 		String writePath = "/home/swolf/MOPAC/Hill-Riken-MM48_POSITIVE_PubChem_LocalMass2009_CHONPS_NEW/sh/";
-		String pathToSDF = "/home/swolf/MOPAC/Hill-Riken-MM48_POSITIVE_PubChem_LocalMass2009_CHONPS_NEW/pubchem/CO000021CO000022CO000023CO000024CO000025";
+		String pathToSDF = "/home/swolf/MOPAC/Hill-Riken-MM48_POSITIVE_PubChem_LocalMass2009_CHONPS_NEW/pubchemClustered/";
 		String pathToJar = "/home/swolf/MOPAC/Hill-Riken-MM48_POSITIVE_PubChem_LocalMass2009_CHONPS_NEW/jar/PreprocessMolecules.jar";
 			
 		
@@ -80,6 +83,10 @@ public class PreprocessSHGeneration {
 		FileUtils.deleteDirectory(new File(writePath));
 		new File(writePath).mkdirs();
 		
+		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd-HH:mm");
+        Date date = new Date();
+        String dateString = dateFormat.format(date);
+		
 		String[] ext = {"sdf"};
 		Collection<File> filesRecursively = (Collection<File>)FileUtils.listFiles(new File(pathToSDF), ext, true);
 		for (File file : filesRecursively) {
@@ -94,7 +101,7 @@ public class PreprocessSHGeneration {
 			BufferedWriter out = new BufferedWriter(new FileWriter(f2));
 			out.write("#!/bin/bash");
 			out.newLine();
-			out.write("java -jar " + pathToJar + " \"" + file.getPath() + "\"" + " \"" + new File(writePath).getParent()  + "/mopac_" + mopacRuntime + "/\" " + mopacRuntime + " " + ffSteps);
+			out.write("java -jar " + pathToJar + " \"" + file.getPath() + "\"" + " \"" + new File(writePath).getParent()  + "/mopac_" + mopacRuntime + "/\" " + mopacRuntime + " " + ffSteps + " " + new File(writePath).getParent() + "/log_" + dateString + ".txt");
 //			out.write("java -jar " + pathToJar + " \"" + file.getPath() + "\"" + " \"" + new File(new File(file.getParent()).getParent()).getParent() + "/pubchemClusteredMopac/mopac_" + mopacRuntime + "/\" " + mopacRuntime + " " + ffSteps);
 //	  		out.write("java -jar /home/swolf/MOPAC/BATCH/jar/PreprocessMolecules.jar \"" + file.getPath() + "\"" + " \"" + file.getParent() + "/mopac_1200/\"" + " 1200 600");
 		  	out.close();

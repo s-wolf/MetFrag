@@ -111,7 +111,7 @@ public class PreprocessMolecules {
 			    bp.debug(false);
 //			    System.out.println("MOPAC runtime: " + mopacRuntime + " FFSteps: " + ffSteps);
 			    //use babel version 2.3.0
-				bp.calculateBondsToBreak(file.getName(), "/vol/local/bin/","run_mopac7", molecule, 4800, "UFF", "AM1, GEO-OK, ECHO, MMOK, XYZ, BONDS", 4800, true, true);
+				bp.calculateBondsToBreak(file.getName(), "/vol/local/bin/","run_mopac7", molecule, 4800, "UFF", "AM1, GEO-OK, ECHO, MMOK, XYZ, BONDS", 4800, false, true);
 				List<CalculationResult> results = bp.getResults();
 				
 				if(molecule.getProperty("candidatesClustered") != null)
@@ -137,6 +137,7 @@ public class PreprocessMolecules {
 								}
 								writerCML.close();
 								
+								//TODODODODODOODODODODODODODODODODODODOODODOD
 								//write the mopac debug messages in one file
 								// Create file 
 								if(!outputMOPACDebug.equals(""))
@@ -177,11 +178,7 @@ public class PreprocessMolecules {
 							// Create file 
 							if(!outputMOPACDebug.equals(""))
 							{
-								FileWriter fstream = new FileWriter(new File(outputMOPACDebug), true);
-							    BufferedWriter out = new BufferedWriter(fstream);
-							    out.write(file.getName() + "_" + results.get(i1).getDebugMessages());
-							    //Close the output stream
-							    out.close();
+								Writer.writeToFile(outputMOPACDebug, file.getName() + "_" +  results.get(i1).getDebugMessages());
 							}
 						    
 							
