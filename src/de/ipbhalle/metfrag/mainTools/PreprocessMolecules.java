@@ -80,7 +80,8 @@ public class PreprocessMolecules {
 		        outputFolder += MolecularFormulaManipulator.getString(MolecularFormulaManipulator.getMolecularFormula(molecule)) + "/";
 		        
 		        //Skip already calculated files!
-		        if(new File(outputFolder + file.getName().split("\\.cml")[0] + "_Combined.cml").exists())
+		        File tempFile = new File(outputFolder + file.getName().split("\\.sdf")[0] + "_Combined.cml");
+		        if(tempFile.exists())
 		        	System.exit(0);
 		        
 		        
