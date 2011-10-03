@@ -129,16 +129,16 @@ public class NeutralLossCheck {
 	}
 
 	
-	public List<List<NeutralLoss>> checkForNeutralLoss(IAtomContainer fragmentStructure, Peak peak, double fragmentMass, double matchMass)
-	{
-		List<List<NeutralLoss>> neutralLossesMatched = new ArrayList<List<NeutralLoss>>();
-		
-		for (Double neutralLossMass : neutralLoss.keySet()) {
-			
-		}
-		
-		return neutralLossesMatched;		
-	}
+//	public List<List<NeutralLoss>> checkForNeutralLoss(IAtomContainer fragmentStructure, Peak peak, double fragmentMass, double matchMass)
+//	{
+//		List<List<NeutralLoss>> neutralLossesMatched = new ArrayList<List<NeutralLoss>>();
+//		
+//		for (Double neutralLossMass : neutralLoss.keySet()) {
+//			
+//		}
+//		
+//		return neutralLossesMatched;		
+//	}
 	
 	
 	/**
