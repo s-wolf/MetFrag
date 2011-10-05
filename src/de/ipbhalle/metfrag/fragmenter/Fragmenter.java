@@ -434,13 +434,13 @@ public class Fragmenter {
     	
 
 		//now find all bonds which are worth splitting
-    	try {
-    		bondPrediction = new Charges();
-			this.bondsToBreak = bondPrediction.calculateBondsToBreak(this.originalMolecule);
-		} catch (CloneNotSupportedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//    	try {
+//    		bondPrediction = new Charges();
+//			this.bondsToBreak = bondPrediction.calculateBondsToBreak(this.originalMolecule);
+//		} catch (CloneNotSupportedException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
     	
     	
     	
@@ -944,7 +944,7 @@ public class Fragmenter {
                         
                         //now set property from both bonds
                         temp = setBondEnergy(temp, currentBondEnergyRing, currentBondEnergy);
-                        temp = setCharge(temp, bondPrediction.getBondLength(bondInRing.getID()), bondPrediction.getBondLength(bond.getID()));
+//                        temp = setCharge(temp, bondPrediction.getBondLength(bondInRing.getID()), bondPrediction.getBondLength(bond.getID()));
                         
                         
                         if(radicalGeneration)
@@ -1034,7 +1034,7 @@ public class Fragmenter {
                 
         		//now set property: BondEnergy!
                 temp = setBondEnergy(temp, currentBondEnergy);
-                temp = setCharge(temp, bondPrediction.getBondLength(bond.getID()));
+//                temp = setCharge(temp, bondPrediction.getBondLength(bond.getID()));
                 
                 if(radicalGeneration)
                 {
@@ -1187,10 +1187,10 @@ public class Fragmenter {
      * 
      * @return the i atom container
      */
-    private IAtomContainer setCharge(IAtomContainer mol, Double partialChargeDiff1, Double partialChargeDiff2)
-    {
-    	return setCharge(mol, partialChargeDiff1.toString() + "," + partialChargeDiff2.toString());
-    }
+//    private IAtomContainer setCharge(IAtomContainer mol, Double partialChargeDiff1, Double partialChargeDiff2)
+//    {
+//    	return setCharge(mol, partialChargeDiff1.toString() + "," + partialChargeDiff2.toString());
+//    }
     
     /**
      * Sets the charge.
@@ -1200,10 +1200,10 @@ public class Fragmenter {
      * 
      * @return the i atom container
      */
-    private IAtomContainer setCharge(IAtomContainer mol, Double partialChargeDiff)
-    {
-    	return setCharge(mol, partialChargeDiff.toString());
-    }
+//    private IAtomContainer setCharge(IAtomContainer mol, Double partialChargeDiff)
+//    {
+//    	return setCharge(mol, partialChargeDiff.toString());
+//    }
     
     /**
      * Sets the partial charge difference previously calculated using Gasteiger-Marsili.
@@ -2002,7 +2002,7 @@ public class Fragmenter {
 	    					//set bond energy
 	    					fragmentNL = setBondEnergy(fragment, fragmentNL, 500.0);
 	    					//set partial charge diff to 0
-	    					fragmentNL = setCharge(fragmentNL, 0.0);
+//	    					fragmentNL = setCharge(fragmentNL, 0.0);
 	    					
 	    					
 	    					Map<Object, Object> props = fragmentNL.getProperties();

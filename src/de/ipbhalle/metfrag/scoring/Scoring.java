@@ -60,7 +60,7 @@ public class Scoring {
 	private Map<Double, NeutralLoss> neutralLoss= null;
 	private double sumIntensities = 0;
 	double scoreBondEnergy = 0.0;
-	double scoreChargesDiff = 0.0;
+//	double scoreChargesDiff = 0.0;
 	private double penalty = 0.0;
 	private HashMap<Double, Integer> peakToRank;
 	private List<OptimizationMatrixEntry> optimizationMatrixEntries;
@@ -134,7 +134,7 @@ public class Scoring {
 			
 			
 			String partialCharges = hits.get(i).getPartialChargeDiff();
-			scoreChargesDiff = Fragmenter.getCombinedEnergy(partialCharges);
+//			scoreChargesDiff = Fragmenter.getCombinedEnergy(partialCharges);
 			
 			penalty += (hits.get(i).getHydrogenPenalty() * 100);
 						
@@ -433,10 +433,10 @@ public class Scoring {
 	}
 
 	
-	public double getPartialChargesDiff()
-	{
-		return this.scoreChargesDiff;
-	}
+//	public double getPartialChargesDiff()
+//	{
+//		return this.scoreChargesDiff;
+//	}
 
 
 	public void setPenalty(double penalty) {

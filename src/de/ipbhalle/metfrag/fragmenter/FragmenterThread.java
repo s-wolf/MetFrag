@@ -369,7 +369,7 @@ public class FragmenterThread implements Runnable{
 				//set the added up energy of every fragment
 				MetFrag.results.getMapCandidateToEnergy().put(candidate, currentBondEnergy);
 				MetFrag.results.getMapCandidateToHydrogenPenalty().put(candidate, score.getPenalty());
-				MetFrag.results.getMapCandidateToPartialChargesDiff().put(candidate, score.getPartialChargesDiff());
+//				MetFrag.results.getMapCandidateToPartialChargesDiff().put(candidate, score.getPartialChargesDiff());
 				
 				//also output the optimization matrix if needed
 				MetFrag.results.getCandidateToOptimizationMatrixEntries().put(candidate, score.getOptimizationMatrixEntries());	

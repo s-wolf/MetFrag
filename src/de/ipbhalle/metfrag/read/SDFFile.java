@@ -79,7 +79,7 @@ public class SDFFile {
 	
 	public static void main(String[] args) {
 		try {
-			List<IAtomContainer> list = ReadSDFFile("/vol/data_extern/emma.schymanski@ufz.de/ufzleipzig/100spec/001_61627_C9H16_struct_wM_END.sdf");
+			List<IAtomContainer> list = ReadSDFFile("/vol/data_extern/emma.schymanski@ufz.de/ufzleipzig/100spec/060_4169_C3H3Cl3_struct_wM_END.sdf");
 			for (IAtomContainer molecule : list) {
 				try
 		        {
