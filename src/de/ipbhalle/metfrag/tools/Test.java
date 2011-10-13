@@ -46,8 +46,8 @@ public class Test {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		
-		System.out.println(PPMTool.getPPMDeviation(295.0763, 10.0) + 0.01);
+		System.out.println(Constants.HYDROGEN_MASS);
+		System.out.println(PPMTool.getPPMDeviation(800, 20.0));
 		
 		System.out.println(181.049 - 0.002 - PPMTool.getPPMDeviation(181.049, 10));
 		
