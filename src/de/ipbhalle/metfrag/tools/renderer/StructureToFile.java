@@ -42,6 +42,7 @@ import org.openscience.cdk.renderer.*;
 import org.openscience.cdk.renderer.font.*;
 import org.openscience.cdk.renderer.generators.*;
 import org.openscience.cdk.renderer.generators.BasicAtomGenerator.AtomRadius;
+import org.openscience.cdk.renderer.generators.BasicAtomGenerator.KekuleStructure;
 import org.openscience.cdk.renderer.visitor.*;
 import org.openscience.cdk.templates.*;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
@@ -146,10 +147,13 @@ public class StructureToFile {
     	// generators make the image elements
     	List<IGenerator<IAtomContainer>> generators = new ArrayList<IGenerator<IAtomContainer>>();
     	generators.add(new BasicSceneGenerator());
-        generators.add(new BasicBondGenerator());
+//        generators.add(new BasicBondGenerator());
+    	generators.add(new RingGenerator());
         generators.add(new BasicAtomGenerator());
-        generators.add(new RingGenerator());
-        generators.add(new RadicalGenerator());
+        generators.add(new AtomNumberGenerator());
+//        generators.add(new RadicalGenerator());
+        
+
 		   
 		// the renderer needs to have a toolkit-specific font manager 
 		AtomContainerRenderer renderer = new AtomContainerRenderer(generators, new AWTFontManager());
@@ -161,11 +165,15 @@ public class StructureToFile {
     	   	
     	   	StructureDiagramGenerator sdg = new StructureDiagramGenerator();
     		sdg.setMolecule(mol);
+   
     		try {
     	       sdg.generateCoordinates();
     		} catch (Exception e) { }
     		mol = sdg.getMolecule();
     	   	
+    		RendererModel rm = renderer.getRenderer2DModel();
+    		rm.set(KekuleStructure.class, true); 
+            rm.set(AtomNumberGenerator.Offset.class, new javax.vecmath.Vector2d(10,0));
         	
             Properties p = new Properties();
             p.setProperty("PageSize","A4");
@@ -213,13 +221,13 @@ public class StructureToFile {
 			//IMolecule chain = MoleculeFactory.makeIndole();
 			
         	PubChemWebService pw = new PubChemWebService();
-        	String PCID = "2520";
+        	String PCID = "3365";
         	IAtomContainer container = pw.getSingleMol(PCID, true);
         	container = AtomContainerManipulator.removeHydrogens(container);
         	IMolecule mol = new Molecule(container);
 			
-			sr = new StructureToFile(200,200, "/home/swolf/", false, false);
-			sr.writeMOL2PNGFile(mol, PCID + ".png");
+			sr = new StructureToFile(800,800, "C:\\Users\\Basti\\Export\\", false, false);
+//			sr.writeMOL2PNGFile(mol, PCID + ".png");
 			sr.writeMOL2SVGFile(mol, PCID + ".svg");
 			
 		} catch (Exception e) {
