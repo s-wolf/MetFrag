@@ -158,6 +158,10 @@ public class ChemSpider {
 			Config config = new Config();
 			ExtendedCompoundInfo cpdInfo = chemSpiderProxy.getExtendedCompoundInfo(907, config.getChemspiderToken());
 			
+			System.out.println(chemSpiderProxy.getRecordMol("7300", false, config.getChemspiderToken()));
+			System.out.println(chemSpiderProxy.getRecordMol("16415113", false, config.getChemspiderToken()));
+			
+			
 			for (int i = 0; i < resultIDs.length; i++) {
 				System.out.println("Result: " + resultIDs[i]);
 			}

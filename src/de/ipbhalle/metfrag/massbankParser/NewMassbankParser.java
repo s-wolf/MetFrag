@@ -272,13 +272,12 @@ public class NewMassbankParser {
 				}
 							
 				//read Peaks
+				if(line.equals("")) break;
+				
 				peaks = new Vector<Peak>();
 				
 				while(!line.contains("//"))/* && line!=null*/    
-				{
-	
-					if(line.equals("")) break;
-		
+				{		
 					String splitString[] = new String[line.split("\\s+").length];
 					splitString=line.split("\\s+");
 

@@ -20,6 +20,7 @@
 */
 package de.ipbhalle.metfrag.tools;
 
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,6 +38,7 @@ import org.openscience.cdk.tools.CDKHydrogenAdder;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 
+import de.ipbhalle.metfrag.read.SDFFile;
 import de.ipbhalle.metfrag.tools.renderer.StructureRenderer;
 
 
@@ -58,6 +60,19 @@ public class Test {
 		System.out.println(PPMTool.getPPMDeviation(200.0, 10));
 		System.out.println(PPMTool.getPPMDeviation(200.0, 20));
 		System.out.println(PPMTool.getPPMWeb(144.0845 - Constants.ELECTRON_MASS, 144.0833));
+		
+		try {
+			List<IAtomContainer> testSDF = SDFFile.ReadSDFFile("/home/swolf/Downloads/naphthalene.sdf");
+			for (IAtomContainer mol : testSDF) {
+				new StructureRenderer(mol, "test");
+			}
+		} catch (FileNotFoundException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (CDKException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		
 		try {
 			SmilesParser sp = new SmilesParser(DefaultChemObjectBuilder.getInstance());
