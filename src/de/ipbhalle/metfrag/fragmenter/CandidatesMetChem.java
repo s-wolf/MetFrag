@@ -99,7 +99,7 @@ public class CandidatesMetChem {
 	*/
 	public static IAtomContainer getCompoundOpenend(Integer candidate, Query query) throws RemoteException, CDKException, SQLException
 	{
-		IAtomContainer molecule = query.getCompound(candidate);
+		IAtomContainer molecule = query.getCompoundConnectionOpened(candidate);
 		return molecule;
 	} 
 	
