@@ -85,4 +85,22 @@ public class CandidatesMetChem {
 		return molecule;
 	}	
 	
+	/**
+	* Gets the compound with alreday opened connection.
+	*
+	* @param candidate the candidate
+	* @param databaseUrl the database url
+	* @param username the username
+	* @param password the password
+	* @return the compound
+	* @throws RemoteException the remote exception
+	* @throws CDKException the cDK exception
+	* @throws SQLException the sQL exception
+	*/
+	public static IAtomContainer getCompoundOpenend(Integer candidate, Query query) throws RemoteException, CDKException, SQLException
+	{
+		IAtomContainer molecule = query.getCompound(candidate);
+		return molecule;
+	} 
+	
 }

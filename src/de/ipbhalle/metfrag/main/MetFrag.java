@@ -49,6 +49,7 @@ import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 
 import de.ipbhalle.metfrag.databaseMetChem.CandidateMetChem;
+import de.ipbhalle.metfrag.databaseMetChem.Query;
 import de.ipbhalle.metfrag.fragmenter.Candidates;
 import de.ipbhalle.metfrag.fragmenter.CandidatesMetChem;
 import de.ipbhalle.metfrag.fragmenter.Fragmenter;
@@ -590,14 +591,19 @@ public class MetFrag {
 	    System.out.println("Used Threads: " + threads);
 	    threadExecutor = Executors.newFixedThreadPool(threads);
 			
+	    Query query = new Query(config.getUsernamePostgres(), config.getPasswordPostgres(), config.getJdbcPostgres());
+		query.openConnection();
+		
 		for (int c = 0; c < candidates.size(); c++) {
 			
 			if(c > limit)
 				break;
-			//TODO fix the candidate retrieval!!!
-			threadExecutor.execute(new FragmenterThread(candidates.get(c), database, pw, spectrum, mzabs, mzppm, 
+
+			FragmenterThread f = new FragmenterThread(candidates.get(c), database, pw, spectrum, mzabs, mzppm, 
 					molecularFormulaRedundancyCheck, breakAromaticRings, treeDepth, false, hydrogenTest, neutralLossInEveryLayer, 
-					bondEnergyScoring, breakOnlySelectedBonds, config, true));	
+					bondEnergyScoring, breakOnlySelectedBonds, config, true, query);
+			f.setUseMetChem(true);
+			threadExecutor.execute(f);	
 			
 		}
 		
@@ -612,6 +618,8 @@ public class MetFrag {
 				e.printStackTrace();
 			}//sleep for 1000 ms
 		}
+		
+		query.closeConnection();
 
 		Map<Double, Vector<String>> scoresNormalized = Scoring.getCombinedScore(results.getRealScoreMap(), results.getMapCandidateToEnergy(), results.getMapCandidateToHydrogenPenalty());
 		Double[] scores = new Double[scoresNormalized.size()];
@@ -906,10 +914,13 @@ public class MetFrag {
 	    System.out.println("Used Threads: " + threads);
 	    threadExecutor = Executors.newFixedThreadPool(threads);
 
+	    Query query = new Query(config.getUsernamePostgres(), config.getPasswordPostgres(), config.getJdbcPostgres());
+		query.openConnection();
+	    
 		for (int c = 0; c < candidates.size(); c++) {
 			FragmenterThread thread = new FragmenterThread(candidates.get(c), database, pubchem, spectrum, config.getMzabs(), config.getMzppm(), 
 					config.isSumFormulaRedundancyCheck(), config.isBreakAromaticRings(), config.getTreeDepth(), false, config.isHydrogenTest(), config.isNeutralLossAdd(), 
-					config.isBondEnergyScoring(), config.isOnlyBreakSelectedBonds(), config, true);
+					config.isBondEnergyScoring(), config.isOnlyBreakSelectedBonds(), config, true, query);
 			thread.setUseMetChem(true);
 			threadExecutor.execute(thread);		
 		}
@@ -933,6 +944,7 @@ public class MetFrag {
 			count++;
 		}
 		
+		query.closeConnection();
 
 		evaluateResults(getCorrectCandidateID(spectrum, database), spectrum, true, config.getFolder(), writeSDF);		
 	}
