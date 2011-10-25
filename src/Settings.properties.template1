@@ -23,3 +23,5 @@ bondEnergyScoring = true
 breakOnlySelectedBonds = false
 #use parallel threads?
 threads = 4
+#maximum neutral loss combination
+maximumNeutralLossCombination = 3
