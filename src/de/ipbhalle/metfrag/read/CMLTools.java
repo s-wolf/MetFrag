@@ -134,6 +134,9 @@ public class CMLTools {
 	 */
 	public static List<CMLMolecule> readFoldersLowestHoF(File folder, String[] sumFormula) throws FileNotFoundException, CDKException
 	{
+		
+		//test: /home/swolf/MOPAC/Hill-Riken-MM48_POSITIVE_PubChem_LocalMass2009_CHONPS_NEW/mopac_4800/C40H39N3O3
+		
 		CMLReader reader;
 		List<IAtomContainer> containersList;
 		List<CMLMolecule> ret = new ArrayList<CMLMolecule>();
