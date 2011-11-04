@@ -26,6 +26,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.openscience.cdk.ChemFile;
@@ -80,7 +81,7 @@ public class CMLTools {
 	 * @throws FileNotFoundException the file not found exception
 	 * @throws CDKException the cDK exception
 	 */
-	public static CMLMolecule readFolderReturnLowestHoF(File folder, String correctCandidateString) throws FileNotFoundException, CDKException
+	public static CMLMolecule readFolderReturnLowestHoFOnlyCorrect(File folder, String correctCandidateString) throws FileNotFoundException, CDKException
 	{
 		CMLReader reader;
 		List<IAtomContainer> containersList;
@@ -119,6 +120,67 @@ public class CMLTools {
         return currentBestSolution;  
 	}
 	
+	
+	
+	/**
+	 * Read all cml files in given folder and its mol. formula subfolders given as array and return a List.
+	 * File extension has to be .cml! It returns the mols with the lowest heat of formation!
+	 *
+	 * @param folder the folder
+	 * @param correctCandidateString the correct candidate string
+	 * @return the list
+	 * @throws FileNotFoundException the file not found exception
+	 * @throws CDKException the cDK exception
+	 */
+	public static List<CMLMolecule> readFoldersLowestHoF(File folder, String[] sumFormula) throws FileNotFoundException, CDKException
+	{
+		CMLReader reader;
+		List<IAtomContainer> containersList;
+		List<CMLMolecule> ret = new ArrayList<CMLMolecule>();
+		
+		
+		for (int j = 0; j < sumFormula.length; j++) {
+			File folderTemp = new File(folder.getAbsolutePath() + "/" + sumFormula[j]);
+			File files[] = folderTemp.listFiles();
+			
+			Arrays.sort(files);
+			String currentMoleculeID = "";
+			for(int i=0;i<files.length;i++)
+			{
+				if(!files[i].isFile())
+					continue;
+				
+				if(!files[i].getName().contains("Combined"))
+					continue;
+				
+				int dotPos = files[i].getName().lastIndexOf(".");
+			    String extension = files[i].getName().substring(dotPos);
+				
+				if(!currentMoleculeID.equals(files[i].getName().split("_")[0]) || currentMoleculeID.equals(""))
+				{
+					double minHof = Double.MAX_VALUE;
+					CMLMolecule currentBestSolution = null;
+					for (CMLMolecule mol : ret) {
+						IAtomContainer temp = mol.getMolStructure();
+						double currentHof = Double.parseDouble(temp.getID());
+						if(currentHof < minHof)
+						{
+							minHof = currentHof;
+							currentBestSolution = mol;
+						}
+					}
+					containersList = new ArrayList<IAtomContainer>();
+					currentMoleculeID = files[i].getName().split("_")[0];
+				}
+				else if(extension.equals(".cml"))
+				{
+			        ret.add(new CMLMolecule(files[i], files[i].getName())); //one container per file
+				}				
+			}
+		}
+		
+        return ret;  
+	}
 	
 	
 	
@@ -170,7 +232,7 @@ public class CMLTools {
 	
 	public static void main(String[] args) {
 		try {
-			CMLMolecule test = CMLTools.readFolderReturnLowestHoF(new File("/home/swolf/MOPAC/BondOrderTests/"), "CID_932.sdf_NEW_AM1_withoutSCFRT_withoutGNORM_aromatic_LONG_FIXED_FINAL");
+			CMLMolecule test = CMLTools.readFolderReturnLowestHoFOnlyCorrect(new File("/home/swolf/MOPAC/BondOrderTests/"), "CID_932.sdf_NEW_AM1_withoutSCFRT_withoutGNORM_aromatic_LONG_FIXED_FINAL");
 			IAtomContainer tmp = test.getMolStructure();
 			System.out.println(tmp.getID());
 		} catch (FileNotFoundException e) {

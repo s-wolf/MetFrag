@@ -85,7 +85,7 @@ public class MetFragPreCalculated {
 		if(getLowestHeatofFormation)
 		{
 			File tmp = new File(file);
-			candidates.add(CMLTools.readFolderReturnLowestHoF(folderToMopac, tmp.getName().substring(0, tmp.getName().lastIndexOf("."))));
+			candidates.add(CMLTools.readFolderReturnLowestHoFOnlyCorrect(folderToMopac, tmp.getName().substring(0, tmp.getName().lastIndexOf("."))));
 		}
 		else		
 			candidates = CMLTools.readFolder(folderToMopac);			

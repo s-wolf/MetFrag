@@ -38,6 +38,7 @@ import org.openscience.cdk.tools.CDKHydrogenAdder;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 
+import de.ipbhalle.metfrag.database.Tools;
 import de.ipbhalle.metfrag.read.SDFFile;
 import de.ipbhalle.metfrag.tools.renderer.StructureRenderer;
 
@@ -48,31 +49,42 @@ public class Test {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		System.out.println(Constants.HYDROGEN_MASS);
-		System.out.println(PPMTool.getPPMDeviation(800, 20.0));
 		
-		System.out.println(181.049 - 0.002 - PPMTool.getPPMDeviation(181.049, 10));
+		System.out.println(291.0758-(Constants.ELECTRON_MASS+Constants.HYDROGEN_MASS));
+		System.out.println("Elektronenmasse: " + Constants.ELECTRON_MASS);
+		System.out.println("Wasserstoffmasse: " + Constants.HYDROGEN_MASS);
+		System.out.println(290.067426388 - 290.079038);
+		System.out.println(PPMTool.getPPMWeb(290.067426388, 290.079038));
 		
-		// TODO Auto-generated method stub
-		double mass = MolecularFormulaManipulator.getTotalExactMass(MolecularFormulaManipulator.getMolecularFormula("Si", new MolecularFormula()));
-		System.out.println(mass);
+		System.out.println(MolecularFormulaTools.getMonoisotopicMassString("C7H6O2"));
+		System.out.println(123.04-(Constants.ELECTRON_MASS+Constants.HYDROGEN_MASS));
+		System.out.println(PPMTool.getPPMWeb(122.031626388, 122.036779432));
 		
-		System.out.println(PPMTool.getPPMDeviation(200.0, 10));
-		System.out.println(PPMTool.getPPMDeviation(200.0, 20));
-		System.out.println(PPMTool.getPPMWeb(144.0845 - Constants.ELECTRON_MASS, 144.0833));
-		
-		try {
-			List<IAtomContainer> testSDF = SDFFile.ReadSDFFile("/home/swolf/Downloads/naphthalene.sdf");
-			for (IAtomContainer mol : testSDF) {
-				new StructureRenderer(mol, "test");
-			}
-		} catch (FileNotFoundException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (CDKException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
+//		System.out.println(Constants.HYDROGEN_MASS);
+//		System.out.println(PPMTool.getPPMDeviation(800, 20.0));
+//		
+//		System.out.println(181.049 - 0.002 - PPMTool.getPPMDeviation(181.049, 10));
+//		
+//		// TODO Auto-generated method stub
+//		double mass = MolecularFormulaManipulator.getTotalExactMass(MolecularFormulaManipulator.getMolecularFormula("Si", new MolecularFormula()));
+//		System.out.println(mass);
+//		
+//		System.out.println(PPMTool.getPPMDeviation(200.0, 10));
+//		System.out.println(PPMTool.getPPMDeviation(200.0, 20));
+//		System.out.println(PPMTool.getPPMWeb(144.0845 - Constants.ELECTRON_MASS, 144.0833));
+//		
+//		try {
+//			List<IAtomContainer> testSDF = SDFFile.ReadSDFFile("/home/swolf/Downloads/naphthalene.sdf");
+//			for (IAtomContainer mol : testSDF) {
+//				new StructureRenderer(mol, "test");
+//			}
+//		} catch (FileNotFoundException e1) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		} catch (CDKException e1) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		}
 		
 		try {
 			SmilesParser sp = new SmilesParser(DefaultChemObjectBuilder.getInstance());

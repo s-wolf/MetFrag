@@ -43,7 +43,7 @@ public class PPMTool {
 	 * Gets the PPM deviation.
 	 * 
 	 * @param peak the peak
-	 * @param measuredPeak the measured peak
+	 * @param measuredPeak the measured peak (calculated exact mass)
 	 * 
 	 * @return the pPM
 	 */

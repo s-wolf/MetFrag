@@ -471,58 +471,63 @@ public class BondPrediction {
 				}
 			}
 			
+			//molecule contained no heteroatom when null...then just write out the original mol with its bond order
+			if(bondToBondLength != null && bondToBondLength.size() > 0)
+			{
 			
-			
-			//now use the original molecule to get all the bond ids and write the partial changes into var
-			for (IBond bond : molArray[0].bonds()) {
-//				System.out.println(bond.getID() + " " + bond.getAtom(0).getSymbol() + "-" + bond.getAtom(1).getSymbol() + " " + bondToBondLength.get(bond.getID()));
+				//now use the original molecule to get all the bond ids and write the partial changes into var
+				for (IBond bond : molArray[0].bonds()) {
+	//				System.out.println(bond.getID() + " " + bond.getAtom(0).getSymbol() + "-" + bond.getAtom(1).getSymbol() + " " + bondToBondLength.get(bond.getID()));
+					
+					//if it is C-C check for double or triple bond order
+					if(!isCandidateBond(bond))
+						continue;
+					
+					if(bondToBondLength.get(bond.getID()) > 0)
+						bondsToBreak.add(bond.getID());				
+				}
 				
-				//if it is C-C check for double or triple bond order
-				if(!isCandidateBond(bond))
-					continue;
+	//			for (String bondID : bondsToBreak) {
+	//				System.out.println(bondID);
+	//			}
+	
 				
-				if(bondToBondLength.get(bond.getID()) > 0)
-					bondsToBreak.add(bond.getID());				
-			}
-			
-//			for (String bondID : bondsToBreak) {
-//				System.out.println(bondID);
-//			}
-
-			
-			//now add the complete combined result in front of the list
-			
-			IAtomContainer molOriginal = (IAtomContainer)this.mol.clone();
-			
-			String combinedResults = "";
-			for (IBond bond : molOriginal.bonds()) {
+				//now add the complete combined result in front of the list
 				
-				combinedResults += bond.getAtom(0).getSymbol() + (Integer.parseInt(bond.getAtom(0).getID()) + 1) + "-" + bond.getAtom(1).getSymbol() + (Integer.parseInt(bond.getAtom(1).getID()) + 1) + "\t" + bondToBondLength.get(bond.getID()) + "\t" + bondToBondOrder.get(bond.getID()) + "\t" + bondToBondOrderDiff.get(bond.getID()) + "\n";
-				if(bondToBondLength.get(bond.getID()) == null)
-				{
-					bond.setProperty(Constants.BONDLENGTHCHANGE, 0.0);
-					bond.setProperty(Constants.BONDORDER, 2.0);
-					bond.setProperty(Constants.BONDORDERDIFF, 0.0);
+				IAtomContainer molOriginal = (IAtomContainer)this.mol.clone();
+				
+				String combinedResults = "";
+				for (IBond bond : molOriginal.bonds()) {
+					
+					combinedResults += bond.getAtom(0).getSymbol() + (Integer.parseInt(bond.getAtom(0).getID()) + 1) + "-" + bond.getAtom(1).getSymbol() + (Integer.parseInt(bond.getAtom(1).getID()) + 1) + "\t" + bondToBondLength.get(bond.getID()) + "\t" + bondToBondOrder.get(bond.getID()) + "\t" + bondToBondOrderDiff.get(bond.getID()) + "\n";
+					if(bondToBondLength.get(bond.getID()) == null)
+					{
+						bond.setProperty(Constants.BONDLENGTHCHANGE, 0.0);
+						bond.setProperty(Constants.BONDORDER, 2.0);
+						bond.setProperty(Constants.BONDORDERDIFF, 0.0);
+						
+					}
+					else
+					{
+						bond.setProperty(Constants.BONDLENGTHCHANGE, bondToBondLength.get(bond.getID()));
+						bond.setProperty(Constants.BONDORDER, this.bondToBondOrder.get(bond.getID()));
+						bond.setProperty(Constants.BONDORDERDIFF, this.bondToBondOrderDiff.get(bond.getID()));
+					}
 					
 				}
-				else
-				{
-					bond.setProperty(Constants.BONDLENGTHCHANGE, bondToBondLength.get(bond.getID()));
-					bond.setProperty(Constants.BONDORDER, this.bondToBondOrder.get(bond.getID()));
-					bond.setProperty(Constants.BONDORDERDIFF, this.bondToBondOrderDiff.get(bond.getID()));
-				}
+	//			for (String bond : bondToBondLength.keySet()) {
+	//				combinedResults += AtomContainerManipulator.g(this.mol, bond) bond + " " + bondToBondLength.get(bond);
+	//			}
 				
+	//			AtomContainerManipulator.convertImplicitToExplicitHydrogens(this.molWithAllProtonationSites);
+	//	        AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(this.molWithAllProtonationSites);
+	//	        this.molWithAllProtonationSites = MoleculeTools.moleculeNumbering(this.molWithAllProtonationSites);
+				this.results.add(0, new CalculationResult(molOriginal, this.mol, this.molWithAllProtonationSites, combinedResults, "Combined", this.mopacMessagesNeutral));
+			}	
+			else
+			{
+				this.results.add(0, new CalculationResult(this.mol, this.mol, this.molWithAllProtonationSites, "No heteroatom", "Combined", this.mopacMessagesNeutral));
 			}
-//			for (String bond : bondToBondLength.keySet()) {
-//				combinedResults += AtomContainerManipulator.g(this.mol, bond) bond + " " + bondToBondLength.get(bond);
-//			}
-			
-//			AtomContainerManipulator.convertImplicitToExplicitHydrogens(this.molWithAllProtonationSites);
-//	        AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(this.molWithAllProtonationSites);
-//	        this.molWithAllProtonationSites = MoleculeTools.moleculeNumbering(this.molWithAllProtonationSites);
-			
-			this.results.add(0, new CalculationResult(molOriginal, this.mol, this.molWithAllProtonationSites, combinedResults, "Combined", this.mopacMessagesNeutral));
-			
 			
 			return bondsToBreak;
 	            
