@@ -146,4 +146,16 @@ public class Peak implements Comparable<Peak>, java.io.Serializable {
 	public int getNominalMass(){
 		return (int)Math.round(this.mass);
 	}
+	
+	 @Override public String toString() {
+		 StringBuilder result = new StringBuilder();
+		 String NEW_LINE = System.getProperty("line.separator");
+		 
+		 result.append("Intensity: "+this.intensity+NEW_LINE);
+		 result.append("Relative Intesity: "+this.relIntensity+NEW_LINE);
+		 result.append("Mass: "+this.mass+NEW_LINE);
+		 result.append(NEW_LINE);
+		 
+		 return result.toString();
+	 }
 }
