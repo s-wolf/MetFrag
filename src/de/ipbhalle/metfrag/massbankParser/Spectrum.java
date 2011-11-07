@@ -38,6 +38,8 @@ public class Spectrum  implements java.io.Serializable, Comparable<Spectrum> {
 	private int CID;
 	private String KEGG;
 	private String CHEBI;
+	private String metlin;
+	private String knapsack;
 	private String nameTrivial;
 	private String formula;
 	private boolean isPositive;
@@ -46,7 +48,7 @@ public class Spectrum  implements java.io.Serializable, Comparable<Spectrum> {
 	
 	private String smiles;
 	
-	public Spectrum(int collisionEnergy, double tic, Vector<Peak> peaks, double exactMass, int mode, String InchI, int CID, String KEGG, String CHEBI, String nameTrivial, String formula, double precursorMZ, String precursorType, boolean isPositive, String smiles){
+	public Spectrum(int collisionEnergy, double tic, Vector<Peak> peaks, double exactMass, int mode, String InchI, int CID, String KEGG, String CHEBI,String metlin,String knapsack, String nameTrivial, String formula, double precursorMZ, String precursorType, boolean isPositive, String smiles){
 		this.collisionEnergy =  collisionEnergy;
 		
 		this.tic = tic;
@@ -56,6 +58,8 @@ public class Spectrum  implements java.io.Serializable, Comparable<Spectrum> {
 		this.InchI = InchI;
 		this.CID = CID;
 		this.KEGG = KEGG;
+		this.metlin = metlin;
+		this.knapsack = knapsack;
 		this.nameTrivial = nameTrivial;
 		this.precursorMZ = precursorMZ;
 		this.precursorType = precursorType;
@@ -66,7 +70,7 @@ public class Spectrum  implements java.io.Serializable, Comparable<Spectrum> {
 		this.smiles = smiles;
 	}
 	
-	public Spectrum(int collisionEnergy, double tic, Vector<Peak> peaks, double exactMass, int mode, String InchI, int CID, String KEGG, String CHEBI, String nameTrivial, String formula, double precursorMZ, String precursorType, boolean isPositive){
+	public Spectrum(int collisionEnergy, double tic, Vector<Peak> peaks, double exactMass, int mode, String InchI, int CID, String KEGG, String CHEBI,String metlin, String nameTrivial, String formula, double precursorMZ, String precursorType, boolean isPositive){
 		this.collisionEnergy =  collisionEnergy;
 		
 		this.tic = tic;
@@ -76,6 +80,7 @@ public class Spectrum  implements java.io.Serializable, Comparable<Spectrum> {
 		this.InchI = InchI;
 		this.CID = CID;
 		this.KEGG = KEGG;
+		this.metlin=metlin;
 		this.nameTrivial = nameTrivial;
 		this.precursorMZ = precursorMZ;
 		this.precursorType = precursorType;
@@ -84,12 +89,12 @@ public class Spectrum  implements java.io.Serializable, Comparable<Spectrum> {
 		this.CHEBI = CHEBI;
 	}
 	
-	public Spectrum(int collisionEnergy, Vector<Peak> peaks, double exactMass, int mode, String InchI, int CID, String KEGG, String linkCHEBI, String nameTrivial, String formula, double precursorMZ, String precursorType, boolean isPositive,String smiles){
-		this( collisionEnergy, 0.0, peaks, exactMass, mode, InchI, CID, KEGG, linkCHEBI, nameTrivial, formula, precursorMZ, precursorType, isPositive,smiles);
+	public Spectrum(int collisionEnergy, Vector<Peak> peaks, double exactMass, int mode, String InchI, int CID, String KEGG, String linkCHEBI,String linkMetlin, String linkKnapsack ,String nameTrivial, String formula, double precursorMZ, String precursorType, boolean isPositive,String smiles){
+		this( collisionEnergy, 0.0, peaks, exactMass, mode, InchI, CID, KEGG, linkCHEBI,linkMetlin,linkKnapsack, nameTrivial, formula, precursorMZ, precursorType, isPositive,smiles);
 	}	
 	
-	public Spectrum(int collisionEnergy, Vector<Peak> peaks, double exactMass, int mode, String InchI, int CID, String KEGG, String linkCHEBI, String nameTrivial, String formula, double precursorMZ, String precursorType, boolean isPositive){
-		this( collisionEnergy, 0.0, peaks, exactMass, mode, InchI, CID, KEGG, linkCHEBI, nameTrivial, formula, precursorMZ, precursorType, isPositive);
+	public Spectrum(int collisionEnergy, Vector<Peak> peaks, double exactMass, int mode, String InchI, int CID, String KEGG, String linkCHEBI,String linkMetlin, String nameTrivial, String formula, double precursorMZ, String precursorType, boolean isPositive){
+		this( collisionEnergy, 0.0, peaks, exactMass, mode, InchI, CID, KEGG, linkCHEBI,linkMetlin, nameTrivial, formula, precursorMZ, precursorType, isPositive);
 	}	
 	
 	public int getCollisionEnergy(){
@@ -243,6 +248,18 @@ public class Spectrum  implements java.io.Serializable, Comparable<Spectrum> {
 
 	public String getCHEBI() {
 		return CHEBI;
+	}
+	
+	public void setMetlin(String metlin) {
+		this.metlin = metlin;
+	}
+
+	public String getMetlin() {
+		return metlin;
+	}
+	
+	public String getKnapsack() {
+		return knapsack;
 	}
 	
 	public String getSmiles(){

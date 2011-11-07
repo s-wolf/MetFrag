@@ -172,6 +172,8 @@ public class NewMassbankParser {
 		int linkPubChem = 0;
 		String linkCHEBI = "";
 		String linkKEGG = "none";
+		String linkMetlin="none";
+		String linkKnapSack ="none";
 		String[] array;
 		String IUPAC = "";
 		int mode = 0, collisionEnergy = 0;
@@ -202,10 +204,11 @@ public class NewMassbankParser {
 		
 		Map< String , Map <String, ArrayList<String>>> record = new HashMap < String , Map <String, ArrayList<String>>>();
 		
+		peaks = new Vector<Peak>();
 		
 		String lineTest="";
 
-		
+		boolean readPeaks=false;
 		
 		try {
 			BufferedReader in = new BufferedReader(new FileReader(filename));
@@ -269,15 +272,26 @@ public class NewMassbankParser {
 					
 					line = in.readLine();
 					
+					if(line.contains("PK$PEAK:"))
+					{
+
+						readPeaks=true;
+						line = in.readLine();
+					}
+					
 				}
 							
 				//read Peaks
 				if(line.equals("")) break;
 				
-				peaks = new Vector<Peak>();
+
 				
-				while(!line.contains("//"))/* && line!=null*/    
+
+				
+				while(!line.contains("//") && readPeaks)/* && line!=null*/    
 				{		
+					
+					
 					String splitString[] = new String[line.split("\\s+").length];
 					splitString=line.split("\\s+");
 
@@ -285,6 +299,7 @@ public class NewMassbankParser {
 					line = in.readLine();
 			
 				}
+				
 				
 				
 				line = in.readLine();
@@ -323,8 +338,8 @@ public class NewMassbankParser {
 			nameTrivial = record.get(CH$).get(CH$+CH.NAME.toString()).get(1);
 		}
 
-			
-		instrument = record.get(AC$).get(AC$+AC.INSTRUMENT.toString()).get(0); 
+		if(record.get(AC$).containsKey(AC$+AC.INSTRUMENT.toString()) )	
+			instrument = record.get(AC$).get(AC$+AC.INSTRUMENT.toString()).get(0); 
 	    
 		if(record.get(CH$).get(CH$+CH.IUPAC.toString()).get(0).contains("InChI=") )
 		{
@@ -359,12 +374,18 @@ public class NewMassbankParser {
 
 					splitString = dblink[2].split(":");
 
-					linkPubChem = Integer.valueOf(splitString[1]).intValue();
-
-				} else if (dblink[1].equals("KEGG"))
+					if(splitString.length>=2)
+					{
+						linkPubChem = Integer.valueOf(splitString[1]).intValue();
+					}
+				} else if (dblink[1].equals("KEGG") && dblink.length >=3)
 					linkKEGG = dblink[2];
-				else if (dblink[1].equals("CHEBI"))
+				else if (dblink[1].equals("CHEBI") && dblink.length >=3)
 					linkCHEBI = dblink[2];
+				else if (dblink[1].contains("METLIN") && dblink.length>=3)
+					linkMetlin=dblink[2];
+				else if (dblink[1].contains("KNAPSACK") && dblink.length>=3)
+					linkKnapSack=dblink[2];
 
 			}
 		}
@@ -481,7 +502,7 @@ public class NewMassbankParser {
 			
 		}
 		
-		spectra.add(new Spectrum(collisionEnergy, peaks, mass, mode, IUPAC, linkPubChem, linkKEGG, linkCHEBI, nameTrivial, formula, precursorMZ, precursorType, isPositive, smiles));	
+		spectra.add(new Spectrum(collisionEnergy, peaks, mass, mode, IUPAC, linkPubChem, linkKEGG, linkCHEBI,linkMetlin , linkKnapSack ,nameTrivial, formula, precursorMZ, precursorType, isPositive, smiles));	
 		return spectra;
 	}
 	
@@ -581,31 +602,7 @@ public class NewMassbankParser {
 		return preType;
 	}
 
-	
-	/*
-	class CH${
-		
-		ArrayList<String> name;
-		ArrayList<String> compoundClass;
-		
-		String formula;
-		double mass;
-		
-		String smiles;
-		String iupac;
-		
-		HashMap<String,String> link;
-		
-		ArrayList<String> comment;
-		
-		public CH$(String line)
-		{
-			
-			
-		}
-		
-		
-	}*/
+
 	
 	
 	/**
@@ -618,15 +615,21 @@ public class NewMassbankParser {
 		//Vector<Spectrum> spectra = Read("/home/ftarutti/records/CO000001.txt");
 		//Vector<Spectrum> spectra = Read("/home/ftarutti/records/PB000122.txt");
 		//Vector<Spectrum> spectra = Read("/home/ftarutti/records/PR100124.txt");
-		Vector<Spectrum> spectra = Read("/vol/massbank/data/records/PR100975.txt");
+		//Vector<Spectrum> spectra = Read("/vol/massbank/data/records/PR100975.txt");
 		//Vector<Spectrum> spectra = Read("/home/ftarutti/records/PR100040.txt");
 		//Vector<Spectrum> spectra = Read("/home/ftarutti/records/PB006007.txt");
 		
-		//Vector<Spectrum> spectra = Read("/home/ftarutti/Desktop/test");
+		Vector<Spectrum> spectra = Read("/home/ftarutti/testspectra/tmp/CO000510.txt");
 		for (Spectrum spectrum : spectra) {
 			
 			spectrum.show();
-		}
+			Vector<Peak> peaks = spectrum.getPeaks();
+			
+			for (Peak peak : peaks) {
+				System.out.println(peak.toString());
+			}
+			
+			}
 		
 	}
 }

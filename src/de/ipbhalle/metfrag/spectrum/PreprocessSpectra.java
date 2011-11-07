@@ -87,11 +87,12 @@ public class PreprocessSpectra {
 				System.out.println(files[i].toString() + spectrum.getCID());
 			}
 		}
-		
+
 		
 		for (String pubchemID : pubchemToFiles.keySet()) {
 			String mergedNames = "";
 			Vector<WrapperSpectrum> spectra = new Vector<WrapperSpectrum>();
+			
 			String lastFile = "";
 			
 			for (File file : pubchemToFiles.get(pubchemID)) {
@@ -103,12 +104,16 @@ public class PreprocessSpectra {
 					continue;
 				
 				spectra.add(spectrum);
+				
+				
 				mergedNames += file.getName().split("\\.")[0];
 				
 				lastFile = file.toString();
 			}
 
 			//now merge the peaks from the different collision energies
+			//System.out.println(spectra.get(0).getPeakList().toString());
+			
 			Vector<Double> mergedPeaks = mergePeaks(spectra, mzabs, mzppm);
 			//now write back those peaks into a new file
 			String line = "";
@@ -252,19 +257,26 @@ public class PreprocessSpectra {
 		Vector<Double> newPeakList = new Vector<Double>();
 		newIntensity = new Vector<Double>();
 		newRelIntensity = new Vector<Double>();
+
 		
 		this.peaksIntensity = new HashMap<Double, Vector<Double>>();
 		this.peaksRelIntensity = new HashMap<Double, Vector<Double>>();
 		for (int i = 0; i < spectra.size(); i++) {
+			System.out.println("Spectra number: "+i);
+			System.out.println(spectra.get(i).toString());
 			Vector<Peak> tempPeaks = spectra.get(i).getPeakList();
 			for (int j = 0; j < tempPeaks.size(); j++) {
 				//peaks.add(tempPeaks.get(j).getMass());
+				System.out.println(tempPeaks.get(j).toString());
 				peaksIntensity = addToMap(peaksIntensity, tempPeaks.get(j).getMass(), tempPeaks.get(j).getIntensity());
 				peaksRelIntensity = addToMap(peaksRelIntensity, tempPeaks.get(j).getMass(),tempPeaks.get(j).getRelIntensity());
 			}
 		}
 
+		System.out.println(peaksIntensity.toString());
+		
 		Double[] peakArray = new Double[peaksIntensity.size()];
+		
 		peakArray = peaksIntensity.keySet().toArray(peakArray);
 		//sort peak list
 		Arrays.sort(peakArray);
@@ -436,7 +448,7 @@ public class PreprocessSpectra {
 	
 	public static void main(String[] args) {
 //		String folder = "/home/swolf/MassBankData/MetFragSunGrid/BrukerRawData/Processed/";
-		String folder = "/home/ftarutti/testspectra/";
+		String folder = "/home/ftarutti/testspectra/tmp/";
 //		String folder = "/home/swolf/test/";
 		PreprocessSpectra pps = new PreprocessSpectra();
 		pps.preprocessUnsorted(folder, 0.002, 10);
