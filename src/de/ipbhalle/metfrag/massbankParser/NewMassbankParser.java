@@ -333,9 +333,9 @@ public class NewMassbankParser {
 
 		name = record.get(CH$).get(CH$+CH.NAME.toString()).get(0);
 				
-		if(record.get(CH$).get(CH$+CH.NAME.toString()).size() > 1)
+		if(record.get(CH$).get(CH$+CH.NAME.toString()).size() > 0)
 		{
-			nameTrivial = record.get(CH$).get(CH$+CH.NAME.toString()).get(1);
+			nameTrivial = record.get(CH$).get(CH$+CH.NAME.toString()).get(0);
 		}
 
 		if(record.get(AC$).containsKey(AC$+AC.INSTRUMENT.toString()) )	
