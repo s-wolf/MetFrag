@@ -21,9 +21,14 @@
 package de.ipbhalle.metfrag.massbankParser;
 
 import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.Vector;
 import java.util.Collections;
 import java.util.Iterator;
+
+import org.eclipse.swt.internal.cde.DtActionArg;
 
 
 public class Spectrum  implements java.io.Serializable, Comparable<Spectrum> {
@@ -48,6 +53,60 @@ public class Spectrum  implements java.io.Serializable, Comparable<Spectrum> {
 	
 	private String smiles;
 	
+	public Map<DatabaseIDs,String> dblinks;
+	
+	public Spectrum(int collisionEnergy, Vector<Peak> peaks, double exactMass, int mode, String InchI, Map<DatabaseIDs,String> dblinks ,String nameTrivial, String formula, double precursorMZ, String precursorType, boolean isPositive,String smiles){
+		this( collisionEnergy, 0.0, peaks, exactMass, mode, InchI, dblinks, nameTrivial, formula, precursorMZ, precursorType, isPositive,smiles);
+	}
+	
+	public Spectrum(int collisionEnergy, double tic, Vector<Peak> peaks, double exactMass, int mode, String InchI, Map<DatabaseIDs,String> dblinks, String nameTrivial, String formula, double precursorMZ, String precursorType, boolean isPositive,String smiles)
+	{
+		this.tic = tic;
+		this.peaks = peaks;
+		this.exactMass = exactMass;
+		this.mode = mode;
+		this.InchI = InchI;
+
+		this.nameTrivial = nameTrivial;
+		this.precursorMZ = precursorMZ;
+		this.precursorType = precursorType;
+		this.setFormula(formula);
+		this.isPositive = isPositive;
+
+		this.smiles = smiles;
+		
+		this.dblinks=dblinks;
+		
+		//TODO: perhaps delete the following things
+		this.CID=0;
+		this.KEGG="none";
+		this.CHEBI="";
+		this.metlin="";
+		this.knapsack="";
+		if(dblinks.containsKey(DatabaseIDs.PUBCHEM_CID))
+		{
+			this.CID = Integer.parseInt(dblinks.get(DatabaseIDs.PUBCHEM_CID));
+		}
+		if(dblinks.containsKey(DatabaseIDs.KEGG))
+		{
+			this.KEGG=dblinks.get(DatabaseIDs.KEGG);
+		}
+		if(dblinks.containsKey(DatabaseIDs.CHEBI))
+		{
+			this.CHEBI= dblinks.get(DatabaseIDs.CHEBI);
+		}
+		if(dblinks.containsKey(DatabaseIDs.METLIN))
+		{
+			this.metlin= dblinks.get(DatabaseIDs.METLIN);
+		}
+		if(dblinks.containsKey(DatabaseIDs.KNAPSACK))
+		{
+			this.knapsack=dblinks.get(DatabaseIDs.KNAPSACK);
+		}
+		
+		
+	}
+	
 	public Spectrum(int collisionEnergy, double tic, Vector<Peak> peaks, double exactMass, int mode, String InchI, int CID, String KEGG, String CHEBI,String metlin,String knapsack, String nameTrivial, String formula, double precursorMZ, String precursorType, boolean isPositive, String smiles){
 		this.collisionEnergy =  collisionEnergy;
 		
@@ -70,6 +129,7 @@ public class Spectrum  implements java.io.Serializable, Comparable<Spectrum> {
 		this.smiles = smiles;
 	}
 	
+	
 	public Spectrum(int collisionEnergy, double tic, Vector<Peak> peaks, double exactMass, int mode, String InchI, int CID, String KEGG, String CHEBI,String metlin, String nameTrivial, String formula, double precursorMZ, String precursorType, boolean isPositive){
 		this.collisionEnergy =  collisionEnergy;
 		
@@ -88,6 +148,8 @@ public class Spectrum  implements java.io.Serializable, Comparable<Spectrum> {
 		this.isPositive = isPositive;
 		this.CHEBI = CHEBI;
 	}
+	
+	
 	
 	public Spectrum(int collisionEnergy, Vector<Peak> peaks, double exactMass, int mode, String InchI, int CID, String KEGG, String linkCHEBI,String linkMetlin, String linkKnapsack ,String nameTrivial, String formula, double precursorMZ, String precursorType, boolean isPositive,String smiles){
 		this( collisionEnergy, 0.0, peaks, exactMass, mode, InchI, CID, KEGG, linkCHEBI,linkMetlin,linkKnapsack, nameTrivial, formula, precursorMZ, precursorType, isPositive,smiles);
@@ -264,6 +326,18 @@ public class Spectrum  implements java.io.Serializable, Comparable<Spectrum> {
 	
 	public String getSmiles(){
 		return smiles;
+	}
+	
+	public String getDatabaseID(DatabaseIDs id)
+	{
+		if(dblinks.containsKey(id))
+		{
+			return dblinks.get(id);
+		}
+		else
+		{
+			return null;
+		}
 	}
 	
 	public void show()
