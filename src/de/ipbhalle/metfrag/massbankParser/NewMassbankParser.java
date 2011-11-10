@@ -35,6 +35,8 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.Vector;
 
+import javax.xml.crypto.Data;
+
 import de.ipbhalle.metfrag.spectrum.AssignFragmentPeak;
 
 
@@ -169,11 +171,12 @@ public class NewMassbankParser {
 		String formula = "";
 		String name = "", instrument = "", precursorType = "";
 		String nameTrivial = "";
-		int linkPubChem = 0;
-		String linkCHEBI = "";
-		String linkKEGG = "none";
-		String linkMetlin="none";
-		String linkKnapSack ="none";
+//		int linkPubChem = 0;
+//		int sid=0;
+//		String linkCHEBI = "";
+//		String linkKEGG = "none";
+//		String linkMetlin="none";
+//		String linkKnapSack ="none";
 		String[] array;
 		String IUPAC = "";
 		int mode = 0, collisionEnergy = 0;
@@ -192,6 +195,8 @@ public class NewMassbankParser {
 		boolean isPositive = false;
 		
 		
+		Map<DatabaseIDs, String> dbLinks= new HashMap<DatabaseIDs, String>();
+		DatabaseIDs[] allIDs =DatabaseIDs.values();
 		
 		
 		Map<String, ArrayList<String> > recordSpecificInformation = new HashMap<String, ArrayList<String> >();
@@ -269,23 +274,24 @@ public class NewMassbankParser {
 				while(line.contains(PK$))
 				{
 					peakInformation = addElementsToMap(line, peakInformation);
-					
-					line = in.readLine();
-					
+
 					if(line.contains("PK$PEAK:"))
 					{
 
 						readPeaks=true;
 						line = in.readLine();
 					}
-					
+					else
+					{
+						line=in.readLine();
+					}
 				}
 							
 				//read Peaks
 				if(line.equals("")) break;
 				
-
-				
+//
+//				System.out.println(line+"\t"+readPeaks);
 
 				
 				while(!line.contains("//") && readPeaks)/* && line!=null*/    
@@ -295,6 +301,7 @@ public class NewMassbankParser {
 					String splitString[] = new String[line.split("\\s+").length];
 					splitString=line.split("\\s+");
 
+					
 					peaks.add(new Peak(Double.valueOf(splitString[1]), Double.valueOf(splitString[2]), Double.valueOf(splitString[3]), collisionEnergy));
 					line = in.readLine();
 			
@@ -366,29 +373,53 @@ public class NewMassbankParser {
 
 			for (String ch : chs) {
 
-				String[] dblink = ch.split("\\s+");
+//				String[] dblink = ch.split("\\s+");
 
-				if (dblink[1].equals("PUBCHEM")) {
 
-					String splitString[] = new String[dblink[2].split(":").length];
+//				if (dblink[1].equals("PUBCHEM")) {
+//
+//					String splitString[] = new String[dblink[2].split(":").length];
+//
+//					splitString = dblink[2].split(":");
+//
+//					if(splitString.length>=2 && dblink[1].equals("CID"))
+//					{
+//						linkPubChem = Integer.valueOf(splitString[1]).intValue();
+//					}
+//					else
+//					{
+//						if(splitString.length>=2 && dblink[1].equals("SID"))
+//						{
+//							sid= Integer.valueOf(splitString[1]).intValue();
+//						}
+//					}
+//				} else if (dblink[1].equals("KEGG") && dblink.length >=3)
+//					linkKEGG = dblink[2];
+//				else if (dblink[1].equals("CHEBI") && dblink.length >=3)
+//					linkCHEBI = dblink[2];
+//				else if (dblink[1].contains("METLIN") && dblink.length>=3)
+//					linkMetlin=dblink[2];
+//				else if (dblink[1].contains("KNAPSACK") && dblink.length>=3)
+//					linkKnapSack=dblink[2];
 
-					splitString = dblink[2].split(":");
-
-					if(splitString.length>=2)
+				for (int i = 0; i < allIDs.length; i++) {
+					
+					if(allIDs[i]!=null && ch.contains(allIDs[i].toString()))
 					{
-						linkPubChem = Integer.valueOf(splitString[1]).intValue();
+						String link = ch.replace(allIDs[i].toString(), "");
+						link = link.replace(":", "");
+						link=link.trim();
+						
+						dbLinks.put(allIDs[i], link);
+						
 					}
-				} else if (dblink[1].equals("KEGG") && dblink.length >=3)
-					linkKEGG = dblink[2];
-				else if (dblink[1].equals("CHEBI") && dblink.length >=3)
-					linkCHEBI = dblink[2];
-				else if (dblink[1].contains("METLIN") && dblink.length>=3)
-					linkMetlin=dblink[2];
-				else if (dblink[1].contains("KNAPSACK") && dblink.length>=3)
-					linkKnapSack=dblink[2];
-
+					
+				}
+				
+				
 			}
 		}
+
 		
 		// ANALYTICAL CONDITIONS MAP
 		Map<String, ArrayList<String>> acmap = record.get(AC$);
@@ -426,7 +457,7 @@ public class NewMassbankParser {
 					{
 						String[] splitString2 = new String[splitString[3].split("-").length];
 						splitString2= splitString[3].split("-");
-						
+						//TODO: divide between minimum and maximum energy
 						collisionEnergy =  Integer.valueOf(splitString2[0]).intValue();
 						collisionEnergy =  Integer.valueOf(splitString2[1]).intValue();
 						
@@ -502,7 +533,9 @@ public class NewMassbankParser {
 			
 		}
 		
-		spectra.add(new Spectrum(collisionEnergy, peaks, mass, mode, IUPAC, linkPubChem, linkKEGG, linkCHEBI,linkMetlin , linkKnapSack ,nameTrivial, formula, precursorMZ, precursorType, isPositive, smiles));	
+		//TODO: add sid to spectra, or better create a Map <CompoundDatabases, (ID)String>
+		
+		spectra.add(new Spectrum(collisionEnergy, peaks, mass, mode, IUPAC, dbLinks,nameTrivial, formula, precursorMZ, precursorType, isPositive, smiles));	
 		return spectra;
 	}
 	
@@ -619,15 +652,17 @@ public class NewMassbankParser {
 		//Vector<Spectrum> spectra = Read("/home/ftarutti/records/PR100040.txt");
 		//Vector<Spectrum> spectra = Read("/home/ftarutti/records/PB006007.txt");
 		
-		Vector<Spectrum> spectra = Read("/home/ftarutti/testspectra/tmp/CO000510.txt");
+	
+
+		
+		Vector<Spectrum> spectra = Read("/home/ftarutti/testspectra/toMerge/XX006704.txt");
 		for (Spectrum spectrum : spectra) {
 			
 			spectrum.show();
 			Vector<Peak> peaks = spectrum.getPeaks();
 			
-			for (Peak peak : peaks) {
-				System.out.println(peak.toString());
-			}
+			System.out.println(spectrum.dblinks.toString());
+			
 			
 			}
 		
