@@ -33,6 +33,7 @@ import javax.imageio.*;
 
 import org.freehep.graphics2d.VectorGraphics;
 import org.freehep.graphicsio.svg.SVGGraphics2D;
+import org.openscience.cdk.DefaultChemObjectBuilder;
 import org.openscience.cdk.Molecule;
 import org.openscience.cdk.aromaticity.CDKHueckelAromaticityDetector;
 import org.openscience.cdk.exception.CDKException;
@@ -44,6 +45,7 @@ import org.openscience.cdk.renderer.generators.*;
 import org.openscience.cdk.renderer.generators.BasicAtomGenerator.AtomRadius;
 import org.openscience.cdk.renderer.generators.BasicAtomGenerator.KekuleStructure;
 import org.openscience.cdk.renderer.visitor.*;
+import org.openscience.cdk.smiles.SmilesParser;
 import org.openscience.cdk.templates.*;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 
@@ -221,10 +223,13 @@ public class StructureToFile {
 			//IMolecule chain = MoleculeFactory.makeIndole();
 			
         	PubChemWebService pw = new PubChemWebService();
-        	String PCID = "3365";
+//        	String PCID = "3365";
+        	String PCID = "8858";
         	IAtomContainer container = pw.getSingleMol(PCID, true);
         	container = AtomContainerManipulator.removeHydrogens(container);
-        	IMolecule mol = new Molecule(container);
+//        	IMolecule mol = new Molecule(container);
+        	SmilesParser sp = new SmilesParser(DefaultChemObjectBuilder.getInstance());
+        	IMolecule mol = sp.parseSmiles("CC(=CC(=O)C)C");
 			
 			sr = new StructureToFile(800,800, "C:\\Users\\Basti\\Export\\", false, false);
 //			sr.writeMOL2PNGFile(mol, PCID + ".png");

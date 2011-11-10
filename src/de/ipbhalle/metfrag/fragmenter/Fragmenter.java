@@ -393,24 +393,30 @@ public class Fragmenter {
     		bondPrediction = new BondPrediction(this.aromaticBonds);
     		Map<String, Double> bondToBondLength = new HashMap<String, Double>();
     		Map<String, Double> bondToBondOrder = new HashMap<String, Double>();
+    		Map<String, Double> bondToBondOrderDiff = new HashMap<String, Double>();
     		for(IBond bond : this.originalMolecule.bonds())
     		{
     			String bondOrderString = (String)bond.getProperty(Constants.BONDORDER);
     			String bondLengthChangeString = (String)bond.getProperty(Constants.BONDLENGTHCHANGE);
+    			String bondOrderDiffString = (String)bond.getProperty(Constants.BONDORDERDIFF);
+    			
     			if(bondOrderString == null || bondLengthChangeString == null)
     			{
     				bondToBondLength.put(bond.getID(), 0.0);
         			bondToBondOrder.put(bond.getID(), 2.0);
+        			bondToBondOrderDiff.put(bond.getID(), 0.0);
     			}
     			else
     			{
     				bondToBondLength.put(bond.getID(), Double.parseDouble(bondLengthChangeString));
         			bondToBondOrder.put(bond.getID(), Double.parseDouble(bondOrderString));
+        			bondToBondOrderDiff.put(bond.getID(), Double.parseDouble(bondOrderDiffString));
     			}
     			
     		}
     		bondPrediction.setBondLength(bondToBondLength);
     		bondPrediction.setBondOrder(bondToBondOrder);
+    		bondPrediction.setBondToBondOrderDiff(bondToBondOrderDiff);
     		this.isPrecalculated = true;
     	}
     	else if(this.optimizeStructure)

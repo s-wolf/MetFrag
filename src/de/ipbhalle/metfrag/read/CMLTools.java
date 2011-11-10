@@ -125,6 +125,7 @@ public class CMLTools {
 	/**
 	 * Read all cml files in given folder and its mol. formula subfolders given as array and return a List.
 	 * File extension has to be .cml! It returns the mols with the lowest heat of formation!
+	 * Hill Data!
 	 *
 	 * @param folder the folder
 	 * @param correctCandidateString the correct candidate string
@@ -138,13 +139,18 @@ public class CMLTools {
 		//test: /home/swolf/MOPAC/Hill-Riken-MM48_POSITIVE_PubChem_LocalMass2009_CHONPS_NEW/mopac_4800/C40H39N3O3
 		
 		CMLReader reader;
-		List<IAtomContainer> containersList;
+		List<CMLMolecule> containersList = null;
 		List<CMLMolecule> ret = new ArrayList<CMLMolecule>();
 		
 		
 		for (int j = 0; j < sumFormula.length; j++) {
 			File folderTemp = new File(folder.getAbsolutePath() + "/" + sumFormula[j]);
 			File files[] = folderTemp.listFiles();
+			if(files == null)
+			{
+				System.err.println("Error: " + folder.getAbsolutePath() + "/" + sumFormula[j] + " does not exist...missing candidate(s)!");
+				continue;
+			}
 			
 			Arrays.sort(files);
 			String currentMoleculeID = "";
@@ -153,17 +159,23 @@ public class CMLTools {
 				if(!files[i].isFile())
 					continue;
 				
-				if(!files[i].getName().contains("Combined"))
+				if(files[i].getName().contains("Combined"))
 					continue;
 				
 				int dotPos = files[i].getName().lastIndexOf(".");
 			    String extension = files[i].getName().substring(dotPos);
-				
-				if(!currentMoleculeID.equals(files[i].getName().split("_")[0]) || currentMoleculeID.equals(""))
+			    
+			    if(currentMoleculeID.equals(""))
+			    {
+			    	containersList = new ArrayList<CMLMolecule>();
+			    	containersList.add(new CMLMolecule(files[i], files[i].getName()));
+			    	currentMoleculeID = files[i].getName().split("_")[0];
+			    }
+			    else if(!currentMoleculeID.equals(files[i].getName().split("_")[0]) || i == (files.length - 1))
 				{
 					double minHof = Double.MAX_VALUE;
 					CMLMolecule currentBestSolution = null;
-					for (CMLMolecule mol : ret) {
+					for (CMLMolecule mol : containersList) {
 						IAtomContainer temp = mol.getMolStructure();
 						double currentHof = Double.parseDouble(temp.getID());
 						if(currentHof < minHof)
@@ -172,12 +184,14 @@ public class CMLTools {
 							currentBestSolution = mol;
 						}
 					}
-					containersList = new ArrayList<IAtomContainer>();
+					ret.add(currentBestSolution); //one container per file
+					containersList = new ArrayList<CMLMolecule>();
+			    	containersList.add(new CMLMolecule(files[i], files[i].getName()));
 					currentMoleculeID = files[i].getName().split("_")[0];
 				}
 				else if(extension.equals(".cml"))
 				{
-			        ret.add(new CMLMolecule(files[i], files[i].getName())); //one container per file
+					containersList.add(new CMLMolecule(files[i], files[i].getName()));
 				}				
 			}
 		}
@@ -235,9 +249,12 @@ public class CMLTools {
 	
 	public static void main(String[] args) {
 		try {
-			CMLMolecule test = CMLTools.readFolderReturnLowestHoFOnlyCorrect(new File("/home/swolf/MOPAC/BondOrderTests/"), "CID_932.sdf_NEW_AM1_withoutSCFRT_withoutGNORM_aromatic_LONG_FIXED_FINAL");
-			IAtomContainer tmp = test.getMolStructure();
-			System.out.println(tmp.getID());
+			String[] molFormulas = new String[] {"C10H14N10", "C40H39N3O3"};
+			List<CMLMolecule> test = CMLTools.readFoldersLowestHoF(new File("C:\\Users\\Basti\\Downloads\\"), molFormulas);
+			
+//			CMLMolecule test = CMLTools.readFolderReturnLowestHoFOnlyCorrect(new File("/home/swolf/MOPAC/BondOrderTests/"), "CID_932.sdf_NEW_AM1_withoutSCFRT_withoutGNORM_aromatic_LONG_FIXED_FINAL");
+//			IAtomContainer tmp = test.getMolStructure();
+//			System.out.println(tmp.getID());
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

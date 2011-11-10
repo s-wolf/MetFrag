@@ -18,8 +18,11 @@ import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IBond;
 import org.openscience.cdk.interfaces.IBond.Stereo;
 import org.openscience.cdk.io.SDFWriter;
+import org.openscience.cdk.tools.CDKHydrogenAdder;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
+import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 
+import de.ipbhalle.metfrag.fragmenter.Candidates;
 import de.ipbhalle.metfrag.fragmenter.FragmenterResult;
 import de.ipbhalle.metfrag.fragmenter.FragmenterThread;
 import de.ipbhalle.metfrag.pubchem.PubChemWebService;
@@ -79,13 +82,49 @@ public class MetFragPreCalculated {
 		Config config = new Config("outside");
 		WrapperSpectrum spectrum = new WrapperSpectrum(file);
 		
+		
 		String database = config.getDatabase();
 		List<CMLMolecule> candidates = new ArrayList<CMLMolecule>();
 		
 		if(getLowestHeatofFormation)
 		{
-			File tmp = new File(file);
-			candidates.add(CMLTools.readFolderReturnLowestHoFOnlyCorrect(folderToMopac, tmp.getName().substring(0, tmp.getName().lastIndexOf("."))));
+			
+			//now get the possible mol formulas
+			List<String> candidatesTemp = Candidates.queryLocally("pubchem", spectrum.getExactMass(), 10.0, config.getJdbc(), config.getUsername(), config.getPassword());
+			Map<String, String> molFormulas = new HashMap<String, String>();
+			for (String candString : candidatesTemp) {
+				IAtomContainer mol = Candidates.getCompoundLocally("pubchem", candString, config.getJdbc(), config.getUsername(), config.getPassword(), false, config.getChemspiderToken());
+				
+				if(mol == null)
+					continue;
+				
+				try
+				{
+					AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(mol);
+			        CDKHydrogenAdder hAdder = CDKHydrogenAdder.getInstance(mol.getBuilder());
+			        hAdder.addImplicitHydrogens(mol);
+			        AtomContainerManipulator.convertImplicitToExplicitHydrogens(mol);
+			        molFormulas.put(MolecularFormulaManipulator.getString(MolecularFormulaManipulator.getMolecularFormula(mol)), "");  
+				}
+				catch(CDKException e)
+				{
+					System.err.println(e.getMessage());
+				}
+			}
+			
+			String[] molFormulaArray = new String[molFormulas.keySet().size()];
+			int countTemp = 0;
+			for (String molFormula : molFormulas.keySet()) {
+				molFormulaArray[countTemp] = molFormula;
+				countTemp++;
+				System.out.print(molFormula + " ");
+			}
+			
+			System.out.println();
+			candidates = CMLTools.readFoldersLowestHoF(folderToMopac, molFormulaArray);
+			for (CMLMolecule cmlmol : candidates) {
+				System.out.println(cmlmol.getFileName());
+			}
 		}
 		else		
 			candidates = CMLTools.readFolder(folderToMopac);			
@@ -202,7 +241,7 @@ public class MetFragPreCalculated {
 	private void evaluateResults(String correctCandidateID, WrapperSpectrum spectrum, boolean generateOptimizationMatrix, String folder, boolean writeSDF) throws InterruptedException
 	{
 		//TODO: hack for local file
-		correctCandidateID = correctCandidateID + "_Combined.cml";
+//		correctCandidateID = correctCandidateID + "_Combined.cml";
 		
 		
 		//now collect the result
@@ -287,7 +326,7 @@ public class MetFragPreCalculated {
 					
 					for (int k = 0; k < tempSimilar.size(); k++) {
 
-						if(correctCandidateID.equals(tempSimilar.get(k)))
+						if(correctCandidateID.equals(tempSimilar.get(k).split("_")[0]))
 							stop = true;
 						
 						similarity.append(tempSimilar.get(k));
@@ -325,7 +364,7 @@ public class MetFragPreCalculated {
 				int temp = 0;
 				for (int j = 0; j < realScoreMap.get(keysScore[i]).size(); j++) {
 					scoreListReal.append("\n" + keysScore[i] + " - " + realScoreMap.get(keysScore[i]).get(j) + "\t[" + candidateToEnergy.get(realScoreMap.get(keysScore[i]).get(j)) + "]" + "\t");
-					if(correctCandidateID.compareTo(realScoreMap.get(keysScore[i]).get(j)) == 0)
+					if(correctCandidateID.equals(realScoreMap.get(keysScore[i]).get(j).split("_")[0]))
 					{
 						check = true;
 					}

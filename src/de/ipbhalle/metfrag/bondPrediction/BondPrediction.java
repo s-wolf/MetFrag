@@ -118,15 +118,45 @@ public class BondPrediction {
 			Map<String, Double> bondToBondOrderOrig = new HashMap<String, Double>();
 			try {	
 				//now optimize the structure of the neutral molecue
-	    		this.mol = mopac.runOptimization(filename, pathToBabel, mopacExecuteable, mol, FFSteps, true, ffMethod, mopacMethod, mopacRuntime, true, "Neutral", deleteTemp, 0, useGen2D);
-	    		if(this.mol == null)
+				boolean triedGen3D = false;
+				
+				try
+				{
+					this.mol = mopac.runOptimization(filename, pathToBabel, mopacExecuteable, mol, FFSteps, true, ffMethod, mopacMethod, mopacRuntime, true, "Neutral", deleteTemp, 0, useGen2D);
+				}
+				catch(IndexOutOfBoundsException e)
+				{
+					System.err.println("Was not able to optimize neutral molecule! Now trying gen3D!");
+					this.mopacMessagesNeutral = "\tHeat of Formation: " + mopac.getHeatOfFormation() + "\tTime: " + mopac.getTime() + "\tWarning: " + mopac.getWarningMessage() + "\tError: " + mopac.getErrorMessage() + "\tERROR using gen2D\n";
+					triedGen3D = true;
+					mopac.setGen3Dworkaround(true);
+					this.mol = mopac.runOptimization(filename, pathToBabel, mopacExecuteable, mol, FFSteps, true, ffMethod, mopacMethod, mopacRuntime, true, "Neutral", deleteTemp, 0, useGen2D);
+				}
+	    		if(this.mol == null && triedGen3D == false)
 	    		{
-	    			this.mopacMessagesNeutral = "\tHeat of Formation: " + mopac.getHeatOfFormation() + "\tTime: " + mopac.getTime() + "\tWarning: " + mopac.getWarningMessage() + "\tError: " + mopac.getErrorMessage() + "\tERROR\n";
-	    			System.err.println("Was not able to optimize neutral molecule!");
-	    			throw new Exception("Error optimizing molecule!");
+	    			this.mopacMessagesNeutral = "\tHeat of Formation: " + mopac.getHeatOfFormation() + "\tTime: " + mopac.getTime() + "\tWarning: " + mopac.getWarningMessage() + "\tError: " + mopac.getErrorMessage() + "\tERROR using gen2D\n";
+	    			System.err.println("Was not able to optimize neutral molecule! Now trying gen3D!");
+	    			
+	    			mopac.setGen3Dworkaround(true);
+	    			this.mol = mopac.runOptimization(filename, pathToBabel, mopacExecuteable, mol, FFSteps, true, ffMethod, mopacMethod, mopacRuntime, true, "Neutral", deleteTemp, 0, useGen2D);
+	    			
+	    			if(this.mol == null)
+	    			{
+	    				this.mopacMessagesNeutral = "\tHeat of Formation: " + mopac.getHeatOfFormation() + "\tTime: " + mopac.getTime() + "\tWarning: " + mopac.getWarningMessage() + "\tError: " + mopac.getErrorMessage() + "\tERROR using gen3D. Molecule skipped!\n";
+		    			System.err.println("Was not able to optimize neutral molecule using gen3D! Skipped molecule! " + filename);
+		    			throw new Exception("Could not generate layout with open babel....skipped!");
+	    			}
 	    		}
-	    		else
+	    		else if(this.mol == null && triedGen3D == true)
+	    		{
+	    			this.mopacMessagesNeutral = "\tHeat of Formation: " + mopac.getHeatOfFormation() + "\tTime: " + mopac.getTime() + "\tWarning: " + mopac.getWarningMessage() + "\tError: " + mopac.getErrorMessage() + "\tERROR using gen3D. Molecule skipped!\n";
+	    			System.err.println("Was not able to optimize neutral molecule using gen3D! Skipped molecule! " + filename);
+	    			throw new Exception("Could not generate layout with open babel....skipped!");
+	    		}
+	    		
+	    		if(this.mol != null)
 	    			this.mopacMessagesNeutral = "\tHeat of Formation: " + mopac.getHeatOfFormation() + "\tTime: " + mopac.getTime() + "\tWarning: " + mopac.getWarningMessage() + "\tError: " + mopac.getErrorMessage() + "\n";
+	    			    		
 
 	           	bondToBondOrderOrig = mopac.getBondOrder();
 	           	for (IBond bond : this.mol.bonds()) {

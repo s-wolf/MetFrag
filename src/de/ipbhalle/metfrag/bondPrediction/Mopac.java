@@ -62,6 +62,7 @@ public class Mopac {
 	private String warningMessage;
 	private String time;
 	private Map<String, Double> bondOrder;
+	private boolean gen3Dworkaround = false;
 	
 	/**
 	 * Run MOPAC to optimize the geometry of the molecule.
@@ -120,8 +121,10 @@ public class Mopac {
 //	        String command = "babel --gen3d -i mol2 " + tempFile.getPath() + " -o mol2 " + tempFileFFInput3D.getPath();
 //	        String command = pathToBabel + "babel --gen2D -i sdf " + tempFile.getPath() + " -o sdf " + tempFileFFInput3D.getPath();
 	        String command = pathToBabel + "babel -i sdf " + tempFile.getPath() + " -o sdf " + tempFileFFInput3D.getPath();
-	        if(useGen2D)
+	        if(useGen2D && gen3Dworkaround == false)
 	        	command = pathToBabel + "babel --gen2D -c -i sdf " + tempFile.getPath() + " -o sdf " + tempFileFFInput3D.getPath();
+	        else if(gen3Dworkaround)
+	        	command = pathToBabel + "babel --gen3D -c -i sdf " + tempFile.getPath() + " -o sdf " + tempFileFFInput3D.getPath();
 	        	
 //	        String command = "babel -i mol2 " + tempFile.getPath() + " -o mol2 " + tempFileFFInput3D.getPath();
 	        String[] psCmdFFInput =
@@ -585,5 +588,15 @@ public class Mopac {
 				e.printStackTrace();
 			}
 		}
+	}
+
+
+	public boolean isGen3Dworkaround() {
+		return gen3Dworkaround;
+	}
+
+
+	public void setGen3Dworkaround(boolean gen3Dworkaround) {
+		this.gen3Dworkaround = gen3Dworkaround;
 	}	
 }

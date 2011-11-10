@@ -22,7 +22,10 @@
 package de.ipbhalle.metfrag.bondPrediction;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -266,14 +269,64 @@ public class MopacOutParser {
 		
 //		MopacOutParser parser = new MopacOutParser("/home/ftarutti/Desktop/CheckParser/test35Atome.txt",35);
 //		MopacOutParser parser = new MopacOutParser("/tmp/molMopIN9025786486123172913.out", 34);
-		MopacOutParser parser = new MopacOutParser("/tmp/molMopIN7921009951524815490.OUT", 53);
+//		MopacOutParser parser = new MopacOutParser("/tmp/molMopIN7921009951524815490.OUT", 53);
+//		MopacOutParser parser = new MopacOutParser("C:\\Users\\Basti\\Export\\10362588.sdfmolMopIN5044085332500263827.OUT", 40);
 		
-		//System.out.println(parser.bondOrder.get("1").toString());
-		for(int i=1;i<parser.bondOrder.size()+1;i++)
-		{
-			String key = ""+i;
-			System.out.println(key + "\t" + parser.bondOrder.get(key).toString());
+		File folder = new File("C:\\Users\\Basti\\Downloads\\BR1N28\\");
+		File[] files = folder.listFiles();
+		StringBuilder sb = new StringBuilder();
+		
+		for (int i = 0; i < files.length; i++) {
+			if(!files[i].getName().split("\\.")[1].equals("out"))
+				continue;
+			
+			FileReader fr = null;
+			try {
+				fr = new FileReader(files[i]);
+				BufferedReader br = new BufferedReader(fr);
+				String line = br.readLine();
+				
+				
+				while (line != null)
+				{
+					if(line.contains("FINAL HEAT OF FORMATION"))
+					{
+						String[] tmpArray = line.split("=");
+						String[] hofArray = tmpArray[1].split("\\sK");
+						double heatOfFormation = Double.parseDouble(hofArray[0].trim());
+						sb.append(files[i].getName() + "\t" + heatOfFormation + "\n");
+						break;
+					}
+					
+					line = br.readLine();
+				}
+				
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
+		
+		FileWriter fw;
+		try {
+			fw = new FileWriter(folder.getAbsolutePath() + "\\" + "resultingHOF.txt");
+			fw.write(sb.toString());
+			fw.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+//		//System.out.println(parser.bondOrder.get("1").toString());
+//		for(int i=1;i<parser.bondOrder.size()+1;i++)
+//		{
+//			String key = ""+i;
+//			System.out.println(key + "\t" + parser.bondOrder.get(key).toString());
+//		}
 	}
 
 }
