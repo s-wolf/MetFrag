@@ -25,6 +25,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -73,6 +74,7 @@ public class WrapperSpectrum {
 	private boolean isPositive;
 	private String smiles;
 	
+	private Map<DatabaseIDs, String> dblinks;
 	
 	/**
 	 * Reads in a MassBank flat file from a given location.
@@ -100,6 +102,8 @@ public class WrapperSpectrum {
 		this.isPositive = spectra.get(0).isPositive();
 		
 		this.smiles=spectra.get(0).getSmiles();
+		
+		this.dblinks=spectra.get(0).dblinks;
 	}
 	
 	
@@ -571,6 +575,11 @@ public class WrapperSpectrum {
 	public String getSmiles(){
 		
 		return smiles;
+	}
+	
+	public Map<DatabaseIDs,String> getDBLinks()
+	{
+		return this.dblinks;
 	}
 	
 	public static void main(String[] args) {
