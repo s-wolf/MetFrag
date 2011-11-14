@@ -35,6 +35,7 @@ import java.util.Vector;
 
 
 import de.ipbhalle.metfrag.massbankParser.Peak;
+import de.ipbhalle.metfrag.massbankParser.Spectrum;
 import de.ipbhalle.metfrag.tools.PPMTool;
 
 
@@ -57,6 +58,10 @@ public class PreprocessSpectra {
 	 */
 	private void preprocessUnsorted(String folder, double mzabs, double mzppm)
 	{
+		
+		String selectedPrecursorTypes ="[M+H]+";
+		int selectedMode = 1;
+		
 		//loop over all files in folder
 		File f = new File(folder);
 		File files[] = f.listFiles();
@@ -68,29 +73,54 @@ public class PreprocessSpectra {
 		
 		int temp = 0;
 		
+		String recordName ="";
+		String accession="";
+		
+		String collisionEnergy="";
 		
 		Map<String, List<File>> pubchemToFiles = new HashMap<String, List<File>>();
-		for(int i=0; i < files.length; i++)
-		{
-			if(files[i].isFile())
-			{
-				WrapperSpectrum spectrum = new WrapperSpectrum(files[i].toString());
-				if(pubchemToFiles.containsKey(Integer.toString(spectrum.getCID())))
-					pubchemToFiles.get(Integer.toString(spectrum.getCID())).add(files[i]);
-				else
-				{
-					List<File> fileList = new ArrayList<File>();
-					fileList.add(files[i]);
-					pubchemToFiles.put(Integer.toString(spectrum.getCID()), fileList);
+		
+		boolean nameNotSet=true;
+		
+		for (int i = 0; i < files.length; i++) {
+			if (files[i].isFile()) {
+				WrapperSpectrum spectrum = new WrapperSpectrum(
+						files[i].toString());
+
+				if (spectrum.isPositive()
+						|| spectrum.getMode() == selectedMode
+						|| spectrum.getPrecursorType().equals(
+								selectedPrecursorTypes)) {
+					if (pubchemToFiles.containsKey(Integer.toString(spectrum
+							.getCID())))
+						pubchemToFiles.get(Integer.toString(spectrum.getCID()))
+								.add(files[i]);
+					else {
+						List<File> fileList = new ArrayList<File>();
+						fileList.add(files[i]);
+						pubchemToFiles.put(Integer.toString(spectrum.getCID()),
+								fileList);
+					}
+
+					if (nameNotSet) {
+						
+						recordName = spectrum.getTrivialName() + ";"
+								+ spectrum.getFormula() + ";"
+								+ selectedPrecursorTypes + "; MERGED";
+						nameNotSet = false;
+					}
+					
+					collisionEnergy+=spectrum.getCollisionEnergy()+";";
 				}
-				
-				System.out.println(files[i].toString() + spectrum.getCID());
+
 			}
+
 		}
 
 		
 		for (String pubchemID : pubchemToFiles.keySet()) {
 			String mergedNames = "";
+			
 			Vector<WrapperSpectrum> spectra = new Vector<WrapperSpectrum>();
 			
 			String lastFile = "";
@@ -107,6 +137,7 @@ public class PreprocessSpectra {
 				
 				
 				mergedNames += file.getName().split("\\.")[0];
+				accession+=file.getName().split("\\.")[0]+";";
 				
 				lastFile = file.toString();
 			}
@@ -120,13 +151,69 @@ public class PreprocessSpectra {
 			try 
 			{
 				BufferedReader reader = new BufferedReader(new FileReader(lastFile));
-			  	line += reader.readLine() + "\n";
+			  
+				String current = reader.readLine();
+				
+				if(current.contains("ACCESSION:"))
+				{
+					line+=("ACCESSION:  "+accession + "\n");
+				}
+				else{
+					if(current.contains("RECORD_TITLE: "))
+					{
+						line+=("RECORD_TITLE: "+recordName+"\n");
+					}
+					else{
+						line+=(current+"\n");
+					}
+				}
+			
 			  	while (line != null && !line.contains("PK$NUM_PEAK:")){
+			  		
 			  		String currentLine = reader.readLine();
-			  		if(currentLine.contains("PK$NUM_PEAK:"))
-			  			break;
-			  		else
-			  			line += currentLine + "\n";
+			  		
+					if (currentLine.contains("ACCESSION:")) {
+						currentLine = ("ACCESSION:  " + accession + "\n");
+						line += currentLine;
+					} else {
+						if (currentLine.contains("RECORD_TITLE: ")) {
+							currentLine = ("RECORD_TITLE: " + recordName + "\n");
+							line += currentLine;
+						} else {
+
+							if (currentLine
+									.contains("AC$ANALYTICAL_CONDITION: COLLISION_ENERGY ")) {
+								String en[] = new String[collisionEnergy
+										.split(";").length];
+								int energies[] = new int[collisionEnergy
+										.split(";").length ];
+
+								en = collisionEnergy.split(";");
+								for (int i = 0; i < en.length ; i++) {
+									energies[i] = Integer.parseInt(en[i]);
+									
+								}
+
+								int min = min(energies);
+								int max = max(energies);
+
+								currentLine = "AC$ANALYTICAL_CONDITION: COLLISION_ENERGY "
+										+ min + "-" + max + " eV \n";
+								line += currentLine;
+							} else {
+								if (currentLine.contains("PK$NUM_PEAK:")) {
+									break;
+								} else
+									line += currentLine + "\n";
+							}
+						}
+					}
+			  		
+			  		
+//			  		if(currentLine.contains("PK$NUM_PEAK:"))
+//			  			break;
+//			  		else
+//			  			line += currentLine+"\n" ;
 			  	}
 			  	line += "PK$NUM_PEAK: " + mergedPeaks.size() + "\n";
 			  	line += "PK$PEAK: m/z int. rel.int.\n";
@@ -262,12 +349,10 @@ public class PreprocessSpectra {
 		this.peaksIntensity = new HashMap<Double, Vector<Double>>();
 		this.peaksRelIntensity = new HashMap<Double, Vector<Double>>();
 		for (int i = 0; i < spectra.size(); i++) {
-			System.out.println("Spectra number: "+i);
-			System.out.println(spectra.get(i).toString());
+
 			Vector<Peak> tempPeaks = spectra.get(i).getPeakList();
 			for (int j = 0; j < tempPeaks.size(); j++) {
 				//peaks.add(tempPeaks.get(j).getMass());
-				System.out.println(tempPeaks.get(j).toString());
 				peaksIntensity = addToMap(peaksIntensity, tempPeaks.get(j).getMass(), tempPeaks.get(j).getIntensity());
 				peaksRelIntensity = addToMap(peaksRelIntensity, tempPeaks.get(j).getMass(),tempPeaks.get(j).getRelIntensity());
 			}
@@ -445,6 +530,33 @@ public class PreprocessSpectra {
         return map;
 	}
 	
+	public static int max(final int vec[])
+	{
+		int max=vec[0];
+		for(int i=1;i<vec.length;i++)
+		{
+			if(vec[i]>max)
+			{
+				max=vec[i];
+			}
+		}
+		
+		return max;
+	}
+	
+	public static int min(final int vec[])
+	{
+		int min=vec[0];
+		for(int i=1;i<vec.length;i++)
+		{
+			if(vec[i]<min)
+			{
+				min=vec[i];
+			}
+		}
+		
+		return min;
+	}
 	
 	public static void main(String[] args) {
 //		String folder = "/home/swolf/MassBankData/MetFragSunGrid/BrukerRawData/Processed/";
