@@ -63,6 +63,8 @@ public class WrapperSpectrum {
 	private int CID;
 	private String KEGG;
 	private String chebi;
+	private String metlin;
+	private String knapsack;
 	private String nameTrivial;
 	private String filename;
 	private String formula;
@@ -86,6 +88,8 @@ public class WrapperSpectrum {
 		this.InchI = spectra.get(0).getInchi();
 		this.CID = spectra.get(0).getCID();
 		this.KEGG = spectra.get(0).getKEGG();
+		this.metlin=spectra.get(0).getMetlin();
+		this.knapsack =spectra.get(0).getKnapsack();
 		this.nameTrivial = spectra.get(0).getTrivialName();
 		this.chebi = spectra.get(0).getCHEBI();
 		this.setPrecursorType(spectra.get(0).getPrecursorType());
@@ -110,7 +114,7 @@ public class WrapperSpectrum {
 	public WrapperSpectrum(String peakString, int mode, double exactMass, boolean isPositive, String smiles){
 		this.spectra = new Vector<Spectrum>();
 		this.collisionEnergy = -1;
-		spectra.add(new Spectrum(-1, parsePeaks(peakString), exactMass, mode, "none", -1, "none", "none", "none", "", 0.0, "", isPositive,smiles));
+		spectra.add(new Spectrum(-1, parsePeaks(peakString), exactMass, mode, "none", -1, "none", "none", "none","none","none", "", 0.0, "", isPositive,smiles));
 
 		this.peaks = spectra.get(0).getPeaks(); //just one spectra for now
 		this.exactMass = spectra.get(0).getExactMass();
@@ -119,6 +123,8 @@ public class WrapperSpectrum {
 		this.CID = spectra.get(0).getCID();
 		this.KEGG = spectra.get(0).getKEGG();
 		this.chebi = spectra.get(0).getCHEBI();
+		this.metlin=spectra.get(0).getMetlin();
+		this.knapsack=spectra.get(0).getKnapsack();
 		this.nameTrivial = spectra.get(0).getTrivialName();
 		this.setFormula(spectra.get(0).getFormula());
 		this.setPositive(isPositive);
@@ -138,7 +144,7 @@ public class WrapperSpectrum {
 	public WrapperSpectrum(String peakString, int mode, double exactMass, boolean isPositive){
 		this.spectra = new Vector<Spectrum>();
 		this.collisionEnergy = -1;
-		spectra.add(new Spectrum(-1, parsePeaks(peakString), exactMass, mode, "none", -1, "none", "none", "none", "", 0.0, "", isPositive));
+		spectra.add(new Spectrum(-1, parsePeaks(peakString), exactMass, mode, "none", -1, "none", "none", "none","none", "", 0.0, "", isPositive));
 
 		this.peaks = spectra.get(0).getPeaks(); //just one spectra for now
 		this.exactMass = spectra.get(0).getExactMass();
@@ -147,6 +153,8 @@ public class WrapperSpectrum {
 		this.CID = spectra.get(0).getCID();
 		this.KEGG = spectra.get(0).getKEGG();
 		this.chebi = spectra.get(0).getCHEBI();
+		this.metlin=spectra.get(0).getMetlin();
+		this.knapsack=spectra.get(0).getKnapsack();
 		this.nameTrivial = spectra.get(0).getTrivialName();
 		this.setFormula(spectra.get(0).getFormula());
 		this.setPositive(isPositive);
@@ -315,6 +323,26 @@ public class WrapperSpectrum {
 	public int getCID()
 	{
 		return this.CID;
+	}
+	
+	/**
+	 * Gets the Metlin ID.
+	 * 
+	 * @return the Metlin ID
+	 */
+	public String getMetlin()
+	{
+		return this.metlin;
+	}
+	
+	/**
+	 * Gets the Knapsack ID.
+	 * 
+	 * @return the Knapsack ID
+	 */
+	public String getKnapsack()
+	{
+		return this.knapsack;
 	}
 	
 	/**
