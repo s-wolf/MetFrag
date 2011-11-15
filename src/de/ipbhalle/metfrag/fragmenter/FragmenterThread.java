@@ -41,6 +41,7 @@ import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 import org.openscience.cdk.tools.manipulator.AtomTypeManipulator;
 
 import de.ipbhalle.metfrag.databaseMetChem.CandidateMetChem;
+import de.ipbhalle.metfrag.databaseMetChem.Query;
 import de.ipbhalle.metfrag.fragmenter.Fragmenter;
 import de.ipbhalle.metfrag.main.Config;
 import de.ipbhalle.metfrag.main.MetFrag;
@@ -76,7 +77,8 @@ public class FragmenterThread implements Runnable{
 	private String jdbc, username, password = "";
 	private boolean SDFDatabase = false;
 	private IAtomContainer mol;
-	private boolean useMetChem = false;
+	private boolean useMetChem = true;
+	private Query query;
 	
 	/**
 	 * Instantiates a new pubChem search thread. ONLINE
@@ -126,7 +128,7 @@ public class FragmenterThread implements Runnable{
 			WrapperSpectrum spectrum, double mzabs, double mzppm, boolean sumFormulaRedundancyCheck,
 			boolean breakAromaticRings, int treeDepth, boolean showDiagrams, boolean hydrogenTest,
 			boolean neutralLossAdd, boolean bondEnergyScoring, boolean isOnlyBreakSelectedBonds, Config c,
-			boolean generateFragmentsInMemory)
+			boolean generateFragmentsInMemory, Query query)
 	{
 		this.candidateMetChem = candidate;
 		this.candidate = candidate.getAccession();
@@ -145,6 +147,7 @@ public class FragmenterThread implements Runnable{
 		this.c = c;
 		this.generateFragmentsInMemory = generateFragmentsInMemory;
 		setUseMetChem(true);
+		this.query = query;
 	}
 	
 	
@@ -249,7 +252,10 @@ public class FragmenterThread implements Runnable{
 			}
 			else if(useMetChem)
 			{
-				molecule = CandidatesMetChem.getCompound(candidateMetChem.getCompoundID(), c.getJdbcPostgres(), c.getUsernamePostgres(), c.getPasswordPostgres());
+				if(query != null)
+					molecule = CandidatesMetChem.getCompoundOpenend(candidateMetChem.getCompoundID(), query);
+				else
+					molecule = CandidatesMetChem.getCompound(candidateMetChem.getCompoundID(), c.getJdbcPostgres(), c.getUsernamePostgres(), c.getPasswordPostgres());
 			}
 			//retrieve the candidate from the database
 			else if(pw == null && c == null)
