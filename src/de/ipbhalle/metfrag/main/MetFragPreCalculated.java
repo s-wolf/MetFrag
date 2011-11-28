@@ -29,6 +29,7 @@ import de.ipbhalle.metfrag.pubchem.PubChemWebService;
 import de.ipbhalle.metfrag.read.CMLMolecule;
 import de.ipbhalle.metfrag.read.CMLTools;
 import de.ipbhalle.metfrag.scoring.OptimizationMatrixEntry;
+import de.ipbhalle.metfrag.scoring.Scoring;
 import de.ipbhalle.metfrag.similarity.Similarity;
 import de.ipbhalle.metfrag.similarity.SimilarityGroup;
 import de.ipbhalle.metfrag.similarity.TanimotoClusterer;
@@ -247,11 +248,14 @@ public class MetFragPreCalculated {
 		//now collect the result
 		Map<String, IAtomContainer> candidateToStructure = results.getMapCandidateToStructure();
 		Map<String, Double> candidateToEnergy = results.getMapCandidateToEnergy();
-		Map<Double, Vector<String>> realScoreMap = results.getRealScoreMap();
+		//CHANGED TO NEW SCORING!!!
+//		Map<Double, Vector<String>> realScoreMap = results.getRealScoreMap();
+		Map<Double, Vector<String>> realScoreMap = Scoring.scoreCandidates(results.getMapCandidateToFragments());
 		StringBuilder completeLog = results.getCompleteLog();
 		
 		//this is the real candidate count after filtering not connected compounds
 		this.candidateCount = results.getMapCandidateToStructure().size();
+		
 		
 		
 		//generate the parameter optimization matrix

@@ -50,13 +50,13 @@ public class PreprocessSHGeneration {
 //		String pathToSDF = "/home/swolf/MOPAC/ProofOfConcept/Hill_OnlyCorrect/";
 //		String pathToJar = "/home/swolf/MOPAC/BondOrderTests/Hill_ProofOfConcept/jar/PreprocessMolecules.jar";
 		
-//		String writePath = "/home/swolf/MOPAC/Hill-Riken-MM48_POSITIVE_PubChem_LocalMass2009_CHONPS_NEW/sh/";
-//		String pathToSDF = "/home/swolf/MOPAC/Hill-Riken-MM48_POSITIVE_PubChem_LocalMass2009_CHONPS_NEW/pubchemClustered/";
-//		String pathToJar = "/home/swolf/MOPAC/Hill-Riken-MM48_POSITIVE_PubChem_LocalMass2009_CHONPS_NEW/jar/PreprocessMolecules.jar";
+		String writePath = "/home/swolf/MOPAC/Hill-Riken-MM48_POSITIVE_PubChem_LocalMass2009_CHONPS_NEW/sh/";
+		String pathToSDF = "/home/swolf/MOPAC/Hill-Riken-MM48_POSITIVE_PubChem_LocalMass2009_CHONPS_NEW/pubchemClustered/";
+		String pathToJar = "/home/swolf/MOPAC/Hill-Riken-MM48_POSITIVE_PubChem_LocalMass2009_CHONPS_NEW/jar/PreprocessMolecules.jar";
 		
-		String writePath = "/home/swolf/MOPAC/100spec_SDF_GC-EIMS/sh/";
-		String pathToSDF = "/home/swolf/MOPAC/100spec_SDF_GC-EIMS/sdf/single/";
-		String pathToJar = "/home/swolf/MOPAC/100spec_SDF_GC-EIMS/jar/PreprocessMolecules.jar";
+//		String writePath = "/home/swolf/MOPAC/100spec_SDF_GC-EIMS/sh/";
+//		String pathToSDF = "/home/swolf/MOPAC/100spec_SDF_GC-EIMS/sdf/single/";
+//		String pathToJar = "/home/swolf/MOPAC/100spec_SDF_GC-EIMS/jar/PreprocessMolecules.jar";
 			
 		
 		String mopacRuntime = "4800";

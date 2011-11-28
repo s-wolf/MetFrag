@@ -107,6 +107,34 @@ public class MoleculeTools {
     	
     	return bondEnergy;
     }
+    
+    
+    /**
+     * Gets the combined bond energy because the property stores every single energy in a list.
+     * 
+     * @param energyString the bond energy string
+     * 
+     * @return the combined bond energy
+     */
+    public static Double getCombinedEnergyLeveled(String energyString)
+    {
+    	double bondEnergy = 0.0;
+    	
+    	String[] arr1 = energyString.split(";");
+    	for (int i = 0; i < arr1.length; i++) {
+			String[] arr2 = arr1[i].split(",");
+			double tempEnergy = 0.0;
+			for (int j = 0; j < arr2.length; j++) {
+				tempEnergy += Double.parseDouble(arr2[j]);
+			}
+//			if(arr2.length > 1)
+//				bondEnergy += (tempEnergy / arr2.length);
+//			else
+			bondEnergy += tempEnergy;
+		}
+    	
+    	return bondEnergy;
+    }
 
 	
 	/**

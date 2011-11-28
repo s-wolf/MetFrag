@@ -221,7 +221,8 @@ public class MatchedFragment {
 	 */
 	public double getBondOrder() {
 		if(bondOrder == null)
-			return MoleculeTools.getCombinedEnergy((String)this.fragmentStructure.getProperty(Constants.BONDORDER));
+//			return MoleculeTools.getCombinedEnergy((String)this.fragmentStructure.getProperty(Constants.BONDORDER));
+			return MoleculeTools.getCombinedEnergyLeveled((String)this.fragmentStructure.getProperty(Constants.BONDORDER));
 		else
 			return bondOrder;
 	}
@@ -237,7 +238,8 @@ public class MatchedFragment {
 	 */
 	public Double getBondLengthChange() {
 		if(bondLengthChange == null)
-			return MoleculeTools.getCombinedEnergy((String)this.fragmentStructure.getProperty(Constants.BONDLENGTHCHANGE));
+//			return MoleculeTools.getCombinedEnergy((String)this.fragmentStructure.getProperty(Constants.BONDLENGTHCHANGE));
+			return MoleculeTools.getCombinedEnergyLeveled((String)this.fragmentStructure.getProperty(Constants.BONDLENGTHCHANGE));
 		else
 			return bondLengthChange;
 	}
@@ -247,7 +249,8 @@ public class MatchedFragment {
 	}
 
 	public Double getBde() {
-		return MoleculeTools.getCombinedEnergy((String)this.fragmentStructure.getProperty(Constants.BDE));
+//		return MoleculeTools.getCombinedEnergy((String)this.fragmentStructure.getProperty(Constants.BDE));
+		return MoleculeTools.getCombinedEnergyLeveled((String)this.fragmentStructure.getProperty(Constants.BDE));
 	}
 
 }

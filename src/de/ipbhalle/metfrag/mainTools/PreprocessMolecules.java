@@ -113,7 +113,7 @@ public class PreprocessMolecules {
 			    bp.debug(false);
 //			    System.out.println("MOPAC runtime: " + mopacRuntime + " FFSteps: " + ffSteps);
 			    //use babel version 2.3.0
-				bp.calculateBondsToBreak(file.getName(), "/vol/local/bin/","run_mopac7", molecule, 4800, "UFF", "AM1, GEO-OK, ECHO, MMOK, XYZ, BONDS", 4800, false, true);
+				bp.calculateBondsToBreak(file.getName(), "/vol/local/bin/","run_mopac7", molecule, 4800, "UFF", "AM1, GEO-OK, ECHO, MMOK, XYZ, BONDS", 4800, false, false);
 				List<CalculationResult> results = bp.getResults();
 				
 				if(molecule.getProperty("candidatesClustered") != null)

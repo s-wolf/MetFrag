@@ -216,6 +216,102 @@ public class Scoring {
 		return score;
 	}
 	
+	/**
+	 * Score candidates with the optimized new scoring using bond orders. Candidates need to be
+	 * preprocessed!!
+	 *
+	 * @param mapToCandidateFragments the map to candidate fragments
+	 * @return the map
+	 */
+	public static Map<Double, Vector<String>> scoreCandidates(Map<String, Vector<MatchedFragment>> mapToCandidateFragments)
+	{
+		Map<Double, Vector<String>> scoredCandidates = new HashMap<Double, Vector<String>>();
+
+        double maxIntensity = 0.0;
+        double maxPeakMass = 0.0;
+        double maxBondLengthChange = 0.0;
+        double maxBondOrder = 0.0;
+        double maxBDE = 0.0;
+        
+		for (String candidateID : mapToCandidateFragments.keySet()) {
+			double tempBondLength = 0.0;
+			double tempBondOrder = 0.0;
+			double tempPeakMass = 0.0;
+			double tempPeakInt = 0.0;
+			double tempBDE = 0.0;
+			//iterate over this candidates' fragments and get the max values
+			for (MatchedFragment fragment : mapToCandidateFragments.get(candidateID)) {
+				tempBondLength = fragment.getBondLengthChange();
+				tempBondOrder = fragment.getBondOrder();
+				tempPeakMass = fragment.getPeak().getMass();
+				tempPeakInt = fragment.getPeak().getIntensity();
+				tempBDE = fragment.getBde();
+				
+				if(tempPeakInt > maxIntensity)
+					maxIntensity = tempPeakInt;
+				
+				if(tempPeakMass > maxPeakMass)
+					maxPeakMass = tempPeakMass;
+								
+				if(tempBondLength > maxBondLengthChange)
+					maxBondLengthChange = tempBondLength;
+				
+				if(tempBondOrder > maxBondOrder)
+					maxBondOrder = tempBondOrder;
+				
+				if(tempBDE > maxBDE)
+					maxBDE = tempBDE;
+				
+				//now average the values so candidates which explain a lot peaks are not penalized!
+//				int matchedFragmentCount = mapToCandidateFragments.get(candidateID).size();
+//				tempBondLength = tempBondLength / Double.valueOf(matchedFragmentCount);
+//				tempBondOrder = tempBondOrder / Double.valueOf(matchedFragmentCount);
+//				tempBDE = tempBDE / Double.valueOf(matchedFragmentCount);
+			}			
+		}
+		
+		//optimized parameters 0.6353030459896155 1.0915238557782132 2.271690272229761
+		double a = 0.6353030459896155;
+		double b = 1.0915238557782132;
+		double c = 2.271690272229761;
+		
+		for (String candidateID : mapToCandidateFragments.keySet()) {
+			double individualScores = 0.0;
+			double tempBondLength = 0.0;
+			double tempBondOrder = 0.0;
+			double tempPeakMass = 0.0;
+			double tempPeakInt = 0.0;
+			double tempBDE = 0.0;
+			//iterate over this candidates' fragments and get the max values
+			for (MatchedFragment fragment : mapToCandidateFragments.get(candidateID)) {
+				tempBondLength = fragment.getBondLengthChange();
+				tempBondOrder = fragment.getBondOrder();
+				tempPeakMass = fragment.getPeak().getMass();
+				tempPeakInt = fragment.getPeak().getIntensity();
+				tempBDE = fragment.getBde();
+				
+				individualScores += ((a * (tempPeakMass / maxPeakMass) + b * (tempPeakInt / maxIntensity)) * (c * (1 - (tempBondOrder / maxBondOrder))));
+//				individualScores.add(((this.parameters[0] * (r.getPeakMass() / maxIndividualPeakMass)) + 
+//						(this.parameters[1] * (r.getPeakInt() / maxIndividualInt))) * 
+//						(this.parameters[2] * (1 - (tempBOIndividual / maxIndividualBondOrder))));
+			}
+			
+			//now add the score to the results list
+			if(scoredCandidates.containsKey(individualScores))
+			{
+				scoredCandidates.get(individualScores).add(candidateID);
+			}
+			else
+			{	
+				Vector<String> temp = new Vector<String>();
+				temp.add(candidateID);
+				scoredCandidates.put(individualScores, temp);
+			}
+		}
+		
+		return scoredCandidates;
+	}
+	
 	
 	/**
 	 * Gets the fragment bond energy.
