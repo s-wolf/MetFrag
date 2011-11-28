@@ -176,6 +176,7 @@ public class CMLTools {
 					double minHof = Double.MAX_VALUE;
 					CMLMolecule currentBestSolution = null;
 					for (CMLMolecule mol : containersList) {
+//						System.out.println(mol.getMolFile().toString());
 						IAtomContainer temp = mol.getMolStructure();
 						double currentHof = Double.parseDouble(temp.getID());
 						if(currentHof < minHof)
@@ -250,7 +251,13 @@ public class CMLTools {
 	public static void main(String[] args) {
 		try {
 			String[] molFormulas = new String[] {"C10H14N10", "C40H39N3O3"};
-			List<CMLMolecule> test = CMLTools.readFoldersLowestHoF(new File("C:\\Users\\Basti\\Downloads\\"), molFormulas);
+//			CMLMolecule test = CMLTools.readFolderReturnLowestHoFOnlyCorrect(new File("/home/swolf/MOPAC/BondOrderTests/"), "CID_932.sdf_NEW_AM1_withoutSCFRT_withoutGNORM_aromatic_LONG_FIXED_FINAL");
+			List<CMLMolecule> list = CMLTools.readFoldersLowestHoF(new File("/home/swolf/MOPAC/Hill-Riken-MM48_POSITIVE_PubChem_LocalMass2009_CHONPS_NEW/mopac_4800/"), new String[]{"C26H25NP2","C23H27NO2S2","C18H21N8O2S","C23H19N5O3","C18H19N7O5","C16H24N5O6P","C23H27O3P2","C21H25N4OS2","C17H25N4O6S","C16H27N7S3","C26H23NO2S","C21H24N3O4P","C15H28NO10P","C18H27N3O4S2","C19H27NO7S","C20H21N4O6","C20H24N5OPS","C17H23N3O9","C19H25O10","C19H23N7S2","C21H17N8O2","C22H20N2O4S","C25H21N2O4","C15H23N7O5S","C14H27N3O9S","C22H23NO7","C24H21N4OS"});
+//			List<CMLMolecule> list = CMLTools.readFoldersLowestHoF(new File("/home/swolf/MOPAC/Hill-Riken-MM48_POSITIVE_PubChem_LocalMass2009_CHONPS_NEW/mopac_4800/"), new String[]{"C40H39N3O3"});
+			for (CMLMolecule cmlMolecule : list) {
+				System.out.println(cmlMolecule.getFileName());
+				cmlMolecule.getMolStructure();
+			}
 			
 //			CMLMolecule test = CMLTools.readFolderReturnLowestHoFOnlyCorrect(new File("/home/swolf/MOPAC/BondOrderTests/"), "CID_932.sdf_NEW_AM1_withoutSCFRT_withoutGNORM_aromatic_LONG_FIXED_FINAL");
 //			IAtomContainer tmp = test.getMolStructure();

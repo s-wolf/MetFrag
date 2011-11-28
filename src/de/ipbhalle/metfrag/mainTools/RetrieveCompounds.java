@@ -1,15 +1,21 @@
 package de.ipbhalle.metfrag.mainTools;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.List;
+import java.util.zip.GZIPInputStream;
 
+import org.openscience.cdk.DefaultChemObjectBuilder;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.io.SDFWriter;
+import org.openscience.cdk.io.iterator.IteratingMDLReader;
 import org.openscience.cdk.tools.CDKHydrogenAdder;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 
@@ -20,6 +26,56 @@ import de.ipbhalle.metfrag.spectrum.WrapperSpectrum;
 
 
 public class RetrieveCompounds {
+	
+	private static IAtomContainer getPubChemEntryFromSdfGZ(String pubChemCID, File[] pubchemFiles)
+	{
+		IAtomContainer molToReturn = null;
+		String pathToFile = "";
+		int pid = Integer.parseInt(pubChemCID);
+		
+		for (int i = 0; i < pubchemFiles.length; i++) {
+			
+			if(pubchemFiles[i].getName().startsWith("README"))
+				continue;
+			
+			String[] zipRange = pubchemFiles[i].getName().split("\\.")[0].split("_");
+			int start = Integer.parseInt(zipRange[1]);
+			int end = Integer.parseInt(zipRange[2]);
+
+			if(pid >= start && pid <= end)
+			{
+				pathToFile = pubchemFiles[i].getPath();
+				break;
+			}
+		}
+		
+		File sdfFile = new File(pathToFile);
+		IteratingMDLReader reader;
+		try {
+			reader = new IteratingMDLReader(new GZIPInputStream(new FileInputStream(sdfFile)), DefaultChemObjectBuilder.getInstance());
+			while (reader.hasNext()) {
+				IAtomContainer molecule = (IAtomContainer)reader.next();
+				
+				if(Integer.parseInt((String)molecule.getProperty("PUBCHEM_COMPOUND_CID")) > pid)
+					return null;
+				
+				if(molecule.getProperty("PUBCHEM_COMPOUND_CID").equals(pubChemCID))
+				{
+					molToReturn = molecule;
+					break;
+				}
+			}
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return molToReturn;
+	}
+	
 	
 	/**
 	 * This method downloads every structure and saves it to the specified location
@@ -35,16 +91,22 @@ public class RetrieveCompounds {
 		
 		
 //		File f = new File("/home/swolf/MOPAC/Hill-Riken-MM48_POSITIVE_PubChem_Formula/");
-		File f = new File("/home/swolf/MOPAC/Hill-Riken-MM48_POSITIVE_PubChem_LocalMass2009_CHONPS_NEW/");
-		File files[] = f.listFiles();
+//		File f = new File("/home/swolf/MOPAC/Hill-Riken-MM48_POSITIVE_PubChem_LocalMass2009_CHONPS_NEW/spectra/");
+//		File files[] = f.listFiles();
+		
+		File[] files = new File[]{new File(args[0])};
+		
 		Config config = null;
 		try {
-			config = new Config();
+			config = new Config("outside");
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-
+		
+		File[] pubchemFiles = new File("/vol/mirrors/pubchem").listFiles();
+		Arrays.sort(pubchemFiles);
+		
 		for(int i=0;i<files.length;i++)
 		{
 			if(files[i].isFile() && files[i].getName().split("\\.")[1].equals("txt"))
@@ -87,9 +149,22 @@ public class RetrieveCompounds {
 					try {
 						new File(filePath + "/" + database + "/" + fileName).mkdirs();
 						
-						SDFWriter writer = new SDFWriter(new FileWriter(new File(filePath + "/" + database + "/" + fileName + "/" + candString + ".sdf")));
-						writer.write(mol);
-						writer.close();
+						IAtomContainer molwith2D = getPubChemEntryFromSdfGZ(candString, pubchemFiles);			
+						if(molwith2D != null)
+						{
+							SDFWriter writer = new SDFWriter(new FileWriter(new File(filePath + "/" + database + "/" + fileName + "/" + candString + ".sdf")));
+							writer.write(molwith2D);
+							writer.close();
+						}
+						else
+						{
+							System.err.println("Mol not found! " + candString);
+
+							SDFWriter writer = new SDFWriter(new FileWriter(new File(filePath + "/" + database + "/" + fileName + "/" + candString + ".sdf")));
+							writer.write(mol);
+							writer.close();
+						}
+						
 					} catch (CDKException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -98,7 +173,6 @@ public class RetrieveCompounds {
 						e.printStackTrace();
 					}
 				}
-				
 			}
 		}
 	}

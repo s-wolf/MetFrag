@@ -271,9 +271,9 @@ public class Scoring {
 		}
 		
 		//optimized parameters 0.6353030459896155 1.0915238557782132 2.271690272229761
-		double a = 0.6353030459896155;
-		double b = 1.0915238557782132;
-		double c = 2.271690272229761;
+		double a = 0.7499;
+		double b = 1.6752;
+		double c = 0.4627;
 		
 		for (String candidateID : mapToCandidateFragments.keySet()) {
 			double individualScores = 0.0;
@@ -290,10 +290,15 @@ public class Scoring {
 				tempPeakInt = fragment.getPeak().getIntensity();
 				tempBDE = fragment.getBde();
 				
-				individualScores += ((a * (tempPeakMass / maxPeakMass) + b * (tempPeakInt / maxIntensity)) * (c * (1 - (tempBondOrder / maxBondOrder))));
+//				individualScores += ((a * (tempPeakMass / maxPeakMass) + b * (tempPeakInt / maxIntensity)) * (c * (1 - (tempBondOrder / maxBondOrder))));
 //				individualScores.add(((this.parameters[0] * (r.getPeakMass() / maxIndividualPeakMass)) + 
 //						(this.parameters[1] * (r.getPeakInt() / maxIndividualInt))) * 
 //						(this.parameters[2] * (1 - (tempBOIndividual / maxIndividualBondOrder))));
+				
+//              best result: rrp: 10.0968: 0.7499 1.6752 0.4627 --> with rrp minimization
+//              best result 1/3 median + 1/3 average: 2011-11-28 16:15:14.4| 0.8924398156145014 2.5829939404187297 2.702359459531139 Score: 45.24666666666666
+				individualScores += (((Math.pow((tempPeakMass / maxPeakMass), a)) * (Math.pow((tempPeakInt / maxIntensity), b))) * (c * (1 - (tempBondOrder / maxBondOrder))));
+				
 			}
 			
 			//now add the score to the results list
