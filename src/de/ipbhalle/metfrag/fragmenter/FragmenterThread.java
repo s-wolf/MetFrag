@@ -40,6 +40,7 @@ import de.ipbhalle.metfrag.fragmenter.Fragmenter;
 import de.ipbhalle.metfrag.main.Config;
 import de.ipbhalle.metfrag.main.MetFrag;
 import de.ipbhalle.metfrag.main.MetFragPreCalculated;
+import de.ipbhalle.metfrag.main.MetFragPreCalculatedGC;
 import de.ipbhalle.metfrag.massbankParser.Peak;
 import de.ipbhalle.metfrag.pubchem.PubChemWebService;
 import de.ipbhalle.metfrag.read.CMLTools;
@@ -76,6 +77,7 @@ public class FragmenterThread implements Runnable{
 	private IAtomContainer candidateStructure = null;
 	private int neutralLossCombination;
 	private boolean isPreCalculated = false;
+	private boolean isGC = false;
 	
 	/**
 	 * Instantiates a new pubChem search thread. ONLINE
@@ -289,7 +291,9 @@ public class FragmenterThread implements Runnable{
 					//there is a bug in cdk??
 					catch(IllegalArgumentException e)
 				    {
-						if(isPreCalculated)
+						if(isGC)
+							MetFragPreCalculatedGC.results.addToCompleteLog("Error: " + candidate + " Message: " + e.getMessage());
+						else if(isPreCalculated)
 							MetFragPreCalculated.results.addToCompleteLog("Error: " + candidate + " Message: " + e.getMessage());
 						else
 							MetFrag.results.addToCompleteLog("Error: " + candidate + " Message: " + e.getMessage());
@@ -318,6 +322,8 @@ public class FragmenterThread implements Runnable{
 	        catch(OutOfMemoryError e)
 	        {
 	        	System.out.println("OUT OF MEMORY ERROR! " + treeDepth);
+	        	if(isGC)
+					MetFragPreCalculatedGC.results.addToCompleteLog("Error: " + candidate + " Message: " + e.getMessage());
 	        	if(isPreCalculated)
 	        		MetFragPreCalculated.results.addToCompleteLog("Error: " + candidate + " Message: " + e.getMessage());
 	        	else
@@ -359,7 +365,23 @@ public class FragmenterThread implements Runnable{
 					currentBondEnergy = currentBondEnergy / afp.getHits().size();
 				
 				Map<Double, Vector<String>> realScoreMap = null;
-				if(isPreCalculated)
+				if(isGC)
+				{
+					//set the added up energy of every fragment
+					MetFragPreCalculatedGC.results.getMapCandidateToEnergy().put(candidate, currentBondEnergy);
+					MetFragPreCalculatedGC.results.getMapCandidateToHydrogenPenalty().put(candidate, score.getPenalty());
+					MetFragPreCalculatedGC.results.getMapCandidateToPartialChargesDiff().put(candidate, score.getPartialChargesDiff());
+					
+					//also output the optimization matrix if needed
+					MetFragPreCalculatedGC.results.getCandidateToOptimizationMatrixEntries().put(candidate, score.getOptimizationMatrixEntries());	
+					
+					//also add the structure to results file
+					MetFragPreCalculatedGC.results.getMapCandidateToStructure().put(candidate, molecule);
+					MetFragPreCalculatedGC.results.getMapCandidateToFragments().put(candidate, afp.getHits());
+					
+					realScoreMap = MetFragPreCalculatedGC.results.getRealScoreMap();
+				}
+				else if(isPreCalculated)
 				{
 					//set the added up energy of every fragment
 					MetFragPreCalculated.results.getMapCandidateToEnergy().put(candidate, currentBondEnergy);
@@ -406,6 +428,7 @@ public class FragmenterThread implements Runnable{
 		        }
 				
 				Map<Integer, List<String>> scoreMap = null;
+				
 				if(isPreCalculated)
 					scoreMap = MetFragPreCalculated.results.getScoreMap();
 				else
@@ -435,6 +458,11 @@ public class FragmenterThread implements Runnable{
 				
 
 				//write things to log file
+				if(isGC)
+				{
+					MetFragPreCalculatedGC.results.addToCompleteLog("\nCandidate: " + candidate + "\t #Peaks: " + spectrum.getPeakList().size() + "\t #Found: " + hits.size());
+					MetFragPreCalculatedGC.results.addToCompleteLog("\tPeaks: " + peaks);
+				}
 				if(isPreCalculated)
 				{
 					MetFragPreCalculated.results.addToCompleteLog("\nCandidate: " + candidate + "\t #Peaks: " + spectrum.getPeakList().size() + "\t #Found: " + hits.size());
@@ -545,6 +573,16 @@ public class FragmenterThread implements Runnable{
 
 	public boolean isUseMetChem() {
 		return useMetChem;
+	}
+
+
+	public boolean isGC() {
+		return isGC;
+	}
+
+
+	public void setGC(boolean isGC) {
+		this.isGC = isGC;
 	}
 
 }

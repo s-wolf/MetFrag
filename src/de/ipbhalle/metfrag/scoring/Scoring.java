@@ -232,6 +232,7 @@ public class Scoring {
         double maxBondLengthChange = 0.0;
         double maxBondOrder = 0.0;
         double maxBDE = 0.0;
+        double maxHP = 0.0;
         
 		for (String candidateID : mapToCandidateFragments.keySet()) {
 			double tempBondLength = 0.0;
@@ -239,6 +240,8 @@ public class Scoring {
 			double tempPeakMass = 0.0;
 			double tempPeakInt = 0.0;
 			double tempBDE = 0.0;
+			double tempHP = 0.0;
+			
 			//iterate over this candidates' fragments and get the max values
 			for (MatchedFragment fragment : mapToCandidateFragments.get(candidateID)) {
 				tempBondLength = fragment.getBondLengthChange();
@@ -246,6 +249,7 @@ public class Scoring {
 				tempPeakMass = fragment.getPeak().getMass();
 				tempPeakInt = fragment.getPeak().getIntensity();
 				tempBDE = fragment.getBde();
+				tempHP = fragment.getHydrogenPenalty();
 				
 				if(tempPeakInt > maxIntensity)
 					maxIntensity = tempPeakInt;
@@ -262,6 +266,9 @@ public class Scoring {
 				if(tempBDE > maxBDE)
 					maxBDE = tempBDE;
 				
+				if(tempHP > maxHP)
+					maxHP = tempHP;
+				
 				//now average the values so candidates which explain a lot peaks are not penalized!
 //				int matchedFragmentCount = mapToCandidateFragments.get(candidateID).size();
 //				tempBondLength = tempBondLength / Double.valueOf(matchedFragmentCount);
@@ -271,9 +278,10 @@ public class Scoring {
 		}
 		
 		//optimized parameters 0.6353030459896155 1.0915238557782132 2.271690272229761
-		double a = 0.7499;
-		double b = 1.6752;
-		double c = 0.4627;
+		double a = 0.8050470257810172;
+		double b = 0.9004924210209632;
+		double c = 0.9355410100697816;
+		double d = 0.033436071416133584;
 		
 		for (String candidateID : mapToCandidateFragments.keySet()) {
 			double individualScores = 0.0;
@@ -282,6 +290,7 @@ public class Scoring {
 			double tempPeakMass = 0.0;
 			double tempPeakInt = 0.0;
 			double tempBDE = 0.0;
+			double tempHP = 0.0;
 			//iterate over this candidates' fragments and get the max values
 			for (MatchedFragment fragment : mapToCandidateFragments.get(candidateID)) {
 				tempBondLength = fragment.getBondLengthChange();
@@ -289,6 +298,7 @@ public class Scoring {
 				tempPeakMass = fragment.getPeak().getMass();
 				tempPeakInt = fragment.getPeak().getIntensity();
 				tempBDE = fragment.getBde();
+				tempHP = fragment.getHydrogenPenalty();
 				
 //				individualScores += ((a * (tempPeakMass / maxPeakMass) + b * (tempPeakInt / maxIntensity)) * (c * (1 - (tempBondOrder / maxBondOrder))));
 //				individualScores.add(((this.parameters[0] * (r.getPeakMass() / maxIndividualPeakMass)) + 
@@ -297,8 +307,14 @@ public class Scoring {
 				
 //              best result: rrp: 10.0968: 0.7499 1.6752 0.4627 --> with rrp minimization
 //              best result 1/3 median + 1/3 average: 2011-11-28 16:15:14.4| 0.8924398156145014 2.5829939404187297 2.702359459531139 Score: 45.24666666666666
-				individualScores += (((Math.pow((tempPeakMass / maxPeakMass), a)) * (Math.pow((tempPeakInt / maxIntensity), b))) * (c * (1 - (tempBondOrder / maxBondOrder))));
-				
+//				individualScores += (((Math.pow((tempPeakMass / maxPeakMass), a)) * (Math.pow((tempPeakInt / maxIntensity), b))) * (c * (1 - (tempBondOrder / maxBondOrder))));
+//				 0.905370372011248 0.7602936368046967 2.9802977932529973 0.07976331444216822 Score: 158.9570091735854
+//				2011-11-30 10:36:29.915| 0.605519245363914 0.9044550966839193 1.8045546811729256 0.016615536120909935 Score: 184.26328386626636
+//				2011-11-30 10:45:34.723| 0.8050470257810172 0.9004924210209632 0.9355410100697816 0.033436071416133584 Score: 177.53203623370868
+				if(maxHP == 0)
+					individualScores += ((((Math.pow((tempPeakMass / maxPeakMass), a)) * (Math.pow((tempPeakInt / maxIntensity), b))) * (c * (1 - (tempBondOrder / maxBondOrder)))));
+				else
+					individualScores += ((((Math.pow((tempPeakMass / maxPeakMass), a)) * (Math.pow((tempPeakInt / maxIntensity), b))) * (c * (1 - (tempBondOrder / maxBondOrder)))) + (d * (1 - (tempHP / maxHP))));
 			}
 			
 			//now add the score to the results list

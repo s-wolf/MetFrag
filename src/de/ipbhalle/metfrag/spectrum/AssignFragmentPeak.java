@@ -20,6 +20,7 @@
 */
 package de.ipbhalle.metfrag.spectrum;
 
+import org.openscience.cdk.AtomContainer;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.formula.MolecularFormula;
 import org.openscience.cdk.interfaces.IAtom;
@@ -187,14 +188,14 @@ public class AssignFragmentPeak {
 	        	fragmentMass = MolecularFormulaTools.getMonoisotopicMass(MolecularFormulaManipulator.getMolecularFormula(this.acs.get(j)));
 	        }
 			
-			if(peakAnnotated.containsKey(fragmentMass))
-			{				
-				MetFragPreCalculated.results.setPositivePeaks(MetFragPreCalculated.results.getPositivePeaks().append(fragmentMass + "\t" + this.acs.get(j).getProperty(Constants.BONDORDER) + "\t" + this.acs.get(j).getProperty(Constants.BONDLENGTHCHANGE) + "\t" + this.acs.get(j).getProperty(Constants.BDE) + "\t" + this.acs.get(j).getProperty(Constants.BONDREMOVED) + "\t" + peakAnnotated.get(fragmentMass).getPeak().getMass() + "\n"));
-			}
-			else
-			{
-				MetFragPreCalculated.results.setNegativePeaks(MetFragPreCalculated.results.getNegativePeaks().append(fragmentMass + "\t" + this.acs.get(j).getProperty(Constants.BONDORDER) + "\t" + this.acs.get(j).getProperty(Constants.BONDLENGTHCHANGE) + "\t" + this.acs.get(j).getProperty(Constants.BDE) + "\t" + this.acs.get(j).getProperty(Constants.BONDREMOVED) + "\n"));
-			}
+//			if(peakAnnotated.containsKey(fragmentMass))
+//			{				
+//				MetFragPreCalculated.results.setPositivePeaks(MetFragPreCalculated.results.getPositivePeaks().append(fragmentMass + "\t" + this.acs.get(j).getProperty(Constants.BONDORDER) + "\t" + this.acs.get(j).getProperty(Constants.BONDLENGTHCHANGE) + "\t" + this.acs.get(j).getProperty(Constants.BDE) + "\t" + this.acs.get(j).getProperty(Constants.BONDREMOVED) + "\t" + peakAnnotated.get(fragmentMass).getPeak().getMass() + "\n"));
+//			}
+//			else
+//			{
+//				MetFragPreCalculated.results.setNegativePeaks(MetFragPreCalculated.results.getNegativePeaks().append(fragmentMass + "\t" + this.acs.get(j).getProperty(Constants.BONDORDER) + "\t" + this.acs.get(j).getProperty(Constants.BONDLENGTHCHANGE) + "\t" + this.acs.get(j).getProperty(Constants.BDE) + "\t" + this.acs.get(j).getProperty(Constants.BONDREMOVED) + "\n"));
+//			}
 		}
 		
 		
@@ -423,9 +424,15 @@ public class AssignFragmentPeak {
 		        	else
 		        		molecularFormulaString = MolecularFormulaManipulator.getString(molecularFormula) + modeString;
 					
+					
+					IAtomContainer fragmentStructureTemp = new AtomContainer(fragmentStructure);
+					fragmentStructureTemp.setProperties(fragmentStructure.getProperties());
+					fragmentStructureTemp.setProperty(Constants.BONDLENGTHCHANGE, fragmentStructure.getProperty(Constants.BONDLENGTHCHANGE) + ";" + maxBondLengthChangeNL);
+					fragmentStructureTemp.setProperty(Constants.BONDORDER, fragmentStructure.getProperty(Constants.BONDORDER) + ";" + minBondOrderNL);
+					
 					MatchedFragment mf = new MatchedFragment(peak, fragmentMass, (matchedMass + (this.hydrogenPenalty * Constants.HYDROGEN_MASS)), fragmentStructure, neutralLossRulesToApply , hydrogenPenalty, molecularFormulaString, matchedAtomsSMARTS);
-					mf.setBondLengthChange(maxBondLengthChangeNL);
-					mf.setBondOrder(minBondOrderNL);
+					
+					
 					matchedFragments.add(mf);
 				}
 			}

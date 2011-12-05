@@ -220,11 +220,15 @@ public class MatchedFragment {
 	 * @return the bond order
 	 */
 	public double getBondOrder() {
-		if(bondOrder == null)
+//		if(bondOrder == null)
 //			return MoleculeTools.getCombinedEnergy((String)this.fragmentStructure.getProperty(Constants.BONDORDER));
 			return MoleculeTools.getCombinedEnergyLeveled((String)this.fragmentStructure.getProperty(Constants.BONDORDER));
-		else
-			return bondOrder;
+//		else
+//			return bondOrder;
+	}
+	
+	public String getBondOrderRaw() {
+		return (String)this.fragmentStructure.getProperty(Constants.BONDORDER);
 	}
 
 	public void setBondLengthChange(double bondLengthChange) {
@@ -237,11 +241,15 @@ public class MatchedFragment {
 	 * @return the bond length change
 	 */
 	public Double getBondLengthChange() {
-		if(bondLengthChange == null)
+//		if(bondLengthChange == null)
 //			return MoleculeTools.getCombinedEnergy((String)this.fragmentStructure.getProperty(Constants.BONDLENGTHCHANGE));
 			return MoleculeTools.getCombinedEnergyLeveled((String)this.fragmentStructure.getProperty(Constants.BONDLENGTHCHANGE));
-		else
-			return bondLengthChange;
+//		else
+//			return bondLengthChange;
+	}
+	
+	public String getBondLengthChangeRaw() {
+		return (String)this.fragmentStructure.getProperty(Constants.BONDLENGTHCHANGE);
 	}
 
 	public void setBde(Double bde) {

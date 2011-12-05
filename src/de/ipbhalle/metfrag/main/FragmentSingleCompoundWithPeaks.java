@@ -22,6 +22,7 @@
 package de.ipbhalle.metfrag.main;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StringReader;
@@ -37,6 +38,7 @@ import org.openscience.cdk.DefaultChemObjectBuilder;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.exception.InvalidSmilesException;
 import org.openscience.cdk.interfaces.IAtomContainer;
+import org.openscience.cdk.io.CMLReader;
 import org.openscience.cdk.io.MDLReader;
 import org.openscience.cdk.smiles.SmilesParser;
 import org.openscience.cdk.tools.CDKHydrogenAdder;
@@ -47,6 +49,7 @@ import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 import de.ipbhalle.metfrag.fragmenter.Fragmenter;
 import de.ipbhalle.metfrag.keggWebservice.KeggWebservice;
 import de.ipbhalle.metfrag.massbankParser.Peak;
+import de.ipbhalle.metfrag.read.CMLMolecule;
 import de.ipbhalle.metfrag.read.CMLTools;
 import de.ipbhalle.metfrag.read.Molfile;
 import de.ipbhalle.metfrag.spectrum.AssignFragmentPeak;
@@ -92,20 +95,20 @@ public class FragmentSingleCompoundWithPeaks {
         //get mol file from kegg....remove "cpd:"
 		String candidateMol = "";
 				
-		candidateMol = KeggWebservice.KEGGgetMol("C00509", "/vol/data/pathways/kegg/mol/");
-		MDLReader reader;
-		List<IAtomContainer> containersList;
-		
-        reader = new MDLReader(new StringReader(candidateMol));
-        ChemFile chemFile = null;
-		try {
-			chemFile = (ChemFile)reader.read((ChemObject)new ChemFile());
-		} catch (CDKException e2) {
-			// TODO Auto-generated catch block
-			e2.printStackTrace();
-		}
-        containersList = ChemFileManipulator.getAllAtomContainers(chemFile);
-        molecule = containersList.get(0);
+//		candidateMol = KeggWebservice.KEGGgetMol("C00509", "/vol/data/pathways/kegg/mol/");
+//		MDLReader reader;
+//		List<IAtomContainer> containersList;
+//		
+//        reader = new MDLReader(new StringReader(candidateMol));
+//        ChemFile chemFile = null;
+//		try {
+//			chemFile = (ChemFile)reader.read((ChemObject)new ChemFile());
+//		} catch (CDKException e2) {
+//			// TODO Auto-generated catch block
+//			e2.printStackTrace();
+//		}
+//        containersList = ChemFileManipulator.getAllAtomContainers(chemFile);
+//        molecule = containersList.get(0);
 		
 //		SmilesParser sp = new SmilesParser(DefaultChemObjectBuilder.getInstance());
 //		try {
@@ -115,6 +118,24 @@ public class FragmentSingleCompoundWithPeaks {
 //			e.printStackTrace();
 //		}				
 //		
+		
+		try {
+			
+			CMLReader reader = new CMLReader(new FileInputStream(new File("/home/swolf/MOPAC/BondOrderTests/Naringenin/PB000122PB000123PB000124PB000125_4.cml")));
+			ChemFile chemFile = (ChemFile)reader.read((ChemObject)new ChemFile());
+			List<IAtomContainer> containersList;
+			List<CMLMolecule> ret = new ArrayList<CMLMolecule>();
+	        containersList = ChemFileManipulator.getAllAtomContainers(chemFile);
+	       	molecule = containersList.get(0);
+		} catch (CDKException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+       
+		
         //add hydrogens
         try {
 			AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(molecule);
@@ -138,7 +159,7 @@ public class FragmentSingleCompoundWithPeaks {
 		        
         Fragmenter fragmenter = new Fragmenter((Vector<Peak>)spectrum.getPeakList().clone(), mzabs, mzppm, mode, true, true, true, false);
         try {
-			l1 = fragmenter.generateFragmentsEfficient(molecule, true, 2, "C00509", false);
+			l1 = fragmenter.generateFragmentsEfficient(molecule, true, 2, "C00509", true);
 		} catch (CDKException e1) {
 			e1.printStackTrace();
 		} catch (Exception e1) {
@@ -181,6 +202,9 @@ public class FragmentSingleCompoundWithPeaks {
 		}
 		
 		StructureRendererTable.DrawHits(molecule, hits, "");
+		for (MatchedFragment fragment : hits) {
+			System.out.println(fragment.getPeak().getMass() + " BLC:" + fragment.getBondLengthChange() + "(" + fragment.getBondLengthChangeRaw() + ")" + " BO:" + fragment.getBondOrder() + "(" + fragment.getBondOrderRaw() + ")");
+		}
 	}
 	
 	
