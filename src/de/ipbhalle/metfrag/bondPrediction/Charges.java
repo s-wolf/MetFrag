@@ -383,7 +383,10 @@ public class Charges {
 	 */
 	public Double getBondLength(String bondID)
 	{
-		return this.bondToBondLength.get(bondID);
+		if(this.bondToBondLength.get(bondID) == null)
+			return 0.0;
+		else
+			return this.bondToBondLength.get(bondID);
 	}
 	
 	public void setResults(List<ChargeResult> results) {
