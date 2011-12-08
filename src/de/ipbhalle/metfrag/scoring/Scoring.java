@@ -278,10 +278,10 @@ public class Scoring {
 		}
 		
 		//optimized parameters 0.6353030459896155 1.0915238557782132 2.271690272229761
-		double a = 0.8050470257810172;
-		double b = 0.9004924210209632;
-		double c = 0.9355410100697816;
-		double d = 0.033436071416133584;
+		double a = 0.9820687515274057;
+		double b = 0.39231025184307844;
+		double c = 3.5865043604129894;
+//		double d = 0.033436071416133584;
 		
 		for (String candidateID : mapToCandidateFragments.keySet()) {
 			double individualScores = 0.0;
@@ -311,10 +311,21 @@ public class Scoring {
 //				 0.905370372011248 0.7602936368046967 2.9802977932529973 0.07976331444216822 Score: 158.9570091735854
 //				2011-11-30 10:36:29.915| 0.605519245363914 0.9044550966839193 1.8045546811729256 0.016615536120909935 Score: 184.26328386626636
 //				2011-11-30 10:45:34.723| 0.8050470257810172 0.9004924210209632 0.9355410100697816 0.033436071416133584 Score: 177.53203623370868
-				if(maxHP == 0)
-					individualScores += ((((Math.pow((tempPeakMass / maxPeakMass), a)) * (Math.pow((tempPeakInt / maxIntensity), b))) * (c * (1 - (tempBondOrder / maxBondOrder)))));
-				else
-					individualScores += ((((Math.pow((tempPeakMass / maxPeakMass), a)) * (Math.pow((tempPeakInt / maxIntensity), b))) * (c * (1 - (tempBondOrder / maxBondOrder)))) + (d * (1 - (tempHP / maxHP))));
+				
+				//bug in scoring function optimization....using same values for int and mass
+				//fixed NL BUG and use NL BO and target function: sum(rrp)*median
+//				2011-12-06 19:25:23.226| 0.38647870592117006 0.7711949058143358 2.873537217254535 0.1813990367861028 Score: 150.11550152848065
+//				2011-12-06 18:55:55.241| 0.348977334605987 0.8750913898107362 2.4647011556436698 0.07126222195714549 Score: 152.94279236370213
+				
+				//bug fixed parameters median*rrp
+//              2011-12-08 12:25:28.085| 0.9820687515274057 0.39231025184307844 3.5865043604129894 Score: 157.32399216852696
+//              2011-12-08 12:35:11.636| 0.8559748053512829 0.5047291590635609 1.9431895490213669 Score: 158.95402179884636
+				
+//				if(maxHP == 0)
+//					individualScores += ((((Math.pow((tempPeakMass / maxPeakMass), a)) * (Math.pow((tempPeakInt / maxIntensity), b))) * (c * (1 - (tempBondOrder / maxBondOrder)))));
+//				else
+//					individualScores += ((((Math.pow((tempPeakMass / maxPeakMass), a)) * (Math.pow((tempPeakInt / maxIntensity), b))) * (c * (1 - (tempBondOrder / maxBondOrder)))) + (d * (1 - (tempHP / maxHP))));
+				individualScores += ((((Math.pow((tempPeakMass / maxPeakMass), a)) * (Math.pow((tempPeakInt / maxIntensity), b))) * (c * (1 - (tempBondOrder / maxBondOrder)))));
 			}
 			
 			//now add the score to the results list

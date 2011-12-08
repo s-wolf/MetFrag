@@ -430,7 +430,7 @@ public class AssignFragmentPeak {
 					fragmentStructureTemp.setProperty(Constants.BONDLENGTHCHANGE, fragmentStructure.getProperty(Constants.BONDLENGTHCHANGE) + ";" + maxBondLengthChangeNL);
 					fragmentStructureTemp.setProperty(Constants.BONDORDER, fragmentStructure.getProperty(Constants.BONDORDER) + ";" + minBondOrderNL);
 					
-					MatchedFragment mf = new MatchedFragment(peak, fragmentMass, (matchedMass + (this.hydrogenPenalty * Constants.HYDROGEN_MASS)), fragmentStructure, neutralLossRulesToApply , hydrogenPenalty, molecularFormulaString, matchedAtomsSMARTS);
+					MatchedFragment mf = new MatchedFragment(peak, fragmentMass, (matchedMass + (this.hydrogenPenalty * Constants.HYDROGEN_MASS)), fragmentStructureTemp, neutralLossRulesToApply , hydrogenPenalty, molecularFormulaString, matchedAtomsSMARTS);
 					
 					
 					matchedFragments.add(mf);
