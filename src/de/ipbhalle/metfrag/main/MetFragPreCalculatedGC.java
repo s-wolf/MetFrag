@@ -122,7 +122,7 @@ public class MetFragPreCalculatedGC {
 	    threadExecutor = Executors.newFixedThreadPool(threads);
 
 		for (int c = 0; c < candidates.size(); c++) {
-			FragmenterThread ft = new FragmenterThread(candidates.get(c).getMolStructure(), candidates.get(c).getFileName(), database, new PubChemWebService(), spectrum, 0.5, 10, 
+			FragmenterThread ft = new FragmenterThread(candidates.get(c).getMolStructure(), candidates.get(c).getFileName(), database, new PubChemWebService(), spectrum, 0.5, 0, 
 					config.isSumFormulaRedundancyCheck(), config.isBreakAromaticRings(), config.getTreeDepth(), false, config.isHydrogenTest(), config.isNeutralLossAdd(), 
 					config.isBondEnergyScoring(), config.isOnlyBreakSelectedBonds(), config, true, config.getMaximumNeutralLossCombination(), true);
 			ft.setGC(true);

@@ -29,9 +29,9 @@ public class MetFragGCSHGeneration {
 //		String pathToJar = "/home/swolf/MOPAC/BondOrderTests/Hill_ProofOfConcept/jar/MetFragPreCalculated.jar";
 //		String pathToPreCalculatedCML = "/home/swolf/MOPAC/BondOrderTests/Hill_ProofOfConcept/mopac_2400/";
 		
-		String writePath = "/home/swolf/MOPAC/100spec_SDF_GC-EIMS/10ppmshMF/";
+		String writePath = "/home/swolf/MOPAC/100spec_SDF_GC-EIMS/shCVAverageshMF/";
 		String pathToSpectra = "/home/swolf/MOPAC/100spec_SDF_GC-EIMS/spectra/";
-		String pathToJar = "/home/swolf/MOPAC/100spec_SDF_GC-EIMS/jar/MetFragPreCalculatedGC_10ppm.jar";
+		String pathToJar = "/home/swolf/MOPAC/100spec_SDF_GC-EIMS/jar/MetFragPreCalculatedGC_CVAverage.jar";
 		String pathToPreCalculatedCML = "/home/swolf/MOPAC/100spec_SDF_GC-EIMS/sdf_calculated/";
 		String configPath = "/home/swolf/MOPAC/100spec_SDF_GC-EIMS/config/";
 		

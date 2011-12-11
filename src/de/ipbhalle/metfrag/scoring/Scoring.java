@@ -278,9 +278,9 @@ public class Scoring {
 		}
 		
 		//optimized parameters 0.6353030459896155 1.0915238557782132 2.271690272229761
-		double a = 0.9820687515274057;
-		double b = 0.39231025184307844;
-		double c = 3.5865043604129894;
+		double a = 0.969420007;
+		double b = 0.4636468136;
+		double c = 1.7775420293;
 //		double d = 0.033436071416133584;
 		
 		for (String candidateID : mapToCandidateFragments.keySet()) {
@@ -320,6 +320,9 @@ public class Scoring {
 				//bug fixed parameters median*rrp
 //              2011-12-08 12:25:28.085| 0.9820687515274057 0.39231025184307844 3.5865043604129894 Score: 157.32399216852696
 //              2011-12-08 12:35:11.636| 0.8559748053512829 0.5047291590635609 1.9431895490213669 Score: 158.95402179884636
+				
+				//CV average values 0,969420007 0,4636468136 1,7775420293
+
 				
 //				if(maxHP == 0)
 //					individualScores += ((((Math.pow((tempPeakMass / maxPeakMass), a)) * (Math.pow((tempPeakInt / maxIntensity), b))) * (c * (1 - (tempBondOrder / maxBondOrder)))));

@@ -400,16 +400,30 @@ public class Fragmenter {
     			String bondLengthChangeString = (String)bond.getProperty(Constants.BONDLENGTHCHANGE);
     			String bondOrderDiffString = (String)bond.getProperty(Constants.BONDORDERDIFF);
     			
-    			if(bondOrderString == null || bondLengthChangeString == null)
+    			if(bondOrderString == null)
+    			{
+        			bondToBondOrder.put(bond.getID(), 2.0);
+    			}
+    			else
+    			{
+        			bondToBondOrder.put(bond.getID(), Double.parseDouble(bondOrderString));
+    			}
+    			
+    			if(bondLengthChangeString == null)
     			{
     				bondToBondLength.put(bond.getID(), 0.0);
-        			bondToBondOrder.put(bond.getID(), 2.0);
-        			bondToBondOrderDiff.put(bond.getID(), 0.0);
     			}
     			else
     			{
     				bondToBondLength.put(bond.getID(), Double.parseDouble(bondLengthChangeString));
-        			bondToBondOrder.put(bond.getID(), Double.parseDouble(bondOrderString));
+    			}
+    			
+    			if(bondOrderDiffString == null)
+    			{
+        			bondToBondOrderDiff.put(bond.getID(), 0.0);
+    			}
+    			else
+    			{
         			bondToBondOrderDiff.put(bond.getID(), Double.parseDouble(bondOrderDiffString));
     			}
     			
@@ -1751,6 +1765,7 @@ public class Fragmenter {
          	    
             }
             partContainer.addBond(builder.newInstance(IBond.class, atom1, atom2));
+            partContainer.getBond(partContainer.getBondCount() - 1).setID(aBond.getID());
             partContainer.getBond(partContainer.getBondCount() - 1).setProperties(aBond.getProperties());
             partContainer.getBond(partContainer.getBondCount() - 1).setFlags(aBond.getFlags());
             partContainer.getBond(partContainer.getBondCount() - 1).setOrder(aBond.getOrder());
