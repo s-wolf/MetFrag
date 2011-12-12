@@ -133,6 +133,7 @@ public class BatchFileProcessingSDF {
 				tmp.setProperty("DatabaseID", result.getCandidateID());
 				tmp.setProperty("Score", result.getScore());
 				tmp.setProperty("NoPeaksExplained", result.getPeaksExplained());
+				tmp.setProperty("RankClustered", result.getRankClustered());
 				
 				//fix for bug in mdl reader setting where it happens that bond.stereo is null when the bond was read in as UP/DOWN (4)
 				for (IBond bond : tmp.bonds()) {

@@ -71,7 +71,7 @@ public class PubChemToDatabaseParallelUpdate implements Runnable {
 	}
 	
 	
-	@Override public void run()
+	public void run()
 	{
 		try {
 			System.out.println("Processing: " + path + file);

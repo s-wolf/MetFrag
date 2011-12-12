@@ -406,29 +406,84 @@ public class MetFrag {
 			}//sleep for 1000 ms
 		}
 
+		
+		
 		Map<Double, Vector<String>> scoresNormalized = Scoring.getCombinedScore(results.getRealScoreMap(), results.getMapCandidateToEnergy(), results.getMapCandidateToHydrogenPenalty());
 		Double[] scores = new Double[scoresNormalized.size()];
 		scores = scoresNormalized.keySet().toArray(scores);
 		Arrays.sort(scores);
-
+		Map<Double, Vector<String>> realScoreMap = scoresNormalized;
+		
 		//now collect the result
 		Map<String, IAtomContainer> candidateToStructure = results.getMapCandidateToStructure();
 		Map<String, Vector<PeakMolPair>> candidateToFragments = results.getMapCandidateToFragments();
-
 		
+		int rankTanimotoGroup = 1;
+
 		List<MetFragResult> resultsToReturn = new ArrayList<MetFragResult>();
 		for (int i = scores.length -1; i >=0 ; i--) {
-			Vector<String> list = scoresNormalized.get(scores[i]);
-			for (String string : list) {
-				//get corresponding structure
-				IAtomContainer tmp = candidateToStructure.get(string);
-				tmp = AtomContainerManipulator.removeHydrogens(tmp);
-				
-				if(isStoreFragments)
-					resultsToReturn.add(new MetFragResult(string, tmp, scores[i], candidateToFragments.get(string).size(), candidateToFragments.get(string)));
-				else
-					resultsToReturn.add(new MetFragResult(string, tmp, scores[i], candidateToFragments.get(string).size()));
+//			Vector<String> list = scoresNormalized.get(scores[i]);
+			
+			List<String> candidateGroup = new ArrayList<String>();
+			Map<String, IAtomContainer> candidateToStructureTemp = new HashMap<String, IAtomContainer>();
+			for (int j = 0; j < realScoreMap.get(scores[i]).size(); j++) {
+				candidateGroup.add(realScoreMap.get(scores[i]).get(j));
+				candidateToStructureTemp.put(realScoreMap.get(scores[i]).get(j), candidateToStructure.get(realScoreMap.get(scores[i]).get(j)));
 			}
+			
+			Similarity sim = null;
+			try {
+				sim = new Similarity(candidateToStructureTemp, true, false);
+			} catch (CDKException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			
+			//now cluster 
+			TanimotoClusterer tanimoto = new TanimotoClusterer(sim.getSimilarityMatrix(), sim.getCandidateToPosition());
+			List<SimilarityGroup> clusteredCpds = tanimoto.clusterCandididates(candidateGroup, 0.95f);
+			List<SimilarityGroup> groupedCandidates = tanimoto.getCleanedClusters(clusteredCpds);
+			
+			for (SimilarityGroup similarityGroup : groupedCandidates) {			
+									
+				List<String> tempSimilar = similarityGroup.getSimilarCompoundsAsArray();				
+				if(similarityGroup.getSimilarCompounds().size() == 0)
+				{
+					String currentID = similarityGroup.getCandidateTocompare();
+					IAtomContainer tmp = candidateToStructure.get(similarityGroup.getCandidateTocompare());
+					tmp = AtomContainerManipulator.removeHydrogens(tmp);
+					
+					if(isStoreFragments)
+						resultsToReturn.add(new MetFragResult(currentID, tmp, scores[i], candidateToFragments.get(currentID).size(), candidateToFragments.get(currentID)));
+					else
+						resultsToReturn.add(new MetFragResult(currentID, tmp, scores[i], candidateToFragments.get(currentID).size()));
+					
+					resultsToReturn.get((resultsToReturn.size() - 1)).setRankClustered(rankTanimotoGroup);
+					
+				}
+				else
+				{
+					for (int k = 0; k < tempSimilar.size(); k++) {
+						String currentID = similarityGroup.getSimilarCompounds().get(k).getCompoundID();
+						IAtomContainer tmp = candidateToStructure.get(similarityGroup.getSimilarCompounds().get(k).getCompoundID());
+						tmp = AtomContainerManipulator.removeHydrogens(tmp);
+						
+						if(isStoreFragments)
+						{
+							resultsToReturn.add(new MetFragResult(similarityGroup.getSimilarCompounds().get(k).getCompoundID(), tmp, scores[i], candidateToFragments.get(currentID).size(), candidateToFragments.get(currentID)));
+						}
+						else
+						{
+							resultsToReturn.add(new MetFragResult(currentID, tmp, scores[i], candidateToFragments.get(currentID).size()));
+						}
+						
+						resultsToReturn.get((resultsToReturn.size() - 1)).setRankClustered(rankTanimotoGroup);
+					}		
+				}
+							
+				rankTanimotoGroup++;
+			}			
 		}		
 		
 		//Output error messages!

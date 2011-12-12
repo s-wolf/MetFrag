@@ -35,6 +35,7 @@ public class MetFragResult {
 	private double score = 0.0;
 	private int peaksExplained = 0;
 	private Vector<PeakMolPair> fragments = null;
+	private int rankClustered = 0;
 	
 	/**
 	 * Instantiates a new MetFrag result.
@@ -107,6 +108,14 @@ public class MetFragResult {
 
 	public Vector<PeakMolPair> getFragments() {
 		return fragments;
+	}
+
+	public int getRankClustered() {
+		return rankClustered;
+	}
+
+	public void setRankClustered(int rankClustered) {
+		this.rankClustered = rankClustered;
 	}
 
 }

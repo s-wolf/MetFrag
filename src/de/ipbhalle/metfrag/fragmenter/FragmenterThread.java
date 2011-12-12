@@ -239,7 +239,7 @@ public class FragmenterThread implements Runnable{
 	}
 	
 	
-	@Override public void run()
+	public void run()
 	{		
 		IAtomContainer molecule = null;
 		
