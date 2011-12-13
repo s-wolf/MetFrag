@@ -227,6 +227,36 @@ public class MatchedFragment {
 //			return bondOrder;
 	}
 	
+	/**
+	 * Gets the bond order weighted (1 - BO/3).
+	 *
+	 * @return the bond order weighted
+	 */
+	public double getBondOrderWeighted(){
+		return MoleculeTools.getCombinedEnergyLeveled3((String)this.fragmentStructure.getProperty(Constants.BONDORDER));
+	}
+	
+	
+	
+	
+	/**
+	 * Gets the number of bonds fragmented to generate this fragment
+	 *
+	 * @return the number of bonds fragmented
+	 */
+	public double getNumberOfBondsFragmented(){
+		double numberOfBonds = 0.0;
+		String bondOrder = (String)this.fragmentStructure.getProperty(Constants.BONDORDER);
+		String[] treeDepthArray = bondOrder.split(";");
+		numberOfBonds += treeDepthArray.length;
+		for (int i = 0; i < treeDepthArray.length; i++) {
+			//ring bond
+			if(treeDepthArray[i].split(",").length > 1)
+				numberOfBonds++;
+		}
+		return numberOfBonds;
+	}
+	
 	public String getBondOrderRaw() {
 		return (String)this.fragmentStructure.getProperty(Constants.BONDORDER);
 	}

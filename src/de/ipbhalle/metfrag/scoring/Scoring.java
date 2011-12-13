@@ -278,9 +278,9 @@ public class Scoring {
 		}
 		
 		//optimized parameters 0.6353030459896155 1.0915238557782132 2.271690272229761
-		double a = 0.969420007;
-		double b = 0.4636468136;
-		double c = 1.7775420293;
+		double a = 0.92;
+		double b = 0.65;
+		double c = 2.58;
 //		double d = 0.033436071416133584;
 		
 		for (String candidateID : mapToCandidateFragments.keySet()) {
@@ -294,7 +294,7 @@ public class Scoring {
 			//iterate over this candidates' fragments and get the max values
 			for (MatchedFragment fragment : mapToCandidateFragments.get(candidateID)) {
 				tempBondLength = fragment.getBondLengthChange();
-				tempBondOrder = fragment.getBondOrder();
+				tempBondOrder = fragment.getBondOrderWeighted();
 				tempPeakMass = fragment.getPeak().getMass();
 				tempPeakInt = fragment.getPeak().getIntensity();
 				tempBDE = fragment.getBde();
@@ -328,7 +328,8 @@ public class Scoring {
 //					individualScores += ((((Math.pow((tempPeakMass / maxPeakMass), a)) * (Math.pow((tempPeakInt / maxIntensity), b))) * (c * (1 - (tempBondOrder / maxBondOrder)))));
 //				else
 //					individualScores += ((((Math.pow((tempPeakMass / maxPeakMass), a)) * (Math.pow((tempPeakInt / maxIntensity), b))) * (c * (1 - (tempBondOrder / maxBondOrder)))) + (d * (1 - (tempHP / maxHP))));
-				individualScores += ((((Math.pow((tempPeakMass / maxPeakMass), a)) * (Math.pow((tempPeakInt / maxIntensity), b))) * (c * (1 - (tempBondOrder / maxBondOrder)))));
+				
+				individualScores += Math.pow((tempPeakMass / maxPeakMass), a) * Math.pow((tempPeakInt / maxIntensity), b) * Math.pow(tempBondOrder, c);
 			}
 			
 			//now add the score to the results list
