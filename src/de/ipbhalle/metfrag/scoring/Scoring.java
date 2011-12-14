@@ -278,9 +278,9 @@ public class Scoring {
 		}
 		
 		//optimized parameters 0.6353030459896155 1.0915238557782132 2.271690272229761
-		double a = 0.85;
-		double b = 0.58;
-		double c = 0.52;
+		double a = 0.90;
+		double b = 0.55;
+		double c = 0.47;
 //		double d = 0.033436071416133584;
 		
 		for (String candidateID : mapToCandidateFragments.keySet()) {

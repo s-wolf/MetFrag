@@ -153,11 +153,24 @@ public class MoleculeTools {
 			String[] arr2 = arr1[i].split(",");
 			double tempEnergy = 1.0;
 			for (int j = 0; j < arr2.length; j++) {
-//				(1 - (d / 3.0))
-				if(Double.parseDouble(arr2[j]) > 3)
-					tempEnergy *= 0;
-				else
-					tempEnergy *= (1 - (Double.parseDouble(arr2[j]) / 3.0));
+				double d = Double.parseDouble(arr2[j]);
+
+//				if(d == 2.0)
+//        			d = 1.5;
+//        		
+//        		if(d > 2)
+//        			d = 2.0;
+//        		
+//                tempBO *= (1 - (d / 2.0));
+				
+				//fix for aromatic bonds
+				if(d == 2)
+					d = 1.5;
+				
+				if(d > 2)
+					d = 2.0;
+
+				tempEnergy *= (1 - (d / 2.0));
 			}
 //			if(arr2.length > 1)
 //				bondEnergy += (tempEnergy / arr2.length);

@@ -156,6 +156,8 @@ public class MopacOutParser {
 						line = br.readLine();
 					}
 					
+					if(bondOrder.size()==numberOfAtoms && bondOrder.get(""+numberOfAtoms).size() == numberOfAtoms)
+						break;
 
 					do
 					{
@@ -272,53 +274,58 @@ public class MopacOutParser {
 //		MopacOutParser parser = new MopacOutParser("/tmp/molMopIN7921009951524815490.OUT", 53);
 //		MopacOutParser parser = new MopacOutParser("C:\\Users\\Basti\\Export\\10362588.sdfmolMopIN5044085332500263827.OUT", 40);
 		
-		File folder = new File("C:\\Users\\Basti\\Downloads\\BR1N28\\");
-		File[] files = folder.listFiles();
-		StringBuilder sb = new StringBuilder();
+		MopacOutParser parser = new MopacOutParser("/tmp/074_831_C2_N1F3.H1.sdfmolMopIN8430374729800272297.OUT", 6);
+		System.out.println(parser.getHeatOfFormation());
+		System.out.println(parser.getBondOrder());
 		
-		for (int i = 0; i < files.length; i++) {
-			if(!files[i].getName().split("\\.")[1].equals("out"))
-				continue;
-			
-			FileReader fr = null;
-			try {
-				fr = new FileReader(files[i]);
-				BufferedReader br = new BufferedReader(fr);
-				String line = br.readLine();
-				
-				
-				while (line != null)
-				{
-					if(line.contains("FINAL HEAT OF FORMATION"))
-					{
-						String[] tmpArray = line.split("=");
-						String[] hofArray = tmpArray[1].split("\\sK");
-						double heatOfFormation = Double.parseDouble(hofArray[0].trim());
-						sb.append(files[i].getName() + "\t" + heatOfFormation + "\n");
-						break;
-					}
-					
-					line = br.readLine();
-				}
-				
-			} catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
 		
-		FileWriter fw;
-		try {
-			fw = new FileWriter(folder.getAbsolutePath() + "\\" + "resultingHOF.txt");
-			fw.write(sb.toString());
-			fw.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//		File folder = new File("C:\\Users\\Basti\\Downloads\\BR1N28\\");
+//		File[] files = folder.listFiles();
+//		StringBuilder sb = new StringBuilder();
+//		
+//		for (int i = 0; i < files.length; i++) {
+//			if(!files[i].getName().split("\\.")[1].equals("out"))
+//				continue;
+//			
+//			FileReader fr = null;
+//			try {
+//				fr = new FileReader(files[i]);
+//				BufferedReader br = new BufferedReader(fr);
+//				String line = br.readLine();
+//				
+//				
+//				while (line != null)
+//				{
+//					if(line.contains("FINAL HEAT OF FORMATION"))
+//					{
+//						String[] tmpArray = line.split("=");
+//						String[] hofArray = tmpArray[1].split("\\sK");
+//						double heatOfFormation = Double.parseDouble(hofArray[0].trim());
+//						sb.append(files[i].getName() + "\t" + heatOfFormation + "\n");
+//						break;
+//					}
+//					
+//					line = br.readLine();
+//				}
+//				
+//			} catch (FileNotFoundException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			} catch (IOException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//		}
+//		
+//		FileWriter fw;
+//		try {
+//			fw = new FileWriter(folder.getAbsolutePath() + "\\" + "resultingHOF.txt");
+//			fw.write(sb.toString());
+//			fw.close();
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 		
 		
 //		//System.out.println(parser.bondOrder.get("1").toString());
