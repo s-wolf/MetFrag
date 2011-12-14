@@ -278,9 +278,10 @@ public class Scoring {
 		}
 		
 		//optimized parameters 0.6353030459896155 1.0915238557782132 2.271690272229761
-		double a = 0.90;
+		//optimized bo norm 2 aromatic bonds 1.5: 0.844787344	0.5533758089	0.2882673733
+		double a = 0.84;
 		double b = 0.55;
-		double c = 0.47;
+		double c = 0.29;
 //		double d = 0.033436071416133584;
 		
 		for (String candidateID : mapToCandidateFragments.keySet()) {
