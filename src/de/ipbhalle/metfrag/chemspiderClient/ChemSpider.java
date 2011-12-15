@@ -39,8 +39,6 @@ import de.ipbhalle.metfrag.tools.MolecularFormulaTools;
 
 public class ChemSpider {
 	
-	private static String token = "4d6c67db-65d0-474e-9f5c-f70f5c85111c";
-	
 	/**
 	 * Gets Chemspider compound ID's by mass.
 	 * 
@@ -92,7 +90,7 @@ public class ChemSpider {
 	 * 
 	 * @throws RemoteException the remote exception
 	 */
-	public static String getMolByID(String ID) throws RemoteException
+	public static String getMolByID(String ID, String token) throws RemoteException
 	{
 		MassSpecAPISoapProxy chemSpiderProxy = new MassSpecAPISoapProxy();
 		String mol = chemSpiderProxy.getRecordMol(ID, false, token);
@@ -109,7 +107,7 @@ public class ChemSpider {
 	 * @throws RemoteException the remote exception
 	 * @throws CDKException 
 	 */
-	public static IAtomContainer getMol(String ID, boolean getAll) throws RemoteException, CDKException
+	public static IAtomContainer getMol(String ID, boolean getAll, String token) throws RemoteException, CDKException
 	{
 		MassSpecAPISoapProxy chemSpiderProxy = new MassSpecAPISoapProxy();
 		String mol = chemSpiderProxy.getRecordMol(ID, false, token);
@@ -147,7 +145,7 @@ public class ChemSpider {
 	 * 
 	 * @throws RemoteException the remote exception
 	 */
-	public static ExtendedCompoundInfo getExtendedCpdInfo(int key) throws RemoteException
+	public static ExtendedCompoundInfo getExtendedCpdInfo(int key, String token) throws RemoteException
 	{
 		MassSpecAPISoapProxy chemSpiderProxy = new MassSpecAPISoapProxy();
 		ExtendedCompoundInfo cpdInfo = chemSpiderProxy.getExtendedCompoundInfo(key, token);
