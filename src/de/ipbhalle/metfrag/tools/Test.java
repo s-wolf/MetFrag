@@ -50,6 +50,8 @@ public class Test {
 	 */
 	public static void main(String[] args) {
 		
+		System.out.println(Math.floor(89.94));
+		
 		System.out.println(291.0758-(Constants.ELECTRON_MASS+Constants.HYDROGEN_MASS));
 		System.out.println("Elektronenmasse: " + Constants.ELECTRON_MASS);
 		System.out.println("Wasserstoffmasse: " + Constants.HYDROGEN_MASS);

@@ -41,6 +41,7 @@ import de.ipbhalle.metfrag.main.Config;
 import de.ipbhalle.metfrag.main.MetFrag;
 import de.ipbhalle.metfrag.main.MetFragPreCalculated;
 import de.ipbhalle.metfrag.main.MetFragPreCalculatedGC;
+import de.ipbhalle.metfrag.main.MetFragPreCalculatedPubChem2006;
 import de.ipbhalle.metfrag.massbankParser.Peak;
 import de.ipbhalle.metfrag.pubchem.PubChemWebService;
 import de.ipbhalle.metfrag.read.CMLTools;
@@ -78,6 +79,7 @@ public class FragmenterThread implements Runnable{
 	private int neutralLossCombination;
 	private boolean isPreCalculated = false;
 	private boolean isGC = false;
+	private boolean isPubChem2006 = false;
 	
 	/**
 	 * Instantiates a new pubChem search thread. ONLINE
@@ -324,6 +326,8 @@ public class FragmenterThread implements Runnable{
 	        	System.out.println("OUT OF MEMORY ERROR! " + treeDepth);
 	        	if(isGC)
 					MetFragPreCalculatedGC.results.addToCompleteLog("Error: " + candidate + " Message: " + e.getMessage());
+	        	if(isPubChem2006)
+					MetFragPreCalculatedPubChem2006.results.addToCompleteLog("Error: " + candidate + " Message: " + e.getMessage());
 	        	if(isPreCalculated)
 	        		MetFragPreCalculated.results.addToCompleteLog("Error: " + candidate + " Message: " + e.getMessage());
 	        	else
@@ -380,6 +384,22 @@ public class FragmenterThread implements Runnable{
 					MetFragPreCalculatedGC.results.getMapCandidateToFragments().put(candidate, afp.getHits());
 					
 					realScoreMap = MetFragPreCalculatedGC.results.getRealScoreMap();
+				}
+				else if(isPubChem2006)
+				{
+					//set the added up energy of every fragment
+					MetFragPreCalculatedPubChem2006.results.getMapCandidateToEnergy().put(candidate, currentBondEnergy);
+					MetFragPreCalculatedPubChem2006.results.getMapCandidateToHydrogenPenalty().put(candidate, score.getPenalty());
+					MetFragPreCalculatedPubChem2006.results.getMapCandidateToPartialChargesDiff().put(candidate, score.getPartialChargesDiff());
+					
+					//also output the optimization matrix if needed
+					MetFragPreCalculatedPubChem2006.results.getCandidateToOptimizationMatrixEntries().put(candidate, score.getOptimizationMatrixEntries());	
+					
+					//also add the structure to results file
+					MetFragPreCalculatedPubChem2006.results.getMapCandidateToStructure().put(candidate, molecule);
+					MetFragPreCalculatedPubChem2006.results.getMapCandidateToFragments().put(candidate, afp.getHits());
+					
+					realScoreMap = MetFragPreCalculatedPubChem2006.results.getRealScoreMap();
 				}
 				else if(isPreCalculated)
 				{
@@ -462,6 +482,11 @@ public class FragmenterThread implements Runnable{
 				{
 					MetFragPreCalculatedGC.results.addToCompleteLog("\nCandidate: " + candidate + "\t #Peaks: " + spectrum.getPeakList().size() + "\t #Found: " + hits.size());
 					MetFragPreCalculatedGC.results.addToCompleteLog("\tPeaks: " + peaks);
+				}
+				if(isPubChem2006)
+				{
+					MetFragPreCalculatedPubChem2006.results.addToCompleteLog("\nCandidate: " + candidate + "\t #Peaks: " + spectrum.getPeakList().size() + "\t #Found: " + hits.size());
+					MetFragPreCalculatedPubChem2006.results.addToCompleteLog("\tPeaks: " + peaks);
 				}
 				if(isPreCalculated)
 				{
@@ -583,6 +608,16 @@ public class FragmenterThread implements Runnable{
 
 	public void setGC(boolean isGC) {
 		this.isGC = isGC;
+	}
+
+
+	public boolean isPubChem2006() {
+		return isPubChem2006;
+	}
+
+
+	public void setPubChem2006(boolean isPubChem2006) {
+		this.isPubChem2006 = isPubChem2006;
 	}
 
 }

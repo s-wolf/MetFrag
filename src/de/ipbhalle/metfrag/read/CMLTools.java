@@ -255,6 +255,161 @@ public class CMLTools {
 	/**
 	 * Read all cml files in given folder and its mol. formula subfolders given as array and return a List.
 	 * File extension has to be .cml! It returns the mols with the lowest heat of formation!
+	 * Hill Data!
+	 *
+	 * @param folder the folder
+	 * @param correctCandidateString the correct candidate string
+	 * @return the list
+	 * @throws FileNotFoundException the file not found exception
+	 * @throws CDKException the cDK exception
+	 */
+	public static List<CMLMolecule> readIDLowestHoF(File folder, String sumFormula, String ID) throws FileNotFoundException, CDKException
+	{
+		
+		//test: /home/swolf/MOPAC/Hill-Riken-MM48_POSITIVE_PubChem_LocalMass2009_CHONPS_NEW/mopac_4800/C40H39N3O3
+		
+		CMLReader reader;
+		List<CMLMolecule> containersList = null;
+		List<CMLMolecule> ret = new ArrayList<CMLMolecule>();
+
+		File folderTemp = new File(folder.getAbsolutePath() + "/" + sumFormula);
+		File files[] = folderTemp.listFiles();
+		if(files == null)
+		{
+			System.err.println("Error: " + folder.getAbsolutePath() + "/" + sumFormula + " does not exist...missing candidate(s)!");
+			return null;
+		}
+		
+		Arrays.sort(files);
+		String currentMoleculeID = "";
+		for(int i=0;i<files.length;i++)
+		{
+			if(!files[i].isFile())
+				continue;
+			
+			if(files[i].getName().contains("Combined"))
+				continue;
+			
+			if(!currentMoleculeID.equals("") && !currentMoleculeID.equals(files[i].getName().split("_")[0]))
+			{
+		    	if(i == (files.length - 1))
+		    		containersList.add(new CMLMolecule(files[i], files[i].getName()));
+		    	
+				double minHof = Double.MAX_VALUE;
+				CMLMolecule currentBestSolution = null;
+				for (CMLMolecule mol : containersList) {
+//						System.out.println(mol.getMolFile().toString());
+					IAtomContainer temp = mol.getMolStructure();
+					double currentHof = Double.parseDouble(temp.getID());
+					if(currentHof < minHof)
+					{
+						minHof = currentHof;
+						currentBestSolution = mol;
+					}
+				}
+				ret.add(currentBestSolution); //one container per file
+				containersList = new ArrayList<CMLMolecule>();
+		    	containersList.add(new CMLMolecule(files[i], files[i].getName()));
+				currentMoleculeID = files[i].getName().split("_")[0];
+				
+				return ret;
+			}
+			
+			
+			if(!files[i].getName().split("_")[0].equals(ID))
+				continue;
+			
+			
+			int dotPos = files[i].getName().lastIndexOf(".");
+		    String extension = files[i].getName().substring(dotPos);
+		    
+		    if(currentMoleculeID.equals(""))
+		    {
+		    	containersList = new ArrayList<CMLMolecule>();
+		    	containersList.add(new CMLMolecule(files[i], files[i].getName()));
+		    	currentMoleculeID = files[i].getName().split("_")[0];
+		    }
+		    //single last molecule differs from previous
+		    else if(!currentMoleculeID.equals(files[i].getName().split("_")[0]) && i == (files.length - 1))
+			{
+		    	if(i == (files.length - 1))
+		    		ret.add(new CMLMolecule(files[i], files[i].getName()));
+		    	
+				double minHof = Double.MAX_VALUE;
+				CMLMolecule currentBestSolution = null;
+				for (CMLMolecule mol : containersList) {
+//						System.out.println(mol.getMolFile().toString());
+					IAtomContainer temp = mol.getMolStructure();
+					double currentHof = Double.parseDouble(temp.getID());
+					if(currentHof < minHof)
+					{
+						minHof = currentHof;
+						currentBestSolution = mol;
+					}
+				}
+				ret.add(currentBestSolution); //one container per file
+				containersList = new ArrayList<CMLMolecule>();
+		    	containersList.add(new CMLMolecule(files[i], files[i].getName()));
+				currentMoleculeID = files[i].getName().split("_")[0];
+			}
+		    //read also last molecule
+		    else if(currentMoleculeID.equals(files[i].getName().split("_")[0]) && i == (files.length - 1))
+			{
+		    	if(i == (files.length - 1))
+		    		containersList.add(new CMLMolecule(files[i], files[i].getName()));
+		    	
+				double minHof = Double.MAX_VALUE;
+				CMLMolecule currentBestSolution = null;
+				for (CMLMolecule mol : containersList) {
+//						System.out.println(mol.getMolFile().toString());
+					IAtomContainer temp = mol.getMolStructure();
+					double currentHof = Double.parseDouble(temp.getID());
+					if(currentHof < minHof)
+					{
+						minHof = currentHof;
+						currentBestSolution = mol;
+					}
+				}
+				ret.add(currentBestSolution); //one container per file
+				containersList = new ArrayList<CMLMolecule>();
+		    	containersList.add(new CMLMolecule(files[i], files[i].getName()));
+				currentMoleculeID = files[i].getName().split("_")[0];
+			}
+		    else if(!currentMoleculeID.equals(files[i].getName().split("_")[0]))
+			{
+		    	if(i == (files.length - 1))
+		    		containersList.add(new CMLMolecule(files[i], files[i].getName()));
+		    	
+				double minHof = Double.MAX_VALUE;
+				CMLMolecule currentBestSolution = null;
+				for (CMLMolecule mol : containersList) {
+//						System.out.println(mol.getMolFile().toString());
+					IAtomContainer temp = mol.getMolStructure();
+					double currentHof = Double.parseDouble(temp.getID());
+					if(currentHof < minHof)
+					{
+						minHof = currentHof;
+						currentBestSolution = mol;
+					}
+				}
+				ret.add(currentBestSolution); //one container per file
+				containersList = new ArrayList<CMLMolecule>();
+		    	containersList.add(new CMLMolecule(files[i], files[i].getName()));
+				currentMoleculeID = files[i].getName().split("_")[0];
+			}
+			else if(extension.equals(".cml"))
+			{
+				containersList.add(new CMLMolecule(files[i], files[i].getName()));
+			}				
+		}
+	
+        return ret;  
+	}
+	
+	
+	/**
+	 * Read all cml files in given folder and its mol. formula subfolders given as array and return a List.
+	 * File extension has to be .cml! It returns the mols with the lowest heat of formation!
 	 * Emma GC Data!
 	 *
 	 * @param folder the folder

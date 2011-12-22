@@ -27,7 +27,7 @@ public class SaveCandidates {
 		Query query = new Query(config.getUsernamePostgres(), config.getPasswordPostgres(), config.getJdbcPostgres());
 		
 		
-		File folder = new File("/home/swolf/MassBankData/TestSpectra/MM48Merged/");
+		File folder = new File("/home/swolf/MOPAC/RIKEN/spectra/");
 		File[] files = folder.listFiles();
 		for (int i = 0; i < files.length; i++) {
 			WrapperSpectrum spectrum = new WrapperSpectrum(files[i].toString());
@@ -36,7 +36,7 @@ public class SaveCandidates {
 			List<CandidateMetChem> res = query.queryByMass((exactMass - deviation), (exactMass + deviation), "pubchem");
 			
 			
-			String folderToWrite = folder + "/" + files[i].getName().split("\\.")[0] + "/";
+			String folderToWrite = folder.getParent() + "/candidates/" + files[i].getName().split("\\.")[0] + "/";
 			new File(folderToWrite).mkdir();
 			
 			query.openConnection();

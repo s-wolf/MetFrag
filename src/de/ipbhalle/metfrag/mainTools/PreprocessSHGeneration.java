@@ -50,9 +50,18 @@ public class PreprocessSHGeneration {
 //		String pathToSDF = "/home/swolf/MOPAC/ProofOfConcept/Hill_OnlyCorrect/";
 //		String pathToJar = "/home/swolf/MOPAC/BondOrderTests/Hill_ProofOfConcept/jar/PreprocessMolecules.jar";
 		
-		String writePath = "/home/swolf/MOPAC/Hill-Riken-MM48_POSITIVE_PubChem_LocalMass2009_CHONPS_NEW/sh/";
-		String pathToSDF = "/home/swolf/MOPAC/Hill-Riken-MM48_POSITIVE_PubChem_LocalMass2009_CHONPS_NEW/pubchemClustered/";
-		String pathToJar = "/home/swolf/MOPAC/Hill-Riken-MM48_POSITIVE_PubChem_LocalMass2009_CHONPS_NEW/jar/PreprocessMolecules.jar";
+//		String writePath = "/home/swolf/MOPAC/Hill-Riken-MM48_POSITIVE_PubChem_LocalMass2009_CHONPS_NEW/sh/";
+//		String pathToSDF = "/home/swolf/MOPAC/Hill-Riken-MM48_POSITIVE_PubChem_LocalMass2009_CHONPS_NEW/pubchemClustered/";
+//		String pathToJar = "/home/swolf/MOPAC/Hill-Riken-MM48_POSITIVE_PubChem_LocalMass2009_CHONPS_NEW/jar/PreprocessMolecules.jar";
+		
+//		String writePath = "/home/swolf/MOPAC/MM48/sh/";
+//		String pathToSDF = "/home/swolf/MOPAC/MM48/candidates/";
+//		String pathToJar = "/home/swolf/MOPAC/MM48/jar/PreprocessMolecules.jar";
+		
+		String writePath = "/home/swolf/MOPAC/RIKEN/sh/";
+		String pathToSDF = "/home/swolf/MOPAC/RIKEN/candidates/";
+		String pathToJar = "/home/swolf/MOPAC/RIKEN/jar/PreprocessMolecules.jar";
+		
 		
 //		String writePath = "/home/swolf/MOPAC/100spec_SDF_GC-EIMS/sh/";
 //		String pathToSDF = "/home/swolf/MOPAC/100spec_SDF_GC-EIMS/sdf/single/";
@@ -69,11 +78,11 @@ public class PreprocessSHGeneration {
 		}
 		else
 		{
-			pathToJar = args[0];
-			pathToSDF = args[1];
-			writePath = args[2];
-			mopacRuntime = args[3];
-			ffSteps = args[4];
+//			pathToJar = args[0];
+//			pathToSDF = args[1];
+//			writePath = args[2];
+//			mopacRuntime = args[3];
+//			ffSteps = args[4];
 				
 		}
 		
@@ -106,7 +115,7 @@ public class PreprocessSHGeneration {
 			out.write("#!/bin/bash");
 			out.newLine();
 			//used for GC MS data
-			out.write("java -jar " + pathToJar + " \"" + file.getPath() + "\"" + " \"" + new File(writePath).getParent() + "/sdf_calculated/" + file.getName().split("\\.")[0]  + "/mopac_" + mopacRuntime + "/\" " + mopacRuntime + " " + ffSteps + " " + new File(writePath).getParent() + "/log_" + dateString + ".txt");
+			out.write("java -jar " + pathToJar + " \"" + file.getPath() + "\"" + " \"" + new File(writePath).getParent() + "/sdf_calculated/" + "mopac_" + mopacRuntime + "/\" " + mopacRuntime + " " + ffSteps + " " + new File(writePath).getParent() + "/log_" + dateString + ".txt");
 //			out.write("java -jar " + pathToJar + " \"" + file.getPath() + "\"" + " \"" + new File(new File(file.getParent()).getParent()).getParent() + "/pubchemClusteredMopac/mopac_" + mopacRuntime + "/\" " + mopacRuntime + " " + ffSteps);
 //	  		out.write("java -jar /home/swolf/MOPAC/BATCH/jar/PreprocessMolecules.jar \"" + file.getPath() + "\"" + " \"" + file.getParent() + "/mopac_1200/\"" + " 1200 600");
 		  	out.close();

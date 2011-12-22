@@ -412,10 +412,10 @@ public class BondPrediction {
 								{
 									//set bond order
 									protonatedMol.getBond(AtomContainerManipulator.getAtomById(protonatedMol, cpd2BondToDistance.get(bondID).getAtom1ID()), AtomContainerManipulator.getAtomById(protonatedMol, cpd2BondToDistance.get(bondID).getAtom2ID()))
-										.setProperty(Constants.BONDORDER, 2.0);									
-									currentBondOrder = 2.0;
+										.setProperty(Constants.BONDORDER, 1.5);									
+									currentBondOrder = 1.5;
 									currentBondOrderDiff = 0.0;
-									this.bondToBondOrder = saveMinimum(bondToBondOrder, cpd1BondToDistance.get(bondID).getBondID(), 2.0);
+									this.bondToBondOrder = saveMinimum(bondToBondOrder, cpd1BondToDistance.get(bondID).getBondID(), 1.5);
 									this.bondToBondOrderDiff = saveMaximum(bondToBondOrderDiff, cpd1BondToDistance.get(bondID).getBondID(), 0.0);
 								}
 								else

@@ -373,16 +373,16 @@ public class Fragmenter {
         }
     	
     	//calculate molecules descriptors: XlogP, AlogP and MannholdLogP
-        this.moleculeDescriptors = new HashMap<String, Object>();
-        XLogPDescriptor logP = new XLogPDescriptor();
-        DescriptorValue logPValue = logP.calculate(this.originalMolecule);
-		this.moleculeDescriptors.put("XLogP", logPValue);
-		MannholdLogPDescriptor mLogP = new MannholdLogPDescriptor();
-		DescriptorValue mlogPValue = mLogP.calculate(this.originalMolecule);
-		this.moleculeDescriptors.put("MannholdLogP", mlogPValue);
-		ALOGPDescriptor aLogP = new ALOGPDescriptor();
-		DescriptorValue alogPValue = aLogP.calculate(this.originalMolecule);
-		this.moleculeDescriptors.put("ALogP", alogPValue);
+//        this.moleculeDescriptors = new HashMap<String, Object>();
+//        XLogPDescriptor logP = new XLogPDescriptor();
+//        DescriptorValue logPValue = logP.calculate(this.originalMolecule);
+//		this.moleculeDescriptors.put("XLogP", logPValue);
+//		MannholdLogPDescriptor mLogP = new MannholdLogPDescriptor();
+//		DescriptorValue mlogPValue = mLogP.calculate(this.originalMolecule);
+//		this.moleculeDescriptors.put("MannholdLogP", mlogPValue);
+//		ALOGPDescriptor aLogP = new ALOGPDescriptor();
+//		DescriptorValue alogPValue = aLogP.calculate(this.originalMolecule);
+//		this.moleculeDescriptors.put("ALogP", alogPValue);
 
 
     	
@@ -450,7 +450,7 @@ public class Fragmenter {
     {
     	for (IBond bond : ac.bonds()) {
     		bond.setProperty(Constants.BONDLENGTHCHANGE, "0.0");
-    		bond.setProperty(Constants.BONDORDER, "2.0");		
+    		bond.setProperty(Constants.BONDORDER, "1.5");		
 		}
     }
     
