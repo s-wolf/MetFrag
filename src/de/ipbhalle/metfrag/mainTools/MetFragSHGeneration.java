@@ -27,9 +27,9 @@ public class MetFragSHGeneration {
 //		String pathToJar = "/home/swolf/MOPAC/BondOrderTests/Hill_ProofOfConcept/jar/MetFragPreCalculated.jar";
 //		String pathToPreCalculatedCML = "/home/swolf/MOPAC/BondOrderTests/Hill_ProofOfConcept/mopac_2400/";
 		
-		String writePath = "/home/swolf/MOPAC/Hill-Riken-MM48_POSITIVE_PubChem_LocalMass2009_CHONPS_NEW/MFNLFixWNLNEWsh/";
+		String writePath = "/home/swolf/MOPAC/Hill-Riken-MM48_POSITIVE_PubChem_LocalMass2009_CHONPS_NEW/MFPubChemsh/";
 		String pathToSpectra = "/home/swolf/MOPAC/Hill-Riken-MM48_POSITIVE_PubChem_LocalMass2009_CHONPS_NEW/spectra/";
-		String pathToJar = "/home/swolf/MOPAC/Hill-Riken-MM48_POSITIVE_PubChem_LocalMass2009_CHONPS_NEW/jar/MetFragPreCalculated_Rrp_CVAverage_new.jar";
+		String pathToJar = "/home/swolf/MOPAC/Hill-Riken-MM48_POSITIVE_PubChem_LocalMass2009_CHONPS_NEW/jar/MetFragPreCalculated_FINAL.jar";
 		String pathToPreCalculatedCML = "/home/swolf/MOPAC/Hill-Riken-MM48_POSITIVE_PubChem_LocalMass2009_CHONPS_NEW/mopac_4800/";
 		String configPath = "/home/swolf/MOPAC/Hill-Riken-MM48_POSITIVE_PubChem_LocalMass2009_CHONPS_NEW/config/";
 		
