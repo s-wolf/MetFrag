@@ -152,7 +152,7 @@ public class StructureToFile {
 //        generators.add(new BasicBondGenerator());
     	generators.add(new RingGenerator());
         generators.add(new BasicAtomGenerator());
-        generators.add(new AtomNumberGenerator());
+//        generators.add(new AtomNumberGenerator());
 //        generators.add(new RadicalGenerator());
         
 
@@ -174,8 +174,8 @@ public class StructureToFile {
     		mol = sdg.getMolecule();
     	   	
     		RendererModel rm = renderer.getRenderer2DModel();
-    		rm.set(KekuleStructure.class, true); 
-            rm.set(AtomNumberGenerator.Offset.class, new javax.vecmath.Vector2d(10,0));
+    		rm.set(KekuleStructure.class, false); 
+//            rm.set(AtomNumberGenerator.Offset.class, new javax.vecmath.Vector2d(10,0));
         	
             Properties p = new Properties();
             p.setProperty("PageSize","A4");
@@ -224,13 +224,13 @@ public class StructureToFile {
 			
         	PubChemWebService pw = new PubChemWebService();
 //        	String PCID = "3365";
-        	String PCID = "8858";
+        	String PCID = "5304";
         	IAtomContainer container = pw.getSingleMol(PCID, true);
         	container = AtomContainerManipulator.removeHydrogens(container);
-//        	IMolecule mol = new Molecule(container);
-        	SmilesParser sp = new SmilesParser(DefaultChemObjectBuilder.getInstance());
-        	IMolecule mol = sp.parseSmiles("CC(=CC(=O)C)C");
-			
+        	IMolecule mol = new Molecule(container);
+//        	SmilesParser sp = new SmilesParser(DefaultChemObjectBuilder.getInstance());
+//        	IMolecule mol = sp.parseSmiles("CC(=CC(=O)C)C");
+//			
 			sr = new StructureToFile(800,800, "C:\\Users\\Basti\\Export\\", false, false);
 //			sr.writeMOL2PNGFile(mol, PCID + ".png");
 			sr.writeMOL2SVGFile(mol, PCID + ".svg");
