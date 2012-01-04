@@ -1325,7 +1325,12 @@ public class Fragmenter {
 	    	{
 	    		this.countIsomorph++;
 	    		//now check if this fragment energy to create the fragment is lower 
-	    		if(molecularFormulaRedundancyCheck || smilesRedundancyCheck)
+	    		
+	    		if(realIsomorphism)
+	    		{
+					addFragmentToListMap(fragment, currentSumFormula);
+	    		}
+	    		else if(molecularFormulaRedundancyCheck || smilesRedundancyCheck)
 	    		{
 	    			if(bondLengthChangePreferred)
 	    			{
@@ -1592,6 +1597,8 @@ public class Fragmenter {
         	molformulaToFragMap.put(currentSumFormula, temp);
         }
     }
+    
+    
     
     /**
      * Set new minweight.

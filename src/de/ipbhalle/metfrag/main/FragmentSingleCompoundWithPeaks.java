@@ -121,7 +121,7 @@ public class FragmentSingleCompoundWithPeaks {
 		
 		try {
 			
-			CMLReader reader = new CMLReader(new FileInputStream(new File("/home/swolf/MOPAC/BondOrderTests/Naringenin/PB000122PB000123PB000124PB000125_4.cml")));
+			CMLReader reader = new CMLReader(new FileInputStream(new File("I:\\Backups\\IPBArbeit\\MOPAC\\BondOrderTests\\Naringenin\\PB000122PB000123PB000124PB000125_4.cml")));
 			ChemFile chemFile = (ChemFile)reader.read((ChemObject)new ChemFile());
 			List<IAtomContainer> containersList;
 			List<CMLMolecule> ret = new ArrayList<CMLMolecule>();
@@ -181,7 +181,7 @@ public class FragmentSingleCompoundWithPeaks {
 		
 		List<IAtomContainer> l = new ArrayList<IAtomContainer>();
 		l = CMLTools.ReadfolderTemp(l1);
-		
+		System.out.println("# of Fragments: " + l.size());
 		StructureRendererTable.Draw(molecule, l, "");
 		
 		//now find corresponding fragments to the mass
