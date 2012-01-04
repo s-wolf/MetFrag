@@ -25,3 +25,5 @@ breakOnlySelectedBonds = false
 threads = 4
 #maximum neutral loss combination
 maximumNeutralLossCombination = 3
+#chemspider token for webservice...please create your own token
+chemspiderToken = 
