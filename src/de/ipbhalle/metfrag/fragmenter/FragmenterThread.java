@@ -77,7 +77,7 @@ public class FragmenterThread implements Runnable{
 	private String jdbc, username, password = "";
 	private boolean SDFDatabase = false;
 	private IAtomContainer mol;
-	private boolean useMetChem = true;
+	private boolean useMetChem = false;
 	private Query query;
 	
 	/**
