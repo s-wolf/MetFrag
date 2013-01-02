@@ -1,25 +1,21 @@
 /*
-*
-* Copyright (C) 2009-2010 IPB Halle, Sebastian Wolf
-*
-* Contact: swolf@ipb-halle.de
-*
-* This program is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*
-*/
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ * 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
 package de.ipbhalle.metfrag.scoring;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -28,6 +24,7 @@ import java.util.Vector;
 
 import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 
+import de.ipbhalle.metfrag.main.Config;
 import de.ipbhalle.metfrag.massbankParser.Peak;
 import de.ipbhalle.metfrag.spectrum.MatchedFragment;
 import de.ipbhalle.metfrag.spectrum.NeutralLoss;
@@ -283,9 +280,24 @@ public class Scoring {
 //		double b = 0.55;
 //		double c = 0.29;
 		//trained on all spectra!
-		double a = 0.99;
-		double b = 0.87;
-		double c = 0.17;
+		
+		Config config = null;
+		try {
+			config = new Config("outside");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		double a = config.getParamA();
+		double b = config.getParamB();
+		double c = config.getParamC();
+		
+		System.out.println("Parameter A: " + a + "Parameter B: " + b + "Parameter C: " + c);
+		
+//		double a = 0.99;
+//		double b = 0.87;
+//		double c = 0.17;
 //		double d = 0.033436071416133584;
 		
 		for (String candidateID : mapToCandidateFragments.keySet()) {

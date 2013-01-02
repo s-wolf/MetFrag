@@ -91,6 +91,7 @@ public class MetFragPreCalculatedPubChem2006 {
 		
 		if(getLowestHeatofFormation)
 		{
+			System.out.println("Lowest HOF");
 			double deviation = PPMTool.getPPMDeviation(spectrum.getExactMass(), 10.0);
 			Map<String, String> candidateIDToFormula = ESearchDownload.ESearchDownloadExactMassFebruary2006((spectrum.getExactMass() - deviation) , (spectrum.getExactMass() + deviation), "/home/swolf/MOPAC/Hill-Riken-MM48_POSITIVE_PubChem_LocalMass2009_CHONPS_NEW/pubchem2006/" + new File(file).getName());
 			

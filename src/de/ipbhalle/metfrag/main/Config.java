@@ -1,23 +1,18 @@
 /*
-*
-* Copyright (C) 2009-2010 IPB Halle, Sebastian Wolf
-*
-* Contact: swolf@ipb-halle.de
-*
-* This program is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*
-*/
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ * 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
 package de.ipbhalle.metfrag.main;
 
 import java.io.File;
@@ -62,6 +57,10 @@ public class Config {
     private boolean isOnlyBreakSelectedBonds = false;
     private int maximumNeutralLossCombination = 3;
     private String chemspiderToken = "";
+    private double paramA;
+    private double paramB;
+    private double paramC;
+    
 	
 	/**
 	 * Instantiates a new config.
@@ -154,6 +153,11 @@ public class Config {
 		//mzabs and mzppm
 		setMzabs(Double.parseDouble(properties.getProperty("mzabs")));
 		setMzppm(Double.parseDouble(properties.getProperty("mzppm")));
+		
+		//set Parameters for scoring function
+		this.paramA = Double.parseDouble(properties.getProperty("paramA"));
+		this.paramB = Double.parseDouble(properties.getProperty("paramB"));
+		this.paramC = Double.parseDouble(properties.getProperty("paramC"));
 		
 		//searchppm
 		setSearchPPM(Integer.parseInt(properties.getProperty("searchppm")));
@@ -633,6 +637,30 @@ public class Config {
 
 	public String getDatabase() {
 		return database;
+	}
+
+	public double getParamA() {
+		return paramA;
+	}
+
+	public void setParamA(double paramA) {
+		this.paramA = paramA;
+	}
+
+	public double getParamB() {
+		return paramB;
+	}
+
+	public void setParamB(double paramB) {
+		this.paramB = paramB;
+	}
+
+	public double getParamC() {
+		return paramC;
+	}
+
+	public void setParamC(double paramC) {
+		this.paramC = paramC;
 	}
 
 }
